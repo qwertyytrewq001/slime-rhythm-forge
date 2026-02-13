@@ -115,3 +115,15 @@
     z-index: 100;
   }
 }
+
+/* Discovery confetti animation */
+@keyframes confetti-burst {
+  0% {
+    transform: translate(0, 0) scale(1);
+    opacity: 1;
+  }
+  100% {
+    transform: translate(var(--tx, 100px), var(--ty, -200px)) scale(0);
+    opacity: 0;
+  }
+}

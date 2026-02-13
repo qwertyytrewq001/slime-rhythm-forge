@@ -13,6 +13,9 @@ export function saveGame(state: GameState): void {
       totalBreeds: state.totalBreeds,
       perfectTaps: state.perfectTaps,
       muted: state.muted,
+      bestRarity: state.bestRarity,
+      discoveredModels: state.discoveredModels,
+      discoveredElements: state.discoveredElements,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {

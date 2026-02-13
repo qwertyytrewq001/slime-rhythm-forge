@@ -11,16 +11,21 @@ export interface SlimeTraits {
   aura: number;       // 0-4
   rhythm: number;     // 0-5
   accessory: number;  // 0-10
+  model: number;      // 0=Blob, 1=Spiky, 2=Jelly
 }
+
+export type SlimeElement = 'earth' | 'fire' | 'ice' | 'cosmic' | 'bio';
 
 export interface Slime {
   id: string;
   name: string;
   traits: SlimeTraits;
+  element: SlimeElement;
   rarityScore: number;
   rarityStars: number;
   createdAt: number;
   parentIds?: [string, string];
+  isNew?: boolean; // "New!" badge flag
 }
 
 export interface BreedResult {
@@ -60,6 +65,9 @@ export interface GameState {
   totalBreeds: number;
   perfectTaps: number;
   muted: boolean;
+  bestRarity: number;
+  discoveredModels: number[];
+  discoveredElements: string[];
 }
 
 export type GameAction =
@@ -78,4 +86,8 @@ export type GameAction =
   | { type: 'RESET_PERFECT_TAPS' }
   | { type: 'TOGGLE_MUTE' }
   | { type: 'LOAD_STATE'; state: Partial<GameState> }
-  | { type: 'BOOST_TRAIT'; slimeId: string; trait: keyof SlimeTraits };
+  | { type: 'BOOST_TRAIT'; slimeId: string; trait: keyof SlimeTraits }
+  | { type: 'SET_BEST_RARITY'; score: number }
+  | { type: 'ADD_DISCOVERED_MODEL'; model: number }
+  | { type: 'ADD_DISCOVERED_ELEMENT'; element: string }
+  | { type: 'CLEAR_NEW_BADGE'; slimeId: string };

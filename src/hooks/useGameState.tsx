@@ -1,7 +1,8 @@
-import React, { createContext, useContext, useReducer, useEffect, useCallback, useRef } from 'react';
+import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
 import { GameState, GameAction, Achievement } from '@/types/slime';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
+import { deriveElement } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
@@ -15,8 +16,14 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = [
 function createInitialState(): GameState {
   const saved = loadGame();
   if (saved && saved.slimes && saved.slimes.length > 0) {
+    // Migrate old slimes missing model/element
+    const migratedSlimes = saved.slimes.map((s: any) => ({
+      ...s,
+      traits: { ...s.traits, model: s.traits.model ?? 0 },
+      element: s.element ?? deriveElement(s.traits.color1, s.traits.shape),
+    }));
     return {
-      slimes: saved.slimes,
+      slimes: migratedSlimes,
       goo: saved.goo ?? 0,
       selectedSlimeId: null,
       breedSlot1: null,
@@ -27,6 +34,9 @@ function createInitialState(): GameState {
       totalBreeds: saved.totalBreeds ?? 0,
       perfectTaps: saved.perfectTaps ?? 0,
       muted: saved.muted ?? false,
+      bestRarity: saved.bestRarity ?? 0,
+      discoveredModels: saved.discoveredModels ?? [],
+      discoveredElements: saved.discoveredElements ?? [],
     };
   }
   return {
@@ -41,6 +51,9 @@ function createInitialState(): GameState {
     totalBreeds: 0,
     perfectTaps: 0,
     muted: false,
+    bestRarity: 0,
+    discoveredModels: [0],
+    discoveredElements: [],
   };
 }
 
@@ -86,6 +99,27 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, muted: !state.muted };
     case 'LOAD_STATE':
       return { ...state, ...action.state };
+    case 'SET_BEST_RARITY':
+      return { ...state, bestRarity: Math.max(state.bestRarity, action.score) };
+    case 'ADD_DISCOVERED_MODEL':
+      return {
+        ...state,
+        discoveredModels: state.discoveredModels.includes(action.model)
+          ? state.discoveredModels
+          : [...state.discoveredModels, action.model],
+      };
+    case 'ADD_DISCOVERED_ELEMENT':
+      return {
+        ...state,
+        discoveredElements: state.discoveredElements.includes(action.element)
+          ? state.discoveredElements
+          : [...state.discoveredElements, action.element],
+      };
+    case 'CLEAR_NEW_BADGE':
+      return {
+        ...state,
+        slimes: state.slimes.map(s => s.id === action.slimeId ? { ...s, isNew: false } : s),
+      };
     case 'BOOST_TRAIT': {
       const slimes = state.slimes.map(s => {
         if (s.id !== action.slimeId) return s;
@@ -94,7 +128,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         if (key === 'size') {
           traits[key] = Math.min(2.0, Math.round((traits[key] + (Math.random() - 0.3) * 0.4) * 10) / 10);
         } else {
-          const maxes: Record<string, number> = { shape: 14, color1: 19, color2: 19, eyes: 14, mouth: 9, spikes: 9, pattern: 14, glow: 5, aura: 4, rhythm: 5, accessory: 10 };
+          const maxes: Record<string, number> = { shape: 14, color1: 19, color2: 19, eyes: 14, mouth: 9, spikes: 9, pattern: 14, glow: 5, aura: 4, rhythm: 5, accessory: 10, model: 2 };
           traits[key] = Math.min(maxes[key] || 14, traits[key] + Math.floor(Math.random() * 3));
         }
         return { ...s, traits };
@@ -127,7 +161,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   // Goo production ticker
   useEffect(() => {
     const interval = setInterval(() => {
-      const gooPerTick = state.slimes.reduce((sum, s) => sum + s.rarityScore * 0.1, 0) / 10; // per 100ms
+      const gooPerTick = state.slimes.reduce((sum, s) => sum + s.rarityScore * 0.1, 0) / 10;
       if (gooPerTick > 0) dispatch({ type: 'ADD_GOO', amount: gooPerTick });
     }, 100);
     return () => clearInterval(interval);
