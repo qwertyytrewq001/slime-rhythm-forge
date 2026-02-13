@@ -1,5 +1,6 @@
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
+import { ELEMENT_ICONS } from '@/data/traitData';
 import { ArrowRight } from 'lucide-react';
 
 export function BreedHistory() {
@@ -30,6 +31,7 @@ export function BreedHistory() {
               <SlimeCanvas slime={p2} size={24} />
               <ArrowRight className="w-3 h-3 text-muted-foreground" />
               <SlimeCanvas slime={child} size={28} />
+              <span className="text-[8px]">{ELEMENT_ICONS[child.element]}</span>
               <span className="text-[9px] text-foreground truncate max-w-[60px]">
                 {child.name.split(' ').pop()}
               </span>

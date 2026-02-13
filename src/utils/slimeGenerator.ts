@@ -1,5 +1,5 @@
 import { Slime, SlimeTraits } from '@/types/slime';
-import { TRAIT_RARITY_WEIGHTS, getSizeRarity } from '@/data/traitData';
+import { TRAIT_RARITY_WEIGHTS, getSizeRarity, deriveElement, ELEMENT_COMBO_BONUS } from '@/data/traitData';
 import { generateSlimeName } from './nameGenerator';
 
 function randomId(): string {
@@ -36,15 +36,18 @@ export function createRandomSlime(basicOnly = false): Slime {
     aura: randInt(0, maxAura),
     rhythm: randInt(0, 5),
     accessory: randInt(0, maxAccessory),
+    model: basicOnly ? 0 : randInt(0, 2),
   };
 
-  const rarityScore = calculateRarity(traits);
+  const element = deriveElement(traits.color1, traits.shape);
+  const rarityScore = calculateRarity(traits, element);
   const rarityStars = getStars(rarityScore);
 
   return {
     id: randomId(),
-    name: generateSlimeName(traits),
+    name: generateSlimeName(traits, rarityStars),
     traits,
+    element,
     rarityScore,
     rarityStars,
     createdAt: Date.now(),
@@ -52,21 +55,23 @@ export function createRandomSlime(basicOnly = false): Slime {
 }
 
 export function createStarterSlimes(): Slime[] {
-  // Green blob
-  const green: SlimeTraits = { shape: 0, color1: 0, color2: 5, eyes: 0, mouth: 0, spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0, rhythm: 1, accessory: 0 };
-  // Blue puddle
-  const blue: SlimeTraits = { shape: 1, color1: 1, color2: 9, eyes: 1, mouth: 0, spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0, rhythm: 0, accessory: 0 };
-  // Pink drop
-  const pink: SlimeTraits = { shape: 8, color1: 2, color2: 8, eyes: 3, mouth: 4, spikes: 0, pattern: 0, glow: 0, size: 0.8, aura: 0, rhythm: 2, accessory: 0 };
+  const green: SlimeTraits = { shape: 0, color1: 0, color2: 5, eyes: 0, mouth: 0, spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0, rhythm: 1, accessory: 0, model: 0 };
+  const blue: SlimeTraits = { shape: 1, color1: 1, color2: 9, eyes: 1, mouth: 0, spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0, rhythm: 0, accessory: 0, model: 1 };
+  const pink: SlimeTraits = { shape: 8, color1: 2, color2: 8, eyes: 3, mouth: 4, spikes: 0, pattern: 0, glow: 0, size: 0.8, aura: 0, rhythm: 2, accessory: 0, model: 2 };
 
-  return [green, blue, pink].map(traits => ({
-    id: randomId(),
-    name: generateSlimeName(traits),
-    traits,
-    rarityScore: calculateRarity(traits),
-    rarityStars: getStars(calculateRarity(traits)),
-    createdAt: Date.now(),
-  }));
+  return [green, blue, pink].map(traits => {
+    const element = deriveElement(traits.color1, traits.shape);
+    const rarityScore = calculateRarity(traits, element);
+    return {
+      id: randomId(),
+      name: generateSlimeName(traits, getStars(rarityScore)),
+      traits,
+      element,
+      rarityScore,
+      rarityStars: getStars(rarityScore),
+      createdAt: Date.now(),
+    };
+  });
 }
 
 export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = false): Slime {
@@ -85,7 +90,6 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
     } else if (roll < 0.6) {
       traits[key] = parent2.traits[key];
     } else if (roll < 0.6 + mutationRate) {
-      // Mutate: shift from parent value
       const base = Math.random() < 0.5 ? parent1.traits[key] : parent2.traits[key];
       if (key === 'size') {
         traits[key] = Math.round((base + (Math.random() - 0.5) * 0.6) * 10) / 10;
@@ -95,13 +99,19 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
         traits[key] = Math.max(0, Math.min(max, base + randInt(-2, 2)));
       }
     } else {
-      // Wild new random
       if (key === 'size') {
         traits[key] = randFloat(0.5, 2.0);
       } else {
         traits[key] = randInt(0, getTraitMax(key));
       }
     }
+  }
+
+  // Model inheritance: 70% from parent, 30% mutate
+  if (Math.random() < 0.7) {
+    traits.model = Math.random() < 0.5 ? parent1.traits.model : parent2.traits.model;
+  } else {
+    traits.model = randInt(0, 2);
   }
 
   // 5% ultra-rare: boost a random trait to max
@@ -114,16 +124,24 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
     }
   }
 
-  const rarityScore = calculateRarity(traits);
+  const element = deriveElement(traits.color1, traits.shape);
+  const rarityScore = calculateRarity(traits, element);
+
+  // Element combo bonus from parents
+  const parentComboKey = `${parent1.element}+${parent2.element}`;
+  const comboBonus = ELEMENT_COMBO_BONUS[parentComboKey] || 0;
+  const finalScore = rarityScore + comboBonus;
 
   return {
     id: randomId(),
-    name: generateSlimeName(traits),
+    name: generateSlimeName(traits, getStars(finalScore)),
     traits,
-    rarityScore,
-    rarityStars: getStars(rarityScore),
+    element,
+    rarityScore: finalScore,
+    rarityStars: getStars(finalScore),
     createdAt: Date.now(),
     parentIds: [parent1.id, parent2.id],
+    isNew: true,
   };
 }
 
@@ -131,16 +149,18 @@ function getTraitMax(key: keyof SlimeTraits): number {
   const maxes: Record<keyof SlimeTraits, number> = {
     shape: 14, color1: 19, color2: 19, eyes: 14, mouth: 9,
     spikes: 9, pattern: 14, glow: 5, size: 2, aura: 4,
-    rhythm: 5, accessory: 10,
+    rhythm: 5, accessory: 10, model: 2,
   };
   return maxes[key];
 }
 
-export function calculateRarity(traits: SlimeTraits): number {
+export function calculateRarity(traits: SlimeTraits, element?: string): number {
   let score = 0;
   for (const [key, value] of Object.entries(traits)) {
     if (key === 'size') {
       score += getSizeRarity(value);
+    } else if (key === 'model') {
+      score += (TRAIT_RARITY_WEIGHTS[key]?.[value] || 0);
     } else if (TRAIT_RARITY_WEIGHTS[key]) {
       score += TRAIT_RARITY_WEIGHTS[key][value] || 0;
     }

@@ -1,6 +1,7 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
+import { ELEMENT_ICONS, MODEL_NAMES } from '@/data/traitData';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PER_PAGE = 12;
@@ -12,6 +13,15 @@ export function SlimeGallery() {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortMode>('newest');
   const [page, setPage] = useState(0);
+  const [hoveredId, setHoveredId] = useState<string | null>(null);
+
+  // Clear "New!" badges after 5 minutes
+  useEffect(() => {
+    const timers = state.slimes
+      .filter(s => s.isNew)
+      .map(s => setTimeout(() => dispatch({ type: 'CLEAR_NEW_BADGE', slimeId: s.id }), 5 * 60 * 1000));
+    return () => timers.forEach(clearTimeout);
+  }, [state.slimes, dispatch]);
 
   const filtered = useMemo(() => {
     let list = state.slimes;
@@ -36,8 +46,15 @@ export function SlimeGallery() {
     e.dataTransfer.effectAllowed = 'copy';
   };
 
+  const rarityGlowClass = (stars: number) => {
+    if (stars >= 5) return 'shadow-[0_0_12px_rgba(255,215,0,0.6)]';
+    if (stars >= 4) return 'shadow-[0_0_8px_rgba(192,192,192,0.5)]';
+    if (stars >= 3) return 'shadow-[0_0_6px_rgba(78,205,196,0.4)]';
+    return '';
+  };
+
   return (
-    <div className="flex flex-col h-full bg-card/50 border-r-4 border-primary/20 p-2"
+    <div className="flex flex-col h-full bg-card/80 backdrop-blur-sm border-r-4 border-primary/20 p-2"
       style={{ fontFamily: "'VT323', monospace" }}>
       <h2 className="text-center text-sm mb-2 text-primary" style={{ fontFamily: "'Press Start 2P', cursive" }}>
         Gallery
@@ -51,7 +68,7 @@ export function SlimeGallery() {
           placeholder="Search..."
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(0); }}
-          className="w-full pl-7 pr-2 py-1 text-sm bg-background border-2 border-input rounded text-foreground placeholder:text-muted-foreground"
+          className="w-full pl-7 pr-2 py-1 text-sm bg-background/80 border-2 border-input rounded text-foreground placeholder:text-muted-foreground"
         />
       </div>
 
@@ -59,7 +76,7 @@ export function SlimeGallery() {
       <select
         value={sort}
         onChange={e => setSort(e.target.value as SortMode)}
-        className="mb-2 text-xs bg-background border-2 border-input rounded px-1 py-0.5 text-foreground"
+        className="mb-2 text-xs bg-background/80 border-2 border-input rounded px-1 py-0.5 text-foreground"
       >
         <option value="rarity">★ Rarity</option>
         <option value="name">A-Z Name</option>
@@ -72,22 +89,48 @@ export function SlimeGallery() {
           {pageSlimes.map(slime => (
             <div
               key={slime.id}
-              className={`flex flex-col items-center p-1 rounded cursor-pointer border-2 transition-all hover:border-primary/60 ${
+              className={`relative flex flex-col items-center p-1 rounded cursor-pointer border-2 transition-all ${rarityGlowClass(slime.rarityStars)} ${
+                hoveredId === slime.id ? 'scale-110 z-10' : ''
+              } ${
                 state.selectedSlimeId === slime.id ? 'border-primary bg-primary/10' :
                 state.breedSlot1 === slime.id || state.breedSlot2 === slime.id ? 'border-accent bg-accent/10' :
                 'border-transparent'
               }`}
               onClick={() => dispatch({ type: 'SELECT_SLIME', id: slime.id })}
+              onMouseEnter={() => setHoveredId(slime.id)}
+              onMouseLeave={() => setHoveredId(null)}
               draggable
               onDragStart={e => handleDragStart(e, slime.id)}
             >
-              <SlimeCanvas slime={slime} size={52} />
-              <span className="text-[10px] text-center leading-tight mt-0.5 text-foreground truncate w-full">
+              {/* New! badge */}
+              {slime.isNew && (
+                <span className="absolute -top-1 -right-1 text-[7px] bg-accent text-accent-foreground px-1 rounded animate-pulse z-20"
+                  style={{ fontFamily: "'Press Start 2P', cursive" }}>
+                  New!
+                </span>
+              )}
+
+              <SlimeCanvas slime={slime} size={hoveredId === slime.id ? 64 : 52} animated={hoveredId === slime.id} />
+
+              {/* Element + Model icon */}
+              <div className="flex items-center gap-0.5 mt-0.5">
+                <span className="text-[8px]">{ELEMENT_ICONS[slime.element]}</span>
+                <span className="text-[8px] text-muted-foreground">{MODEL_NAMES[slime.traits.model]?.[0]}</span>
+              </div>
+
+              <span className="text-[10px] text-center leading-tight text-foreground truncate w-full">
                 {slime.name.split(' ').pop()}
               </span>
               <span className="text-[9px] text-accent-foreground">
                 {'★'.repeat(slime.rarityStars)}{'☆'.repeat(5 - slime.rarityStars)}
               </span>
+
+              {/* Hover personality preview */}
+              {hoveredId === slime.id && (
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[7px] text-muted-foreground whitespace-nowrap bg-card/90 px-1 rounded border border-border z-30">
+                  {slime.traits.model === 0 ? '😊 Chill' : slime.traits.model === 1 ? '😤 Feisty' : '🌊 Dreamy'}
+                </div>
+              )}
             </div>
           ))}
         </div>
