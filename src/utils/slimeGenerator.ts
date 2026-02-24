@@ -143,13 +143,15 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
     }
   }
 
-  // Element combo bonus from parents
-  const allParentElements = [...new Set([...parent1.elements, ...parent2.elements])];
+  // Element combo bonus from parents (defensive: fallback to [element] if elements missing)
+  const p1Elems = parent1.elements || (parent1.element ? [parent1.element] : ['nature' as SlimeElement]);
+  const p2Elems = parent2.elements || (parent2.element ? [parent2.element] : ['nature' as SlimeElement]);
+  const allParentElements = [...new Set([...p1Elems, ...p2Elems])];
   let comboBonus = 0;
 
   // Check breeding combos for hybrid element injection
-  for (const e1 of parent1.elements) {
-    for (const e2 of parent2.elements) {
+  for (const e1 of p1Elems) {
+    for (const e2 of p2Elems) {
       const key1 = `${e1}+${e2}`;
       const key2 = `${e2}+${e1}`;
       comboBonus += ELEMENT_COMBO_BONUS[key1] || ELEMENT_COMBO_BONUS[key2] || 0;
