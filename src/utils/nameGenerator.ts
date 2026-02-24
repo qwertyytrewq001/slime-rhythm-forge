@@ -1,12 +1,22 @@
-import { SlimeTraits } from '@/types/slime';
-import { NAME_ADJECTIVES, NAME_DESCRIPTORS, NAME_NOUNS, MODEL_NAME_PREFIX, RARITY_PREFIXES, RARITY_SUFFIXES } from '@/data/traitData';
+import { SlimeTraits, SlimeElement } from '@/types/slime';
+import { NAME_ADJECTIVES, NAME_DESCRIPTORS, NAME_NOUNS, MODEL_NAME_PREFIX, RARITY_PREFIXES, RARITY_SUFFIXES, ELEMENT_NAME_FRAGMENTS } from '@/data/traitData';
 
-export function generateSlimeName(traits: SlimeTraits, stars: number = 1): string {
-  // Model-specific base name
+export function generateSlimeName(traits: SlimeTraits, stars: number = 1, elements: SlimeElement[] = []): string {
   const modelNames = MODEL_NAME_PREFIX[traits.model] || MODEL_NAME_PREFIX[0];
   const modelBase = modelNames[Math.floor(Math.random() * modelNames.length)];
 
-  // Pick adjective from pattern, glow, or aura
+  // Element fragment from primary element
+  const primaryElem = elements[0];
+  const elemFragments = primaryElem ? ELEMENT_NAME_FRAGMENTS[primaryElem] : [];
+  const elemFragment = elemFragments.length > 0 ? elemFragments[Math.floor(Math.random() * elemFragments.length)] : '';
+
+  // Multi-element fusion name fragment
+  let fusionFragment = '';
+  if (elements.length >= 3) {
+    const secondFrags = ELEMENT_NAME_FRAGMENTS[elements[1]] || [];
+    fusionFragment = secondFrags.length > 0 ? secondFrags[Math.floor(Math.random() * secondFrags.length)] : '';
+  }
+
   let adjective = '';
   if (traits.aura > 0 && NAME_ADJECTIVES.aura[traits.aura]) {
     adjective = NAME_ADJECTIVES.aura[traits.aura];
@@ -16,7 +26,6 @@ export function generateSlimeName(traits: SlimeTraits, stars: number = 1): strin
     adjective = NAME_ADJECTIVES.pattern[traits.pattern];
   }
 
-  // Pick descriptor from eyes or spikes
   let descriptor = '';
   if (traits.spikes > 0 && NAME_DESCRIPTORS.spikes[traits.spikes]) {
     descriptor = NAME_DESCRIPTORS.spikes[traits.spikes];
@@ -24,27 +33,35 @@ export function generateSlimeName(traits: SlimeTraits, stars: number = 1): strin
     descriptor = NAME_DESCRIPTORS.eyes[traits.eyes];
   }
 
-  // Noun from shape
   const noun = NAME_NOUNS[traits.shape] || 'Slimeus';
 
-  // Build name based on rarity tier
-  if (stars >= 5) {
-    // Mythic: "[Rarity Prefix] [Adj] [Noun] [Suffix]"
+  // Build name based on rarity tier with element flavor
+  const clampedStars = Math.min(stars, 7);
+
+  if (clampedStars >= 7) {
+    // Supreme: "[Supreme Prefix] [Elem] [Fusion] [Noun] [Suffix]"
+    const prefix = pickRandom(RARITY_PREFIXES[7]);
+    const suffix = pickRandom(RARITY_SUFFIXES[7]);
+    return [prefix, elemFragment, fusionFragment || adjective, noun, suffix].filter(Boolean).join(' ');
+  } else if (clampedStars >= 6) {
+    const prefix = pickRandom(RARITY_PREFIXES[6]);
+    const suffix = pickRandom(RARITY_SUFFIXES[6]);
+    return [prefix, elemFragment, adjective || descriptor, noun, suffix].filter(Boolean).join(' ');
+  } else if (clampedStars >= 5) {
     const prefix = pickRandom(RARITY_PREFIXES[5]);
     const suffix = pickRandom(RARITY_SUFFIXES[5]);
-    return [prefix, adjective || descriptor, noun, suffix].filter(Boolean).join(' ');
-  } else if (stars >= 4) {
+    return [prefix, elemFragment || adjective, noun, suffix].filter(Boolean).join(' ');
+  } else if (clampedStars >= 4) {
     const prefix = pickRandom(RARITY_PREFIXES[4]);
     const suffix = pickRandom(RARITY_SUFFIXES[4]);
-    return [prefix, adjective || modelBase, noun, suffix].filter(Boolean).join(' ');
-  } else if (stars >= 3) {
+    return [prefix, elemFragment || modelBase, noun, suffix].filter(Boolean).join(' ');
+  } else if (clampedStars >= 3) {
     const prefix = pickRandom(RARITY_PREFIXES[3]);
-    return [prefix, descriptor || adjective, noun].filter(Boolean).join(' ');
-  } else if (stars >= 2) {
-    return [adjective || descriptor, modelBase, noun].filter(Boolean).join(' ');
+    return [prefix, elemFragment || descriptor, noun].filter(Boolean).join(' ');
+  } else if (clampedStars >= 2) {
+    return [adjective || elemFragment || descriptor, modelBase, noun].filter(Boolean).join(' ');
   } else {
-    // Common: just a cute name
-    return modelBase || noun;
+    return elemFragment || modelBase || noun;
   }
 }
 

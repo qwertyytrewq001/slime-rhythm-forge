@@ -5,7 +5,7 @@ import { breedSlimes } from '@/utils/slimeGenerator';
 import { audioEngine } from '@/utils/audioEngine';
 import { BreedHistory } from './BreedHistory';
 import { DiscoveryPopup } from './DiscoveryPopup';
-import { MODEL_NAMES, ELEMENT_NAMES } from '@/data/traitData';
+import { MODEL_NAMES, ELEMENT_NAMES, RARITY_TIER_COLORS, ELEMENT_ICONS } from '@/data/traitData';
 import { Slime } from '@/types/slime';
 import { Sparkles } from 'lucide-react';
 
@@ -222,8 +222,11 @@ export function BreedingPod() {
               <SlimeCanvas slime={child} size={80} animated />
             </div>
             <p className="text-sm text-primary font-bold mt-1">{child.name}</p>
-            <p className="text-xs text-accent-foreground">
-              {'★'.repeat(child.rarityStars)} {child.element} born!
+            <p className="text-[10px] font-bold" style={{ color: RARITY_TIER_COLORS[child.rarityTier] }}>
+              {child.rarityTier} {'★'.repeat(Math.min(child.rarityStars, 7))}
+            </p>
+            <p className="text-xs text-muted-foreground">
+              {(child.elements || [child.element]).map(e => ELEMENT_ICONS[e]).join(' ')} born!
             </p>
           </div>
         ) : null;

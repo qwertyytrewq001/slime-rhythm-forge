@@ -1,8 +1,8 @@
 import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
-import { GameState, GameAction, Achievement } from '@/types/slime';
+import { GameState, GameAction, Achievement, SlimeElement } from '@/types/slime';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
-import { deriveElement } from '@/data/traitData';
+import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
@@ -13,15 +13,31 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'rhythm_master', name: 'Rhythm Master', description: 'Hit 10 perfect rhythm taps in a row', reward: '100 goo', rewardAmount: 100, unlocked: false },
 ];
 
+function migrateSlime(s: any) {
+  const traits = { ...s.traits, model: s.traits.model ?? 0 };
+  const primary: SlimeElement = s.element ?? deriveElement(traits.color1, traits.shape);
+  // Derive multi-element array if missing
+  const secondary = deriveSecondaryElement(traits.spikes, traits.pattern, traits.aura, traits.glow);
+  const elements: SlimeElement[] = [primary];
+  if (secondary && secondary !== primary) elements.push(secondary);
+  const score = s.rarityScore ?? 0;
+  const tier = getRarityTier(score);
+  const stars = Math.min(7, RARITY_TIER_STARS[tier]);
+
+  return {
+    ...s,
+    traits,
+    element: primary,
+    elements: s.elements ?? elements,
+    rarityTier: s.rarityTier ?? tier,
+    rarityStars: stars,
+  };
+}
+
 function createInitialState(): GameState {
   const saved = loadGame();
   if (saved && saved.slimes && saved.slimes.length > 0) {
-    // Migrate old slimes missing model/element
-    const migratedSlimes = saved.slimes.map((s: any) => ({
-      ...s,
-      traits: { ...s.traits, model: s.traits.model ?? 0 },
-      element: s.element ?? deriveElement(s.traits.color1, s.traits.shape),
-    }));
+    const migratedSlimes = saved.slimes.map(migrateSlime);
     return {
       slimes: migratedSlimes,
       goo: saved.goo ?? 0,
@@ -151,14 +167,12 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
 
-  // Auto-save debounced
   useEffect(() => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
     saveTimer.current = setTimeout(() => saveGame(state), 500);
     return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
   }, [state]);
 
-  // Goo production ticker
   useEffect(() => {
     const interval = setInterval(() => {
       const gooPerTick = state.slimes.reduce((sum, s) => sum + s.rarityScore * 0.1, 0) / 10;
@@ -167,7 +181,6 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     return () => clearInterval(interval);
   }, [state.slimes]);
 
-  // Audio mute sync
   useEffect(() => {
     if (state.muted !== audioEngine.muted) audioEngine.toggleMute();
   }, [state.muted]);

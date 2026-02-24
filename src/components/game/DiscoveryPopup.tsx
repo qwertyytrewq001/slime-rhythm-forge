@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Slime } from '@/types/slime';
 import { SlimeCanvas } from './SlimeCanvas';
-import { ELEMENT_ICONS } from '@/data/traitData';
+import { ELEMENT_ICONS, RARITY_TIER_COLORS } from '@/data/traitData';
 
 interface DiscoveryPopupProps {
   slime: Slime;
@@ -69,9 +69,11 @@ export function DiscoveryPopup({ slime, reason, onClose }: DiscoveryPopupProps) 
           {slime.name}
         </h2>
 
-        <div className="flex items-center gap-2 text-accent-foreground text-xs">
-          <span>{'★'.repeat(slime.rarityStars)}{'☆'.repeat(5 - slime.rarityStars)}</span>
-          <span>{ELEMENT_ICONS[slime.element]}</span>
+        <div className="flex items-center gap-2 text-xs">
+          <span style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
+            {'★'.repeat(Math.min(slime.rarityStars, 7))} {slime.rarityTier}
+          </span>
+          <span>{(slime.elements || [slime.element]).map(e => ELEMENT_ICONS[e]).join(' ')}</span>
         </div>
 
         <div className="text-muted-foreground text-[8px] md:text-[10px] text-center">
