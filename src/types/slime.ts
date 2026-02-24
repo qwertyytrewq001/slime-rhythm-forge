@@ -14,18 +14,28 @@ export interface SlimeTraits {
   model: number;      // 0=Blob, 1=Spiky, 2=Jelly
 }
 
-export type SlimeElement = 'earth' | 'fire' | 'ice' | 'cosmic' | 'bio';
+// 18 Dragon Mania Legends-inspired elements
+export type SlimeElement =
+  | 'fire' | 'water' | 'plant' | 'earth' | 'wind'
+  | 'ice' | 'electric' | 'metal' | 'light' | 'shadow'
+  | 'cosmic' | 'void' | 'toxic' | 'crystal' | 'lava'
+  | 'nature' | 'arcane' | 'divine';
+
+// Rarity tiers (DML-inspired scaling)
+export type RarityTier = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic' | 'Supreme';
 
 export interface Slime {
   id: string;
   name: string;
   traits: SlimeTraits;
-  element: SlimeElement;
+  elements: SlimeElement[];  // 1-4 elements (multi-element hybrids!)
+  element: SlimeElement;     // Primary element (first in array, backward compat)
   rarityScore: number;
   rarityStars: number;
+  rarityTier: RarityTier;
   createdAt: number;
   parentIds?: [string, string];
-  isNew?: boolean; // "New!" badge flag
+  isNew?: boolean;
 }
 
 export interface BreedResult {

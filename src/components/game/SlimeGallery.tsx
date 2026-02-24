@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
-import { ELEMENT_ICONS, MODEL_NAMES } from '@/data/traitData';
+import { ELEMENT_ICONS, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PER_PAGE = 12;
@@ -15,7 +15,6 @@ export function SlimeGallery() {
   const [page, setPage] = useState(0);
   const [hoveredId, setHoveredId] = useState<string | null>(null);
 
-  // Clear "New!" badges after 5 minutes
   useEffect(() => {
     const timers = state.slimes
       .filter(s => s.isNew)
@@ -46,11 +45,11 @@ export function SlimeGallery() {
     e.dataTransfer.effectAllowed = 'copy';
   };
 
-  const rarityGlowClass = (stars: number) => {
-    if (stars >= 5) return 'shadow-[0_0_12px_rgba(255,215,0,0.6)]';
-    if (stars >= 4) return 'shadow-[0_0_8px_rgba(192,192,192,0.5)]';
-    if (stars >= 3) return 'shadow-[0_0_6px_rgba(78,205,196,0.4)]';
-    return '';
+  const rarityGlowStyle = (tier: string) => {
+    const color = RARITY_TIER_COLORS[tier as keyof typeof RARITY_TIER_COLORS] || '#A0A0A0';
+    const stars = { Common: 0, Uncommon: 0, Rare: 4, Epic: 6, Legendary: 8, Mythic: 10, Supreme: 14 }[tier] || 0;
+    if (stars < 4) return {};
+    return { boxShadow: `0 0 ${stars}px ${color}50` };
   };
 
   return (
@@ -60,7 +59,6 @@ export function SlimeGallery() {
         Gallery
       </h2>
 
-      {/* Search */}
       <div className="relative mb-2">
         <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
         <input
@@ -72,7 +70,6 @@ export function SlimeGallery() {
         />
       </div>
 
-      {/* Sort */}
       <select
         value={sort}
         onChange={e => setSort(e.target.value as SortMode)}
@@ -83,26 +80,25 @@ export function SlimeGallery() {
         <option value="newest">🕐 Newest</option>
       </select>
 
-      {/* Grid */}
       <div className="flex-1 overflow-y-auto">
         <div className="grid grid-cols-3 gap-1.5">
           {pageSlimes.map(slime => (
             <div
               key={slime.id}
-              className={`relative flex flex-col items-center p-1 rounded cursor-pointer border-2 transition-all ${rarityGlowClass(slime.rarityStars)} ${
+              className={`relative flex flex-col items-center p-1 rounded cursor-pointer border-2 transition-all ${
                 hoveredId === slime.id ? 'scale-110 z-10' : ''
               } ${
                 state.selectedSlimeId === slime.id ? 'border-primary bg-primary/10' :
                 state.breedSlot1 === slime.id || state.breedSlot2 === slime.id ? 'border-accent bg-accent/10' :
                 'border-transparent'
               }`}
+              style={rarityGlowStyle(slime.rarityTier)}
               onClick={() => dispatch({ type: 'SELECT_SLIME', id: slime.id })}
               onMouseEnter={() => setHoveredId(slime.id)}
               onMouseLeave={() => setHoveredId(null)}
               draggable
               onDragStart={e => handleDragStart(e, slime.id)}
             >
-              {/* New! badge */}
               {slime.isNew && (
                 <span className="absolute -top-1 -right-1 text-[7px] bg-accent text-accent-foreground px-1 rounded animate-pulse z-20"
                   style={{ fontFamily: "'Press Start 2P', cursive" }}>
@@ -112,23 +108,30 @@ export function SlimeGallery() {
 
               <SlimeCanvas slime={slime} size={hoveredId === slime.id ? 64 : 52} animated={hoveredId === slime.id} />
 
-              {/* Element + Model icon */}
+              {/* Element icons (multi-element) */}
               <div className="flex items-center gap-0.5 mt-0.5">
-                <span className="text-[8px]">{ELEMENT_ICONS[slime.element]}</span>
-                <span className="text-[8px] text-muted-foreground">{MODEL_NAMES[slime.traits.model]?.[0]}</span>
+                {(slime.elements || [slime.element]).slice(0, 3).map((elem, i) => (
+                  <span key={elem + i} className="text-[7px]">{ELEMENT_ICONS[elem]}</span>
+                ))}
+                {(slime.elements?.length || 0) > 3 && <span className="text-[7px] text-muted-foreground">+</span>}
+                <span className="text-[7px] text-muted-foreground">{MODEL_NAMES[slime.traits.model]?.[0]}</span>
               </div>
 
               <span className="text-[10px] text-center leading-tight text-foreground truncate w-full">
                 {slime.name.split(' ').pop()}
               </span>
-              <span className="text-[9px] text-accent-foreground">
-                {'★'.repeat(slime.rarityStars)}{'☆'.repeat(5 - slime.rarityStars)}
+
+              {/* Rarity tier color-coded stars */}
+              <span className="text-[8px]" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
+                {'★'.repeat(Math.min(slime.rarityStars, 7))}
               </span>
 
               {/* Hover personality preview */}
               {hoveredId === slime.id && (
-                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[7px] text-muted-foreground whitespace-nowrap bg-card/90 px-1 rounded border border-border z-30">
-                  {slime.traits.model === 0 ? '😊 Chill' : slime.traits.model === 1 ? '😤 Feisty' : '🌊 Dreamy'}
+                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[7px] text-muted-foreground whitespace-nowrap bg-card/90 px-1.5 py-0.5 rounded border border-border z-30">
+                  <span style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>{slime.rarityTier}</span>
+                  {' '}{slime.traits.model === 0 ? '😊' : slime.traits.model === 1 ? '😤' : '🌊'}
+                  {' '}{(slime.elements || []).length > 1 ? `${slime.elements.length}x Hybrid` : ''}
                 </div>
               )}
             </div>
@@ -136,7 +139,6 @@ export function SlimeGallery() {
         </div>
       </div>
 
-      {/* Pagination */}
       <div className="flex items-center justify-center gap-2 mt-2 text-xs text-muted-foreground">
         <button
           onClick={() => setPage(Math.max(0, currentPage - 1))}

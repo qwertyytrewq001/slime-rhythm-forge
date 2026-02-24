@@ -20,7 +20,7 @@ export function drawSlime(
   const model = t.model || 0;
   const c1 = COLOR_PALETTE[t.color1] || '#7FFF7F';
   const c2 = COLOR_PALETTE[t.color2] || '#7FBFFF';
-  const element = slime.element || 'bio';
+  const element = slime.element || 'nature';
   const stars = slime.rarityStars;
 
   // Model-specific idle animation - MUCH more expressive
@@ -845,7 +845,7 @@ function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeEleme
         }
         break;
       }
-      case 'bio': { // Pollen + spores
+      case 'nature': { // Pollen + spores
         ctx.globalAlpha = 0.45;
         const drift = Math.sin(frame * 0.015 + i) * 6;
         ctx.beginPath();
@@ -861,6 +861,124 @@ function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeEleme
           ctx.lineWidth = 0.5;
           ctx.stroke();
         }
+        break;
+      }
+      case 'water': { // Bubbles rising
+        ctx.globalAlpha = 0.4;
+        const bubY = y - (frame * 0.4 + i * 15) % 30;
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.lineWidth = 0.5;
+        ctx.beginPath(); ctx.arc(x, bubY, 2 + Math.sin(i) * 1.5, 0, Math.PI * 2); ctx.stroke();
+        ctx.fillStyle = '#fff';
+        ctx.globalAlpha = 0.2;
+        ctx.beginPath(); ctx.arc(x - 0.5, bubY - 1, 0.6, 0, Math.PI * 2); ctx.fill();
+        break;
+      }
+      case 'plant': { // Leaves + petals
+        ctx.globalAlpha = 0.45;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(frame * 0.01 + i * 2);
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath(); ctx.ellipse(0, 0, 3, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.restore();
+        break;
+      }
+      case 'wind': { // Swirling wisps
+        ctx.globalAlpha = 0.3;
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.lineWidth = 0.8;
+        ctx.beginPath();
+        const wa = frame * 0.03 + i;
+        ctx.arc(x, y, 4, wa, wa + Math.PI);
+        ctx.stroke();
+        break;
+      }
+      case 'electric': { // Lightning sparks
+        ctx.globalAlpha = Math.random() > 0.3 ? 0.6 : 0;
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        ctx.lineTo(x + (Math.random() - 0.5) * 8, y + (Math.random() - 0.5) * 8);
+        ctx.stroke();
+        break;
+      }
+      case 'metal': { // Metallic glints
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.fillRect(x - 1, y - 1, 2, 2);
+        break;
+      }
+      case 'light': { // Light rays
+        ctx.globalAlpha = 0.3 + Math.sin(frame * 0.06 + i) * 0.2;
+        ctx.fillStyle = colors[i % colors.length];
+        drawStarShape(ctx, x, y, 0.5, 2.5, 4);
+        ctx.fill();
+        break;
+      }
+      case 'shadow': { // Dark wisps
+        ctx.globalAlpha = 0.3;
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
+        break;
+      }
+      case 'void': { // Glitch fragments
+        if (frame % 10 < 3) {
+          ctx.globalAlpha = 0.4;
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.fillRect(x - 2, y - 0.5, 4, 1);
+        }
+        break;
+      }
+      case 'toxic': { // Dripping drops
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = colors[i % colors.length];
+        const dripY = y + (frame * 0.3 + i * 10) % 20;
+        ctx.beginPath(); ctx.arc(x, dripY, 1.5, 0, Math.PI * 2); ctx.fill();
+        break;
+      }
+      case 'crystal': { // Rotating gems
+        ctx.globalAlpha = 0.5;
+        ctx.save();
+        ctx.translate(x, y);
+        ctx.rotate(frame * 0.015 + i);
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath();
+        ctx.moveTo(0, -3); ctx.lineTo(2, 0); ctx.lineTo(0, 3); ctx.lineTo(-2, 0);
+        ctx.fill();
+        ctx.restore();
+        break;
+      }
+      case 'lava': { // Rising magma blobs
+        const lavaY = y - (frame * 0.5 + i * 10) % 20;
+        const lavaLife = 1 - ((frame * 0.5 + i * 10) % 20) / 20;
+        ctx.globalAlpha = lavaLife * 0.6;
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.shadowColor = '#FF4500';
+        ctx.shadowBlur = 3;
+        ctx.beginPath(); ctx.arc(x, lavaY, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
+        break;
+      }
+      case 'arcane': { // Rune symbols
+        ctx.globalAlpha = 0.35 + Math.sin(frame * 0.05 + i * 2) * 0.2;
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.lineWidth = 0.8;
+        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 1.5); ctx.stroke();
+        break;
+      }
+      case 'divine': { // Holy sparkles
+        ctx.globalAlpha = 0.5;
+        ctx.fillStyle = colors[i % colors.length];
+        drawStarShape(ctx, x, y, 1, 3, 6);
+        ctx.fill();
+        break;
+      }
+      default: { // Fallback
+        ctx.globalAlpha = 0.4;
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
         break;
       }
     }

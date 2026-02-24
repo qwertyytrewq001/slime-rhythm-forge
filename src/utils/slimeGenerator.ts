@@ -1,5 +1,5 @@
-import { Slime, SlimeTraits } from '@/types/slime';
-import { TRAIT_RARITY_WEIGHTS, getSizeRarity, deriveElement, ELEMENT_COMBO_BONUS } from '@/data/traitData';
+import { Slime, SlimeTraits, SlimeElement, RarityTier } from '@/types/slime';
+import { TRAIT_RARITY_WEIGHTS, getSizeRarity, deriveElement, deriveSecondaryElement, BREEDING_COMBOS, ELEMENT_COMBO_BONUS, getRarityTier, RARITY_TIER_STARS, ALL_ELEMENTS } from '@/data/traitData';
 import { generateSlimeName } from './nameGenerator';
 
 function randomId(): string {
@@ -12,6 +12,49 @@ function randInt(min: number, max: number): number {
 
 function randFloat(min: number, max: number): number {
   return Math.round((Math.random() * (max - min) + min) * 10) / 10;
+}
+
+function deriveElements(traits: SlimeTraits): SlimeElement[] {
+  const primary = deriveElement(traits.color1, traits.shape);
+  const elements: SlimeElement[] = [primary];
+
+  const secondary = deriveSecondaryElement(traits.spikes, traits.pattern, traits.aura, traits.glow);
+  if (secondary && secondary !== primary) {
+    elements.push(secondary);
+  }
+
+  // Rare third element from extreme trait combos
+  if (traits.glow >= 4 && traits.aura >= 3) {
+    const third: SlimeElement = traits.model === 0 ? 'divine' : traits.model === 1 ? 'void' : 'arcane';
+    if (!elements.includes(third)) elements.push(third);
+  }
+
+  return elements.slice(0, 4);
+}
+
+function buildSlime(traits: SlimeTraits, parentIds?: [string, string], bonusScore = 0): Slime {
+  const elements = deriveElements(traits);
+  const primary = elements[0];
+  const baseScore = calculateRarity(traits, primary);
+  // Multi-element bonus
+  const multiBonus = (elements.length - 1) * 8;
+  const finalScore = baseScore + bonusScore + multiBonus;
+  const tier = getRarityTier(finalScore);
+  const stars = Math.min(7, RARITY_TIER_STARS[tier]);
+
+  return {
+    id: randomId(),
+    name: generateSlimeName(traits, stars, elements),
+    traits,
+    elements,
+    element: primary,
+    rarityScore: finalScore,
+    rarityStars: stars,
+    rarityTier: tier,
+    createdAt: Date.now(),
+    parentIds,
+    isNew: !!parentIds,
+  };
 }
 
 export function createRandomSlime(basicOnly = false): Slime {
@@ -39,19 +82,7 @@ export function createRandomSlime(basicOnly = false): Slime {
     model: basicOnly ? 0 : randInt(0, 2),
   };
 
-  const element = deriveElement(traits.color1, traits.shape);
-  const rarityScore = calculateRarity(traits, element);
-  const rarityStars = getStars(rarityScore);
-
-  return {
-    id: randomId(),
-    name: generateSlimeName(traits, rarityStars),
-    traits,
-    element,
-    rarityScore,
-    rarityStars,
-    createdAt: Date.now(),
-  };
+  return buildSlime(traits);
 }
 
 export function createStarterSlimes(): Slime[] {
@@ -59,19 +90,7 @@ export function createStarterSlimes(): Slime[] {
   const blue: SlimeTraits = { shape: 1, color1: 1, color2: 9, eyes: 1, mouth: 0, spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0, rhythm: 0, accessory: 0, model: 1 };
   const pink: SlimeTraits = { shape: 8, color1: 2, color2: 8, eyes: 3, mouth: 4, spikes: 0, pattern: 0, glow: 0, size: 0.8, aura: 0, rhythm: 2, accessory: 0, model: 2 };
 
-  return [green, blue, pink].map(traits => {
-    const element = deriveElement(traits.color1, traits.shape);
-    const rarityScore = calculateRarity(traits, element);
-    return {
-      id: randomId(),
-      name: generateSlimeName(traits, getStars(rarityScore)),
-      traits,
-      element,
-      rarityScore,
-      rarityStars: getStars(rarityScore),
-      createdAt: Date.now(),
-    };
-  });
+  return [green, blue, pink].map(traits => buildSlime(traits));
 }
 
 export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = false): Slime {
@@ -124,25 +143,56 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
     }
   }
 
-  const element = deriveElement(traits.color1, traits.shape);
-  const rarityScore = calculateRarity(traits, element);
-
   // Element combo bonus from parents
-  const parentComboKey = `${parent1.element}+${parent2.element}`;
-  const comboBonus = ELEMENT_COMBO_BONUS[parentComboKey] || 0;
-  const finalScore = rarityScore + comboBonus;
+  const allParentElements = [...new Set([...parent1.elements, ...parent2.elements])];
+  let comboBonus = 0;
 
-  return {
-    id: randomId(),
-    name: generateSlimeName(traits, getStars(finalScore)),
-    traits,
-    element,
-    rarityScore: finalScore,
-    rarityStars: getStars(finalScore),
-    createdAt: Date.now(),
-    parentIds: [parent1.id, parent2.id],
-    isNew: true,
+  // Check breeding combos for hybrid element injection
+  for (const e1 of parent1.elements) {
+    for (const e2 of parent2.elements) {
+      const key1 = `${e1}+${e2}`;
+      const key2 = `${e2}+${e1}`;
+      comboBonus += ELEMENT_COMBO_BONUS[key1] || ELEMENT_COMBO_BONUS[key2] || 0;
+
+      // Chance to inject combo element into child traits
+      const comboResult = BREEDING_COMBOS[key1] || BREEDING_COMBOS[key2];
+      if (comboResult && Math.random() < 0.4) {
+        // Bias traits to produce the combo element
+        const targetElem = comboResult[randInt(0, comboResult.length - 1)];
+        biasTraitsForElement(traits, targetElem);
+      }
+    }
+  }
+
+  // Multi-element parents increase child complexity
+  if (allParentElements.length >= 3 && Math.random() < 0.3) {
+    // Boost glow/aura to trigger secondary element derivation
+    traits.glow = Math.min(5, traits.glow + randInt(1, 2));
+    traits.aura = Math.min(4, traits.aura + 1);
+  }
+
+  return buildSlime(traits, [parent1.id, parent2.id], comboBonus);
+}
+
+function biasTraitsForElement(traits: SlimeTraits, element: SlimeElement) {
+  // Nudge color/shape toward producing the target element
+  const colorMap: Partial<Record<SlimeElement, number[]>> = {
+    fire: [3, 6, 11], water: [12, 17], plant: [0, 7], earth: [3],
+    ice: [1, 5, 13], cosmic: [4, 9, 19], arcane: [8, 16],
+    light: [15], shadow: [4], electric: [10],
   };
+  const colors = colorMap[element];
+  if (colors && Math.random() < 0.5) {
+    traits.color1 = colors[randInt(0, colors.length - 1)];
+  }
+
+  // Boost secondary element traits
+  const auraMap: Partial<Record<SlimeElement, number>> = {
+    void: 4, ice: 3, fire: 2,
+  };
+  if (auraMap[element] !== undefined) {
+    traits.aura = Math.max(traits.aura, auraMap[element]!);
+  }
 }
 
 function getTraitMax(key: keyof SlimeTraits): number {
@@ -169,9 +219,5 @@ export function calculateRarity(traits: SlimeTraits, element?: string): number {
 }
 
 export function getStars(score: number): number {
-  if (score >= 50) return 5;
-  if (score >= 35) return 4;
-  if (score >= 20) return 3;
-  if (score >= 10) return 2;
-  return 1;
+  return Math.min(7, RARITY_TIER_STARS[getRarityTier(score)]);
 }

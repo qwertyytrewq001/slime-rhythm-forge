@@ -1,5 +1,5 @@
 import { useRef, useEffect } from 'react';
-
+import { ELEMENT_HUE } from '@/data/traitData';
 export function ForestBackground({ elementTint }: { elementTint?: string }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
@@ -18,7 +18,7 @@ export function ForestBackground({ elementTint }: { elementTint?: string }) {
     resize();
     window.addEventListener('resize', resize);
 
-    const tintHue = elementTint === 'fire' ? 15 : elementTint === 'ice' ? 200 : elementTint === 'cosmic' ? 270 : elementTint === 'earth' ? 100 : 140;
+    const tintHue = elementTint ? (ELEMENT_HUE[elementTint as keyof typeof ELEMENT_HUE] ?? 140) : 140;
 
     // Seed fireflies and mushroom positions once
     const fireflies: { seed: number; speed: number; brightness: number }[] = [];
