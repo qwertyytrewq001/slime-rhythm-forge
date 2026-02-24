@@ -21,7 +21,7 @@ export function drawSlime(
   const c1 = COLOR_PALETTE[t.color1] || '#7FFF7F';
   const c2 = COLOR_PALETTE[t.color2] || '#7FBFFF';
   const element = slime.element || 'nature';
-  const stars = slime.rarityStars;
+  const stars = slime.rarityStars ?? 1;
 
   // Model-specific idle animation - MUCH more expressive
   let bounce = 0, squashX = 1, squashY = 1, sway = 0, tilt = 0;
@@ -769,7 +769,8 @@ function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: strin
 }
 
 function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeElement, frame: number, stars: number, model: number) {
-  const colors = ELEMENT_COLORS[element];
+  const colors = ELEMENT_COLORS[element] || ELEMENT_COLORS['nature'];
+  if (!colors || colors.length === 0) return;
   const count = Math.min(3 + stars * 2, 14);
 
   for (let i = 0; i < count; i++) {
