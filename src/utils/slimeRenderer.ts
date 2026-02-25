@@ -23,46 +23,43 @@ export function drawSlime(
   const element = slime.element || 'nature';
   const stars = slime.rarityStars ?? 1;
 
-  // Model-specific idle animation - MUCH more expressive
+  // Model-specific idle animation — MORE EXAGGERATED
   let bounce = 0, squashX = 1, squashY = 1, sway = 0, tilt = 0;
   if (animated) {
     const phase = frame * 0.06;
     switch (model) {
-      case 0: { // Blob: exaggerated squash/stretch bounce + happy wiggle
+      case 0: { // Blob: deep squash/stretch bounce + happy wiggle
         const hopCycle = Math.sin(phase * 1.3);
-        bounce = Math.abs(hopCycle) * 5;
-        squashX = 1 + hopCycle * 0.12;
-        squashY = 1 - hopCycle * 0.12;
-        // Occasional wiggle
+        bounce = Math.abs(hopCycle) * 6.5;
+        squashX = 1 + hopCycle * 0.18;
+        squashY = 1 - hopCycle * 0.18;
         if (frame % 240 < 30) {
-          sway = Math.sin(frame * 0.4) * 3;
-          tilt = Math.sin(frame * 0.4) * 0.08;
+          sway = Math.sin(frame * 0.4) * 4;
+          tilt = Math.sin(frame * 0.4) * 0.12;
         }
         break;
       }
-      case 1: { // Spiky: sharp side-to-side rock + spike rattle
+      case 1: { // Spiky: sharper side-to-side rock + spike rattle
         const rockPhase = Math.sin(phase * 0.8);
-        sway = rockPhase * 4;
-        tilt = rockPhase * 0.06;
-        squashX = 1 + Math.abs(Math.sin(phase * 1.5)) * 0.04;
+        sway = rockPhase * 5.5;
+        tilt = rockPhase * 0.09;
+        squashX = 1 + Math.abs(Math.sin(phase * 1.5)) * 0.06;
         squashY = 1;
-        // Angry trait: sharper movement
         if (t.eyes === 10) {
-          sway *= 1.5;
-          tilt *= 2;
+          sway *= 1.6;
+          tilt *= 2.2;
         }
         break;
       }
-      case 2: { // Jelly: liquid wave ripple
+      case 2: { // Jelly: more fluid liquid wave ripple
         const wave = Math.sin(phase * 0.6);
-        bounce = wave * 2.5;
-        squashX = 1 + Math.sin(phase * 0.7) * 0.1;
-        squashY = 1 + Math.cos(phase * 0.7) * 0.1;
-        sway = Math.sin(phase * 0.3) * 2;
-        // High rhythm = groove dance
+        bounce = wave * 3.5;
+        squashX = 1 + Math.sin(phase * 0.7) * 0.15;
+        squashY = 1 + Math.cos(phase * 0.7) * 0.15;
+        sway = Math.sin(phase * 0.3) * 3;
         if (t.rhythm >= 4) {
-          sway += Math.sin(frame * 0.12) * 3;
-          tilt = Math.sin(frame * 0.12) * 0.05;
+          sway += Math.sin(frame * 0.12) * 4;
+          tilt = Math.sin(frame * 0.12) * 0.07;
         }
         break;
       }
@@ -82,20 +79,21 @@ export function drawSlime(
   if (tilt) ctx.rotate(tilt);
   ctx.scale(squashX * sizeMultiplier, squashY * sizeMultiplier);
 
-  // Rarity aura glow behind the slime
-  if (stars >= 3 && animated) {
-    const glowHue = stars >= 5 ? (frame * 3) % 360 : stars >= 4 ? 45 : 160;
-    const glowAlpha = 0.25 + Math.sin(frame * 0.04) * 0.12;
-    ctx.shadowColor = `hsla(${glowHue}, 85%, 60%, ${glowAlpha})`;
-    ctx.shadowBlur = stars * 4;
+  // ★ ENHANCED rarity aura glow — deeper bloom for high rarity
+  if (stars >= 2 && animated) {
+    const glowHue = stars >= 6 ? (frame * 4) % 360 : stars >= 5 ? (frame * 3) % 360 : stars >= 4 ? 45 : 160;
+    const glowAlpha = stars >= 5 ? 0.4 + Math.sin(frame * 0.04) * 0.18 : 0.2 + Math.sin(frame * 0.04) * 0.1;
+    const glowSize = stars >= 5 ? stars * 6 : stars * 4;
+    ctx.shadowColor = `hsla(${glowHue}, 90%, 60%, ${glowAlpha})`;
+    ctx.shadowBlur = glowSize;
   }
 
   // Trait glow
   if (t.glow > 0) {
-    const ga = t.glow * 0.12;
+    const ga = t.glow * 0.14;
     const gc = t.glow === 5 ? `hsla(${(frame * 3) % 360}, 80%, 60%, ${ga})` : hexToRgba(c1, ga);
     ctx.shadowColor = gc;
-    ctx.shadowBlur = t.glow * 6;
+    ctx.shadowBlur = t.glow * 7;
   }
 
   // === DRAW BODY with enhanced gradients ===
@@ -110,8 +108,11 @@ export function drawSlime(
   // Gradient veins
   drawVeinOverlay(ctx, c1, c2, t.shape, frame, animated);
 
-  // Core shadow (bottom-right)
-  drawCoreShadow(ctx, t.shape);
+  // Core shadow (bottom-right) — DEEPER
+  drawCoreShadow(ctx, t.shape, stars);
+
+  // ★ RIM LIGHTING — dynamic, follows animation
+  drawRimLight(ctx, c1, stars, frame, animated, model, sway);
 
   // Top-left shine highlight
   drawTopShine(ctx, stars);
@@ -123,7 +124,7 @@ export function drawSlime(
   if (t.spikes > 0) drawSpikes(ctx, t.spikes, c2, model, frame, animated);
 
   // Shine edge (rarity)
-  drawShineEdge(ctx, stars);
+  drawShineEdge(ctx, stars, frame, animated);
 
   // Eyes with bigger expressive pixels + blink cycles
   drawEyes(ctx, t.eyes, frame, model, animated, stars);
@@ -134,7 +135,7 @@ export function drawSlime(
   // Accessory
   if (t.accessory > 0) drawAccessory(ctx, t.accessory, c2);
 
-  // Element particles (more variety)
+  // Element particles (MORE density/variety)
   if (animated) drawElementParticles(ctx, element, frame, stars, model);
 
   // Aura particles
@@ -143,10 +144,10 @@ export function drawSlime(
   // Trait-specific flair
   if (animated) drawTraitFlair(ctx, t, frame, element);
 
-  // 5★ metallic shader + aura trail
+  // 5★+ metallic shader + aura trail — ENHANCED
   if (stars >= 5 && animated) {
-    drawMetallicShader(ctx, frame);
-    drawAuraTrail(ctx, frame);
+    drawMetallicShader(ctx, frame, stars);
+    drawAuraTrail(ctx, frame, stars);
   }
 
   // 4★+ confetti
@@ -154,26 +155,105 @@ export function drawSlime(
     drawConfetti(ctx, frame, stars);
   }
 
+  // ★ Quantum phase cycling (aura 4 / void element)
+  if (animated && (t.aura === 4 || element === 'void')) {
+    drawQuantumPhase(ctx, frame, stars);
+  }
+
   ctx.restore();
 }
 
+// ★ NEW: Dynamic rim lighting
+function drawRimLight(ctx: CanvasRenderingContext2D, c1: string, stars: number, frame: number, animated: boolean, model: number, sway: number) {
+  if (stars < 1) return;
+  const intensity = Math.min(0.5, 0.12 + stars * 0.06);
+  const rimShift = animated ? Math.sin(frame * 0.02) * 8 + sway * 0.5 : 0;
+
+  // Top-right rim
+  const rimGrad = ctx.createLinearGradient(rimShift + 10, -42, rimShift + 40, -10);
+  rimGrad.addColorStop(0, `rgba(255,255,255,${intensity})`);
+  rimGrad.addColorStop(0.5, `rgba(255,255,255,${intensity * 0.4})`);
+  rimGrad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = rimGrad;
+  ctx.beginPath();
+  ctx.ellipse(12 + rimShift * 0.3, -22, 18, 28, 0.3, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Bottom-left counter rim (subtle)
+  if (stars >= 3) {
+    const counterAlpha = intensity * 0.3;
+    const cGrad = ctx.createLinearGradient(-35, 15, -10, 35);
+    cGrad.addColorStop(0, hexToRgba(lightenColor(c1, 1.5), counterAlpha));
+    cGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = cGrad;
+    ctx.beginPath();
+    ctx.ellipse(-18, 18, 14, 20, -0.3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  // Spiky model: spike-tip highlights
+  if (model === 1 && stars >= 2 && animated) {
+    ctx.globalAlpha = 0.2 + Math.sin(frame * 0.06) * 0.1;
+    ctx.fillStyle = '#fff';
+    for (let i = 0; i < 4; i++) {
+      const a = (i / 4) * Math.PI * 2 - Math.PI / 2;
+      ctx.beginPath();
+      ctx.arc(Math.cos(a) * 40, Math.sin(a) * 36, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+    }
+    ctx.globalAlpha = 1;
+  }
+}
+
+// ★ NEW: Quantum phase cycling effect
+function drawQuantumPhase(ctx: CanvasRenderingContext2D, frame: number, stars: number) {
+  const phaseIntensity = stars >= 5 ? 0.18 : 0.1;
+  const cycleSpeed = stars >= 5 ? 0.08 : 0.05;
+
+  // Phase shift overlay
+  const phaseOffset = Math.sin(frame * cycleSpeed) * 6;
+  ctx.globalAlpha = phaseIntensity;
+
+  // Glitch band 1
+  ctx.fillStyle = `hsla(${(frame * 5) % 360}, 80%, 60%, 0.4)`;
+  ctx.fillRect(-30, phaseOffset - 1, 60, 2);
+
+  // Glitch band 2
+  if (frame % 20 < 4) {
+    ctx.fillStyle = `hsla(${(frame * 8 + 120) % 360}, 70%, 50%, 0.3)`;
+    const y2 = Math.sin(frame * 0.13) * 25;
+    ctx.fillRect(-25, y2 - 0.5, 50, 1);
+  }
+
+  // Phase ghost
+  if (frame % 60 < 8) {
+    ctx.globalAlpha = 0.06;
+    ctx.fillStyle = '#ff00ff';
+    ctx.beginPath();
+    ctx.arc(phaseOffset * 0.5, -phaseOffset * 0.3, 36, 0, Math.PI * 2);
+    ctx.fill();
+  }
+
+  ctx.globalAlpha = 1;
+}
+
 function drawBody(ctx: CanvasRenderingContext2D, shape: number, c1: string, c2: string, model: number, frame: number, animated: boolean, stars: number) {
-  // Multi-stop gradient for gooey depth
+  // Multi-stop gradient for gooey depth — RICHER contrast
   const grad = ctx.createRadialGradient(-8, -10, 2, 4, 8, 55);
-  const c1Light = lightenColor(c1, 1.3);
-  const c2Dark = darkenColor(c2, 0.55);
+  const c1Light = lightenColor(c1, 1.4);
+  const c2Dark = darkenColor(c2, 0.45);
   grad.addColorStop(0, c1Light);
-  grad.addColorStop(0.25, c1);
-  grad.addColorStop(0.55, c2);
-  grad.addColorStop(0.85, c2Dark);
-  grad.addColorStop(1, darkenColor(c2, 0.35));
+  grad.addColorStop(0.2, c1);
+  grad.addColorStop(0.5, c2);
+  grad.addColorStop(0.75, c2Dark);
+  grad.addColorStop(1, darkenColor(c2, 0.25));
   ctx.fillStyle = grad;
 
   ctx.beginPath();
 
   if (model === 2 && animated) {
     ctx.save();
-    const wobble = Math.sin(frame * 0.05) * 0.04;
+    const wobble = Math.sin(frame * 0.05) * 0.06;
     ctx.transform(1 + wobble, wobble * 0.5, -wobble * 0.5, 1 - wobble, 0, 0);
   }
 
@@ -238,46 +318,55 @@ function drawBody(ctx: CanvasRenderingContext2D, shape: number, c1: string, c2: 
 
   if (model === 2 && animated) ctx.restore();
 
-  // Main specular highlight (top-left, large)
-  const shineGrad = ctx.createRadialGradient(-14, -16, 1, -10, -12, 18);
-  shineGrad.addColorStop(0, 'rgba(255,255,255,0.55)');
-  shineGrad.addColorStop(0.4, 'rgba(255,255,255,0.25)');
+  // Main specular highlight (top-left, larger + brighter)
+  const shineGrad = ctx.createRadialGradient(-14, -16, 1, -10, -12, 20);
+  shineGrad.addColorStop(0, 'rgba(255,255,255,0.65)');
+  shineGrad.addColorStop(0.35, 'rgba(255,255,255,0.3)');
   shineGrad.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = shineGrad;
   ctx.beginPath();
-  ctx.ellipse(-12, -15, 14, 10, -0.4, 0, Math.PI * 2);
+  ctx.ellipse(-12, -15, 15, 11, -0.4, 0, Math.PI * 2);
   ctx.fill();
 
   // Secondary small highlight
-  ctx.fillStyle = 'rgba(255,255,255,0.35)';
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
   ctx.beginPath();
   ctx.ellipse(-6, -22, 5, 3, -0.2, 0, Math.PI * 2);
   ctx.fill();
 
   // Tiny sparkle dot
-  ctx.fillStyle = 'rgba(255,255,255,0.7)';
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
   ctx.beginPath();
-  ctx.arc(-16, -18, 1.5, 0, Math.PI * 2);
+  ctx.arc(-16, -18, 2, 0, Math.PI * 2);
   ctx.fill();
+
+  // ★ NEW: Inner subsurface scattering glow for gooey/metallic feel
+  if (stars >= 3) {
+    const sssGrad = ctx.createRadialGradient(0, 5, 3, 0, 0, 35);
+    sssGrad.addColorStop(0, hexToRgba(c1, 0.12));
+    sssGrad.addColorStop(0.5, hexToRgba(lightenColor(c1, 1.3), 0.06));
+    sssGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sssGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 35, 0, Math.PI * 2);
+    ctx.fill();
+  }
 }
 
 function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string, frame: number, animated: boolean) {
-  // Subtle dithering pattern for gooey organic texture
-  ctx.globalAlpha = 0.06;
+  ctx.globalAlpha = 0.07;
   const offset = animated ? frame * 0.005 : 0;
-  for (let i = 0; i < 35; i++) {
+  for (let i = 0; i < 40; i++) {
     const x = Math.sin(i * 7.3 + offset) * 28;
     const y = Math.cos(i * 5.1 + offset) * 24;
-    // Checkerboard dither
     const isLight = (Math.floor(x + 50) + Math.floor(y + 50)) % 2 === 0;
     ctx.fillStyle = isLight ? '#fff' : darkenColor(c2, 0.6);
     ctx.fillRect(x - 0.5, y - 0.5, 1.5, 1.5);
   }
-  // Noise veins for organic feel
-  ctx.globalAlpha = 0.04;
+  ctx.globalAlpha = 0.05;
   ctx.strokeStyle = darkenColor(c1, 0.7);
   ctx.lineWidth = 0.5;
-  for (let i = 0; i < 5; i++) {
+  for (let i = 0; i < 6; i++) {
     const startAngle = i * 1.3 + offset * 0.3;
     ctx.beginPath();
     ctx.moveTo(Math.cos(startAngle) * 5, Math.sin(startAngle) * 5);
@@ -292,45 +381,45 @@ function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string
   ctx.globalAlpha = 1;
 }
 
-function drawCoreShadow(ctx: CanvasRenderingContext2D, _shape: number) {
-  // Bottom-right core shadow for 3D pop
+function drawCoreShadow(ctx: CanvasRenderingContext2D, _shape: number, stars: number) {
+  // Bottom-right core shadow — DEEPER contrast
+  const shadowIntensity = 0.22 + Math.min(stars * 0.03, 0.12);
   const shadowGrad = ctx.createRadialGradient(10, 14, 2, 8, 10, 40);
-  shadowGrad.addColorStop(0, 'rgba(0,0,0,0.18)');
-  shadowGrad.addColorStop(0.6, 'rgba(0,0,0,0.08)');
+  shadowGrad.addColorStop(0, `rgba(0,0,0,${shadowIntensity})`);
+  shadowGrad.addColorStop(0.5, `rgba(0,0,0,${shadowIntensity * 0.5})`);
   shadowGrad.addColorStop(1, 'rgba(0,0,0,0)');
   ctx.fillStyle = shadowGrad;
   ctx.beginPath();
-  ctx.ellipse(8, 12, 30, 25, 0.3, 0, Math.PI * 2);
+  ctx.ellipse(8, 12, 32, 27, 0.3, 0, Math.PI * 2);
   ctx.fill();
 
   // Ground shadow
-  ctx.globalAlpha = 0.12;
+  ctx.globalAlpha = 0.15;
   ctx.fillStyle = '#000';
   ctx.beginPath();
-  ctx.ellipse(0, 38, 25, 5, 0, 0, Math.PI * 2);
+  ctx.ellipse(0, 38, 26, 6, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.globalAlpha = 1;
 }
 
 function drawTopShine(ctx: CanvasRenderingContext2D, stars: number) {
-  // Additional rim light for high-rarity
-  if (stars >= 3) {
+  if (stars >= 2) {
     const rimGrad = ctx.createLinearGradient(-30, -35, 30, -20);
-    rimGrad.addColorStop(0, `rgba(255,255,255,${0.15 + stars * 0.05})`);
+    rimGrad.addColorStop(0, `rgba(255,255,255,${0.18 + stars * 0.06})`);
     rimGrad.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = rimGrad;
     ctx.beginPath();
-    ctx.ellipse(0, -28, 28, 8, 0, 0, Math.PI * 2);
+    ctx.ellipse(0, -28, 30, 9, 0, 0, Math.PI * 2);
     ctx.fill();
   }
 }
 
 function drawVeinOverlay(ctx: CanvasRenderingContext2D, c1: string, c2: string, shape: number, frame: number, animated: boolean) {
-  ctx.globalAlpha = 0.1;
+  ctx.globalAlpha = 0.12;
   ctx.strokeStyle = darkenColor(c2, 0.6);
   ctx.lineWidth = 0.8;
-  for (let i = 0; i < 5; i++) {
-    const angle = (i / 5) * Math.PI * 2 + (animated ? frame * 0.004 : 0);
+  for (let i = 0; i < 6; i++) {
+    const angle = (i / 6) * Math.PI * 2 + (animated ? frame * 0.004 : 0);
     ctx.beginPath();
     ctx.moveTo(0, 0);
     ctx.bezierCurveTo(
@@ -343,19 +432,20 @@ function drawVeinOverlay(ctx: CanvasRenderingContext2D, c1: string, c2: string, 
   ctx.globalAlpha = 1;
 }
 
-function drawShineEdge(ctx: CanvasRenderingContext2D, stars: number) {
+function drawShineEdge(ctx: CanvasRenderingContext2D, stars: number, frame: number, animated: boolean) {
   if (stars < 2) return;
-  ctx.globalAlpha = 0.25 + stars * 0.06;
-  ctx.strokeStyle = stars >= 5 ? '#FFD700' : stars >= 4 ? '#E0E0E0' : '#fff';
-  ctx.lineWidth = stars >= 4 ? 2.5 : 1.5;
+  const pulseAlpha = animated ? 0.25 + stars * 0.06 + Math.sin(frame * 0.03) * 0.06 : 0.25 + stars * 0.06;
+  ctx.globalAlpha = pulseAlpha;
+  ctx.strokeStyle = stars >= 6 ? `hsl(${(frame * 2) % 360}, 80%, 70%)` : stars >= 5 ? '#FFD700' : stars >= 4 ? '#E0E0E0' : '#fff';
+  ctx.lineWidth = stars >= 5 ? 3 : stars >= 4 ? 2.5 : 1.5;
   ctx.beginPath();
   ctx.arc(0, 0, 38, -Math.PI * 0.75, -Math.PI * 0.15);
   ctx.stroke();
-  // Second rim for 5★
+  // Double rim for 5★+
   if (stars >= 5) {
-    ctx.globalAlpha = 0.15;
-    ctx.strokeStyle = '#FFF8DC';
-    ctx.lineWidth = 1;
+    ctx.globalAlpha = 0.18;
+    ctx.strokeStyle = stars >= 6 ? `hsl(${(frame * 2 + 60) % 360}, 70%, 80%)` : '#FFF8DC';
+    ctx.lineWidth = 1.2;
     ctx.beginPath();
     ctx.arc(0, 0, 36, -Math.PI * 0.6, -Math.PI * 0.25);
     ctx.stroke();
@@ -367,7 +457,6 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
   const eyeY = -7;
   const eyeSpacing = 13;
 
-  // Blink cycle - more natural with double-blink
   const blinkPhase = animated ? Math.floor(frame / 90) % 12 : -1;
   const isBlinking = (blinkPhase === 0 || blinkPhase === 1) && animated;
 
@@ -375,7 +464,6 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
     ctx.lineWidth = 2.5;
     ctx.strokeStyle = '#1a1a1a';
     ctx.lineCap = 'round';
-    // Cute curved blink lines
     ctx.beginPath();
     ctx.arc(-eyeSpacing, eyeY, 4, 0.2, Math.PI - 0.2);
     ctx.stroke();
@@ -385,7 +473,6 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
     return;
   }
 
-  // Spiky angry tilt
   if (model === 1) {
     ctx.save();
     ctx.translate(-eyeSpacing, eyeY);
@@ -394,36 +481,34 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
   }
 
   switch (type) {
-    case 0: // Pixel dot eyes
+    case 0:
       ctx.fillStyle = '#1a1a1a';
       ctx.fillRect(-eyeSpacing - 3, eyeY - 3, 6, 6);
       ctx.fillRect(eyeSpacing - 3, eyeY - 3, 6, 6);
-      // Tiny highlight
       ctx.fillStyle = '#fff';
       ctx.fillRect(-eyeSpacing - 1, eyeY - 2, 2, 2);
       ctx.fillRect(eyeSpacing - 1, eyeY - 2, 2, 2);
       break;
-    case 1: // Big round eyes with pupils
+    case 1: {
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
-      // Pupils with look direction
       const lookX = animated ? Math.sin(frame * 0.018) * 2 : 0;
       const lookY = animated ? Math.cos(frame * 0.025) * 1 : 0;
       ctx.fillStyle = '#1a1a1a';
       ctx.beginPath(); ctx.arc(-eyeSpacing + lookX, eyeY + lookY, 3, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing + lookX, eyeY + lookY, 3, 0, Math.PI * 2); ctx.fill();
-      // Specular
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(-eyeSpacing - 1.5, eyeY - 2, 1.5, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing - 1.5, eyeY - 2, 1.5, 0, Math.PI * 2); ctx.fill();
       break;
-    case 2: // Star eyes
+    }
+    case 2:
       ctx.fillStyle = stars >= 4 ? '#FFD700' : '#1a1a1a';
       drawStarShape(ctx, -eyeSpacing, eyeY, 2, 6, 5); ctx.fill();
       drawStarShape(ctx, eyeSpacing, eyeY, 2, 6, 5); ctx.fill();
       break;
-    case 3: { // Heart eyes - flutter for blob
+    case 3: {
       ctx.fillStyle = '#FF4466';
       const heartScale = model === 0 && animated ? 1 + Math.sin(frame * 0.15) * 0.25 : 1;
       ctx.save();
@@ -433,17 +518,16 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
       ctx.restore();
       break;
     }
-    case 4: // X eyes (dizzy)
+    case 4:
       ctx.lineWidth = 2.5; ctx.strokeStyle = '#1a1a1a'; ctx.lineCap = 'round';
       drawX(ctx, -eyeSpacing, eyeY, 4); drawX(ctx, eyeSpacing, eyeY, 4);
       break;
-    case 5: { // Laser eyes! (glowing)
+    case 5: {
       ctx.fillStyle = '#FF0000';
       ctx.shadowColor = '#FF0000';
       ctx.shadowBlur = 8;
       ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 4, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 4, 0, Math.PI * 2); ctx.fill();
-      // Laser beam on angry pulse
       if (animated && frame % 120 < 15) {
         ctx.globalAlpha = 0.6;
         ctx.fillStyle = '#FF0000';
@@ -455,11 +539,10 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
       ctx.shadowColor = 'transparent';
       break;
     }
-    case 6: { // Galaxy eyes
+    case 6: {
       ctx.fillStyle = '#0a0020';
       ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
-      // Swirling stars
       if (animated) {
         for (let i = 0; i < 4; i++) {
           const sa = frame * 0.08 + i * 1.5;
@@ -471,7 +554,7 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
       }
       break;
     }
-    case 7: // Sparkle eyes
+    case 7:
       ctx.fillStyle = '#FFD700';
       drawStarShape(ctx, -eyeSpacing, eyeY, 1, 5, 4); ctx.fill();
       drawStarShape(ctx, eyeSpacing, eyeY, 1, 5, 4); ctx.fill();
@@ -479,7 +562,7 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
       ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 1.5, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 1.5, 0, Math.PI * 2); ctx.fill();
       break;
-    case 8: // Wide surprised eyes
+    case 8:
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 7, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 7, 0, Math.PI * 2); ctx.fill();
@@ -490,14 +573,13 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
       ctx.beginPath(); ctx.arc(-eyeSpacing - 2, eyeY - 2, 2, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing - 2, eyeY - 2, 2, 0, Math.PI * 2); ctx.fill();
       break;
-    case 9: { // Sleepy (half-closed)
+    case 9: {
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.ellipse(-eyeSpacing, eyeY, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(eyeSpacing, eyeY, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#1a1a1a';
       ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY + 1, 2, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing, eyeY + 1, 2, 0, Math.PI * 2); ctx.fill();
-      // Zzz for jelly
       if (model === 2 && animated) {
         ctx.fillStyle = '#8888cc';
         ctx.font = '7px monospace';
@@ -508,7 +590,7 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
       }
       break;
     }
-    case 10: { // Angry (with glowing pupils for spiky)
+    case 10: {
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
@@ -520,13 +602,12 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
       ctx.beginPath(); ctx.arc(-eyeSpacing + 1, eyeY, 3, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing + 1, eyeY, 3, 0, Math.PI * 2); ctx.fill();
       ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
-      // Angry brows (thicker)
       ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
       ctx.beginPath(); ctx.moveTo(-eyeSpacing - 6, eyeY - 7); ctx.lineTo(-eyeSpacing + 3, eyeY - 4); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(eyeSpacing + 6, eyeY - 7); ctx.lineTo(eyeSpacing - 3, eyeY - 4); ctx.stroke();
       break;
     }
-    default: { // Standard cute eyes
+    default: {
       ctx.fillStyle = '#fff';
       ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
@@ -549,32 +630,28 @@ function drawMouth(ctx: CanvasRenderingContext2D, type: number, model: number, f
   const y = 7;
 
   switch (type) {
-    case 0: { // Smile
+    case 0: {
       const smileWidth = model === 0 ? 10 : 7;
       ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(0, y, smileWidth, 0.15, Math.PI - 0.15); ctx.stroke();
-      // Blob: occasional happy open mouth
       if (model === 0 && animated && frame % 150 < 12) {
         ctx.fillStyle = '#4a2a2a';
         ctx.beginPath(); ctx.ellipse(0, y + 3, 6, 4, 0, 0, Math.PI * 2); ctx.fill();
-        // Tongue
         ctx.fillStyle = '#FF8888';
         ctx.beginPath(); ctx.ellipse(2, y + 5, 3, 2, 0.2, 0, Math.PI * 2); ctx.fill();
       }
       break;
     }
-    case 1: // Frown
+    case 1:
       ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(0, y + 8, 7, Math.PI + 0.2, -0.2); ctx.stroke();
       break;
-    case 2: { // Open mouth - Blob burps particles
+    case 2: {
       ctx.fillStyle = '#3a1a1a';
       const openH = model === 0 && animated && frame % 180 < 18 ? 7 : 5;
       ctx.beginPath(); ctx.ellipse(0, y + 3, 6, openH, 0, 0, Math.PI * 2); ctx.fill();
-      // Inner highlight
       ctx.fillStyle = '#6a2a2a';
       ctx.beginPath(); ctx.ellipse(0, y + 2, 4, openH - 2, 0, 0, Math.PI * 2); ctx.fill();
-      // Blob burp particles
       if (model === 0 && animated && frame % 180 < 18) {
         for (let i = 0; i < 3; i++) {
           ctx.globalAlpha = 0.4;
@@ -587,7 +664,7 @@ function drawMouth(ctx: CanvasRenderingContext2D, type: number, model: number, f
       }
       break;
     }
-    case 3: { // Fang
+    case 3: {
       ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(0, y, 7, 0.1, Math.PI - 0.1); ctx.stroke();
       ctx.fillStyle = '#fff';
@@ -596,7 +673,6 @@ function drawMouth(ctx: CanvasRenderingContext2D, type: number, model: number, f
       if (model === 1) {
         ctx.beginPath(); ctx.moveTo(2, y + 2); ctx.lineTo(4, y + fangLen); ctx.lineTo(6, y + 2); ctx.fill();
       }
-      // Drool for jelly
       if (model === 2 && animated) {
         ctx.fillStyle = 'rgba(150,200,255,0.4)';
         const drip = (frame * 0.3) % 15;
@@ -604,11 +680,10 @@ function drawMouth(ctx: CanvasRenderingContext2D, type: number, model: number, f
       }
       break;
     }
-    case 4: // :3 cat mouth
+    case 4:
       ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.arc(-5, y + 3, 4, 0.15, Math.PI - 0.15); ctx.stroke();
       ctx.beginPath(); ctx.arc(5, y + 3, 4, 0.15, Math.PI - 0.15); ctx.stroke();
-      // Whiskers for blob
       if (model === 0) {
         ctx.lineWidth = 1; ctx.globalAlpha = 0.3;
         ctx.beginPath(); ctx.moveTo(-18, y); ctx.lineTo(-8, y + 2); ctx.stroke();
@@ -616,7 +691,7 @@ function drawMouth(ctx: CanvasRenderingContext2D, type: number, model: number, f
         ctx.globalAlpha = 1;
       }
       break;
-    case 5: // Chomp (teeth showing)
+    case 5:
       ctx.fillStyle = '#3a1a1a';
       ctx.beginPath(); ctx.roundRect(-8, y, 16, 8, 3); ctx.fill();
       ctx.fillStyle = '#fff';
@@ -635,8 +710,7 @@ function drawSpikes(ctx: CanvasRenderingContext2D, type: number, color: string, 
   ctx.globalAlpha = 0.75;
   const count = Math.min(type + 2, 8);
   const spikeMultiplier = model === 1 ? 1.6 : model === 2 ? 0.6 : 1;
-  // Spike rattle for Spiky model
-  const rattle = model === 1 && animated ? Math.sin(frame * 0.2) * 2 : 0;
+  const rattle = model === 1 && animated ? Math.sin(frame * 0.25) * 3 : 0;
 
   for (let i = 0; i < count; i++) {
     const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
@@ -644,12 +718,11 @@ function drawSpikes(ctx: CanvasRenderingContext2D, type: number, color: string, 
     const y = Math.sin(angle) * 38;
     ctx.save();
     ctx.translate(x, y);
-    ctx.rotate(angle + Math.PI / 2 + (rattle * 0.02 * (i % 2 === 0 ? 1 : -1)));
+    ctx.rotate(angle + Math.PI / 2 + (rattle * 0.025 * (i % 2 === 0 ? 1 : -1)));
     const len = (10 + type) * spikeMultiplier;
     const width = model === 1 ? 3 : 4;
-    // Gradient spike
     const sGrad = ctx.createLinearGradient(0, -len, 0, 2);
-    sGrad.addColorStop(0, lightenColor(color, 1.3));
+    sGrad.addColorStop(0, lightenColor(color, 1.4));
     sGrad.addColorStop(1, color);
     ctx.fillStyle = sGrad;
     ctx.beginPath();
@@ -677,7 +750,7 @@ function drawPattern(ctx: CanvasRenderingContext2D, type: number, color: string,
         ctx.beginPath(); ctx.moveTo(-30, i * 11); ctx.lineTo(30, i * 11); ctx.stroke();
       }
       break;
-    case 9: // Galaxy swirl
+    case 9:
       ctx.globalAlpha = 0.18;
       for (let i = 0; i < 12; i++) {
         const angle = (i / 12) * Math.PI * 2 + frame * 0.008;
@@ -700,29 +773,27 @@ function drawPattern(ctx: CanvasRenderingContext2D, type: number, color: string,
 
 function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: string) {
   switch (type) {
-    case 1: // Top hat
+    case 1:
       ctx.fillStyle = '#222';
       ctx.fillRect(-13, -50, 26, 7);
       ctx.fillRect(-9, -65, 18, 17);
-      // Band
       ctx.fillStyle = '#8B0000';
       ctx.fillRect(-9, -54, 18, 3);
       break;
-    case 2: // Crown
+    case 2:
       ctx.fillStyle = '#FFD700';
       ctx.beginPath();
       ctx.moveTo(-13, -38); ctx.lineTo(-13, -52); ctx.lineTo(-7, -45);
       ctx.lineTo(0, -56); ctx.lineTo(7, -45); ctx.lineTo(13, -52);
       ctx.lineTo(13, -38);
       ctx.fill();
-      // Gems
       ctx.fillStyle = '#FF4500';
       ctx.beginPath(); ctx.arc(0, -48, 2.5, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#4169E1';
       ctx.beginPath(); ctx.arc(-7, -44, 1.5, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.arc(7, -44, 1.5, 0, Math.PI * 2); ctx.fill();
       break;
-    case 3: // Flower
+    case 3:
       ctx.fillStyle = '#FF69B4';
       for (let i = 0; i < 5; i++) {
         const a = (i / 5) * Math.PI * 2;
@@ -731,13 +802,13 @@ function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: strin
       ctx.fillStyle = '#FFD700';
       ctx.beginPath(); ctx.arc(-18, -32, 3, 0, Math.PI * 2); ctx.fill();
       break;
-    case 4: // Glasses
+    case 4:
       ctx.strokeStyle = '#222'; ctx.lineWidth = 2;
       ctx.beginPath(); ctx.roundRect(-20, -14, 14, 12, 3); ctx.stroke();
       ctx.beginPath(); ctx.roundRect(6, -14, 14, 12, 3); ctx.stroke();
       ctx.beginPath(); ctx.moveTo(-6, -8); ctx.lineTo(6, -8); ctx.stroke();
       break;
-    case 5: // Wings
+    case 5:
       ctx.fillStyle = 'rgba(255,255,255,0.35)';
       ctx.beginPath(); ctx.ellipse(-42, -5, 14, 22, -0.3, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(42, -5, 14, 22, 0.3, 0, Math.PI * 2); ctx.fill();
@@ -745,7 +816,7 @@ function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: strin
       ctx.beginPath(); ctx.ellipse(-38, -8, 8, 14, -0.2, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(38, -8, 8, 14, 0.2, 0, Math.PI * 2); ctx.fill();
       break;
-    case 6: // Scarf
+    case 6:
       ctx.fillStyle = '#CC3333';
       ctx.beginPath();
       ctx.moveTo(-25, 15); ctx.quadraticCurveTo(-15, 22, 0, 18);
@@ -753,10 +824,9 @@ function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: strin
       ctx.lineTo(25, 22); ctx.quadraticCurveTo(15, 28, 0, 24);
       ctx.quadraticCurveTo(-15, 28, -25, 22);
       ctx.fill();
-      // Tail
       ctx.fillRect(20, 18, 6, 15);
       break;
-    case 7: // Halo
+    case 7:
       ctx.strokeStyle = '#FFD700'; ctx.lineWidth = 2.5;
       ctx.beginPath(); ctx.ellipse(0, -48, 16, 6, 0, 0, Math.PI * 2); ctx.stroke();
       ctx.globalAlpha = 0.2;
@@ -771,90 +841,86 @@ function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: strin
 function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeElement, frame: number, stars: number, model: number) {
   const colors = ELEMENT_COLORS[element] || ELEMENT_COLORS['nature'];
   if (!colors || colors.length === 0) return;
-  const count = Math.min(3 + stars * 2, 14);
+  // ★ HIGHER particle density
+  const count = Math.min(5 + stars * 3, 20);
 
   for (let i = 0; i < count; i++) {
     const seed = i * 137.508;
     const angle = seed + frame * 0.018;
-    const dist = 46 + Math.sin(frame * 0.035 + i * 2) * 12;
+    const dist = 46 + Math.sin(frame * 0.035 + i * 2) * 14;
     const x = Math.cos(angle) * dist;
     const y = Math.sin(angle) * dist;
 
     ctx.fillStyle = colors[i % colors.length];
 
     switch (element) {
-      case 'earth': // Moss + leaves
+      case 'earth': {
         ctx.globalAlpha = 0.5;
         ctx.fillRect(x - 1.5, y - 1.5, 3, 3);
         if (i % 3 === 0) {
-          ctx.globalAlpha = 0.3;
+          ctx.globalAlpha = 0.35;
           ctx.fillStyle = '#4a7a3a';
           ctx.beginPath(); ctx.ellipse(x + 3, y, 3, 1.5, seed, 0, Math.PI * 2); ctx.fill();
         }
         break;
-      case 'fire': { // Embers + flames
-        const fireY = y - (frame * 0.6 + i * 12) % 25;
-        const life = 1 - ((frame * 0.6 + i * 12) % 25) / 25;
-        ctx.globalAlpha = life * 0.7;
-        // Ember glow
+      }
+      case 'fire': {
+        const fireY = y - (frame * 0.7 + i * 12) % 28;
+        const life = 1 - ((frame * 0.7 + i * 12) % 28) / 28;
+        ctx.globalAlpha = life * 0.75;
         ctx.shadowColor = '#FF4500';
-        ctx.shadowBlur = 3;
-        ctx.beginPath(); ctx.arc(x, fireY, 1.5 + life, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 4;
+        ctx.beginPath(); ctx.arc(x, fireY, 2 + life * 1.5, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
-        // Flame flicker on spiky
-        if (model === 1 && i < 3) {
-          ctx.globalAlpha = 0.3;
+        // Enhanced flame flicker on spiky
+        if (model === 1 && i < 4) {
+          ctx.globalAlpha = 0.35;
           ctx.fillStyle = '#FF6600';
-          const fh = 8 + Math.sin(frame * 0.2 + i) * 4;
+          const fh = 10 + Math.sin(frame * 0.25 + i) * 5;
           ctx.beginPath();
-          ctx.moveTo(x - 2, fireY); ctx.quadraticCurveTo(x + Math.sin(frame * 0.3) * 2, fireY - fh, x + 2, fireY);
+          ctx.moveTo(x - 2.5, fireY); ctx.quadraticCurveTo(x + Math.sin(frame * 0.35) * 3, fireY - fh, x + 2.5, fireY);
           ctx.fill();
         }
         break;
       }
-      case 'ice': { // Crystal shards + frost sparkle
-        ctx.globalAlpha = 0.55;
+      case 'ice': {
+        ctx.globalAlpha = 0.6;
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(frame * 0.008 + i);
-        // Diamond shard shape
+        ctx.rotate(frame * 0.01 + i);
         ctx.beginPath();
-        ctx.moveTo(0, -4); ctx.lineTo(1.5, 0); ctx.lineTo(0, 4); ctx.lineTo(-1.5, 0);
+        ctx.moveTo(0, -5); ctx.lineTo(2, 0); ctx.lineTo(0, 5); ctx.lineTo(-2, 0);
         ctx.fill();
-        // Refraction sparkle
         if (i % 2 === 0) {
           ctx.fillStyle = '#fff';
-          ctx.globalAlpha = 0.4 + Math.sin(frame * 0.1 + i) * 0.3;
-          ctx.beginPath(); ctx.arc(0, -2, 0.8, 0, Math.PI * 2); ctx.fill();
+          ctx.globalAlpha = 0.5 + Math.sin(frame * 0.1 + i) * 0.3;
+          ctx.beginPath(); ctx.arc(0, -2, 1, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
         break;
       }
-      case 'cosmic': { // Stars + nebula wisps
+      case 'cosmic': {
         const twinkle = Math.sin(frame * 0.08 + i * 3);
-        ctx.globalAlpha = 0.4 + twinkle * 0.4;
+        ctx.globalAlpha = 0.45 + twinkle * 0.45;
         if (twinkle > 0) {
-          // 4-point star
-          drawStarShape(ctx, x, y, 0.5, 3 + twinkle * 2, 4);
+          drawStarShape(ctx, x, y, 0.5, 3.5 + twinkle * 2.5, 4);
           ctx.fill();
         }
-        // Nebula wisp
-        if (i % 4 === 0) {
-          ctx.globalAlpha = 0.08;
+        if (i % 3 === 0) {
+          ctx.globalAlpha = 0.1;
           ctx.fillStyle = '#9966FF';
-          ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fill();
         }
         break;
       }
-      case 'nature': { // Pollen + spores
-        ctx.globalAlpha = 0.45;
-        const drift = Math.sin(frame * 0.015 + i) * 6;
+      case 'nature': {
+        ctx.globalAlpha = 0.5;
+        const drift = Math.sin(frame * 0.015 + i) * 7;
         ctx.beginPath();
-        ctx.arc(x + drift, y, 2, 0, Math.PI * 2);
+        ctx.arc(x + drift, y, 2.5, 0, Math.PI * 2);
         ctx.fill();
-        // Floating spore trail
         if (i % 3 === 0) {
-          ctx.globalAlpha = 0.15;
+          ctx.globalAlpha = 0.18;
           ctx.beginPath();
           ctx.moveTo(x + drift, y);
           ctx.lineTo(x + drift - 3, y + 8);
@@ -864,122 +930,182 @@ function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeEleme
         }
         break;
       }
-      case 'water': { // Bubbles rising
-        ctx.globalAlpha = 0.4;
-        const bubY = y - (frame * 0.4 + i * 15) % 30;
+      case 'water': {
+        ctx.globalAlpha = 0.45;
+        const bubY = y - (frame * 0.45 + i * 15) % 35;
         ctx.strokeStyle = colors[i % colors.length];
-        ctx.lineWidth = 0.5;
-        ctx.beginPath(); ctx.arc(x, bubY, 2 + Math.sin(i) * 1.5, 0, Math.PI * 2); ctx.stroke();
+        ctx.lineWidth = 0.6;
+        ctx.beginPath(); ctx.arc(x, bubY, 2.5 + Math.sin(i) * 1.5, 0, Math.PI * 2); ctx.stroke();
         ctx.fillStyle = '#fff';
-        ctx.globalAlpha = 0.2;
-        ctx.beginPath(); ctx.arc(x - 0.5, bubY - 1, 0.6, 0, Math.PI * 2); ctx.fill();
+        ctx.globalAlpha = 0.25;
+        ctx.beginPath(); ctx.arc(x - 0.5, bubY - 1, 0.8, 0, Math.PI * 2); ctx.fill();
         break;
       }
-      case 'plant': { // Leaves + petals
-        ctx.globalAlpha = 0.45;
+      case 'plant': {
+        ctx.globalAlpha = 0.5;
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(frame * 0.01 + i * 2);
+        ctx.rotate(frame * 0.012 + i * 2);
         ctx.fillStyle = colors[i % colors.length];
-        ctx.beginPath(); ctx.ellipse(0, 0, 3, 1.5, 0, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.ellipse(0, 0, 3.5, 1.8, 0, 0, Math.PI * 2); ctx.fill();
         ctx.restore();
         break;
       }
-      case 'wind': { // Swirling wisps
-        ctx.globalAlpha = 0.3;
-        ctx.strokeStyle = colors[i % colors.length];
-        ctx.lineWidth = 0.8;
-        ctx.beginPath();
-        const wa = frame * 0.03 + i;
-        ctx.arc(x, y, 4, wa, wa + Math.PI);
-        ctx.stroke();
-        break;
-      }
-      case 'electric': { // Lightning sparks
-        ctx.globalAlpha = Math.random() > 0.3 ? 0.6 : 0;
+      case 'wind': {
+        ctx.globalAlpha = 0.35;
         ctx.strokeStyle = colors[i % colors.length];
         ctx.lineWidth = 1;
         ctx.beginPath();
-        ctx.moveTo(x, y);
-        ctx.lineTo(x + (Math.random() - 0.5) * 8, y + (Math.random() - 0.5) * 8);
+        const wa = frame * 0.04 + i;
+        ctx.arc(x, y, 5, wa, wa + Math.PI);
         ctx.stroke();
         break;
       }
-      case 'metal': { // Metallic glints
-        ctx.globalAlpha = 0.5;
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.fillRect(x - 1, y - 1, 2, 2);
+      case 'electric': {
+        ctx.globalAlpha = Math.random() > 0.25 ? 0.7 : 0;
+        ctx.strokeStyle = colors[i % colors.length];
+        ctx.lineWidth = 1.2;
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+        const mid1x = x + (Math.random() - 0.5) * 6;
+        const mid1y = y + (Math.random() - 0.5) * 6;
+        ctx.lineTo(mid1x, mid1y);
+        ctx.lineTo(mid1x + (Math.random() - 0.5) * 5, mid1y + (Math.random() - 0.5) * 5);
+        ctx.stroke();
         break;
       }
-      case 'light': { // Light rays
-        ctx.globalAlpha = 0.3 + Math.sin(frame * 0.06 + i) * 0.2;
+      case 'metal': {
+        ctx.globalAlpha = 0.55;
         ctx.fillStyle = colors[i % colors.length];
-        drawStarShape(ctx, x, y, 0.5, 2.5, 4);
-        ctx.fill();
-        break;
-      }
-      case 'shadow': { // Dark wisps
-        ctx.globalAlpha = 0.3;
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill();
-        break;
-      }
-      case 'void': { // Glitch fragments
-        if (frame % 10 < 3) {
-          ctx.globalAlpha = 0.4;
-          ctx.fillStyle = colors[i % colors.length];
-          ctx.fillRect(x - 2, y - 0.5, 4, 1);
+        ctx.fillRect(x - 1.2, y - 1.2, 2.4, 2.4);
+        // Metallic glint flash
+        if (i % 4 === 0 && frame % 40 < 5) {
+          ctx.globalAlpha = 0.6;
+          ctx.fillStyle = '#fff';
+          ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
         }
         break;
       }
-      case 'toxic': { // Dripping drops
-        ctx.globalAlpha = 0.5;
+      case 'light': {
+        ctx.globalAlpha = 0.35 + Math.sin(frame * 0.07 + i) * 0.25;
         ctx.fillStyle = colors[i % colors.length];
-        const dripY = y + (frame * 0.3 + i * 10) % 20;
-        ctx.beginPath(); ctx.arc(x, dripY, 1.5, 0, Math.PI * 2); ctx.fill();
+        drawStarShape(ctx, x, y, 0.5, 3, 4);
+        ctx.fill();
+        // Ray lines
+        if (i % 3 === 0) {
+          ctx.globalAlpha = 0.12;
+          ctx.strokeStyle = '#FFD700';
+          ctx.lineWidth = 0.5;
+          ctx.beginPath(); ctx.moveTo(0, 0); ctx.lineTo(x, y); ctx.stroke();
+        }
         break;
       }
-      case 'crystal': { // Rotating gems
-        ctx.globalAlpha = 0.5;
+      case 'shadow': {
+        ctx.globalAlpha = 0.35;
+        ctx.fillStyle = colors[i % colors.length];
+        ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 2); ctx.fill();
+        // Wispy tendrils
+        if (i % 3 === 0) {
+          ctx.globalAlpha = 0.12;
+          ctx.strokeStyle = '#2F2F4F';
+          ctx.lineWidth = 1;
+          ctx.beginPath();
+          ctx.moveTo(x, y);
+          ctx.quadraticCurveTo(x + Math.sin(frame * 0.03 + i) * 8, y + 5, x + Math.sin(frame * 0.02 + i) * 12, y + 15);
+          ctx.stroke();
+        }
+        break;
+      }
+      case 'void': {
+        // ★ Enhanced glitch fragments
+        if (frame % 8 < 4) {
+          ctx.globalAlpha = 0.5;
+          ctx.fillStyle = colors[i % colors.length];
+          ctx.fillRect(x - 3, y - 0.5, 6, 1);
+          // Chromatic aberration
+          if (i % 2 === 0) {
+            ctx.globalAlpha = 0.2;
+            ctx.fillStyle = '#ff00ff';
+            ctx.fillRect(x - 3 + 1, y - 0.5 - 1, 6, 1);
+            ctx.fillStyle = '#00ffff';
+            ctx.fillRect(x - 3 - 1, y - 0.5 + 1, 6, 1);
+          }
+        }
+        break;
+      }
+      case 'toxic': {
+        ctx.globalAlpha = 0.55;
+        ctx.fillStyle = colors[i % colors.length];
+        const dripY = y + (frame * 0.35 + i * 10) % 22;
+        ctx.beginPath(); ctx.arc(x, dripY, 2, 0, Math.PI * 2); ctx.fill();
+        // Toxic fumes
+        if (i % 3 === 0) {
+          ctx.globalAlpha = 0.1;
+          ctx.fillStyle = '#7FFF00';
+          ctx.beginPath(); ctx.arc(x, dripY - 5, 5, 0, Math.PI * 2); ctx.fill();
+        }
+        break;
+      }
+      case 'crystal': {
+        ctx.globalAlpha = 0.55;
         ctx.save();
         ctx.translate(x, y);
-        ctx.rotate(frame * 0.015 + i);
+        ctx.rotate(frame * 0.018 + i);
         ctx.fillStyle = colors[i % colors.length];
         ctx.beginPath();
-        ctx.moveTo(0, -3); ctx.lineTo(2, 0); ctx.lineTo(0, 3); ctx.lineTo(-2, 0);
+        ctx.moveTo(0, -4); ctx.lineTo(2.5, 0); ctx.lineTo(0, 4); ctx.lineTo(-2.5, 0);
         ctx.fill();
+        // Prismatic refraction
+        if (i % 2 === 0) {
+          ctx.globalAlpha = 0.3;
+          ctx.fillStyle = `hsl(${(frame * 3 + i * 50) % 360}, 70%, 70%)`;
+          ctx.beginPath(); ctx.arc(0, -2, 1, 0, Math.PI * 2); ctx.fill();
+        }
         ctx.restore();
         break;
       }
-      case 'lava': { // Rising magma blobs
-        const lavaY = y - (frame * 0.5 + i * 10) % 20;
-        const lavaLife = 1 - ((frame * 0.5 + i * 10) % 20) / 20;
-        ctx.globalAlpha = lavaLife * 0.6;
+      case 'lava': {
+        const lavaY = y - (frame * 0.55 + i * 10) % 22;
+        const lavaLife = 1 - ((frame * 0.55 + i * 10) % 22) / 22;
+        ctx.globalAlpha = lavaLife * 0.7;
         ctx.fillStyle = colors[i % colors.length];
         ctx.shadowColor = '#FF4500';
-        ctx.shadowBlur = 3;
-        ctx.beginPath(); ctx.arc(x, lavaY, 2, 0, Math.PI * 2); ctx.fill();
+        ctx.shadowBlur = 4;
+        ctx.beginPath(); ctx.arc(x, lavaY, 2.5, 0, Math.PI * 2); ctx.fill();
         ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
         break;
       }
-      case 'arcane': { // Rune symbols
-        ctx.globalAlpha = 0.35 + Math.sin(frame * 0.05 + i * 2) * 0.2;
+      case 'arcane': {
+        ctx.globalAlpha = 0.4 + Math.sin(frame * 0.05 + i * 2) * 0.25;
         ctx.strokeStyle = colors[i % colors.length];
-        ctx.lineWidth = 0.8;
-        ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 1.5); ctx.stroke();
+        ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 1.5); ctx.stroke();
+        // Rune symbol
+        if (i % 4 === 0) {
+          ctx.globalAlpha = 0.15;
+          ctx.fillStyle = '#BA55D3';
+          ctx.font = '5px monospace';
+          ctx.fillText('✧', x - 2, y + 2);
+        }
         break;
       }
-      case 'divine': { // Holy sparkles
-        ctx.globalAlpha = 0.5;
+      case 'divine': {
+        ctx.globalAlpha = 0.55;
         ctx.fillStyle = colors[i % colors.length];
-        drawStarShape(ctx, x, y, 1, 3, 6);
+        drawStarShape(ctx, x, y, 1.2, 3.5, 6);
         ctx.fill();
+        // Holy glow
+        if (i % 3 === 0) {
+          ctx.globalAlpha = 0.08;
+          ctx.fillStyle = '#FFD700';
+          ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
+        }
         break;
       }
-      default: { // Fallback
-        ctx.globalAlpha = 0.4;
+      default: {
+        ctx.globalAlpha = 0.45;
         ctx.fillStyle = colors[i % colors.length];
-        ctx.beginPath(); ctx.arc(x, y, 1.5, 0, Math.PI * 2); ctx.fill();
+        ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI * 2); ctx.fill();
         break;
       }
     }
@@ -988,116 +1114,116 @@ function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeEleme
 }
 
 function drawAura(ctx: CanvasRenderingContext2D, type: number, frame: number, stars: number, element: SlimeElement) {
-  const particleCount = type * 3 + (stars >= 5 ? 12 : 0);
+  const particleCount = type * 4 + (stars >= 5 ? 16 : 0);
   for (let i = 0; i < particleCount; i++) {
     const angle = (i / particleCount) * Math.PI * 2 + frame * 0.015;
-    const dist = 50 + Math.sin(frame * 0.04 + i) * 10;
+    const dist = 50 + Math.sin(frame * 0.04 + i) * 12;
     const x = Math.cos(angle) * dist;
     const y = Math.sin(angle) * dist;
 
-    ctx.globalAlpha = 0.35 + Math.sin(frame * 0.07 + i) * 0.25;
+    ctx.globalAlpha = 0.38 + Math.sin(frame * 0.07 + i) * 0.28;
     switch (type) {
       case 1: ctx.fillStyle = '#FFE4B5'; break;
       case 2: ctx.fillStyle = '#FF6347'; break;
       case 3: ctx.fillStyle = '#87CEEB'; break;
       case 4:
-        ctx.fillStyle = `hsl(${(frame * 4 + i * 35) % 360}, 70%, 65%)`;
+        ctx.fillStyle = `hsl(${(frame * 5 + i * 35) % 360}, 75%, 65%)`;
         break;
     }
     ctx.beginPath();
-    ctx.arc(x, y, 2.5 + Math.sin(frame * 0.08 + i) * 1.5, 0, Math.PI * 2);
+    ctx.arc(x, y, 3 + Math.sin(frame * 0.08 + i) * 2, 0, Math.PI * 2);
     ctx.fill();
   }
   ctx.globalAlpha = 1;
 }
 
 function drawTraitFlair(ctx: CanvasRenderingContext2D, t: any, frame: number, element: SlimeElement) {
-  // High rhythm = subtle dance shimmer
+  // High rhythm = dance shimmer
   if (t.rhythm >= 4) {
-    ctx.globalAlpha = 0.08;
-    const shimmer = Math.sin(frame * 0.15) * 20;
+    ctx.globalAlpha = 0.1;
+    const shimmer = Math.sin(frame * 0.15) * 22;
     const grad = ctx.createLinearGradient(shimmer - 15, -30, shimmer + 15, 30);
     grad.addColorStop(0, 'rgba(255,255,255,0)');
-    grad.addColorStop(0.5, 'rgba(255,255,255,0.5)');
+    grad.addColorStop(0.5, 'rgba(255,255,255,0.6)');
     grad.addColorStop(1, 'rgba(255,255,255,0)');
     ctx.fillStyle = grad;
     ctx.beginPath(); ctx.arc(0, 0, 38, 0, Math.PI * 2); ctx.fill();
     ctx.globalAlpha = 1;
   }
 
-  // Void aura = glitch flicker
+  // Void aura = glitch flicker — MORE NOTICEABLE
   if (t.aura === 4) {
-    if (frame % 30 < 2) {
-      ctx.globalAlpha = 0.3;
+    if (frame % 25 < 3) {
+      ctx.globalAlpha = 0.35;
       ctx.fillStyle = '#ff00ff';
-      ctx.fillRect(-35, -2 + Math.random() * 20, 70, 2);
+      ctx.fillRect(-35, -2 + Math.random() * 20, 70, 2.5);
+      ctx.fillStyle = '#00ffff';
+      ctx.fillRect(-32, 5 + Math.random() * 15, 64, 1.5);
       ctx.globalAlpha = 1;
     }
   }
 
-  // Jelly model: bubble pops + drips
+  // Jelly model: bubble pops + drips — more fluid
   if (t.model === 2) {
-    // Drip from bottom
-    ctx.globalAlpha = 0.3;
+    ctx.globalAlpha = 0.35;
     ctx.fillStyle = COLOR_PALETTE[t.color1] || '#7FBFFF';
-    const dripPhase = (frame * 0.4) % 30;
-    if (dripPhase < 20) {
+    const dripPhase = (frame * 0.45) % 30;
+    if (dripPhase < 22) {
       ctx.beginPath();
-      ctx.ellipse(5, 32 + dripPhase, 2, 3 + dripPhase * 0.2, 0, 0, Math.PI * 2);
+      ctx.ellipse(5, 32 + dripPhase, 2.5, 3.5 + dripPhase * 0.25, 0, 0, Math.PI * 2);
       ctx.fill();
     }
-    // Bubbles rising
-    for (let i = 0; i < 3; i++) {
-      const bubbleY = 30 - ((frame * 0.3 + i * 30) % 50);
-      const bubbleX = -8 + i * 8 + Math.sin(frame * 0.05 + i) * 3;
-      const life = 1 - ((frame * 0.3 + i * 30) % 50) / 50;
-      ctx.globalAlpha = life * 0.35;
-      ctx.strokeStyle = 'rgba(200,230,255,0.6)';
-      ctx.lineWidth = 0.5;
-      ctx.beginPath(); ctx.arc(bubbleX, bubbleY, 2 + life * 2, 0, Math.PI * 2); ctx.stroke();
-      // Bubble highlight
+    // More bubbles rising
+    for (let i = 0; i < 4; i++) {
+      const bubbleY = 30 - ((frame * 0.35 + i * 25) % 55);
+      const bubbleX = -10 + i * 7 + Math.sin(frame * 0.06 + i) * 4;
+      const life = 1 - ((frame * 0.35 + i * 25) % 55) / 55;
+      ctx.globalAlpha = life * 0.4;
+      ctx.strokeStyle = 'rgba(200,230,255,0.7)';
+      ctx.lineWidth = 0.6;
+      ctx.beginPath(); ctx.arc(bubbleX, bubbleY, 2.5 + life * 2.5, 0, Math.PI * 2); ctx.stroke();
       ctx.fillStyle = '#fff';
-      ctx.globalAlpha = life * 0.2;
-      ctx.beginPath(); ctx.arc(bubbleX - 0.5, bubbleY - 1, 0.8, 0, Math.PI * 2); ctx.fill();
+      ctx.globalAlpha = life * 0.25;
+      ctx.beginPath(); ctx.arc(bubbleX - 0.5, bubbleY - 1, 1, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
   }
 
-  // Blob: occasional happy particle burst (from mouth when burping)
-  if (t.model === 0 && frame % 200 < 3) {
-    ctx.globalAlpha = 0.4;
-    // Sparkle burst
-    for (let i = 0; i < 4; i++) {
+  // Blob: happy particle burst
+  if (t.model === 0 && frame % 180 < 4) {
+    ctx.globalAlpha = 0.45;
+    for (let i = 0; i < 5; i++) {
       const a = Math.random() * Math.PI * 2;
-      const d = 15 + Math.random() * 10;
+      const d = 15 + Math.random() * 12;
       ctx.fillStyle = element === 'cosmic' ? '#FFD700' : '#98FB98';
-      ctx.beginPath(); ctx.arc(Math.cos(a) * d, 8 + Math.sin(a) * d * 0.5, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(Math.cos(a) * d, 8 + Math.sin(a) * d * 0.5, 2, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;
   }
 }
 
-function drawMetallicShader(ctx: CanvasRenderingContext2D, frame: number) {
-  const sweep = (frame * 1.5) % 180 - 40;
-  const grad = ctx.createLinearGradient(sweep - 25, -40, sweep + 25, 40);
+function drawMetallicShader(ctx: CanvasRenderingContext2D, frame: number, stars: number) {
+  const sweep = (frame * 1.8) % 200 - 50;
+  const intensity = stars >= 6 ? 0.35 : 0.25;
+  const grad = ctx.createLinearGradient(sweep - 28, -40, sweep + 28, 40);
   grad.addColorStop(0, 'rgba(255,255,255,0)');
-  grad.addColorStop(0.3, 'rgba(255,248,220,0.12)');
-  grad.addColorStop(0.5, 'rgba(255,215,0,0.3)');
-  grad.addColorStop(0.7, 'rgba(255,248,220,0.12)');
+  grad.addColorStop(0.25, `rgba(255,248,220,${intensity * 0.4})`);
+  grad.addColorStop(0.5, `rgba(255,215,0,${intensity})`);
+  grad.addColorStop(0.75, `rgba(255,248,220,${intensity * 0.4})`);
   grad.addColorStop(1, 'rgba(255,255,255,0)');
   ctx.fillStyle = grad;
   ctx.beginPath();
-  ctx.arc(0, 0, 42, 0, Math.PI * 2);
+  ctx.arc(0, 0, 44, 0, Math.PI * 2);
   ctx.fill();
 }
 
-function drawAuraTrail(ctx: CanvasRenderingContext2D, frame: number) {
-  // Trailing after-images for mythics
-  for (let i = 1; i <= 3; i++) {
-    ctx.globalAlpha = 0.06 / i;
-    ctx.fillStyle = `hsl(${(frame * 3 + i * 40) % 360}, 70%, 60%)`;
+function drawAuraTrail(ctx: CanvasRenderingContext2D, frame: number, stars: number) {
+  const trailCount = stars >= 6 ? 5 : 3;
+  for (let i = 1; i <= trailCount; i++) {
+    ctx.globalAlpha = 0.08 / i;
+    ctx.fillStyle = `hsl(${(frame * 3 + i * 40) % 360}, 75%, 60%)`;
     ctx.beginPath();
-    const off = Math.sin(frame * 0.03 + i) * 4;
+    const off = Math.sin(frame * 0.03 + i) * 5;
     ctx.arc(off * i, i * 2, 38 + i * 2, 0, Math.PI * 2);
     ctx.fill();
   }
@@ -1106,16 +1232,16 @@ function drawAuraTrail(ctx: CanvasRenderingContext2D, frame: number) {
 
 function drawConfetti(ctx: CanvasRenderingContext2D, frame: number, stars: number) {
   const confettiColors = ['#FFD700', '#FF69B4', '#87CEEB', '#98FB98', '#DDA0DD', '#FF6347'];
-  ctx.globalAlpha = 0.55;
-  const count = stars + 2;
+  ctx.globalAlpha = 0.6;
+  const count = stars + 3;
   for (let i = 0; i < count; i++) {
-    const x = Math.sin(frame * 0.025 + i * 2.3) * 58;
-    const y = Math.cos(frame * 0.035 + i * 1.7) * 52;
+    const x = Math.sin(frame * 0.025 + i * 2.3) * 60;
+    const y = Math.cos(frame * 0.035 + i * 1.7) * 55;
     ctx.fillStyle = confettiColors[i % confettiColors.length];
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(frame * 0.04 + i);
-    ctx.fillRect(-2.5, -1, 5, 2);
+    ctx.fillRect(-3, -1, 6, 2);
     ctx.restore();
   }
   ctx.globalAlpha = 1;

@@ -1,13 +1,14 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { breedSlimes } from '@/utils/slimeGenerator';
 import { audioEngine } from '@/utils/audioEngine';
 import { BreedHistory } from './BreedHistory';
 import { DiscoveryPopup } from './DiscoveryPopup';
-import { MODEL_NAMES, ELEMENT_NAMES, RARITY_TIER_COLORS, ELEMENT_ICONS } from '@/data/traitData';
+import { MODEL_NAMES, ELEMENT_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Slime } from '@/types/slime';
 import { Sparkles } from 'lucide-react';
+import { generateBreedPreviews } from '@/utils/breedPreviewGenerator';
 
 export function BreedingPod() {
   const { state, dispatch } = useGameState();
@@ -18,6 +19,20 @@ export function BreedingPod() {
 
   const slot1Slime = state.slimes.find(s => s.id === state.breedSlot1);
   const slot2Slime = state.slimes.find(s => s.id === state.breedSlot2);
+
+  // ★ POSSIBLE OFFSPRING PREVIEWS
+  const possibleOffspring = useMemo(() => {
+    if (!slot1Slime || !slot2Slime) return [];
+    return generateBreedPreviews(slot1Slime, slot2Slime, 6);
+  }, [slot1Slime, slot2Slime]);
+
+  const getElementNames = (s: Slime) => {
+    const elems = s.elements || [s.element];
+    return elems.map((e: string) => {
+      const name = ELEMENT_NAMES[e as keyof typeof ELEMENT_NAMES];
+      return name ? name.split(' ').slice(1).join(' ') : e;
+    }).join(', ');
+  };
 
   const handleDrop = useCallback((slot: 1 | 2) => (e: React.DragEvent) => {
     e.preventDefault();
@@ -57,10 +72,8 @@ export function BreedingPod() {
 
       if (state.mutationJuiceActive) dispatch({ type: 'DEACTIVATE_MUTATION_JUICE' });
 
-      // Check for discoveries
       let discoveryTriggered = false;
 
-      // New PB rarity
       if (child.rarityScore > state.bestRarity && !discoveryTriggered) {
         setDiscovery({ slime: child, reason: `New personal best rarity: ${child.rarityScore} points!` });
         dispatch({ type: 'ADD_GOO', amount: 500 });
@@ -68,7 +81,6 @@ export function BreedingPod() {
         discoveryTriggered = true;
       }
 
-      // First model discovery
       if (!state.discoveredModels.includes(child.traits.model)) {
         dispatch({ type: 'ADD_DISCOVERED_MODEL', model: child.traits.model });
         if (!discoveryTriggered) {
@@ -79,7 +91,6 @@ export function BreedingPod() {
         }
       }
 
-      // First element discovery
       if (!state.discoveredElements.includes(child.element)) {
         dispatch({ type: 'ADD_DISCOVERED_ELEMENT', element: child.element });
         if (!discoveryTriggered) {
@@ -90,7 +101,6 @@ export function BreedingPod() {
         }
       }
 
-      // Achievements
       if (state.totalBreeds === 0 && !state.achievements.find(a => a.id === 'first_fusion')?.unlocked) {
         dispatch({ type: 'UNLOCK_ACHIEVEMENT', id: 'first_fusion' });
         dispatch({ type: 'ADD_GOO', amount: 50 });
@@ -142,11 +152,10 @@ export function BreedingPod() {
 
       {/* Pond visual container */}
       <div className="relative">
-        {/* Pond background */}
         <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-sm" />
 
         <div className="flex items-center gap-4 relative">
-          {/* Slot 1 - Pond */}
+          {/* Slot 1 */}
           <div
             className={`w-28 h-28 rounded-2xl flex items-center justify-center transition-all relative overflow-hidden ${
               slot1Slime ? 'border-4 border-primary/60 bg-primary/5' : 'border-4 border-dashed border-muted-foreground/30 bg-muted/10'
@@ -155,7 +164,6 @@ export function BreedingPod() {
             onDrop={handleDrop(1)}
             onClick={() => handleSlotClick(1)}
           >
-            {/* Ripple effect */}
             <div className="absolute inset-0 opacity-20">
               <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-primary/20 to-transparent" />
             </div>
@@ -176,7 +184,7 @@ export function BreedingPod() {
             )}
           </div>
 
-          {/* Slot 2 - Pond */}
+          {/* Slot 2 */}
           <div
             className={`w-28 h-28 rounded-2xl flex items-center justify-center transition-all relative overflow-hidden ${
               slot2Slime ? 'border-4 border-primary/60 bg-primary/5' : 'border-4 border-dashed border-muted-foreground/30 bg-muted/10'
@@ -210,6 +218,28 @@ export function BreedingPod() {
         {breeding ? 'Merging...' : 'BREED!'}
       </button>
 
+      {/* ★ POSSIBLE OFFSPRING PREVIEW */}
+      {possibleOffspring.length > 0 && !newSlime && !breeding && (
+        <div className="w-full mt-2">
+          <h3 className="text-xs text-muted-foreground mb-2 text-center" style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '8px' }}>
+            Possible Offspring
+          </h3>
+          <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
+            {possibleOffspring.map((preview, i) => (
+              <div key={i} className="flex flex-col items-center flex-shrink-0 p-1.5 rounded-lg bg-muted/20 border border-border/30">
+                <SlimeCanvas slime={preview} size={48} animated />
+                <span className="text-[8px] font-bold mt-0.5" style={{ color: RARITY_TIER_COLORS[preview.rarityTier] }}>
+                  {preview.rarityTier}
+                </span>
+                <span className="text-[7px] text-muted-foreground text-center leading-tight max-w-[56px] truncate">
+                  {getElementNames(preview)}
+                </span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* New slime reveal */}
       {newSlime && (() => {
         const child = state.slimes.find(s => s.id === newSlime);
@@ -223,10 +253,10 @@ export function BreedingPod() {
             </div>
             <p className="text-sm text-primary font-bold mt-1">{child.name}</p>
             <p className="text-[10px] font-bold" style={{ color: RARITY_TIER_COLORS[child.rarityTier] }}>
-              {child.rarityTier} {'★'.repeat(Math.min(child.rarityStars, 7))}
+              {child.rarityTier}
             </p>
             <p className="text-xs text-muted-foreground">
-              {(child.elements || [child.element]).map(e => ELEMENT_ICONS[e]).join(' ')} born!
+              {getElementNames(child)}
             </p>
           </div>
         ) : null;
