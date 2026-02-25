@@ -1,7 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
-import { ELEMENT_ICONS, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
+import { ELEMENT_NAMES, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 
 const PER_PAGE = 12;
@@ -47,9 +47,17 @@ export function SlimeGallery() {
 
   const rarityGlowStyle = (tier: string) => {
     const color = RARITY_TIER_COLORS[tier as keyof typeof RARITY_TIER_COLORS] || '#A0A0A0';
-    const stars = { Common: 0, Uncommon: 0, Rare: 4, Epic: 6, Legendary: 8, Mythic: 10, Supreme: 14 }[tier] || 0;
-    if (stars < 4) return {};
-    return { boxShadow: `0 0 ${stars}px ${color}50` };
+    const glowSize = { Common: 0, Uncommon: 0, Rare: 4, Epic: 6, Legendary: 8, Mythic: 10, Supreme: 14 }[tier] || 0;
+    if (glowSize < 4) return {};
+    return { boxShadow: `0 0 ${glowSize}px ${color}50` };
+  };
+
+  const getElementNames = (slime: any) => {
+    const elems = slime.elements || [slime.element];
+    return elems.map((e: string) => {
+      const name = ELEMENT_NAMES[e as keyof typeof ELEMENT_NAMES];
+      return name ? name.split(' ').slice(1).join(' ') : e;
+    }).join(', ');
   };
 
   return (
@@ -75,9 +83,9 @@ export function SlimeGallery() {
         onChange={e => setSort(e.target.value as SortMode)}
         className="mb-2 text-xs bg-background/80 border-2 border-input rounded px-1 py-0.5 text-foreground"
       >
-        <option value="rarity">★ Rarity</option>
+        <option value="rarity">Rarity</option>
         <option value="name">A-Z Name</option>
-        <option value="newest">🕐 Newest</option>
+        <option value="newest">Newest</option>
       </select>
 
       <div className="flex-1 overflow-y-auto">
@@ -108,30 +116,24 @@ export function SlimeGallery() {
 
               <SlimeCanvas slime={slime} size={hoveredId === slime.id ? 64 : 52} animated={hoveredId === slime.id} />
 
-              {/* Element icons (multi-element) */}
-              <div className="flex items-center gap-0.5 mt-0.5">
-                {(slime.elements || [slime.element]).slice(0, 3).map((elem, i) => (
-                  <span key={elem + i} className="text-[7px]">{ELEMENT_ICONS[elem]}</span>
-                ))}
-                {(slime.elements?.length || 0) > 3 && <span className="text-[7px] text-muted-foreground">+</span>}
-                <span className="text-[7px] text-muted-foreground">{MODEL_NAMES[slime.traits.model]?.[0]}</span>
-              </div>
-
-              <span className="text-[10px] text-center leading-tight text-foreground truncate w-full">
+              <span className="text-[10px] text-center leading-tight text-foreground truncate w-full mt-0.5">
                 {slime.name.split(' ').pop()}
               </span>
 
-              {/* Rarity tier color-coded stars */}
-              <span className="text-[8px]" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
-                {'★'.repeat(Math.min(slime.rarityStars, 7))}
+              {/* Rarity tier — clean minimal text */}
+              <span className="text-[8px] font-bold" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
+                {slime.rarityTier}
               </span>
 
-              {/* Hover personality preview */}
+              {/* Element list — comma separated */}
+              <span className="text-[7px] text-muted-foreground text-center leading-tight truncate w-full">
+                {getElementNames(slime)}
+              </span>
+
+              {/* Hover tooltip */}
               {hoveredId === slime.id && (
-                <div className="absolute -bottom-8 left-1/2 -translate-x-1/2 text-[7px] text-muted-foreground whitespace-nowrap bg-card/90 px-1.5 py-0.5 rounded border border-border z-30">
-                  <span style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>{slime.rarityTier}</span>
-                  {' '}{slime.traits.model === 0 ? '😊' : slime.traits.model === 1 ? '😤' : '🌊'}
-                  {' '}{(slime.elements || []).length > 1 ? `${slime.elements.length}x Hybrid` : ''}
+                <div className="absolute -bottom-6 left-1/2 -translate-x-1/2 text-[7px] text-muted-foreground whitespace-nowrap bg-card/90 px-1.5 py-0.5 rounded border border-border z-30">
+                  {MODEL_NAMES[slime.traits.model]}
                 </div>
               )}
             </div>
