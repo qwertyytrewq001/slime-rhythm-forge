@@ -5,6 +5,7 @@ import { SlimeGallery } from '@/components/game/SlimeGallery';
 import { BreedingPod } from '@/components/game/BreedingPod';
 import { StatsPanel } from '@/components/game/StatsPanel';
 import { ForestBackground } from '@/components/game/ForestBackground';
+import { IslandGrid } from '@/components/game/IslandGrid';
 import { audioEngine } from '@/utils/audioEngine';
 
 function GameLayout() {
@@ -23,7 +24,6 @@ function GameLayout() {
     };
   }, []);
 
-  // Get selected slime's element for background tinting
   const selectedSlime = state.slimes.find(s => s.id === state.selectedSlimeId);
   const elementTint = selectedSlime?.element;
 
@@ -35,17 +35,18 @@ function GameLayout() {
         <TopBar />
         <div className="flex flex-1 overflow-hidden">
           {/* Left: Gallery */}
-          <div className="w-56 md:w-64 flex-shrink-0 overflow-hidden">
+          <div className="w-52 md:w-60 flex-shrink-0 overflow-hidden">
             <SlimeGallery />
           </div>
 
-          {/* Center: Breeding Pod */}
-          <div className="flex-1 overflow-y-auto flex items-start justify-center">
+          {/* Center: Breeding Den + Island */}
+          <div className="flex-1 overflow-y-auto flex flex-col items-center gap-4 py-2">
             <BreedingPod />
+            {state.habitats.length > 0 && <IslandGrid />}
           </div>
 
-          {/* Right: Stats */}
-          <div className="w-56 md:w-72 flex-shrink-0 overflow-hidden">
+          {/* Right: Stats + Shop */}
+          <div className="w-52 md:w-64 flex-shrink-0 overflow-hidden">
             <StatsPanel />
           </div>
         </div>

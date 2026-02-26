@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { Slime } from '@/types/slime';
 import { SlimeCanvas } from './SlimeCanvas';
-import { ELEMENT_ICONS, RARITY_TIER_COLORS } from '@/data/traitData';
+import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 
 interface DiscoveryPopupProps {
   slime: Slime;
@@ -15,7 +15,6 @@ export function DiscoveryPopup({ slime, reason, onClose }: DiscoveryPopupProps) 
 
   useEffect(() => {
     setVisible(true);
-    // Generate confetti
     const particles = Array.from({ length: 30 }, () => ({
       x: 50 + (Math.random() - 0.5) * 20,
       y: 50 + (Math.random() - 0.5) * 20,
@@ -29,14 +28,18 @@ export function DiscoveryPopup({ slime, reason, onClose }: DiscoveryPopupProps) 
     return () => clearTimeout(timer);
   }, [onClose]);
 
+  const getElementNames = () => {
+    const elems = slime.elements || [slime.element];
+    return elems.map(e => ELEMENT_DISPLAY_NAMES[e as keyof typeof ELEMENT_DISPLAY_NAMES] || e).join(', ');
+  };
+
   return (
     <div
       className={`fixed inset-0 z-[200] flex items-center justify-center transition-all duration-500 ${visible ? 'opacity-100' : 'opacity-0'}`}
       onClick={onClose}
       style={{ fontFamily: "'Press Start 2P', cursive" }}
     >
-      {/* Dark overlay with screen shake effect */}
-      <div className="absolute inset-0 bg-black/70 animate-pulse" style={{ animationDuration: '0.1s', animationIterationCount: 4 }} />
+      <div className="absolute inset-0 bg-black/70" />
 
       {/* Confetti */}
       {confetti.map((p, i) => (
@@ -55,9 +58,9 @@ export function DiscoveryPopup({ slime, reason, onClose }: DiscoveryPopupProps) 
       ))}
 
       {/* Main content */}
-      <div className="relative z-10 flex flex-col items-center gap-4 animate-scale-in">
-        <div className="text-accent text-xs md:text-sm tracking-wider animate-pulse">
-          ✦ NEW DISCOVERY UNLOCKED! ✦
+      <div className="relative z-10 flex flex-col items-center gap-3 animate-scale-in">
+        <div className="text-accent text-[9px] tracking-wider animate-pulse">
+          NEW SPECIES UNLOCKED!
         </div>
 
         <div className="relative">
@@ -65,26 +68,28 @@ export function DiscoveryPopup({ slime, reason, onClose }: DiscoveryPopupProps) 
           <SlimeCanvas slime={slime} size={128} animated />
         </div>
 
-        <h2 className="text-primary text-sm md:text-base text-center max-w-xs">
+        <h2 className="text-primary text-xs text-center max-w-xs">
           {slime.name}
         </h2>
 
-        <div className="flex items-center gap-2 text-xs">
-          <span style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
-            {'★'.repeat(Math.min(slime.rarityStars, 7))} {slime.rarityTier}
+        <div className="flex flex-col items-center gap-1">
+          <span className="text-[9px]" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
+            {slime.rarityTier}
           </span>
-          <span>{(slime.elements || [slime.element]).map(e => ELEMENT_ICONS[e]).join(' ')}</span>
+          <span className="text-[8px] text-muted-foreground">
+            {getElementNames()}
+          </span>
         </div>
 
-        <div className="text-muted-foreground text-[8px] md:text-[10px] text-center">
+        <div className="text-muted-foreground text-[8px] text-center">
           {reason}
         </div>
 
-        <div className="text-accent text-[10px] animate-pulse">
-          +500 GOO!
+        <div className="text-accent text-[9px] animate-pulse">
+          +500 GOO
         </div>
 
-        <div className="text-muted-foreground text-[8px] mt-2">
+        <div className="text-muted-foreground text-[7px] mt-2">
           tap to continue
         </div>
       </div>

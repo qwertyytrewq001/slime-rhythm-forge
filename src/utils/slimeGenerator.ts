@@ -32,11 +32,10 @@ function deriveElements(traits: SlimeTraits): SlimeElement[] {
   return elements.slice(0, 4);
 }
 
-function buildSlime(traits: SlimeTraits, parentIds?: [string, string], bonusScore = 0): Slime {
-  const elements = deriveElements(traits);
+function buildSlime(traits: SlimeTraits, parentIds?: [string, string], bonusScore = 0, overrideName?: string, overrideElement?: SlimeElement): Slime {
+  const elements = overrideElement ? [overrideElement] : deriveElements(traits);
   const primary = elements[0];
   const baseScore = calculateRarity(traits, primary);
-  // Multi-element bonus
   const multiBonus = (elements.length - 1) * 8;
   const finalScore = baseScore + bonusScore + multiBonus;
   const tier = getRarityTier(finalScore);
@@ -44,7 +43,7 @@ function buildSlime(traits: SlimeTraits, parentIds?: [string, string], bonusScor
 
   return {
     id: randomId(),
-    name: generateSlimeName(traits, stars, elements),
+    name: overrideName || generateSlimeName(traits, stars, elements),
     traits,
     elements,
     element: primary,
@@ -85,12 +84,52 @@ export function createRandomSlime(basicOnly = false): Slime {
   return buildSlime(traits);
 }
 
+// Start with 1 Goo Slime (Common, nature element, basic stats)
 export function createStarterSlimes(): Slime[] {
-  const green: SlimeTraits = { shape: 0, color1: 0, color2: 5, eyes: 0, mouth: 0, spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0, rhythm: 1, accessory: 0, model: 0 };
-  const blue: SlimeTraits = { shape: 1, color1: 1, color2: 9, eyes: 1, mouth: 0, spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0, rhythm: 0, accessory: 0, model: 1 };
-  const pink: SlimeTraits = { shape: 8, color1: 2, color2: 8, eyes: 3, mouth: 4, spikes: 0, pattern: 0, glow: 0, size: 0.8, aura: 0, rhythm: 2, accessory: 0, model: 2 };
+  const gooTraits: SlimeTraits = {
+    shape: 0, color1: 0, color2: 5, eyes: 0, mouth: 0,
+    spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0,
+    rhythm: 1, accessory: 0, model: 0,
+  };
+  return [buildSlime(gooTraits, undefined, 0, 'Goo Slime')];
+}
 
-  return [green, blue, pink].map(traits => buildSlime(traits));
+// Create a slime with a specific element (for starter eggs in shop)
+export function createElementSlime(element: SlimeElement): Slime {
+  // Map elements to color ranges that will derive that element
+  const elementColorMap: Partial<Record<SlimeElement, { color1: number; shape: number }>> = {
+    fire:     { color1: 3, shape: 2 },
+    water:    { color1: 12, shape: 1 },
+    plant:    { color1: 0, shape: 9 },
+    earth:    { color1: 3, shape: 3 },
+    ice:      { color1: 1, shape: 14 },
+    wind:     { color1: 14, shape: 10 },
+    electric: { color1: 10, shape: 0 },
+    void:     { color1: 4, shape: 13 },
+    cosmic:   { color1: 4, shape: 4 },
+    light:    { color1: 15, shape: 5 },
+    shadow:   { color1: 4, shape: 13 },
+  };
+
+  const mapping = elementColorMap[element] || { color1: 0, shape: 0 };
+
+  const traits: SlimeTraits = {
+    shape: mapping.shape,
+    color1: mapping.color1,
+    color2: randInt(0, 19),
+    eyes: randInt(0, 3),
+    mouth: randInt(0, 3),
+    spikes: randInt(0, 2),
+    pattern: 0,
+    glow: 0,
+    size: 1.0,
+    aura: 0,
+    rhythm: randInt(0, 2),
+    accessory: 0,
+    model: 0,
+  };
+
+  return buildSlime(traits, undefined, 0, undefined, element);
 }
 
 export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = false): Slime {
@@ -143,32 +182,27 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
     }
   }
 
-  // Element combo bonus from parents (defensive: fallback to [element] if elements missing)
+  // Element combo bonus from parents
   const p1Elems = parent1.elements || (parent1.element ? [parent1.element] : ['nature' as SlimeElement]);
   const p2Elems = parent2.elements || (parent2.element ? [parent2.element] : ['nature' as SlimeElement]);
   const allParentElements = [...new Set([...p1Elems, ...p2Elems])];
   let comboBonus = 0;
 
-  // Check breeding combos for hybrid element injection
   for (const e1 of p1Elems) {
     for (const e2 of p2Elems) {
       const key1 = `${e1}+${e2}`;
       const key2 = `${e2}+${e1}`;
       comboBonus += ELEMENT_COMBO_BONUS[key1] || ELEMENT_COMBO_BONUS[key2] || 0;
 
-      // Chance to inject combo element into child traits
       const comboResult = BREEDING_COMBOS[key1] || BREEDING_COMBOS[key2];
       if (comboResult && Math.random() < 0.4) {
-        // Bias traits to produce the combo element
         const targetElem = comboResult[randInt(0, comboResult.length - 1)];
         biasTraitsForElement(traits, targetElem);
       }
     }
   }
 
-  // Multi-element parents increase child complexity
   if (allParentElements.length >= 3 && Math.random() < 0.3) {
-    // Boost glow/aura to trigger secondary element derivation
     traits.glow = Math.min(5, traits.glow + randInt(1, 2));
     traits.aura = Math.min(4, traits.aura + 1);
   }
@@ -177,7 +211,6 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
 }
 
 function biasTraitsForElement(traits: SlimeTraits, element: SlimeElement) {
-  // Nudge color/shape toward producing the target element
   const colorMap: Partial<Record<SlimeElement, number[]>> = {
     fire: [3, 6, 11], water: [12, 17], plant: [0, 7], earth: [3],
     ice: [1, 5, 13], cosmic: [4, 9, 19], arcane: [8, 16],
@@ -188,7 +221,6 @@ function biasTraitsForElement(traits: SlimeTraits, element: SlimeElement) {
     traits.color1 = colors[randInt(0, colors.length - 1)];
   }
 
-  // Boost secondary element traits
   const auraMap: Partial<Record<SlimeElement, number>> = {
     void: 4, ice: 3, fire: 2,
   };

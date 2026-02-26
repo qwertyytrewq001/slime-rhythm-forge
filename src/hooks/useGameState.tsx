@@ -1,37 +1,56 @@
-import React, { createContext, useContext, useReducer, useEffect, useRef } from 'react';
-import { GameState, GameAction, Achievement, SlimeElement } from '@/types/slime';
+import React, { createContext, useContext, useReducer, useEffect, useRef, useMemo } from 'react';
+import { GameState, GameAction, Achievement, SlimeElement, Habitat } from '@/types/slime';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
-import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS } from '@/data/traitData';
+import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'first_fusion', name: 'First Fusion', description: 'Breed your first slime', reward: '50 goo', rewardAmount: 50, unlocked: false },
-  { id: 'rare_find', name: 'Rare Find', description: 'Obtain a 3★+ slime', reward: 'Free Mutation Juice', rewardAmount: 0, unlocked: false },
+  { id: 'rare_find', name: 'Rare Find', description: 'Obtain a Rare+ slime', reward: 'Free Mutation Juice', rewardAmount: 0, unlocked: false },
   { id: 'slime_hoarder', name: 'Slime Hoarder', description: 'Collect 20 slimes', reward: '200 goo', rewardAmount: 200, unlocked: false },
-  { id: 'mythic_hunter', name: 'Mythic Hunter', description: 'Obtain a 5★ Mythic slime', reward: '500 goo + Crown', rewardAmount: 500, unlocked: false },
+  { id: 'mythic_hunter', name: 'Legendary Hunter', description: 'Obtain a Legendary slime', reward: '500 goo + Crown', rewardAmount: 500, unlocked: false },
   { id: 'rhythm_master', name: 'Rhythm Master', description: 'Hit 10 perfect rhythm taps in a row', reward: '100 goo', rewardAmount: 100, unlocked: false },
 ];
+
+function migrateRarityTier(tier: string): string {
+  if (tier === 'Mythic') return 'Divine';
+  if (tier === 'Supreme') return 'Ancient';
+  return tier;
+}
 
 function migrateSlime(s: any) {
   const traits = { ...s.traits, model: s.traits.model ?? 0 };
   const primary: SlimeElement = s.element ?? deriveElement(traits.color1, traits.shape);
-  // Derive multi-element array if missing
   const secondary = deriveSecondaryElement(traits.spikes, traits.pattern, traits.aura, traits.glow);
   const elements: SlimeElement[] = [primary];
   if (secondary && secondary !== primary) elements.push(secondary);
   const score = s.rarityScore ?? 0;
-  const tier = getRarityTier(score);
-  const stars = Math.min(7, RARITY_TIER_STARS[tier]);
+  const tier = migrateRarityTier(s.rarityTier ?? getRarityTier(score));
+  const stars = Math.min(7, RARITY_TIER_STARS[tier] ?? 1);
 
   return {
     ...s,
     traits,
     element: primary,
     elements: s.elements ?? elements,
-    rarityTier: s.rarityTier ?? tier,
+    rarityTier: tier,
     rarityStars: stars,
   };
+}
+
+function randomId(): string {
+  return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+}
+
+function findNextGridSlot(habitats: Habitat[]): { x: number; y: number } {
+  const occupied = new Set(habitats.map(h => `${h.gridX},${h.gridY}`));
+  for (let y = 0; y < 4; y++) {
+    for (let x = 0; x < 4; x++) {
+      if (!occupied.has(`${x},${y}`)) return { x, y };
+    }
+  }
+  return { x: 0, y: 0 }; // Grid full, stack
 }
 
 function createInitialState(): GameState {
@@ -53,6 +72,8 @@ function createInitialState(): GameState {
       bestRarity: saved.bestRarity ?? 0,
       discoveredModels: saved.discoveredModels ?? [],
       discoveredElements: saved.discoveredElements ?? [],
+      habitats: saved.habitats ?? [],
+      happiness: saved.happiness ?? {},
     };
   }
   return {
@@ -70,6 +91,8 @@ function createInitialState(): GameState {
     bestRarity: 0,
     discoveredModels: [0],
     discoveredElements: [],
+    habitats: [],
+    happiness: {},
   };
 }
 
@@ -151,6 +174,47 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       });
       return { ...state, slimes };
     }
+    case 'BUY_HABITAT': {
+      const slot = findNextGridSlot(state.habitats);
+      const newHabitat: Habitat = {
+        id: randomId(),
+        element: action.element,
+        gridX: slot.x,
+        gridY: slot.y,
+        assignedSlimeIds: [],
+        capacity: 2,
+      };
+      return { ...state, habitats: [...state.habitats, newHabitat] };
+    }
+    case 'ASSIGN_SLIME_TO_HABITAT': {
+      // Remove slime from any other habitat first
+      const habitats = state.habitats.map(h => ({
+        ...h,
+        assignedSlimeIds: h.assignedSlimeIds.filter(id => id !== action.slimeId),
+      })).map(h => {
+        if (h.id === action.habitatId && h.assignedSlimeIds.length < h.capacity) {
+          return { ...h, assignedSlimeIds: [...h.assignedSlimeIds, action.slimeId] };
+        }
+        return h;
+      });
+      return { ...state, habitats };
+    }
+    case 'REMOVE_SLIME_FROM_HABITAT': {
+      const habitats = state.habitats.map(h => {
+        if (h.id === action.habitatId) {
+          return { ...h, assignedSlimeIds: h.assignedSlimeIds.filter(id => id !== action.slimeId) };
+        }
+        return h;
+      });
+      return { ...state, habitats };
+    }
+    case 'FEED_SLIME': {
+      const current = state.happiness[action.slimeId] || 0;
+      return {
+        ...state,
+        happiness: { ...state.happiness, [action.slimeId]: Math.min(100, current + 20) },
+      };
+    }
     default:
       return state;
   }
@@ -159,6 +223,7 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 interface GameContextType {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
+  playerLevel: number;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
@@ -166,6 +231,11 @@ const GameContext = createContext<GameContextType | null>(null);
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+
+  const playerLevel = useMemo(() =>
+    getPlayerLevel(state.totalBreeds, state.slimes.length),
+    [state.totalBreeds, state.slimes.length]
+  );
 
   useEffect(() => {
     if (saveTimer.current) clearTimeout(saveTimer.current);
@@ -175,18 +245,38 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      const gooPerTick = state.slimes.reduce((sum, s) => sum + s.rarityScore * 0.1, 0) / 10;
+      // Base goo from slimes
+      let gooPerTick = state.slimes.reduce((sum, s) => sum + s.rarityScore * 0.1, 0) / 10;
+
+      // Habitat bonus: element-matched slimes produce 2x
+      for (const habitat of state.habitats) {
+        for (const slimeId of habitat.assignedSlimeIds) {
+          const slime = state.slimes.find(s => s.id === slimeId);
+          if (slime && slime.elements.includes(habitat.element)) {
+            gooPerTick += slime.rarityScore * 0.1 / 10; // Double their contribution
+          }
+        }
+      }
+
+      // Happiness bonus
+      for (const [slimeId, happiness] of Object.entries(state.happiness)) {
+        if (happiness > 50) {
+          const slime = state.slimes.find(s => s.id === slimeId);
+          if (slime) gooPerTick += (happiness / 100) * slime.rarityScore * 0.05 / 10;
+        }
+      }
+
       if (gooPerTick > 0) dispatch({ type: 'ADD_GOO', amount: gooPerTick });
     }, 100);
     return () => clearInterval(interval);
-  }, [state.slimes]);
+  }, [state.slimes, state.habitats, state.happiness]);
 
   useEffect(() => {
     if (state.muted !== audioEngine.muted) audioEngine.toggleMute();
   }, [state.muted]);
 
   return (
-    <GameContext.Provider value={{ state, dispatch }}>
+    <GameContext.Provider value={{ state, dispatch, playerLevel }}>
       {children}
     </GameContext.Provider>
   );

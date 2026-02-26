@@ -22,7 +22,7 @@ export type SlimeElement =
   | 'nature' | 'arcane' | 'divine';
 
 // Rarity tiers (DML-inspired scaling)
-export type RarityTier = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Mythic' | 'Supreme';
+export type RarityTier = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Divine' | 'Ancient';
 
 export interface Slime {
   id: string;
@@ -36,6 +36,15 @@ export interface Slime {
   createdAt: number;
   parentIds?: [string, string];
   isNew?: boolean;
+}
+
+export interface Habitat {
+  id: string;
+  element: SlimeElement;
+  gridX: number;
+  gridY: number;
+  assignedSlimeIds: string[];
+  capacity: number;
 }
 
 export interface BreedResult {
@@ -78,6 +87,8 @@ export interface GameState {
   bestRarity: number;
   discoveredModels: number[];
   discoveredElements: string[];
+  habitats: Habitat[];
+  happiness: Record<string, number>;
 }
 
 export type GameAction =
@@ -100,4 +111,8 @@ export type GameAction =
   | { type: 'SET_BEST_RARITY'; score: number }
   | { type: 'ADD_DISCOVERED_MODEL'; model: number }
   | { type: 'ADD_DISCOVERED_ELEMENT'; element: string }
-  | { type: 'CLEAR_NEW_BADGE'; slimeId: string };
+  | { type: 'CLEAR_NEW_BADGE'; slimeId: string }
+  | { type: 'BUY_HABITAT'; element: SlimeElement }
+  | { type: 'ASSIGN_SLIME_TO_HABITAT'; habitatId: string; slimeId: string }
+  | { type: 'REMOVE_SLIME_FROM_HABITAT'; habitatId: string; slimeId: string }
+  | { type: 'FEED_SLIME'; slimeId: string };
