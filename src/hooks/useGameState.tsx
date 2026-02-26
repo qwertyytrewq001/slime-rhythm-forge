@@ -20,7 +20,25 @@ function migrateRarityTier(tier: string): string {
 }
 
 function migrateSlime(s: any) {
-  const traits = { ...s.traits, model: s.traits.model ?? 0 };
+  if (!s || typeof s !== 'object') return s;
+
+  const rawTraits = s.traits ?? {};
+  const traits = {
+    shape: rawTraits.shape ?? 0,
+    color1: rawTraits.color1 ?? 0,
+    color2: rawTraits.color2 ?? rawTraits.color1 ?? 0,
+    eyes: rawTraits.eyes ?? 0,
+    mouth: rawTraits.mouth ?? 0,
+    spikes: rawTraits.spikes ?? 0,
+    pattern: rawTraits.pattern ?? 0,
+    glow: rawTraits.glow ?? 0,
+    size: rawTraits.size ?? 1.0,
+    aura: rawTraits.aura ?? 0,
+    rhythm: rawTraits.rhythm ?? 0,
+    accessory: rawTraits.accessory ?? 0,
+    model: rawTraits.model ?? 0,
+  };
+
   const primary: SlimeElement = s.element ?? deriveElement(traits.color1, traits.shape);
   const secondary = deriveSecondaryElement(traits.spikes, traits.pattern, traits.aura, traits.glow);
   const elements: SlimeElement[] = [primary];
