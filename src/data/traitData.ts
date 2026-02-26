@@ -39,6 +39,10 @@ export const PATTERN_NAMES = [
 export const GLOW_NAMES = ['None', 'Soft', 'Medium', 'Bright', 'Intense', 'Rainbow'];
 export const AURA_NAMES = ['None', 'Sparkle', 'Flame', 'Frost', 'Quantum'];
 export const MODEL_NAMES = ['Blob', 'Spiky', 'Jelly'];
+export const ACCESSORY_NAMES = [
+  'None', 'Hat', 'Crown', 'Bow', 'Glasses',
+  'Wings', 'Horns', 'Halo', 'Scarf', 'Flower', 'Monocle',
+];
 
 // ===== 18 ELEMENTS (Dragon Mania Legends inspired) =====
 
@@ -56,6 +60,14 @@ export const ELEMENT_NAMES: Record<SlimeElement, string> = {
   shadow: '🌑 Shadow',   cosmic: '🌌 Cosmic',  void: '🕳️ Void',
   toxic: '☠️ Toxic',     crystal: '💎 Crystal', lava: '🌋 Lava',
   nature: '🌿 Nature',   arcane: '🔮 Arcane',  divine: '👼 Divine',
+};
+
+// Clean display names without emojis
+export const ELEMENT_DISPLAY_NAMES: Record<SlimeElement, string> = {
+  fire: 'Fire', water: 'Water', plant: 'Plant', earth: 'Earth', wind: 'Wind',
+  ice: 'Ice', electric: 'Electric', metal: 'Metal', light: 'Light', shadow: 'Shadow',
+  cosmic: 'Cosmic', void: 'Void', toxic: 'Toxic', crystal: 'Crystal', lava: 'Lava',
+  nature: 'Nature', arcane: 'Arcane', divine: 'Divine',
 };
 
 export const ELEMENT_ICONS: Record<SlimeElement, string> = {
@@ -117,7 +129,7 @@ export const ELEMENT_MODEL_FEATURES: Record<SlimeElement, { blob: string; spiky:
   divine:   { blob: 'halo-born', spiky: 'seraph wings', jelly: 'grace body' },
 };
 
-// Breeding combo results: parent elements → possible hybrid elements
+// Breeding combo results
 export const BREEDING_COMBOS: Record<string, SlimeElement[]> = {
   'fire+water': ['lava'],
   'fire+ice': ['crystal'],
@@ -165,10 +177,10 @@ export const ELEMENT_COMBO_BONUS: Record<string, number> = {
   'metal+crystal': 12,  'wind+electric': 10,
 };
 
-// Rarity tier thresholds
+// Rarity tier thresholds — renamed Mythic→Divine, Supreme→Ancient
 export function getRarityTier(score: number): RarityTier {
-  if (score >= 80) return 'Supreme';
-  if (score >= 60) return 'Mythic';
+  if (score >= 80) return 'Ancient';
+  if (score >= 60) return 'Divine';
   if (score >= 45) return 'Legendary';
   if (score >= 30) return 'Epic';
   if (score >= 18) return 'Rare';
@@ -176,24 +188,80 @@ export function getRarityTier(score: number): RarityTier {
   return 'Common';
 }
 
-export const RARITY_TIER_COLORS: Record<RarityTier, string> = {
+export const RARITY_TIER_COLORS: Record<string, string> = {
   Common: '#A0A0A0',
   Uncommon: '#4ECDC4',
   Rare: '#4169E1',
   Epic: '#9B59B6',
   Legendary: '#FFD700',
+  Divine: '#FF4500',
+  Ancient: '#FF69B4',
+  // Legacy compat
   Mythic: '#FF4500',
   Supreme: '#FF69B4',
 };
 
-export const RARITY_TIER_STARS: Record<RarityTier, number> = {
-  Common: 1, Uncommon: 2, Rare: 3, Epic: 4, Legendary: 5, Mythic: 6, Supreme: 7,
+export const RARITY_TIER_STARS: Record<string, number> = {
+  Common: 1, Uncommon: 2, Rare: 3, Epic: 4, Legendary: 5, Divine: 6, Ancient: 7,
+  Mythic: 6, Supreme: 7,
 };
 
-export const ACCESSORY_NAMES = [
-  'None', 'Hat', 'Crown', 'Bow', 'Glasses',
-  'Wings', 'Horns', 'Halo', 'Scarf', 'Flower', 'Monocle',
-];
+// ===== PROGRESSIVE ELEMENT UNLOCKING =====
+
+export const ELEMENT_TIERS: Record<number, SlimeElement[]> = {
+  1: ['fire', 'water', 'plant', 'earth'],
+  2: ['ice', 'wind', 'electric'],
+  3: ['void', 'cosmic', 'light', 'shadow'],
+};
+
+export function getPlayerLevel(totalBreeds: number, slimeCount: number): number {
+  return Math.floor((totalBreeds * 2 + slimeCount) / 5) + 1;
+}
+
+export function getUnlockedElements(level: number): SlimeElement[] {
+  const elements: SlimeElement[] = [];
+  if (level >= 1) elements.push(...ELEMENT_TIERS[1]);
+  if (level >= 6) elements.push(...ELEMENT_TIERS[2]);
+  if (level >= 11) elements.push(...ELEMENT_TIERS[3]);
+  return elements;
+}
+
+export function getElementTierForLevel(level: number): number {
+  if (level >= 11) return 3;
+  if (level >= 6) return 2;
+  return 1;
+}
+
+// Habitat costs per element
+export const HABITAT_COSTS: Record<SlimeElement, number> = {
+  fire: 100, water: 100, plant: 100, earth: 100,
+  ice: 200, wind: 200, electric: 200,
+  void: 400, cosmic: 400, light: 400, shadow: 400,
+  metal: 250, toxic: 250, crystal: 300, lava: 300,
+  nature: 150, arcane: 350, divine: 500,
+};
+
+// Habitat visual themes
+export const HABITAT_THEMES: Record<SlimeElement, { bg: string; accent: string; desc: string }> = {
+  fire:     { bg: '#3D1408', accent: '#FF4500', desc: 'Volcanic nest with lava cracks' },
+  water:    { bg: '#082038', accent: '#4169E1', desc: 'Crystal blue pool with ripples' },
+  plant:    { bg: '#0A2810', accent: '#32CD32', desc: 'Vine-covered floral dome' },
+  earth:    { bg: '#2A1A08', accent: '#A0522D', desc: 'Rocky cavern with crystals' },
+  ice:      { bg: '#102838', accent: '#87CEEB', desc: 'Shimmering ice cave' },
+  wind:     { bg: '#1A2838', accent: '#B0C4DE', desc: 'Floating cloud platform' },
+  electric: { bg: '#282008', accent: '#FFD700', desc: 'Tesla coil chamber' },
+  metal:    { bg: '#1A1A1A', accent: '#C0C0C0', desc: 'Forge and anvil pit' },
+  light:    { bg: '#2A2810', accent: '#FFFACD', desc: 'Sunlit crystal garden' },
+  shadow:   { bg: '#0A0A1A', accent: '#483D8B', desc: 'Dark mist hollow' },
+  cosmic:   { bg: '#100A28', accent: '#9B59B6', desc: 'Starfield observatory' },
+  void:     { bg: '#050508', accent: '#2D1B69', desc: 'Reality rift chamber' },
+  toxic:    { bg: '#0A1A08', accent: '#7FFF00', desc: 'Bubbling acid swamp' },
+  crystal:  { bg: '#1A0A28', accent: '#DA70D6', desc: 'Prism geode cavern' },
+  lava:     { bg: '#280808', accent: '#FF0000', desc: 'Molten core pit' },
+  nature:   { bg: '#0A2018', accent: '#3CB371', desc: 'Enchanted grove' },
+  arcane:   { bg: '#140A28', accent: '#8A2BE2', desc: 'Rune circle sanctum' },
+  divine:   { bg: '#28280A', accent: '#FFD700', desc: 'Celestial shrine' },
+};
 
 // Rarity weights
 export const TRAIT_RARITY_WEIGHTS: Record<string, number[]> = {

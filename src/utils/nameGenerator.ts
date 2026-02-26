@@ -1,71 +1,109 @@
 import { SlimeTraits, SlimeElement } from '@/types/slime';
-import { NAME_ADJECTIVES, NAME_DESCRIPTORS, NAME_NOUNS, MODEL_NAME_PREFIX, RARITY_PREFIXES, RARITY_SUFFIXES, ELEMENT_NAME_FRAGMENTS } from '@/data/traitData';
+import { ELEMENT_NAME_FRAGMENTS } from '@/data/traitData';
 
-export function generateSlimeName(traits: SlimeTraits, stars: number = 1, elements: SlimeElement[] = []): string {
-  const modelNames = MODEL_NAME_PREFIX[traits.model] || MODEL_NAME_PREFIX[0];
-  const modelBase = modelNames[Math.floor(Math.random() * modelNames.length)];
+// DML-style species names: always end with "Slime"
+// Pattern: [Rarity Descriptor] [Element Prefix] [Optional Descriptor] Slime
 
-  // Element fragment from primary element
-  const primaryElem = elements[0];
-  const elemFragments = primaryElem ? ELEMENT_NAME_FRAGMENTS[primaryElem] : [];
-  const elemFragment = elemFragments.length > 0 ? elemFragments[Math.floor(Math.random() * elemFragments.length)] : '';
+const ELEMENT_SPECIES: Record<SlimeElement, string[]> = {
+  fire: ['Blaze', 'Ember', 'Cinder', 'Flame', 'Scorch'],
+  water: ['Aqua', 'Tide', 'Splash', 'Ripple', 'Brook'],
+  plant: ['Vine', 'Sprout', 'Bloom', 'Fern', 'Leaf'],
+  earth: ['Stone', 'Mud', 'Clay', 'Pebble', 'Boulder'],
+  wind: ['Breeze', 'Gale', 'Zephyr', 'Gust', 'Draft'],
+  ice: ['Frost', 'Crystal', 'Flurry', 'Shard', 'Glacier'],
+  electric: ['Volt', 'Spark', 'Surge', 'Bolt', 'Arc'],
+  metal: ['Steel', 'Chrome', 'Iron', 'Tin', 'Alloy'],
+  light: ['Prism', 'Ray', 'Dawn', 'Glow', 'Beacon'],
+  shadow: ['Shade', 'Dusk', 'Gloom', 'Murk', 'Phantom'],
+  cosmic: ['Nebula', 'Nova', 'Pulsar', 'Astral', 'Star'],
+  void: ['Rift', 'Abyss', 'Null', 'Warp', 'Vortex'],
+  toxic: ['Venom', 'Sludge', 'Blight', 'Ooze', 'Acid'],
+  crystal: ['Geode', 'Jewel', 'Opal', 'Facet', 'Gem'],
+  lava: ['Magma', 'Basalt', 'Pumice', 'Caldera', 'Obsidian'],
+  nature: ['Grove', 'Moss', 'Thicket', 'Dew', 'Meadow'],
+  arcane: ['Rune', 'Sigil', 'Mystic', 'Ether', 'Mana'],
+  divine: ['Halo', 'Seraph', 'Celeste', 'Grace', 'Sanctus'],
+};
 
-  // Multi-element fusion name fragment
-  let fusionFragment = '';
-  if (elements.length >= 3) {
-    const secondFrags = ELEMENT_NAME_FRAGMENTS[elements[1]] || [];
-    fusionFragment = secondFrags.length > 0 ? secondFrags[Math.floor(Math.random() * secondFrags.length)] : '';
-  }
+// Hybrid combo names for two elements
+const HYBRID_NAMES: Record<string, string[]> = {
+  'fire+water': ['Steam', 'Geyser', 'Boil'],
+  'fire+earth': ['Magma', 'Volcano', 'Molten'],
+  'fire+wind': ['Smoke', 'Ash', 'Wildfire'],
+  'fire+plant': ['Bonfire', 'Char', 'Scald'],
+  'fire+ice': ['Frost Flame', 'Glacial Ember', 'Thaw'],
+  'fire+shadow': ['Dark Flame', 'Hellfire', 'Soot'],
+  'fire+cosmic': ['Solar', 'Supernova', 'Sunspot'],
+  'water+plant': ['Swamp', 'Lily Pad', 'Marsh'],
+  'water+earth': ['Mud', 'Bog', 'Delta'],
+  'water+ice': ['Sleet', 'Permafrost', 'Polar'],
+  'water+electric': ['Storm', 'Thunder Rain', 'Tempest'],
+  'water+toxic': ['Acid Pool', 'Bile', 'Corrosion'],
+  'ice+wind': ['Blizzard', 'Snowdrift', 'Hailstorm'],
+  'ice+cosmic': ['Comet', 'Aurora', 'Deep Freeze'],
+  'ice+shadow': ['Black Ice', 'Frostbite', 'Void Chill'],
+  'earth+plant': ['Forest', 'Root', 'Terrain'],
+  'earth+metal': ['Ore', 'Mineral', 'Bedrock'],
+  'wind+electric': ['Lightning', 'Thunderbolt', 'Cyclone'],
+  'wind+light': ['Prism Wind', 'Rainbow', 'Skylight'],
+  'light+shadow': ['Twilight', 'Eclipse', 'Duality'],
+  'light+cosmic': ['Starlight', 'Radiance', 'Aurora'],
+  'shadow+void': ['Abyss', 'Oblivion', 'Nether'],
+  'shadow+cosmic': ['Dark Matter', 'Black Hole', 'Entropy'],
+  'cosmic+arcane': ['Astral Rune', 'Starweaver', 'Cosmic Sigil'],
+  'toxic+nature': ['Poison Ivy', 'Blight Bloom', 'Miasma'],
+  'metal+electric': ['Tesla', 'Dynamo', 'Circuit'],
+  'metal+crystal': ['Titanium', 'Diamond Edge', 'Platinum'],
+  'arcane+void': ['Eldritch', 'Rift Walker', 'Planar'],
+  'light+arcane': ['Holy', 'Sanctified', 'Blessed'],
+};
 
-  let adjective = '';
-  if (traits.aura > 0 && NAME_ADJECTIVES.aura[traits.aura]) {
-    adjective = NAME_ADJECTIVES.aura[traits.aura];
-  } else if (traits.glow > 0 && NAME_ADJECTIVES.glow[traits.glow]) {
-    adjective = NAME_ADJECTIVES.glow[traits.glow];
-  } else if (traits.pattern > 0 && NAME_ADJECTIVES.pattern[traits.pattern]) {
-    adjective = NAME_ADJECTIVES.pattern[traits.pattern];
-  }
+// Descriptors for mid-rarity slimes
+const MID_DESCRIPTORS = ['Peak', 'Wisp', 'Core', 'Pulse', 'Drift', 'Wave', 'Mist', 'Dust', 'Gleam', 'Flare'];
 
-  let descriptor = '';
-  if (traits.spikes > 0 && NAME_DESCRIPTORS.spikes[traits.spikes]) {
-    descriptor = NAME_DESCRIPTORS.spikes[traits.spikes];
-  } else if (NAME_DESCRIPTORS.eyes[traits.eyes]) {
-    descriptor = NAME_DESCRIPTORS.eyes[traits.eyes];
-  }
+// High-rarity prefixes
+const RARITY_DESCRIPTORS: Record<number, string[]> = {
+  5: ['Eternal', 'Ancient', 'Mythic', 'Legendary'],
+  6: ['Transcendent', 'Primordial', 'Celestial', 'Omniscient'],
+  7: ['Supreme', 'Absolute', 'Infinite', 'Godlike'],
+};
 
-  const noun = NAME_NOUNS[traits.shape] || 'Slimeus';
-
-  // Build name based on rarity tier with element flavor
-  const clampedStars = Math.min(stars, 7);
-
-  if (clampedStars >= 7) {
-    // Supreme: "[Supreme Prefix] [Elem] [Fusion] [Noun] [Suffix]"
-    const prefix = pickRandom(RARITY_PREFIXES[7]);
-    const suffix = pickRandom(RARITY_SUFFIXES[7]);
-    return [prefix, elemFragment, fusionFragment || adjective, noun, suffix].filter(Boolean).join(' ');
-  } else if (clampedStars >= 6) {
-    const prefix = pickRandom(RARITY_PREFIXES[6]);
-    const suffix = pickRandom(RARITY_SUFFIXES[6]);
-    return [prefix, elemFragment, adjective || descriptor, noun, suffix].filter(Boolean).join(' ');
-  } else if (clampedStars >= 5) {
-    const prefix = pickRandom(RARITY_PREFIXES[5]);
-    const suffix = pickRandom(RARITY_SUFFIXES[5]);
-    return [prefix, elemFragment || adjective, noun, suffix].filter(Boolean).join(' ');
-  } else if (clampedStars >= 4) {
-    const prefix = pickRandom(RARITY_PREFIXES[4]);
-    const suffix = pickRandom(RARITY_SUFFIXES[4]);
-    return [prefix, elemFragment || modelBase, noun, suffix].filter(Boolean).join(' ');
-  } else if (clampedStars >= 3) {
-    const prefix = pickRandom(RARITY_PREFIXES[3]);
-    return [prefix, elemFragment || descriptor, noun].filter(Boolean).join(' ');
-  } else if (clampedStars >= 2) {
-    return [adjective || elemFragment || descriptor, modelBase, noun].filter(Boolean).join(' ');
-  } else {
-    return elemFragment || modelBase || noun;
-  }
+function pickRandom<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
 }
 
-function pickRandom(arr: string[]): string {
-  if (!arr || arr.length === 0) return '';
-  return arr[Math.floor(Math.random() * arr.length)];
+export function generateSlimeName(traits: SlimeTraits, stars: number = 1, elements: SlimeElement[] = []): string {
+  if (elements.length === 0) return 'Goo Slime';
+
+  // Try hybrid name first (2+ elements)
+  if (elements.length >= 2) {
+    const key1 = `${elements[0]}+${elements[1]}`;
+    const key2 = `${elements[1]}+${elements[0]}`;
+    const hybrids = HYBRID_NAMES[key1] || HYBRID_NAMES[key2];
+
+    if (hybrids) {
+      const prefix = pickRandom(hybrids);
+      if (stars >= 5) {
+        const rarityDesc = pickRandom(RARITY_DESCRIPTORS[Math.min(stars, 7)] || RARITY_DESCRIPTORS[5]);
+        return `${rarityDesc} ${prefix} Slime`;
+      }
+      if (stars >= 3 && Math.random() > 0.5) {
+        return `${prefix} ${pickRandom(MID_DESCRIPTORS)} Slime`;
+      }
+      return `${prefix} Slime`;
+    }
+  }
+
+  // Single element name
+  const elemSpecies = ELEMENT_SPECIES[elements[0]] || ['Mystery'];
+  const prefix = pickRandom(elemSpecies);
+
+  if (stars >= 5) {
+    const rarityDesc = pickRandom(RARITY_DESCRIPTORS[Math.min(stars, 7)] || RARITY_DESCRIPTORS[5]);
+    return `${rarityDesc} ${prefix} Slime`;
+  }
+  if (stars >= 3 && Math.random() > 0.4) {
+    return `${prefix} ${pickRandom(MID_DESCRIPTORS)} Slime`;
+  }
+  return `${prefix} Slime`;
 }

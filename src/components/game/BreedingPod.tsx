@@ -5,7 +5,7 @@ import { breedSlimes } from '@/utils/slimeGenerator';
 import { audioEngine } from '@/utils/audioEngine';
 import { BreedHistory } from './BreedHistory';
 import { DiscoveryPopup } from './DiscoveryPopup';
-import { MODEL_NAMES, ELEMENT_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
+import { ELEMENT_DISPLAY_NAMES, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Slime } from '@/types/slime';
 import { Sparkles } from 'lucide-react';
 import { generateBreedPreviews } from '@/utils/breedPreviewGenerator';
@@ -20,7 +20,6 @@ export function BreedingPod() {
   const slot1Slime = state.slimes.find(s => s.id === state.breedSlot1);
   const slot2Slime = state.slimes.find(s => s.id === state.breedSlot2);
 
-  // ★ POSSIBLE OFFSPRING PREVIEWS
   const possibleOffspring = useMemo(() => {
     if (!slot1Slime || !slot2Slime) return [];
     return generateBreedPreviews(slot1Slime, slot2Slime, 6);
@@ -28,10 +27,7 @@ export function BreedingPod() {
 
   const getElementNames = (s: Slime) => {
     const elems = s.elements || [s.element];
-    return elems.map((e: string) => {
-      const name = ELEMENT_NAMES[e as keyof typeof ELEMENT_NAMES];
-      return name ? name.split(' ').slice(1).join(' ') : e;
-    }).join(', ');
+    return elems.map((e: string) => ELEMENT_DISPLAY_NAMES[e as keyof typeof ELEMENT_DISPLAY_NAMES] || e).join(', ');
   };
 
   const handleDrop = useCallback((slot: 1 | 2) => (e: React.DragEvent) => {
@@ -75,7 +71,7 @@ export function BreedingPod() {
       let discoveryTriggered = false;
 
       if (child.rarityScore > state.bestRarity && !discoveryTriggered) {
-        setDiscovery({ slime: child, reason: `New personal best rarity: ${child.rarityScore} points!` });
+        setDiscovery({ slime: child, reason: `New Species Unlocked: ${child.name}!` });
         dispatch({ type: 'ADD_GOO', amount: 500 });
         audioEngine.playSfx('achievement');
         discoveryTriggered = true;
@@ -84,7 +80,7 @@ export function BreedingPod() {
       if (!state.discoveredModels.includes(child.traits.model)) {
         dispatch({ type: 'ADD_DISCOVERED_MODEL', model: child.traits.model });
         if (!discoveryTriggered) {
-          setDiscovery({ slime: child, reason: `First ${MODEL_NAMES[child.traits.model]} model discovered!` });
+          setDiscovery({ slime: child, reason: `New Species Unlocked: ${child.name}!` });
           dispatch({ type: 'ADD_GOO', amount: 500 });
           audioEngine.playSfx('achievement');
           discoveryTriggered = true;
@@ -94,7 +90,7 @@ export function BreedingPod() {
       if (!state.discoveredElements.includes(child.element)) {
         dispatch({ type: 'ADD_DISCOVERED_ELEMENT', element: child.element });
         if (!discoveryTriggered) {
-          setDiscovery({ slime: child, reason: `First ${ELEMENT_NAMES[child.element]} element discovered!` });
+          setDiscovery({ slime: child, reason: `New Species Unlocked: ${child.name}!` });
           dispatch({ type: 'ADD_GOO', amount: 500 });
           audioEngine.playSfx('achievement');
           discoveryTriggered = true;
@@ -140,67 +136,64 @@ export function BreedingPod() {
 
   return (
     <div className="flex flex-col items-center gap-3 p-4 relative" style={{ fontFamily: "'VT323', monospace" }}>
-      <h2 className="text-sm text-primary mb-1" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-        🌿 Enchanted Pond
+      <h2 className="text-xs text-primary mb-1" style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '9px' }}>
+        Breeding Den
       </h2>
 
       {state.mutationJuiceActive && (
-        <div className="text-xs text-accent-foreground bg-accent/20 px-2 py-1 rounded border border-accent animate-pulse">
-          🧪 Mutation Juice Active!
+        <div className="text-[9px] text-accent-foreground bg-accent/20 px-2 py-0.5 rounded border border-accent/40 animate-pulse">
+          Mutation Juice Active
         </div>
       )}
 
-      {/* Pond visual container */}
+      {/* Den visual container */}
       <div className="relative">
-        <div className="absolute inset-0 -m-4 rounded-full bg-gradient-to-b from-primary/10 via-primary/5 to-transparent blur-sm" />
+        {/* Glow aura behind den */}
+        <div className="absolute inset-0 -m-6 rounded-full blur-lg animate-pulse" style={{
+          background: 'radial-gradient(circle, hsl(var(--primary) / 0.15), transparent)',
+        }} />
 
         <div className="flex items-center gap-4 relative">
           {/* Slot 1 */}
           <div
-            className={`w-28 h-28 rounded-2xl flex items-center justify-center transition-all relative overflow-hidden ${
-              slot1Slime ? 'border-4 border-primary/60 bg-primary/5' : 'border-4 border-dashed border-muted-foreground/30 bg-muted/10'
+            className={`w-24 h-24 rounded-xl flex items-center justify-center transition-all relative overflow-hidden ${
+              slot1Slime ? 'border-2 border-primary/50 bg-primary/5' : 'border-2 border-dashed border-muted-foreground/25 bg-muted/10'
             } ${breeding ? 'animate-pulse' : ''}`}
             onDragOver={handleDragOver}
             onDrop={handleDrop(1)}
             onClick={() => handleSlotClick(1)}
           >
-            <div className="absolute inset-0 opacity-20">
-              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-primary/20 to-transparent" />
-            </div>
             {slot1Slime ? (
-              <SlimeCanvas slime={slot1Slime} size={96} animated />
+              <SlimeCanvas slime={slot1Slime} size={80} animated />
             ) : (
-              <span className="text-xs text-muted-foreground text-center px-2">
-                Drop slime into pond
+              <span className="text-[9px] text-muted-foreground text-center px-2">
+                Drop slime here
               </span>
             )}
           </div>
 
           {/* Merge indicator */}
           <div className="flex flex-col items-center gap-1">
-            <span className="text-2xl text-primary">✦</span>
+            <Sparkles className="w-5 h-5 text-primary" />
             {mergeParticles && (
-              <div className="w-8 h-8 rounded-full bg-accent/30 animate-ping" />
+              <div className="w-6 h-6 rounded-full bg-accent/30 animate-ping" />
             )}
           </div>
 
           {/* Slot 2 */}
           <div
-            className={`w-28 h-28 rounded-2xl flex items-center justify-center transition-all relative overflow-hidden ${
-              slot2Slime ? 'border-4 border-primary/60 bg-primary/5' : 'border-4 border-dashed border-muted-foreground/30 bg-muted/10'
+            className={`w-24 h-24 rounded-xl flex items-center justify-center transition-all relative overflow-hidden ${
+              slot2Slime ? 'border-2 border-primary/50 bg-primary/5' : 'border-2 border-dashed border-muted-foreground/25 bg-muted/10'
             } ${breeding ? 'animate-pulse' : ''}`}
             onDragOver={handleDragOver}
             onDrop={handleDrop(2)}
             onClick={() => handleSlotClick(2)}
           >
-            <div className="absolute inset-0 opacity-20">
-              <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-primary/20 to-transparent" />
-            </div>
             {slot2Slime ? (
-              <SlimeCanvas slime={slot2Slime} size={96} animated />
+              <SlimeCanvas slime={slot2Slime} size={80} animated />
             ) : (
-              <span className="text-xs text-muted-foreground text-center px-2">
-                Drop slime into pond
+              <span className="text-[9px] text-muted-foreground text-center px-2">
+                Drop slime here
               </span>
             )}
           </div>
@@ -211,27 +204,27 @@ export function BreedingPod() {
       <button
         onClick={handleBreed}
         disabled={!slot1Slime || !slot2Slime || breeding}
-        className="flex items-center gap-2 px-6 py-2 bg-primary text-primary-foreground rounded-lg border-4 border-primary/60 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 hover:scale-105 transition-all text-sm"
-        style={{ fontFamily: "'Press Start 2P', cursive" }}
+        className="flex items-center gap-2 px-5 py-1.5 bg-primary text-primary-foreground rounded-lg border-2 border-primary/50 disabled:opacity-40 disabled:cursor-not-allowed hover:brightness-110 hover:scale-105 transition-all text-xs"
+        style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '9px' }}
       >
-        <Sparkles className="w-4 h-4" />
-        {breeding ? 'Merging...' : 'BREED!'}
+        <Sparkles className="w-3.5 h-3.5" />
+        {breeding ? 'Merging...' : 'BREED'}
       </button>
 
-      {/* ★ POSSIBLE OFFSPRING PREVIEW */}
+      {/* Possible Offspring Preview */}
       {possibleOffspring.length > 0 && !newSlime && !breeding && (
         <div className="w-full mt-2">
-          <h3 className="text-xs text-muted-foreground mb-2 text-center" style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '8px' }}>
+          <h3 className="text-muted-foreground mb-1.5 text-center" style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '7px' }}>
             Possible Offspring
           </h3>
           <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-thin">
             {possibleOffspring.map((preview, i) => (
               <div key={i} className="flex flex-col items-center flex-shrink-0 p-1.5 rounded-lg bg-muted/20 border border-border/30">
-                <SlimeCanvas slime={preview} size={48} animated />
-                <span className="text-[8px] font-bold mt-0.5" style={{ color: RARITY_TIER_COLORS[preview.rarityTier] }}>
+                <SlimeCanvas slime={preview} size={44} animated />
+                <span className="text-[7px] font-bold mt-0.5" style={{ color: RARITY_TIER_COLORS[preview.rarityTier] }}>
                   {preview.rarityTier}
                 </span>
-                <span className="text-[7px] text-muted-foreground text-center leading-tight max-w-[56px] truncate">
+                <span className="text-[6px] text-muted-foreground text-center leading-tight max-w-[52px] truncate">
                   {getElementNames(preview)}
                 </span>
               </div>
@@ -252,7 +245,7 @@ export function BreedingPod() {
               <SlimeCanvas slime={child} size={80} animated />
             </div>
             <p className="text-sm text-primary font-bold mt-1">{child.name}</p>
-            <p className="text-[10px] font-bold" style={{ color: RARITY_TIER_COLORS[child.rarityTier] }}>
+            <p className="text-[9px] font-bold" style={{ color: RARITY_TIER_COLORS[child.rarityTier] }}>
               {child.rarityTier}
             </p>
             <p className="text-xs text-muted-foreground">

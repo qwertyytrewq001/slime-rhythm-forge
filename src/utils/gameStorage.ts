@@ -16,6 +16,8 @@ export function saveGame(state: GameState): void {
       bestRarity: state.bestRarity,
       discoveredModels: state.discoveredModels,
       discoveredElements: state.discoveredElements,
+      habitats: state.habitats,
+      happiness: state.happiness,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
