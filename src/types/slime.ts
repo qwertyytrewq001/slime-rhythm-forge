@@ -78,6 +78,16 @@ export interface GameState {
   selectedSlimeId: string | null;
   breedSlot1: string | null;
   breedSlot2: string | null;
+  activeBreeding: {
+    parent1Id: string;
+    parent2Id: string;
+    endTime: number;
+    resultSlime: Slime; // The slime that will be born
+  } | null;
+  activeHatching: {
+    slime: Slime;
+    endTime: number;
+  } | null;
   breedHistory: BreedResult[];
   achievements: Achievement[];
   mutationJuiceActive: boolean;
@@ -96,6 +106,10 @@ export type GameAction =
   | { type: 'SELECT_SLIME'; id: string | null }
   | { type: 'SET_BREED_SLOT'; slot: 1 | 2; id: string | null }
   | { type: 'CLEAR_BREED_SLOTS' }
+  | { type: 'START_BREEDING'; ritual: { parent1Id: string; parent2Id: string; endTime: number; resultSlime: Slime } }
+  | { type: 'COLLECT_EGG' }
+  | { type: 'START_HATCHING'; slime: Slime; duration: number }
+  | { type: 'FINISH_HATCHING' }
   | { type: 'ADD_GOO'; amount: number }
   | { type: 'SPEND_GOO'; amount: number }
   | { type: 'ACTIVATE_MUTATION_JUICE' }

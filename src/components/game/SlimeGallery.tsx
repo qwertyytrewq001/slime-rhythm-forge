@@ -7,7 +7,15 @@ import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
 const PER_PAGE = 12;
 type SortMode = 'rarity' | 'name' | 'newest';
 
-export function SlimeGallery() {
+interface SlimeGalleryProps {
+  /**
+   * If provided, gallery will call this when a slime is clicked
+   * instead of dispatching SELECT_SLIME. Used by the breeding pod picker.
+   */
+  onSelect?: (id: string) => void;
+}
+
+export function SlimeGallery({ onSelect }: SlimeGalleryProps = {}) {
   const { state, dispatch } = useGameState();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortMode>('newest');
@@ -22,7 +30,10 @@ export function SlimeGallery() {
   }, [state.slimes, dispatch]);
 
   const filtered = useMemo(() => {
-    let list = state.slimes;
+    // Filter out the slime that is currently in the hatchery
+    const unhatchedId = state.activeHatching?.slime.id;
+    let list = state.slimes.filter(s => s.id !== unhatchedId);
+    
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(s => s.name.toLowerCase().includes(q));
@@ -33,7 +44,7 @@ export function SlimeGallery() {
       case 'newest': list = [...list].sort((a, b) => b.createdAt - a.createdAt); break;
     }
     return list;
-  }, [state.slimes, search, sort]);
+  }, [state.slimes, state.activeHatching, search, sort]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const currentPage = Math.min(page, totalPages - 1);
@@ -59,29 +70,34 @@ export function SlimeGallery() {
   return (
     <div className="flex flex-col h-full bg-card/80 backdrop-blur-sm border-r-2 border-primary/15 p-2"
       style={{ fontFamily: "'VT323', monospace" }}>
-      <h2 className="text-center text-xs mb-2 text-primary" style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '9px' }}>
-        Gallery
+      <h2 className="text-center text-[11px] mb-4 text-[#FF7EB6] animate-inscription-glow font-black tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+        SLIME GALLERY
       </h2>
+      {onSelect && (
+        <div className="text-center text-[14px] text-[#FF7EB6] animate-pulse font-black mb-4 uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
+          Invoke a Parent
+        </div>
+      )}
 
-      <div className="relative mb-2">
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-3 h-3 text-muted-foreground" />
+      <div className="relative mb-3">
+        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-primary font-bold" />
         <input
           type="text"
-          placeholder="Search..."
+          placeholder="SEARCH..."
           value={search}
           onChange={e => { setSearch(e.target.value); setPage(0); }}
-          className="w-full pl-7 pr-2 py-1 text-sm bg-background/80 border border-input rounded text-foreground placeholder:text-muted-foreground"
+          className="w-full pl-8 pr-2 py-1.5 text-xs bg-background/90 border-2 border-primary/40 rounded-lg text-foreground placeholder:text-muted-foreground font-black"
         />
       </div>
 
       <select
         value={sort}
         onChange={e => setSort(e.target.value as SortMode)}
-        className="mb-2 text-xs bg-background/80 border border-input rounded px-1 py-0.5 text-foreground"
+        className="mb-3 text-xs bg-background/90 border-2 border-primary/40 rounded-lg px-2 py-1 text-foreground font-black"
       >
-        <option value="rarity">Rarity</option>
-        <option value="name">A-Z Name</option>
-        <option value="newest">Newest</option>
+        <option value="rarity">Sort: Rarity</option>
+        <option value="name">Sort: A-Z</option>
+        <option value="newest">Sort: Newest</option>
       </select>
 
       <div className="flex-1 overflow-y-auto">
@@ -97,7 +113,13 @@ export function SlimeGallery() {
                 'border-transparent'
               }`}
               style={rarityGlowStyle(slime.rarityTier)}
-              onClick={() => dispatch({ type: 'SELECT_SLIME', id: slime.id })}
+              onClick={() => {
+                if (onSelect) {
+                  onSelect(slime.id);
+                } else {
+                  dispatch({ type: 'SELECT_SLIME', id: slime.id });
+                }
+              }}
               onMouseEnter={() => setHoveredId(slime.id)}
               onMouseLeave={() => setHoveredId(null)}
               draggable

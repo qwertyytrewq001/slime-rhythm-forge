@@ -81,6 +81,8 @@ function createInitialState(): GameState {
       selectedSlimeId: null,
       breedSlot1: null,
       breedSlot2: null,
+      activeBreeding: saved.activeBreeding ?? null,
+      activeHatching: saved.activeHatching ?? null,
       breedHistory: saved.breedHistory ?? [],
       achievements: saved.achievements ?? DEFAULT_ACHIEVEMENTS,
       mutationJuiceActive: saved.mutationJuiceActive ?? false,
@@ -100,6 +102,8 @@ function createInitialState(): GameState {
     selectedSlimeId: null,
     breedSlot1: null,
     breedSlot2: null,
+    activeBreeding: null,
+    activeHatching: null,
     breedHistory: [],
     achievements: DEFAULT_ACHIEVEMENTS,
     mutationJuiceActive: false,
@@ -126,6 +130,14 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         : { ...state, breedSlot2: action.id };
     case 'CLEAR_BREED_SLOTS':
       return { ...state, breedSlot1: null, breedSlot2: null };
+    case 'START_BREEDING':
+      return { ...state, activeBreeding: action.ritual, breedSlot1: null, breedSlot2: null };
+    case 'COLLECT_EGG':
+      return { ...state, activeBreeding: null };
+    case 'START_HATCHING':
+      return { ...state, activeHatching: { slime: action.slime, endTime: Date.now() + action.duration } };
+    case 'FINISH_HATCHING':
+      return { ...state, activeHatching: null };
     case 'ADD_GOO':
       return { ...state, goo: Math.round((state.goo + action.amount) * 100) / 100 };
     case 'SPEND_GOO':

@@ -33,6 +33,18 @@
   }
 }
 
+/* pond water ripple */
+@keyframes wave {
+  0% { background-position: 0% 0%; }
+  100% { background-position: 100% 0%; }
+}
+
+.wave-bg {
+  background-image: radial-gradient(circle at 50% 50%, rgba(255,255,255,0.1) 10%, transparent 40%);
+  background-size: 200% 100%;
+  animation: wave 8s linear infinite;
+}
+
 .card {
   padding: 2em;
 }

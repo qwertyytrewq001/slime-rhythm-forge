@@ -8,122 +8,159 @@
   :root {
     --background: 270 30% 95%;
     --foreground: 260 20% 12%;
-
     --card: 270 25% 97%;
     --card-foreground: 260 20% 12%;
-
     --popover: 270 25% 97%;
     --popover-foreground: 260 20% 12%;
-
     --primary: 160 55% 40%;
     --primary-foreground: 160 10% 98%;
-
     --secondary: 340 55% 65%;
     --secondary-foreground: 340 10% 98%;
-
     --muted: 270 15% 88%;
     --muted-foreground: 260 10% 45%;
-
     --accent: 45 85% 55%;
     --accent-foreground: 45 80% 15%;
-
     --destructive: 0 72% 55%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 270 20% 85%;
     --input: 270 20% 85%;
     --ring: 160 55% 40%;
-
     --radius: 0.5rem;
-
-    --sidebar-background: 270 25% 93%;
-    --sidebar-foreground: 260 15% 25%;
-    --sidebar-primary: 160 55% 35%;
-    --sidebar-primary-foreground: 160 10% 98%;
-    --sidebar-accent: 270 15% 90%;
-    --sidebar-accent-foreground: 260 15% 25%;
-    --sidebar-border: 270 15% 82%;
-    --sidebar-ring: 160 55% 40%;
   }
 
   .dark {
     --background: 260 30% 8%;
     --foreground: 270 15% 90%;
-
     --card: 260 25% 12%;
     --card-foreground: 270 15% 90%;
-
     --popover: 260 25% 12%;
     --popover-foreground: 270 15% 90%;
-
     --primary: 160 60% 50%;
     --primary-foreground: 160 10% 5%;
-
     --secondary: 340 50% 55%;
     --secondary-foreground: 340 10% 98%;
-
     --muted: 260 20% 18%;
     --muted-foreground: 260 10% 55%;
-
     --accent: 45 80% 50%;
     --accent-foreground: 45 80% 95%;
-
     --destructive: 0 65% 45%;
     --destructive-foreground: 0 0% 98%;
-
     --border: 260 20% 20%;
     --input: 260 20% 20%;
     --ring: 160 60% 50%;
-
-    --sidebar-background: 260 25% 10%;
-    --sidebar-foreground: 270 15% 85%;
-    --sidebar-primary: 160 60% 45%;
-    --sidebar-primary-foreground: 160 10% 98%;
-    --sidebar-accent: 260 20% 15%;
-    --sidebar-accent-foreground: 270 15% 85%;
-    --sidebar-border: 260 20% 18%;
-    --sidebar-ring: 160 60% 50%;
   }
-}
 
-@layer base {
-  * {
-    @apply border-border;
+  :root {
+    --mystic-rose: 330 80% 70%;
+    --obsidian: 260 30% 5%;
   }
 
   body {
     @apply bg-background text-foreground;
     font-family: 'VT323', monospace;
+    font-weight: 600;
     image-rendering: pixelated;
+    /* Character shadow trick: Multi-directional black shadows for max readability */
+    text-shadow: 
+      1px 1px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      0 2px 4px rgba(0,0,0,0.8);
+  }
+
+  h1, h2, h3, h4, h5, h6, span, p, div {
+    /* Apply to almost all text elements */
+    text-shadow: 
+      1px 1px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      0 2px 4px rgba(0,0,0,0.8);
   }
 }
 
-/* Pixel art scanline overlay */
-@layer components {
-  .scanlines::after {
-    content: '';
-    position: fixed;
-    inset: 0;
-    background: repeating-linear-gradient(
-      0deg,
-      transparent,
-      transparent 2px,
-      rgba(0, 0, 0, 0.03) 2px,
-      rgba(0, 0, 0, 0.03) 4px
-    );
-    pointer-events: none;
-    z-index: 100;
+@layer utilities {
+  .text-mystic {
+    color: #FF7EB6;
+    text-shadow: 0 0 10px rgba(255, 126, 182, 0.8), 1px 1px 2px #000;
+  }
+  .bg-obsidian-glass {
+    background-color: rgba(10, 20, 10, 0.85);
+    backdrop-filter: blur(8px);
+    border: 1.5px solid rgba(255, 255, 255, 0.1);
   }
 }
 
-/* Discovery confetti animation */
-@keyframes confetti-burst {
-  0% {
-    transform: translate(0, 0) scale(1);
+@keyframes fairy-sparkle {
+  0% { transform: translate(0, 0) scale(0); opacity: 0; }
+  50% { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1.5); }
+  100% { transform: translate(calc(var(--tx) * 1.5), calc(var(--ty) * 1.5)) scale(0); opacity: 0; }
+}
+
+@keyframes soft-inscription-glow {
+  0%, 100% { 
+    text-shadow: 0 0 4px #FF7EB6, 1px 1px 1px #000;
+    opacity: 0.85;
+    transform: translateY(0);
+  }
+  50% { 
+    text-shadow: 0 0 10px #FF7EB6, 1px 1px 1px #000;
     opacity: 1;
-  }
-  100% {
-    transform: translate(var(--tx, 100px), var(--ty, -200px)) scale(0);
-    opacity: 0;
+    transform: translateY(-2px);
   }
 }
+
+@keyframes intense-inscription-glow {
+  0%, 100% { 
+    text-shadow: 0 0 8px #FF7EB6, 0 0 15px #FF7EB6, 1px 1px 1px #000;
+    opacity: 0.9;
+    transform: translateY(0) scale(1);
+  }
+  50% { 
+    text-shadow: 0 0 20px #FF7EB6, 0 0 30px #FF7EB6, 1px 1px 1px #000;
+    opacity: 1;
+    transform: translateY(-4px) scale(1.03);
+  }
+}
+
+@keyframes soft-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 0.8; transform: scale(1.03); }
+}
+
+@keyframes inscription-glow {
+  0%, 100% { 
+    text-shadow: 0 0 6px #FF7EB6, 1px 1px 1px #000;
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% { 
+    text-shadow: 0 0 12px #FF7EB6, 1px 1px 1px #000;
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.animate-soft-inscription-glow {
+  animation: soft-inscription-glow 4s ease-in-out infinite;
+}
+
+.animate-intense-inscription-glow {
+  animation: intense-inscription-glow 3s ease-in-out infinite;
+}
+
+.animate-fairy-sparkle {
+  animation: fairy-sparkle 3.5s ease-in-out infinite;
+}
+
+.animate-inscription-glow {
+  animation: inscription-glow 5s ease-in-out infinite;
+}
+
+/* Rest of existing animations kept... */
+@keyframes spirit-pulse { 0%, 100% { transform: scale(1); opacity: 0.3; } 50% { transform: scale(1.25); opacity: 0.8; } }
+@keyframes magic-mote { 0% { transform: translateY(0) translateX(0); opacity: 0; } 20% { opacity: 0.9; } 80% { opacity: 0.9; } 100% { transform: translateY(-80px) translateX(var(--mote-tx, 20px)); opacity: 0; } }
+@keyframes wiggle { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg); } }
+@keyframes scale-in { 0% { transform: scale(0.9); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+@keyframes spin-slow { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
