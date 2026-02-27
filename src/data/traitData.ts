@@ -209,9 +209,9 @@ export const RARITY_TIER_STARS: Record<string, number> = {
 // ===== PROGRESSIVE ELEMENT UNLOCKING =====
 
 export const ELEMENT_TIERS: Record<number, SlimeElement[]> = {
-  1: ['fire', 'water', 'plant', 'earth'],
+  1: ['fire', 'water', 'plant', 'earth', 'light', 'shadow'],
   2: ['ice', 'wind', 'electric'],
-  3: ['void', 'cosmic', 'light', 'shadow'],
+  3: ['void', 'cosmic'],
 };
 
 export function getPlayerLevel(totalBreeds: number, slimeCount: number): number {
@@ -242,17 +242,17 @@ export const HABITAT_COSTS: Record<SlimeElement, number> = {
 };
 
 // Habitat visual themes
-export const HABITAT_THEMES: Record<SlimeElement, { bg: string; accent: string; desc: string }> = {
-  fire:     { bg: '#3D1408', accent: '#FF4500', desc: 'Volcanic nest with lava cracks' },
-  water:    { bg: '#082038', accent: '#4169E1', desc: 'Crystal blue pool with ripples' },
-  plant:    { bg: '#0A2810', accent: '#32CD32', desc: 'Vine-covered floral dome' },
-  earth:    { bg: '#2A1A08', accent: '#A0522D', desc: 'Rocky cavern with crystals' },
+export const HABITAT_THEMES: Record<SlimeElement, { bg: string; accent: string; desc: string; bgImage?: string }> = {
+  fire:     { bg: '#3D1408', accent: '#FF4500', desc: 'Volcanic nest with lava cracks', bgImage: '/fire habitat.png' },
+  water:    { bg: '#082038', accent: '#4169E1', desc: 'Crystal blue pool with ripples', bgImage: '/Water habitat.png' },
+  plant:    { bg: '#0A2810', accent: '#32CD32', desc: 'Vine-covered floral dome', bgImage: '/plant habitat.png' },
+  earth:    { bg: '#2A1A08', accent: '#A0522D', desc: 'Rocky cavern with crystals', bgImage: '/earth habitat.png' },
   ice:      { bg: '#102838', accent: '#87CEEB', desc: 'Shimmering ice cave' },
   wind:     { bg: '#1A2838', accent: '#B0C4DE', desc: 'Floating cloud platform' },
   electric: { bg: '#282008', accent: '#FFD700', desc: 'Tesla coil chamber' },
   metal:    { bg: '#1A1A1A', accent: '#C0C0C0', desc: 'Forge and anvil pit' },
-  light:    { bg: '#2A2810', accent: '#FFFACD', desc: 'Sunlit crystal garden' },
-  shadow:   { bg: '#0A0A1A', accent: '#483D8B', desc: 'Dark mist hollow' },
+  light:    { bg: '#2A2810', accent: '#FFFACD', desc: 'Sunlit crystal garden', bgImage: '/light habitat.png' },
+  shadow:   { bg: '#0A0A1A', accent: '#483D8B', desc: 'Dark mist hollow', bgImage: '/shadow habitat (2).png' },
   cosmic:   { bg: '#100A28', accent: '#9B59B6', desc: 'Starfield observatory' },
   void:     { bg: '#050508', accent: '#2D1B69', desc: 'Reality rift chamber' },
   toxic:    { bg: '#0A1A08', accent: '#7FFF00', desc: 'Bubbling acid swamp' },

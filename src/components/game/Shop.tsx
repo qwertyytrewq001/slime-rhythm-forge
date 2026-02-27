@@ -109,38 +109,38 @@ export function Shop() {
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#0a140a]/95 text-primary-foreground border-l-4 border-primary/20" 
-         style={{ fontFamily: "'VT323', monospace", backgroundImage: 'radial-gradient(circle at center, rgba(74, 93, 69, 0.15) 0%, transparent 80%)' }}>
+    <div className="flex flex-col h-full w-full bg-rose-50/90 text-slate-900 border-l-4 border-[#FF7EB6]/20" 
+         style={{ fontFamily: "'VT323', monospace" }}>
       
-      <div className="p-6 border-b-2 border-primary/10 bg-black/30 backdrop-blur-md">
+      <div className="p-6 border-b-2 border-[#FF7EB6]/10 bg-white/40 backdrop-blur-md">
         <div className="flex items-center gap-5">
-          <div className="w-14 h-14 rounded-2xl bg-primary/10 flex items-center justify-center border-2 border-primary/40 shadow-[0_0_20px_rgba(var(--primary),0.2)]">
-            <ShoppingBag className="w-8 h-8 text-primary" />
+          <div className="w-14 h-14 rounded-2xl bg-[#FF7EB6]/10 flex items-center justify-center border-2 border-[#FF7EB6]/40">
+            <ShoppingBag className="w-8 h-8 text-[#FF7EB6]" />
           </div>
           <div>
-            <h2 className="text-base font-black text-primary uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+            <h2 className="text-base font-black text-[#FF7EB6] uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>
               Mystic Bazaar
             </h2>
-            <p className="text-sm text-primary/60 italic mt-1 font-bold">
+            <p className="text-sm text-slate-500 italic mt-1 font-bold">
               Treasures from the slime world...
             </p>
           </div>
-          <div className="ml-auto bg-black/40 px-4 py-2 rounded-xl border-2 border-primary/30">
-            <span className="text-xl font-bold text-primary tracking-tight">{Math.floor(state.goo)}g</span>
+          <div className="ml-auto bg-white/60 px-4 py-2 rounded-xl border-2 border-[#FF7EB6]/30">
+            <span className="text-xl font-bold text-[#FF7EB6] tracking-tight">{Math.floor(state.goo)}g</span>
           </div>
         </div>
       </div>
 
       <Tabs defaultValue="eggs" className="flex-1 flex flex-col min-h-0 mt-4">
         <div className="px-6">
-          <TabsList className="grid grid-cols-3 w-full bg-black/40 border-2 border-primary/10 h-12 p-1 rounded-xl">
-            <TabsTrigger value="eggs" className="text-xs uppercase font-black data-[state=active]:bg-primary/20 data-[state=active]:text-white">
+          <TabsList className="grid grid-cols-3 w-full bg-[#FF7EB6]/5 border-2 border-[#FF7EB6]/10 h-12 p-1 rounded-xl">
+            <TabsTrigger value="eggs" className="text-xs uppercase font-black data-[state=active]:bg-[#FF7EB6] data-[state=active]:text-white">
               Eggs
             </TabsTrigger>
-            <TabsTrigger value="items" className="text-xs uppercase font-black data-[state=active]:bg-primary/20">
+            <TabsTrigger value="items" className="text-xs uppercase font-black data-[state=active]:bg-[#FF7EB6] data-[state=active]:text-white">
               Tools
             </TabsTrigger>
-            <TabsTrigger value="habitats" className="text-xs uppercase font-black data-[state=active]:bg-primary/20">
+            <TabsTrigger value="habitats" className="text-xs uppercase font-black data-[state=active]:bg-[#FF7EB6] data-[state=active]:text-white">
               Sanctums
             </TabsTrigger>
           </TabsList>
@@ -156,15 +156,15 @@ export function Shop() {
                     onClick={() => handleBuyEgg(elem)}
                     className={`group relative flex flex-col items-center p-6 rounded-3xl border-2 transition-all duration-300
                       ${state.goo >= STARTER_EGG_COST 
-                        ? 'bg-white/5 border-primary/20 hover:border-primary hover:bg-white/10 cursor-pointer active:scale-95' 
-                        : 'bg-black/40 border-white/5 opacity-40 grayscale'}`}
+                        ? 'bg-white border-[#FF7EB6]/20 hover:border-[#FF7EB6] hover:shadow-lg cursor-pointer active:scale-95' 
+                        : 'bg-slate-100 border-slate-200 opacity-40 grayscale'}`}
                   >
                     <EggCanvas element={elem} />
-                    <span className="mt-4 text-sm font-black text-white group-hover:text-primary uppercase tracking-widest transition-colors">
+                    <span className="mt-4 text-sm font-black text-slate-700 group-hover:text-[#FF7EB6] uppercase tracking-widest transition-colors">
                       {ELEMENT_DISPLAY_NAMES[elem]} Slime
                     </span>
-                    <div className="mt-2 flex items-center gap-1 bg-black/40 px-3 py-1 rounded-full border border-primary/20">
-                      <span className="text-xs font-bold text-primary">{STARTER_EGG_COST}g</span>
+                    <div className="mt-2 flex items-center gap-1 bg-white px-3 py-1 rounded-full border border-[#FF7EB6]/20">
+                      <span className="text-xs font-bold text-[#FF7EB6]">{STARTER_EGG_COST}g</span>
                     </div>
                   </div>
                 ))}
@@ -180,17 +180,17 @@ export function Shop() {
                     key={item.id}
                     onClick={() => handleBuyItem(item.id, item.cost)}
                     disabled={state.goo < item.cost}
-                    className="w-full flex items-center gap-5 p-5 bg-white/5 rounded-3xl border-2 border-primary/10 hover:border-primary hover:bg-white/10 transition-all active:scale-[0.98] disabled:opacity-30 text-left"
+                    className="w-full flex items-center gap-5 p-5 bg-white border-2 border-[#FF7EB6]/10 hover:border-[#FF7EB6] transition-all active:scale-[0.98] disabled:opacity-30 text-left rounded-3xl"
                   >
-                    <div className="text-4xl bg-black/40 w-16 h-16 flex items-center justify-center rounded-2xl border-2 border-primary/10">
+                    <div className="text-4xl bg-rose-50 w-16 h-16 flex items-center justify-center rounded-2xl border-2 border-[#FF7EB6]/5">
                       {item.icon}
                     </div>
                     <div className="flex-1">
                       <div className="flex justify-between items-center mb-1">
-                        <span className="text-sm font-black text-white uppercase">{item.name}</span>
-                        <span className="text-sm font-bold text-primary">{item.cost}g</span>
+                        <span className="text-sm font-black text-slate-700 uppercase">{item.name}</span>
+                        <span className="text-sm font-bold text-[#FF7EB6]">{item.cost}g</span>
                       </div>
-                      <p className="text-[13px] text-white/60 leading-tight font-bold italic">
+                      <p className="text-[13px] text-slate-500 leading-tight font-bold italic">
                         {item.desc}
                       </p>
                     </div>
@@ -217,20 +217,26 @@ export function Shop() {
                         }
                       }}
                       disabled={state.goo < cost || state.habitats.length >= 16}
-                      className="group flex items-center gap-5 p-4 bg-white/5 rounded-3xl border-2 border-primary/10 hover:border-primary transition-all active:scale-[0.98] disabled:opacity-30 text-left"
+                      className="group flex items-center gap-5 p-4 bg-white border-2 border-[#FF7EB6]/10 hover:border-[#FF7EB6] transition-all active:scale-[0.98] disabled:opacity-30 text-left rounded-3xl"
                     >
                       <div className="w-14 h-14 rounded-2xl border-2 shadow-inner flex-shrink-0" 
-                           style={{ backgroundColor: theme.bg, borderColor: theme.accent }} />
+                           style={{ 
+                             backgroundColor: theme.bgImage ? 'transparent' : theme.bg, 
+                             borderColor: theme.accent,
+                             backgroundImage: theme.bgImage ? `url("${theme.bgImage}")` : 'none',
+                             backgroundSize: 'cover',
+                             backgroundPosition: 'center'
+                           }} />
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
-                          <span className="text-sm font-black text-white uppercase truncate">
+                          <span className="text-sm font-black text-slate-700 uppercase truncate">
                             {ELEMENT_DISPLAY_NAMES[elem]} Sanctum
                           </span>
-                          <span className="text-sm font-bold text-primary">
+                          <span className="text-sm font-bold text-[#FF7EB6]">
                             {cost}g
                           </span>
                         </div>
-                        <p className="text-xs text-white/50 truncate italic font-bold mt-1">{theme.desc}</p>
+                        <p className="text-xs text-slate-400 truncate italic font-bold mt-1">{theme.desc}</p>
                       </div>
                     </button>
                   );

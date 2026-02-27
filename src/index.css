@@ -90,6 +90,22 @@
     backdrop-filter: blur(8px);
     border: 1.5px solid rgba(255, 255, 255, 0.1);
   }
+  .bg-rose-glass {
+    background-color: rgba(255, 245, 247, 0.92);
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 126, 182, 0.2);
+  }
+
+  .light-theme {
+    color: #2D1B36 !important;
+  }
+  .light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme span, .light-theme p {
+    text-shadow: none !important;
+    color: #2D1B36 !important;
+  }
+  .light-theme .text-white\/60, .light-theme .text-white\/50, .light-theme .text-muted-foreground {
+    color: #5D4B66 !important;
+  }
 }
 
 /* Hide scrollbar for Chrome, Safari and Opera */
@@ -101,6 +117,23 @@
 .scrollbar-none {
   -ms-overflow-style: none;  /* IE and Edge */
   scrollbar-width: none;  /* Firefox */
+}
+
+@keyframes intense-green-inscription-glow {
+  0%, 100% { 
+    text-shadow: 0 0 10px #4ADE80, 0 0 20px #22C55E, 1px 1px 1px #000;
+    opacity: 0.9;
+    transform: translateY(0) scale(1);
+  }
+  50% { 
+    text-shadow: 0 0 30px #4ADE80, 0 0 50px #22C55E, 1px 1px 1px #000;
+    opacity: 1;
+    transform: translateY(-5px) scale(1.05);
+  }
+}
+
+.animate-intense-green-inscription-glow {
+  animation: intense-green-inscription-glow 5s ease-in-out infinite;
 }
 
 @keyframes soft-blue-inscription-glow {

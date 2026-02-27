@@ -217,13 +217,24 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, habitats: [...state.habitats, newHabitat] };
     }
     case 'ASSIGN_SLIME_TO_HABITAT': {
+      const slime = state.slimes.find(s => s.id === action.slimeId);
+      const habitat = state.habitats.find(h => h.id === action.habitatId);
+      
+      if (!slime || !habitat) return state;
+      
+      // Enforce elemental match: slime must have at least one element matching habitat
+      if (!slime.elements.includes(habitat.element)) return state;
+      
+      // Enforce capacity
+      if (habitat.assignedSlimeIds.length >= habitat.capacity && !habitat.assignedSlimeIds.includes(action.slimeId)) return state;
+
       // Remove slime from any other habitat first
       const habitats = state.habitats.map(h => ({
         ...h,
         assignedSlimeIds: h.assignedSlimeIds.filter(id => id !== action.slimeId),
       })).map(h => {
-        if (h.id === action.habitatId && h.assignedSlimeIds.length < h.capacity) {
-          return { ...h, assignedSlimeIds: [...h.assignedSlimeIds, action.slimeId] };
+        if (h.id === action.habitatId) {
+          return { ...h, assignedSlimeIds: [...new Set([...h.assignedSlimeIds, action.slimeId])] };
         }
         return h;
       });

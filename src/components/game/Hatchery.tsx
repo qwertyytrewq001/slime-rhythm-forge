@@ -1,16 +1,3 @@
-      {/* Ancient Hatchery title visually above the bench, scrolls with content */}
-      <div className="absolute -top-24 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center pointer-events-none z-10">
-        <div className="transition-all duration-700 flex flex-col items-center opacity-100 scale-125">
-           <div className="relative flex flex-col items-center pointer-events-auto cursor-default">
-             <div className="absolute inset-0 pointer-events-none overflow-visible">
-               {[...Array(10)].map((_, i) => <FairySparkle key={i} index={i} />)}
-             </div>
-             <h3 className="text-[12px] text-[#FF7EB6] uppercase tracking-[0.3em] font-black transition-all duration-300 animate-intense-inscription-glow" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-               Ancient Hatchery
-             </h3>
-           </div>
-        </div>
-      </div>
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { formatTime } from '@/utils/timeUtils';
@@ -95,18 +82,21 @@ export function Hatchery() {
     if (!activeHatching) return;
     setIsHatching(true);
     audioEngine.playSfx('achievement');
+    
+    // Add slime to state immediately so it can be assigned to habitat in popup
+    const newSlime = activeHatching.slime;
+    dispatch({ type: 'ADD_SLIME', slime: newSlime });
+    dispatch({ type: 'SELECT_SLIME', id: newSlime.id });
+    dispatch({ type: 'SET_BEST_RARITY', score: newSlime.rarityScore });
+    dispatch({ type: 'ADD_GOO', amount: 500 });
+    
     setTimeout(() => {
-      setDiscoveredSlime(activeHatching.slime);
+      setDiscoveredSlime(newSlime);
       setIsHatching(false);
     }, 800);
   };
 
   const finalizeHatch = () => {
-    if (!discoveredSlime) return;
-    dispatch({ type: 'ADD_SLIME', slime: discoveredSlime });
-    dispatch({ type: 'SELECT_SLIME', id: discoveredSlime.id });
-    dispatch({ type: 'SET_BEST_RARITY', score: discoveredSlime.rarityScore });
-    dispatch({ type: 'ADD_GOO', amount: 500 });
     dispatch({ type: 'FINISH_HATCHING' });
     setDiscoveredSlime(null);
     setCrackProgress(0);
@@ -117,8 +107,6 @@ export function Hatchery() {
   return (
     <div ref={containerRef} className="fixed top-[78%] left-[68%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 group/hatchery">
       {discoveredSlime && <DiscoveryPopup slime={discoveredSlime} reason="Hatched from an Ancient Egg" onClose={finalizeHatch} />}
-
-      {/* Ancient Hatchery title moved to layout for sticky header */}
 
       <div className="relative w-56 h-56 flex items-center justify-center cursor-pointer group pointer-events-auto" onClick={handleTap}>
         <div className="absolute inset-0 pointer-events-none overflow-visible">

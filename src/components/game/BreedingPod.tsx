@@ -68,17 +68,22 @@ const RitualInscription = ({
 }) => (
   <div 
     onClick={onClick}
-    className={`relative flex flex-col items-center group pointer-events-auto ${onClick ? 'cursor-pointer' : 'cursor-default'} ${className}`}
+    className={`relative flex flex-col items-center group pointer-events-auto transition-all duration-500 ${onClick ? 'cursor-pointer' : 'cursor-default'} ${className}`}
   >
     <div className="absolute inset-0 pointer-events-none overflow-visible">
-      {[...Array(sparkles)].map((_, i) => <FairySparkle key={i} index={i} color="#40E0D0" />)}
+      {[...Array(sparkles)].map((_, i) => <FairySparkle key={i} index={i} color="#FFD1DC" />)}
     </div>
     <h3 
-      className={`text-[#FF7EB6] uppercase tracking-[0.3em] font-black transition-all duration-300 ${blueGlow ? 'animate-intense-blue-inscription-glow' : 'animate-intense-inscription-glow'} ${onClick ? 'group-hover:scale-110 group-active:scale-95' : ''}`} 
-      style={{ fontFamily: "'Press Start 2P', cursive", fontSize }}
+      className={`text-[#FFD1DC] uppercase tracking-[0.3em] font-black transition-all duration-500 ${blueGlow ? 'animate-intense-blue-inscription-glow' : 'animate-intense-inscription-glow'} group-hover:scale-[1.35] group-hover:-translate-y-3 group-hover:brightness-125 group-hover:drop-shadow-[0_0_20px_#FFD1DC]`} 
+      style={{ 
+        fontFamily: "'Press Start 2P', cursive", 
+        fontSize,
+      }}
     >
       {children}
     </h3>
+    {/* Explicit hover glow layer */}
+    <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 blur-2xl transition-all duration-500 pointer-events-none rounded-full" />
   </div>
 );
 
@@ -184,14 +189,14 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
   return (
     <div className="flex flex-col items-center gap-3 p-4 relative" style={{ fontFamily: "'VT323', monospace" }}>
       {/* Mystic Altar Title - Matches Ancient Hatchery style and permanently fixed */}
-      <div className="h-16 flex flex-col items-center justify-center z-20 scale-125 min-w-[200px] translate-y-10">
+      <div className="h-16 flex flex-col items-center justify-center z-20 scale-125 min-w-[200px] -translate-y-2">
          <RitualInscription sparkles={10} blueGlow={false}>
            Mystic Altar
          </RitualInscription>
       </div>
 
       {state.mutationJuiceActive && (
-        <div className="text-[9px] text-[#FF7EB6] bg-[#FF7EB6]/5 px-2 py-0.5 rounded animate-pulse mt-10 shadow-[0_0_10px_#40E0D0]/20 backdrop-blur-sm border border-[#FF7EB6]/20">
+        <div className="text-[9px] text-[#FF7EB6] bg-[#FF7EB6]/5 px-2 py-0.5 rounded animate-pulse mt-0 shadow-[0_0_10px_#40E0D0]/20 backdrop-blur-sm border border-[#FF7EB6]/20">
           Mutation Juice Active
         </div>
       )}
@@ -201,7 +206,7 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
         <div className="relative w-full h-full z-10">
           {/* Slot 1 - Left Pedestal moved UP */}
           <div
-            className={`absolute left-[0%] top-[20%] w-32 h-32 flex items-center justify-center transition-all cursor-pointer ${breeding ? 'animate-spirit-pulse' : ''}`}
+            className={`absolute left-[0%] top-[0%] w-32 h-32 flex items-center justify-center transition-all cursor-pointer ${breeding ? 'animate-spirit-pulse' : ''}`}
             onDragOver={handleDragOver}
             onDrop={handleDrop(1)}
             onClick={() => handleSlotClick(1)}
@@ -209,7 +214,7 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
             {slot1Slime ? (
               <SlimeCanvas slime={slot1Slime} size={100} animated />
             ) : (
-              <div className="relative">
+              <div className="relative -translate-y-4">
                 <RitualInscription fontSize="6px" sparkles={4} className="scale-110">
                   Select<br/>Parent
                 </RitualInscription>
@@ -219,7 +224,7 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
 
           {/* Slot 2 - Right Pedestal moved UP */}
           <div
-            className={`absolute right-[0%] top-[20%] w-32 h-32 flex items-center justify-center transition-all cursor-pointer ${breeding ? 'animate-spirit-pulse' : ''}`}
+            className={`absolute right-[0%] top-[0%] w-32 h-32 flex items-center justify-center transition-all cursor-pointer ${breeding ? 'animate-spirit-pulse' : ''}`}
             onDragOver={handleDragOver}
             onDrop={handleDrop(2)}
             onClick={() => handleSlotClick(2)}
@@ -227,7 +232,7 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
             {slot2Slime ? (
               <SlimeCanvas slime={slot2Slime} size={100} animated />
             ) : (
-              <div className="relative">
+              <div className="relative -translate-y-4">
                 <RitualInscription fontSize="6px" sparkles={4} className="scale-110">
                   Select<br/>Parent
                 </RitualInscription>

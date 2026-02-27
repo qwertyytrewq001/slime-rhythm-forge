@@ -1,9 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { HABITAT_THEMES, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
 import { Habitat } from '@/types/slime';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, Plus } from 'lucide-react';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { SlimeGallery } from './SlimeGallery';
 
 interface HabitatViewerProps {
   habitatId: string;
@@ -207,38 +209,83 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
   }
 };
 
-// Component for animated bouncing slimes
-function BouncingSlime({ slime, habitatId }: { slime: any; habitatId: string }) {
-  const [position, setPosition] = useState({ x: Math.random() * 70 + 15, y: 60 });
-  const [velocity, setVelocity] = useState({ x: (Math.random() - 0.5) * 2, y: 0 });
+// Component for animated bouncing slimes with personality-based movement
+function BouncingSlime({ slime, habitatId }: { slime: Slime; habitatId: string }) {
+  const [position, setPosition] = useState({ x: Math.random() * 60 + 20, y: 60 });
+  const [velocity, setVelocity] = useState({ x: (Math.random() - 0.5) * 1.5, y: 0 });
+  const [rotation, setRotation] = useState(0);
+  const [scale, setScale] = useState(1);
+  const startTime = useRef(Date.now() + Math.random() * 2000);
 
   useEffect(() => {
     const interval = setInterval(() => {
+      const elapsed = (Date.now() - startTime.current) / 1000;
+      const element = slime.element;
+      
       setPosition(prev => {
         let newX = prev.x + velocity.x;
         let newY = prev.y + velocity.y;
         let newVelX = velocity.x;
-        let newVelY = velocity.y + 0.15; // Gravity
+        let newVelY = velocity.y;
+
+        // Apply personality-based physics/logic
+        switch(element) {
+          case 'fire':
+          case 'electric':
+            // High energy, jittery
+            newVelX += (Math.random() - 0.5) * 0.4;
+            newVelY += (Math.random() - 0.5) * 0.4;
+            break;
+          case 'water':
+          case 'wind':
+            // Floating, wavy
+            newVelY = Math.sin(elapsed * 2) * 0.5;
+            break;
+          case 'plant':
+          case 'earth':
+            // Slow, heavy
+            newVelX *= 0.98; 
+            break;
+          default:
+            newVelY += 0.12; // Standard Gravity
+        }
+
+        // Standard physics for those not floating
+        if (!['water', 'wind', 'cosmic', 'void'].includes(element)) {
+          newVelY += 0.15; // Gravity
+        }
 
         // Bounce off walls
-        if (newX < 5 || newX > 85) {
+        if (newX < 10 || newX > 90) {
           newVelX *= -0.8;
-          newX = newX < 5 ? 5 : 85;
+          newX = newX < 10 ? 10 : 90;
         }
 
-        // Bounce off ground
-        if (newY > 75) {
-          newVelY *= -0.7;
-          newY = 75;
+        // Ground collision
+        const groundLevel = 75;
+        if (newY > groundLevel) {
+          newVelY *= -0.6;
+          newY = groundLevel;
+          // Small jump logic for heavy/standard
+          if (Math.random() > 0.97) newVelY = -3 - (Math.random() * 2);
         }
+
+        // Apply air friction
+        newVelX *= 0.99;
+        newVelY *= 0.99;
 
         setVelocity({ x: newVelX, y: newVelY });
+        
+        // Visual polish
+        setRotation(newVelX * 10);
+        setScale(1 + Math.sin(elapsed * 4) * 0.05); // Idle breathing
+
         return { x: newX, y: newY };
       });
     }, 30);
 
     return () => clearInterval(interval);
-  }, [velocity]);
+  }, [velocity, slime.element]);
 
   return (
     <div
@@ -246,17 +293,19 @@ function BouncingSlime({ slime, habitatId }: { slime: any; habitatId: string }) 
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
-        transform: 'translate(-50%, -50%)',
-        zIndex: 20
+        transform: `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`,
+        zIndex: 20,
+        filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.3))'
       }}
     >
-      <SlimeCanvas slime={slime} size={48} animated={true} />
+      <SlimeCanvas slime={slime} size={120} animated={true} />
     </div>
   );
 }
 
 export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
-  const { state } = useGameState();
+  const { state, dispatch } = useGameState();
+  const [galleryOpen, setGalleryOpen] = useState(false);
   const habitat = state.habitats.find(h => h.id === habitatId);
 
   if (!habitat) return null;
@@ -266,6 +315,14 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
   const assignedSlimes = habitat.assignedSlimeIds
     .map(id => state.slimes.find(s => s.id === id))
     .filter(Boolean);
+
+  const handleSlimeSelect = (slimeId: string) => {
+    const slime = state.slimes.find(s => s.id === slimeId);
+    if (slime && slime.elements.includes(habitat.element)) {
+      dispatch({ type: 'ASSIGN_SLIME_TO_HABITAT', habitatId, slimeId });
+      setGalleryOpen(false);
+    }
+  };
 
   // Prevent body scroll when modal is open
   useEffect(() => {
@@ -302,41 +359,62 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
         {/* Background */}
         <div 
           className="absolute inset-0"
-          style={{ background: layers.backdrop }}
+          style={{ 
+            background: theme.bgImage ? `url("${theme.bgImage}")` : layers.backdrop,
+            backgroundSize: 'cover',
+            backgroundPosition: 'center'
+          }}
         />
 
-        {/* Midground effect */}
-        <div 
-          className="absolute inset-0"
-          style={{ background: layers.midground }}
-        />
+        {/* Midground effect (only if no bgImage) */}
+        {!theme.bgImage && (
+          <div 
+            className="absolute inset-0"
+            style={{ background: layers.midground }}
+          />
+        )}
 
-        {/* Ground */}
-        <div 
-          className="absolute bottom-0 left-0 right-0 h-1/2"
-          style={{ background: layers.ground }}
-        />
+        {/* Ground (only if no bgImage) */}
+        {!theme.bgImage && (
+          <div 
+            className="absolute bottom-0 left-0 right-0 h-1/2"
+            style={{ background: layers.ground }}
+          />
+        )}
 
-        {/* Environment Details Layer */}
-        <div className="absolute inset-0 pointer-events-none">
-          {layers.details}
-        </div>
+        {/* Environment Details Layer (only if no bgImage) */}
+        {!theme.bgImage && (
+          <div className="absolute inset-0 pointer-events-none">
+            {layers.details}
+          </div>
+        )}
 
         {/* Slimes Container */}
         <div className="absolute inset-0">
           {assignedSlimes.map((slime) => slime && (
             <BouncingSlime key={slime.id} slime={slime} habitatId={habitatId} />
           ))}
+          
+          {/* Plus button for adding slimes */}
+          {assignedSlimes.length < habitat.capacity && (
+            <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30">
+              <button
+                onClick={() => setGalleryOpen(true)}
+                className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#FF7EB6] hover:scale-110 transition-all flex items-center justify-center group"
+              >
+                <Plus className="w-8 h-8 text-white/40 group-hover:text-[#FF7EB6]" />
+              </button>
+            </div>
+          )}
         </div>
 
-        {/* Empty state */}
+        {/* Empty state (handled by the plus button above now, but keeping text) */}
         {assignedSlimes.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center">
-            <div className="text-center">
+          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+            <div className="text-center translate-y-20">
               <p className="text-white/40 font-bold text-sm tracking-wider">
                 This sanctuary is empty...
               </p>
-              <p className="text-white/30 text-xs mt-2">Drag slimes here from the gallery</p>
             </div>
           </div>
         )}
@@ -359,6 +437,20 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
           )}
         </div>
       </div>
+
+      {/* Slime Selection Gallery */}
+      <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
+        <SheetContent side="bottom" className="h-[80vh] bg-obsidian-glass p-0 border-t-4 border-[#FF7EB6]/50 shadow-2xl">
+          <SheetHeader className="p-4 border-b border-white/10 bg-black/40">
+            <SheetTitle className="text-center text-sm font-black text-[#FF7EB6] uppercase tracking-[0.3em]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+              Select {ELEMENT_DISPLAY_NAMES[habitat.element]} Slime
+            </SheetTitle>
+          </SheetHeader>
+          <div className="h-full overflow-hidden">
+             <SlimeGallery onSelect={handleSlimeSelect} />
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Styles for animations */}
       <style>{`
