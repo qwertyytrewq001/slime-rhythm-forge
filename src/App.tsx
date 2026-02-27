@@ -2,7 +2,8 @@ import { AppToaster } from "./components/ui/toaster";
 import { Toaster as Sonner } from "./components/ui/sonner";
 import { TooltipProvider } from "./components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+// We use HashRouter instead of BrowserRouter for GitHub Pages compatibility
+import { HashRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import NotFound from "./pages/NotFound";
 
@@ -13,17 +14,17 @@ const App = () => (
     <TooltipProvider>
       <AppToaster />
       <Sonner />
-      {/* The basename tells React Router that the app is living in a subfolder.
-          Without this, it tries to find the route for "/slime-rhythm-forge/" 
-          and fails, showing the NotFound page. 
+      {/* HashRouter adds a /#/ to your URL. 
+        This prevents GitHub from throwing 404 errors when you refresh the page 
+        or try to access specific routes.
       */}
-      <BrowserRouter basename="/slime-rhythm-forge">
+      <HashRouter>
         <Routes>
           <Route path="/" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
-      </BrowserRouter>
+      </HashRouter>
     </TooltipProvider>
   </QueryClientProvider>
 );
