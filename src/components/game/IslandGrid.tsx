@@ -3,10 +3,15 @@ import { SlimeCanvas } from './SlimeCanvas';
 import { HABITAT_THEMES, ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Habitat, SlimeElement } from '@/types/slime';
 import { useCallback } from 'react';
+import { Maximize2 } from 'lucide-react';
 
 const GRID_SIZE = 4;
 
-export function IslandGrid() {
+interface IslandGridProps {
+  onHabitatClick?: (habitatId: string) => void;
+}
+
+export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
   const { state, dispatch } = useGameState();
 
   const handleDrop = useCallback((habitatId: string) => (e: React.DragEvent) => {
@@ -53,7 +58,7 @@ export function IslandGrid() {
           return (
             <div
               key={i}
-              className="aspect-square rounded-lg border-2 p-1 flex flex-col items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-105"
+              className="aspect-square rounded-lg border-2 p-1 flex flex-col items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-105 group"
               style={{
                 borderColor: theme.accent + '80',
                 backgroundColor: theme.bg + 'CC',
@@ -61,6 +66,7 @@ export function IslandGrid() {
               }}
               onDragOver={handleDragOver}
               onDrop={handleDrop(habitat.id)}
+              onClick={() => onHabitatClick?.(habitat.id)}
               title={theme.desc}
             >
               {/* Element glow */}
@@ -92,6 +98,18 @@ export function IslandGrid() {
               {assignedSlimes.some(s => s && s.elements.includes(habitat.element)) && (
                 <span className="text-[6px] text-green-400 relative z-10">2x goo</span>
               )}
+
+              {/* Expand button */}
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onHabitatClick?.(habitat.id);
+                }}
+                className="absolute top-1 right-1 p-0.5 bg-white/10 hover:bg-white/20 rounded-md opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                title="Expand habitat"
+              >
+                <Maximize2 className="w-3 h-3" style={{ color: theme.accent }} />
+              </button>
             </div>
           );
         })}

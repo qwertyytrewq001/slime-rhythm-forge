@@ -1,3 +1,16 @@
+      {/* Ancient Hatchery title visually above the bench, scrolls with content */}
+      <div className="absolute -top-24 left-1/2 -translate-x-1/2 flex flex-col items-center justify-center pointer-events-none z-10">
+        <div className="transition-all duration-700 flex flex-col items-center opacity-100 scale-125">
+           <div className="relative flex flex-col items-center pointer-events-auto cursor-default">
+             <div className="absolute inset-0 pointer-events-none overflow-visible">
+               {[...Array(10)].map((_, i) => <FairySparkle key={i} index={i} />)}
+             </div>
+             <h3 className="text-[12px] text-[#FF7EB6] uppercase tracking-[0.3em] font-black transition-all duration-300 animate-intense-inscription-glow" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+               Ancient Hatchery
+             </h3>
+           </div>
+        </div>
+      </div>
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { formatTime } from '@/utils/timeUtils';
@@ -105,18 +118,7 @@ export function Hatchery() {
     <div ref={containerRef} className="fixed top-[78%] left-[68%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 group/hatchery">
       {discoveredSlime && <DiscoveryPopup slime={discoveredSlime} reason="Hatched from an Ancient Egg" onClose={finalizeHatch} />}
 
-      <div className="absolute inset-0 -top-24 flex flex-col items-center justify-center pointer-events-none z-10 translate-x-8">
-        <div className="transition-all duration-700 flex flex-col items-center opacity-100 scale-125">
-           <div className="relative flex flex-col items-center pointer-events-auto cursor-default">
-             <div className="absolute inset-0 pointer-events-none overflow-visible">
-               {[...Array(10)].map((_, i) => <FairySparkle key={i} index={i} />)}
-             </div>
-             <h3 className="text-[12px] text-[#FF7EB6] uppercase tracking-[0.3em] font-black transition-all duration-300 animate-intense-inscription-glow" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-               Ancient Hatchery
-             </h3>
-           </div>
-        </div>
-      </div>
+      {/* Ancient Hatchery title moved to layout for sticky header */}
 
       <div className="relative w-56 h-56 flex items-center justify-center cursor-pointer group pointer-events-auto" onClick={handleTap}>
         <div className="absolute inset-0 pointer-events-none overflow-visible">

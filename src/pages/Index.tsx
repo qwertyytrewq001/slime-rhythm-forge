@@ -5,6 +5,7 @@ import { TopBar } from '@/components/game/TopBar';
 import { SlimeGallery } from '@/components/game/SlimeGallery';
 import { BreedingPod } from '@/components/game/BreedingPod';
 import { StatsPanel } from '@/components/game/StatsPanel';
+import { HabitatViewer } from '@/components/game/HabitatViewer';
 import { Shop } from '@/components/game/Shop';
 import { Hatchery } from '@/components/game/Hatchery';
 import { ForestBackground } from '@/components/game/ForestBackground';
@@ -17,6 +18,7 @@ import { ShoppingBag, Images, Info } from 'lucide-react';
 function GameLayout() {
   const { state, dispatch } = useGameState();
   const [scrollOffset, setScrollOffset] = useState(0);
+  const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
@@ -157,9 +159,14 @@ function GameLayout() {
           >
             <BreedingPod onRequestGallery={openGalleryForSlot} />
             <Hatchery />
-            {state.habitats.length > 0 && <IslandGrid />}
+            {state.habitats.length > 0 && <IslandGrid onHabitatClick={setSelectedHabitatId} />}
           </div>
         </div>
+
+        {/* Habitat Viewer Modal */}
+        {selectedHabitatId && (
+          <HabitatViewer habitatId={selectedHabitatId} onClose={() => setSelectedHabitatId(null)} />
+        )}
       </div>
     </div>
   );
