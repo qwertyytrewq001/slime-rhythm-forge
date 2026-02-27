@@ -65,7 +65,7 @@ function GameLayout() {
             <div 
               className="absolute inset-0 bg-black animate-scale-in"
               style={{
-                backgroundImage: "url('/second screen background.png')",
+                backgroundImage: "url('./second_screen_background.png')",
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundRepeat: 'no-repeat',
