@@ -103,6 +103,57 @@
   scrollbar-width: none;  /* Firefox */
 }
 
+@keyframes soft-blue-inscription-glow {
+  0%, 100% { 
+    text-shadow: 0 0 4px #40E0D0, 1px 1px 1px #000;
+    opacity: 0.85;
+    transform: translateY(0);
+  }
+  50% { 
+    text-shadow: 0 0 10px #40E0D0, 1px 1px 1px #000;
+    opacity: 1;
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes intense-blue-inscription-glow {
+  0%, 100% { 
+    text-shadow: 0 0 10px #40E0D0, 0 0 20px #00CED1, 1px 1px 1px #000;
+    opacity: 0.9;
+    transform: translateY(0) scale(1);
+  }
+  50% { 
+    text-shadow: 0 0 30px #40E0D0, 0 0 50px #00CED1, 1px 1px 1px #000;
+    opacity: 1;
+    transform: translateY(-5px) scale(1.05);
+  }
+}
+
+@keyframes blue-inscription-glow {
+  0%, 100% { 
+    text-shadow: 0 0 6px #40E0D0, 1px 1px 1px #000;
+    opacity: 0.9;
+    transform: scale(1);
+  }
+  50% { 
+    text-shadow: 0 0 12px #40E0D0, 1px 1px 1px #000;
+    opacity: 1;
+    transform: scale(1.02);
+  }
+}
+
+.animate-soft-blue-inscription-glow {
+  animation: soft-blue-inscription-glow 4s ease-in-out infinite;
+}
+
+.animate-intense-blue-inscription-glow {
+  animation: intense-blue-inscription-glow 5s ease-in-out infinite;
+}
+
+.animate-blue-inscription-glow {
+  animation: blue-inscription-glow 5s ease-in-out infinite;
+}
+
 @keyframes fairy-sparkle {
   0% { transform: translate(0, 0) scale(0); opacity: 0; }
   50% { opacity: 1; transform: translate(var(--tx), var(--ty)) scale(1.5); }

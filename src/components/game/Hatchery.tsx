@@ -1,6 +1,6 @@
-import { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
-import { formatTime } from './BreedingPod';
+import { formatTime } from '@/utils/timeUtils';
 import { SlimeElement, Slime } from '@/types/slime';
 import { ELEMENT_COLORS, ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Sparkles, Zap, Wand2, MousePointer2, Trophy, X, ShoppingCart } from 'lucide-react';
@@ -10,24 +10,7 @@ import { SlimeCanvas } from './SlimeCanvas';
 import { generateSlimeLore } from '@/utils/loreGenerator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DiscoveryPopup } from './DiscoveryPopup';
-
-const FairySparkle = ({ index }: { index: number }) => {
-  const style = {
-    '--tx': `${(Math.sin(index) * 40)}px`,
-    '--ty': `${-20 - (Math.cos(index) * 30)}px`,
-    left: `${40 + (Math.sin(index * 1.5) * 30)}%`,
-    top: `${50 + (Math.cos(index * 1.2) * 20)}%`,
-    animationDelay: `${index * 0.3}s`,
-    backgroundColor: index % 2 === 0 ? '#FFD700' : '#FFFACD',
-  } as React.CSSProperties;
-  
-  return (
-    <div 
-      className="absolute w-1 h-1 rounded-full blur-[1px] animate-fairy-sparkle pointer-events-none z-0"
-      style={style}
-    />
-  );
-};
+import { FairySparkle } from './FairySparkle';
 
 function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackProgress: number; shaking?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -123,13 +106,12 @@ export function Hatchery() {
       {discoveredSlime && <DiscoveryPopup slime={discoveredSlime} reason="Hatched from an Ancient Egg" onClose={finalizeHatch} />}
 
       <div className="absolute inset-0 -top-24 flex flex-col items-center justify-center pointer-events-none z-10 translate-x-8">
-        <div className={`transition-all duration-700 flex flex-col items-center opacity-100 ${isHovered ? 'scale-125' : 'scale-110'}`}>
-           <div 
-             className="flex flex-col items-center pointer-events-auto cursor-default"
-             onMouseEnter={() => setIsHovered(true)}
-             onMouseLeave={() => setIsHovered(false)}
-           >
-             <h3 className={`text-[12px] text-[#FF7EB6] uppercase tracking-[0.3em] font-black transition-all duration-300 ${isHovered ? 'animate-intense-inscription-glow' : 'animate-soft-inscription-glow'}`} style={{ fontFamily: "'Press Start 2P', cursive" }}>
+        <div className="transition-all duration-700 flex flex-col items-center opacity-100 scale-125">
+           <div className="relative flex flex-col items-center pointer-events-auto cursor-default">
+             <div className="absolute inset-0 pointer-events-none overflow-visible">
+               {[...Array(10)].map((_, i) => <FairySparkle key={i} index={i} />)}
+             </div>
+             <h3 className="text-[12px] text-[#FF7EB6] uppercase tracking-[0.3em] font-black transition-all duration-300 animate-intense-inscription-glow" style={{ fontFamily: "'Press Start 2P', cursive" }}>
                Ancient Hatchery
              </h3>
            </div>

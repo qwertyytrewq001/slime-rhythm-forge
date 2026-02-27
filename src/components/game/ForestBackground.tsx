@@ -1,27 +1,24 @@
-import type { FC } from 'react';
+import React, { type FC } from 'react';
 
 interface ForestBackgroundProps {
-  /**
-   * Kept for API compatibility with previous implementation.
-   * The new background image is not tinted per element.
-   */
   elementTint?: string;
-  /**
-   * Scroll offset from the main content area, used for subtle parallax.
-   */
   parallaxOffset?: number;
 }
 
-const BackgroundSparkle = ({ x, y, color, delay }: { x: string, y: string, color: string, delay: string }) => (
+const BackgroundSparkle = ({ x, y, color, delay, size = "1.5px", duration = "4s" }: { x: string, y: string, color: string, delay: string, size?: string, duration?: string }) => (
   <div 
-    className="absolute w-1.5 h-1.5 rounded-full blur-[1px] animate-fairy-sparkle"
+    className="absolute rounded-full blur-[0.5px] animate-fairy-sparkle pointer-events-none"
     style={{
       left: x,
       top: y,
+      width: size,
+      height: size,
       backgroundColor: color,
       animationDelay: delay,
-      '--tx': '20px',
-      '--ty': '-30px',
+      animationDuration: duration,
+      boxShadow: `0 0 8px ${color}`,
+      '--tx': '15px',
+      '--ty': '-25px',
     } as any}
   />
 );
@@ -32,12 +29,11 @@ export const ForestBackground: FC<ForestBackgroundProps> = ({ parallaxOffset = 0
   return (
     <div
       aria-hidden="true"
-      className="fixed inset-0 pointer-events-none z-0 overflow-hidden"
+      className="fixed inset-0 pointer-events-none z-0 overflow-hidden bg-black"
     >
       <div
         className="absolute inset-0"
         style={{
-          // Uses your uploaded public asset.
           backgroundImage: "url('/Gemini_Generated_Image_m175nhm175nhm175.png')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
@@ -45,20 +41,37 @@ export const ForestBackground: FC<ForestBackgroundProps> = ({ parallaxOffset = 0
           transform: `translateY(${parallaxY}px)`,
         }}
       >
-        {/* Ambient Background Sparkles */}
-        <BackgroundSparkle x="15%" y="25%" color="#FF7EB6" delay="0s" />
-        <BackgroundSparkle x="85%" y="35%" color="#40E0D0" delay="1.5s" />
-        <BackgroundSparkle x="45%" y="15%" color="#FFD700" delay="0.8s" />
-        <BackgroundSparkle x="25%" y="65%" color="#FF7EB6" delay="2.2s" />
-        <BackgroundSparkle x="75%" y="75%" color="#40E0D0" delay="1.1s" />
-        <BackgroundSparkle x="10%" y="85%" color="#FFD700" delay="3s" />
-        <BackgroundSparkle x="90%" y="10%" color="#FF7EB6" delay="0.5s" />
+        {/* --- ALGAE MIST (Fine Green Dust clusters) --- */}
+        <BackgroundSparkle x="15%" y="75%" color="#4ADE80" delay="0s" size="2px" />
+        <BackgroundSparkle x="18%" y="78%" color="#22C55E" delay="1s" size="1px" />
+        <BackgroundSparkle x="12%" y="72%" color="#86EFAC" delay="2s" size="1.5px" />
+        <BackgroundSparkle x="65%" y="82%" color="#4ADE80" delay="0.5s" size="2px" />
+        <BackgroundSparkle x="68%" y="85%" color="#22C55E" delay="1.5s" size="1.5px" />
+
+        {/* --- CRYSTAL SHIMMER (Turquoise Dust clusters) --- */}
+        <BackgroundSparkle x="75%" y="45%" color="#40E0D0" delay="0.2s" size="2.5px" duration="3s" />
+        <BackgroundSparkle x="78%" y="48%" color="#00CED1" delay="1.2s" size="2px" duration="2.5s" />
+        <BackgroundSparkle x="72%" y="42%" color="#60A5FA" delay="2.2s" size="1.5px" duration="4s" />
+        <BackgroundSparkle x="30%" y="35%" color="#40E0D0" delay="0.8s" size="2px" />
+        <BackgroundSparkle x="33%" y="38%" color="#00CED1" delay="1.8s" size="1.5px" />
+
+        {/* --- LEAF & FLOWER GLITTER --- */}
+        <BackgroundSparkle x="25%" y="65%" color="#BBF7D0" delay="0.3s" size="2px" />
+        <BackgroundSparkle x="45%" y="25%" color="#FDE68A" delay="1.1s" size="1px" />
+        <BackgroundSparkle x="85%" y="30%" color="#FF7EB6" delay="2.5s" size="1.5px" />
+        <BackgroundSparkle x="55%" y="60%" color="#BBF7D0" delay="0.7s" size="2px" />
+
+        {/* --- AMBIENT FLOATING MANA --- */}
+        <BackgroundSparkle x="50%" y="20%" color="#FFD700" delay="0.8s" size="1px" />
+        <BackgroundSparkle x="10%" y="85%" color="#40E0D0" delay="3s" size="1.5px" />
+        <BackgroundSparkle x="90%" y="10%" color="#FF7EB6" delay="0.5s" size="1px" />
         
-        {/* Glow filters for background interest */}
-        <div className="absolute top-[20%] left-[15%] w-32 h-32 bg-[#FF7EB6]/10 blur-[60px] rounded-full animate-soft-pulse" />
-        <div className="absolute top-[40%] right-[10%] w-40 h-40 bg-[#40E0D0]/10 blur-[80px] rounded-full animate-soft-pulse" style={{ animationDelay: '2s' }} />
+        {/* Subtle radial depth gradient (not circles, just edge lighting) */}
+        <div className="absolute inset-0 bg-gradient-to-tr from-[#FF7EB6]/5 via-transparent to-[#40E0D0]/5 pointer-events-none" />
+        
+        {/* Grounding Mist */}
+        <div className="absolute bottom-0 left-0 w-full h-[25%] bg-gradient-to-t from-black/40 to-transparent" />
       </div>
     </div>
   );
 };
-
