@@ -2,16 +2,12 @@ import { useState, useMemo, useEffect } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, ShoppingCart, Sparkles } from 'lucide-react';
 
-const PER_PAGE = 12;
+const PER_PAGE = 8; // Reduced per page for 2-column layout
 type SortMode = 'rarity' | 'name' | 'newest';
 
 interface SlimeGalleryProps {
-  /**
-   * If provided, gallery will call this when a slime is clicked
-   * instead of dispatching SELECT_SLIME. Used by the breeding pod picker.
-   */
   onSelect?: (id: string) => void;
 }
 
@@ -20,17 +16,8 @@ export function SlimeGallery({ onSelect }: SlimeGalleryProps = {}) {
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortMode>('newest');
   const [page, setPage] = useState(0);
-  const [hoveredId, setHoveredId] = useState<string | null>(null);
-
-  useEffect(() => {
-    const timers = state.slimes
-      .filter(s => s.isNew)
-      .map(s => setTimeout(() => dispatch({ type: 'CLEAR_NEW_BADGE', slimeId: s.id }), 5 * 60 * 1000));
-    return () => timers.forEach(clearTimeout);
-  }, [state.slimes, dispatch]);
 
   const filtered = useMemo(() => {
-    // Filter out the slime that is currently in the hatchery
     const unhatchedId = state.activeHatching?.slime.id;
     let list = state.slimes.filter(s => s.id !== unhatchedId);
     
@@ -50,121 +37,92 @@ export function SlimeGallery({ onSelect }: SlimeGalleryProps = {}) {
   const currentPage = Math.min(page, totalPages - 1);
   const pageSlimes = filtered.slice(currentPage * PER_PAGE, (currentPage + 1) * PER_PAGE);
 
-  const handleDragStart = (e: React.DragEvent, id: string) => {
-    e.dataTransfer.setData('slimeId', id);
-    e.dataTransfer.effectAllowed = 'copy';
-  };
-
-  const rarityGlowStyle = (tier: string) => {
-    const color = RARITY_TIER_COLORS[tier as keyof typeof RARITY_TIER_COLORS] || '#A0A0A0';
-    const glowSize = { Common: 0, Uncommon: 0, Rare: 4, Epic: 6, Legendary: 8, Divine: 10, Ancient: 14 }[tier] || 0;
-    if (glowSize < 4) return {};
-    return { boxShadow: `0 0 ${glowSize}px ${color}50` };
-  };
-
-  const getElementNames = (slime: any) => {
-    const elems = slime.elements || [slime.element];
-    return elems.map((e: string) => ELEMENT_DISPLAY_NAMES[e as keyof typeof ELEMENT_DISPLAY_NAMES] || e).join(', ');
-  };
-
   return (
-    <div className="flex flex-col h-full bg-card/80 backdrop-blur-sm border-r-2 border-primary/15 p-2"
+    <div className="flex flex-col h-full bg-[#0a140a]/95 backdrop-blur-xl border-r-4 border-primary/20 p-8"
       style={{ fontFamily: "'VT323', monospace" }}>
-      <h2 className="text-center text-[11px] mb-4 text-[#FF7EB6] animate-inscription-glow font-black tracking-[0.2em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-        SLIME GALLERY
-      </h2>
-      {onSelect && (
-        <div className="text-center text-[14px] text-[#FF7EB6] animate-pulse font-black mb-4 uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-          Invoke a Parent
+      
+      <div className="flex items-center justify-center gap-3 mb-8">
+        <Sparkles className="w-5 h-5 text-[#FF7EB6]" />
+        <h2 className="text-sm text-[#FF7EB6] animate-soft-inscription-glow font-black uppercase tracking-[0.3em]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+          Slime Gallery
+        </h2>
+        <Sparkles className="w-5 h-5 text-[#FF7EB6]" />
+      </div>
+
+      {state.slimes.length <= 3 && (
+        <div className="flex items-center justify-center gap-2 mb-8 py-1 animate-pulse text-[13px] text-primary font-black uppercase tracking-widest border-b border-primary/20 pb-4">
+          <ShoppingCart className="w-4 h-4" />
+          <span>Visit Bazaar to summon slimes</span>
         </div>
       )}
 
-      <div className="relative mb-3">
-        <Search className="absolute left-2 top-1/2 -translate-y-1/2 w-4 h-4 text-primary font-bold" />
-        <input
-          type="text"
-          placeholder="SEARCH..."
-          value={search}
-          onChange={e => { setSearch(e.target.value); setPage(0); }}
-          className="w-full pl-8 pr-2 py-1.5 text-xs bg-background/90 border-2 border-primary/40 rounded-lg text-foreground placeholder:text-muted-foreground font-black"
-        />
+      <div className="flex gap-4 mb-8">
+        <div className="relative flex-1 group">
+          <Search className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-primary/40 group-focus-within:text-primary transition-colors" />
+          <input
+            type="text"
+            placeholder="Filter slimes..."
+            value={search}
+            onChange={e => { setSearch(e.target.value); setPage(0); }}
+            className="w-full pl-12 pr-4 py-4 bg-black/40 border-2 border-primary/10 rounded-2xl text-white placeholder:text-white/10 font-bold focus:border-primary/40 outline-none transition-all shadow-inner"
+          />
+        </div>
+        <select
+          value={sort}
+          onChange={e => setSort(e.target.value as SortMode)}
+          className="bg-black/40 border-2 border-primary/10 rounded-2xl px-6 py-2 text-white font-bold outline-none cursor-pointer hover:border-primary/30 transition-all appearance-none text-center"
+        >
+          <option value="rarity">Tier</option>
+          <option value="name">A-Z</option>
+          <option value="newest">New</option>
+        </select>
       </div>
 
-      <select
-        value={sort}
-        onChange={e => setSort(e.target.value as SortMode)}
-        className="mb-3 text-xs bg-background/90 border-2 border-primary/40 rounded-lg px-2 py-1 text-foreground font-black"
-      >
-        <option value="rarity">Sort: Rarity</option>
-        <option value="name">Sort: A-Z</option>
-        <option value="newest">Sort: Newest</option>
-      </select>
-
-      <div className="flex-1 overflow-y-auto">
-        <div className="grid grid-cols-3 gap-1.5">
+      <div className="flex-1 overflow-y-auto pr-2 scrollbar-none">
+        <div className="grid grid-cols-2 gap-6 pb-4">
           {pageSlimes.map(slime => (
             <div
               key={slime.id}
-              className={`relative flex flex-col items-center p-1 rounded cursor-pointer border transition-all ${
-                hoveredId === slime.id ? 'scale-110 z-10' : ''
-              } ${
-                state.selectedSlimeId === slime.id ? 'border-primary bg-primary/10' :
-                state.breedSlot1 === slime.id || state.breedSlot2 === slime.id ? 'border-accent bg-accent/10' :
-                'border-transparent'
-              }`}
-              style={rarityGlowStyle(slime.rarityTier)}
+              className={`group relative flex flex-col items-center p-5 rounded-3xl border-2 transition-all duration-500 ${
+                state.selectedSlimeId === slime.id ? 'border-primary bg-primary/20 shadow-[0_0_20px_rgba(var(--primary),0.2)]' :
+                'border-white/5 bg-white/5 hover:border-primary/30 hover:bg-white/10 hover:scale-105'
+              } cursor-pointer`}
               onClick={() => {
-                if (onSelect) {
-                  onSelect(slime.id);
-                } else {
-                  dispatch({ type: 'SELECT_SLIME', id: slime.id });
-                }
+                if (onSelect) onSelect(slime.id);
+                else dispatch({ type: 'SELECT_SLIME', id: slime.id });
               }}
-              onMouseEnter={() => setHoveredId(slime.id)}
-              onMouseLeave={() => setHoveredId(null)}
-              draggable
-              onDragStart={e => handleDragStart(e, slime.id)}
             >
-              {slime.isNew && (
-                <span className="absolute -top-1 -right-1 text-[6px] bg-accent text-accent-foreground px-0.5 rounded animate-pulse z-20"
-                  style={{ fontFamily: "'Press Start 2P', cursive" }}>
-                  New
-                </span>
-              )}
-
-              <SlimeCanvas slime={slime} size={hoveredId === slime.id ? 64 : 48} animated={hoveredId === slime.id} />
-
-              {/* Species name */}
-              <span className="text-[9px] text-center leading-tight text-foreground truncate w-full mt-0.5">
-                {slime.name}
-              </span>
-
-              {/* Rarity tier */}
-              <span className="text-[7px] font-bold" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
-                {slime.rarityTier}
-              </span>
-
-              {/* Elements */}
-              <span className="text-[6px] text-muted-foreground text-center leading-tight truncate w-full">
-                {getElementNames(slime)}
-              </span>
+              <div className="relative">
+                <div className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-20 transition-opacity" 
+                     style={{ backgroundColor: RARITY_TIER_COLORS[slime.rarityTier] }} />
+                <SlimeCanvas slime={slime} size={100} animated />
+              </div>
+              <div className="mt-4 w-full text-center">
+                <p className="text-base font-black text-white uppercase leading-none mb-1 break-words px-1">{slime.name}</p>
+                <p className="text-[11px] font-black tracking-widest" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
+                  {slime.rarityTier}
+                </p>
+              </div>
             </div>
           ))}
         </div>
       </div>
 
-      <div className="flex items-center justify-center gap-2 mt-2 text-xs text-muted-foreground">
-        <button onClick={() => setPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0} className="p-0.5 disabled:opacity-30 hover:text-primary">
-          <ChevronLeft className="w-4 h-4" />
+      <div className="flex items-center justify-between mt-8 pt-6 border-t-2 border-white/5">
+        <button onClick={() => setPage(Math.max(0, page - 1))} disabled={page === 0} 
+                className="p-3 hover:bg-white/10 rounded-2xl disabled:opacity-10 transition-all hover:scale-110 active:scale-90">
+          <ChevronLeft className="w-8 h-8 text-primary" />
         </button>
-        <span className="text-[10px]">{currentPage + 1}/{totalPages}</span>
-        <button onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))} disabled={currentPage >= totalPages - 1} className="p-0.5 disabled:opacity-30 hover:text-primary">
-          <ChevronRight className="w-4 h-4" />
+        <div className="flex flex-col items-center">
+          <span className="text-[10px] font-black text-primary/40 tracking-[0.3em] uppercase mb-1">Slime Log</span>
+          <span className="text-sm font-black text-white tracking-widest">
+            {page + 1} <span className="text-primary/40 mx-1">/</span> {totalPages}
+          </span>
+        </div>
+        <button onClick={() => setPage(Math.min(totalPages - 1, page + 1))} disabled={page >= totalPages - 1}
+                className="p-3 hover:bg-white/10 rounded-2xl disabled:opacity-10 transition-all hover:scale-110 active:scale-90">
+          <ChevronRight className="w-8 h-8 text-primary" />
         </button>
-      </div>
-
-      <div className="text-center text-[9px] text-muted-foreground mt-1">
-        {state.slimes.length} slimes
       </div>
     </div>
   );

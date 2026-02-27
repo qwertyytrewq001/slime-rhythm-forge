@@ -2,12 +2,15 @@ import { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { formatTime } from './BreedingPod';
 import { SlimeElement, Slime } from '@/types/slime';
-import { ELEMENT_COLORS, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
-import { Sparkles, Zap, Wand2 } from 'lucide-react';
+import { ELEMENT_COLORS, ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
+import { Sparkles, Zap, Wand2, MousePointer2, Trophy, X, ShoppingCart } from 'lucide-react';
 import { audioEngine } from '@/utils/audioEngine';
+import { drawEnhancedEgg } from '@/utils/eggRenderer';
+import { SlimeCanvas } from './SlimeCanvas';
+import { generateSlimeLore } from '@/utils/loreGenerator';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { DiscoveryPopup } from './DiscoveryPopup';
 
-// Fairy Sparkle Mote for the bench
 const FairySparkle = ({ index }: { index: number }) => {
   const style = {
     '--tx': `${(Math.sin(index) * 40)}px`,
@@ -26,8 +29,7 @@ const FairySparkle = ({ index }: { index: number }) => {
   );
 };
 
-// Canvas component for drawing the egg on the bench
-function HatchingEgg({ element, shaking }: { element: SlimeElement; shaking?: boolean }) {
+function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackProgress: number; shaking?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -36,60 +38,20 @@ function HatchingEgg({ element, shaking }: { element: SlimeElement; shaking?: bo
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
 
-    ctx.clearRect(0, 0, 80, 80);
-    ctx.imageSmoothingEnabled = false;
-
-    const colors = ELEMENT_COLORS[element] || ELEMENT_COLORS['nature'];
-    const baseColor = colors[0];
-    const accentColor = colors[1] || colors[0];
-
-    ctx.save();
-    ctx.translate(40, 40);
-    
-    // Draw Proper Egg Shape
-    const drawEggPath = (c: CanvasRenderingContext2D, width: number, height: number) => {
-      c.beginPath();
-      c.moveTo(0, height/2);
-      c.bezierCurveTo(width/2, height/2, width/2, -height/4, 0, -height/2);
-      c.bezierCurveTo(-width/2, -height/4, -width/2, height/2, 0, height/2);
-      c.closePath();
-    };
-
-    // Glow
-    ctx.shadowColor = baseColor;
-    ctx.shadowBlur = 15;
-
-    // Body
-    const grad = ctx.createRadialGradient(-5, -8, 2, 0, 0, 35);
-    grad.addColorStop(0, '#fff');
-    grad.addColorStop(0.4, baseColor);
-    grad.addColorStop(1, accentColor);
-    ctx.fillStyle = grad;
-    drawEggPath(ctx, 36, 46);
-    ctx.fill();
-
-    // Pattern
-    ctx.globalAlpha = 0.3;
-    ctx.strokeStyle = '#fff';
-    ctx.lineWidth = 2;
-    for(let i=0; i<5; i++) {
-        const x = Math.sin(i*2) * 8;
-        const y = Math.cos(i*3) * 12;
-        ctx.beginPath();
-        ctx.arc(x, y, 3, 0, Math.PI*2);
-        ctx.stroke();
-    }
-
-    ctx.restore();
-  }, [element]);
+    drawEnhancedEgg(ctx, {
+      size: 140,
+      slime,
+      crackProgress,
+      isShaking: shaking
+    });
+  }, [slime, crackProgress, shaking]);
 
   return (
     <canvas 
       ref={canvasRef} 
-      width={80} 
-      height={80} 
-      className={`w-20 h-20 pixel-art ${shaking ? 'animate-wiggle' : 'animate-bounce'}`} 
-      style={{ animationDuration: shaking ? '0.2s' : '3s' }} 
+      width={140} 
+      height={140} 
+      className={`w-32 h-32 pixel-art transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`}
     />
   );
 }
@@ -99,7 +61,9 @@ export function Hatchery() {
   const [now, setNow] = useState(Date.now());
   const [isHovered, setIsHovered] = useState(false);
   const [isHatching, setIsHatching] = useState(false);
-  const [showDiscovery, setShowDiscovery] = useState(false);
+  const [discoveredSlime, setDiscoveredSlime] = useState<Slime | null>(null);
+  const [crackProgress, setCrackProgress] = useState(0);
+  const [lastTapTime, setLastTapTap] = useState(0);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const activeHatching = state.activeHatching;
@@ -116,38 +80,48 @@ export function Hatchery() {
     }
   }, []);
 
-  const handleHatch = () => {
-    if (!isFinished || !activeHatching || isHatching) return;
-    
-    setIsHatching(true);
-    audioEngine.playSfx('achievement');
+  useEffect(() => {
+    if (!activeHatching) {
+      setCrackProgress(0);
+      setDiscoveredSlime(null);
+    }
+  }, [activeHatching]);
 
-    setTimeout(() => {
-      const slime = activeHatching.slime;
-      dispatch({ type: 'ADD_SLIME', slime });
-      dispatch({ type: 'SELECT_SLIME', id: slime.id });
-      dispatch({ type: 'SET_BEST_RARITY', score: slime.rarityScore });
-      dispatch({ type: 'ADD_GOO', amount: 500 });
-      setShowDiscovery(true);
-      dispatch({ type: 'FINISH_HATCHING' });
-      setIsHatching(false);
-    }, 1500);
+  const handleTap = () => {
+    if (!isFinished || !activeHatching || isHatching || discoveredSlime) return;
+    setCrackProgress(prev => Math.min(prev + 0.15, 1));
+    setLastTapTap(Date.now());
+    audioEngine.playSfx('tap');
+    if (crackProgress >= 0.85) handleReveal();
   };
 
-  return (
-    <div 
-      ref={containerRef}
-      className="fixed top-[78%] left-[68%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 group/hatchery"
-    >
-      {showDiscovery && activeHatching?.slime && (
-        <DiscoveryPopup 
-          slime={activeHatching.slime} 
-          reason={`Born from the Mystic Bench after a specialized incubation ritual.`}
-          onClose={() => setShowDiscovery(false)}
-        />
-      )}
+  const handleReveal = () => {
+    if (!activeHatching) return;
+    setIsHatching(true);
+    audioEngine.playSfx('achievement');
+    setTimeout(() => {
+      setDiscoveredSlime(activeHatching.slime);
+      setIsHatching(false);
+    }, 800);
+  };
 
-      {/* Visual Marker for the Bench Area - PERMANENTLY VISIBLE */}
+  const finalizeHatch = () => {
+    if (!discoveredSlime) return;
+    dispatch({ type: 'ADD_SLIME', slime: discoveredSlime });
+    dispatch({ type: 'SELECT_SLIME', id: discoveredSlime.id });
+    dispatch({ type: 'SET_BEST_RARITY', score: discoveredSlime.rarityScore });
+    dispatch({ type: 'ADD_GOO', amount: 500 });
+    dispatch({ type: 'FINISH_HATCHING' });
+    setDiscoveredSlime(null);
+    setCrackProgress(0);
+  };
+
+  const isRecentlyTapped = Date.now() - lastTapTime < 100;
+
+  return (
+    <div ref={containerRef} className="fixed top-[78%] left-[68%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 group/hatchery">
+      {discoveredSlime && <DiscoveryPopup slime={discoveredSlime} reason="Hatched from an Ancient Egg" onClose={finalizeHatch} />}
+
       <div className="absolute inset-0 -top-24 flex flex-col items-center justify-center pointer-events-none z-10 translate-x-8">
         <div className={`transition-all duration-700 flex flex-col items-center opacity-100 ${isHovered ? 'scale-125' : 'scale-110'}`}>
            <div 
@@ -162,67 +136,45 @@ export function Hatchery() {
         </div>
       </div>
 
-      {/* BENCH INTERACTION AREA */}
-      <div className="relative w-56 h-56 flex items-center justify-center cursor-pointer group pointer-events-auto">
-        
-        {/* PERMANENT Fairy Dust Particles */}
+      <div className="relative w-56 h-56 flex items-center justify-center cursor-pointer group pointer-events-auto" onClick={handleTap}>
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {[...Array(20)].map((_, i) => <FairySparkle key={i} index={i} />)}
-          
-          {/* The Specific 'Here the egg goes' Glow - MORE INTENSE */}
           {!activeHatching && (
             <div className={`absolute left-[65%] top-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FF7EB6]/50 blur-2xl animate-soft-pulse shadow-[0_0_40px_#FF7EB6] border-2 border-[#FF7EB6]/30 transition-all duration-500 ${isHovered ? 'w-24 h-28 opacity-100' : 'w-16 h-20 opacity-70'}`} />
           )}
         </div>
-
-        {/* Bench Shadow/Glow */}
         <div className={`absolute bottom-8 w-32 h-8 rounded-[100%] blur-2xl transition-all duration-1000 ${activeHatching ? 'bg-[#FF7EB6]/30 opacity-100 shadow-[0_0_25px_#FF7EB6]' : 'bg-primary/10 opacity-40'}`} />
-
         {!activeHatching ? (
-          <div className="flex flex-col items-center gap-2 translate-y-6">
-            <div className={`transition-all duration-500 text-center ${isHovered ? 'opacity-100 scale-110' : 'opacity-40'}`}>
-              {/* Star icon and text REMOVED as requested */}
-              <div className="w-1 h-1" /> 
-            </div>
-          </div>
+          <div className="flex flex-col items-center gap-2 translate-y-6"><div className="w-1 h-1" /></div>
         ) : (
           <div className="relative flex flex-col items-center">
-            
-            {/* THE PLAYER'S EGG */}
-            <div className="relative z-10 translate-x-12 translate-y-4" onClick={isFinished ? handleHatch : undefined}>
-              <HatchingEgg element={activeHatching.slime.element} shaking={isHatching} />
-              
-              {/* Cracking FX */}
+            <div className="relative z-10 translate-x-12 translate-y-4">
+              <HatchingEgg slime={activeHatching.slime} crackProgress={crackProgress} shaking={isRecentlyTapped || isHatching} />
               {isFinished && !isHatching && (
-                <div className="absolute inset-0 flex items-center justify-center">
-                  <Zap className="w-20 h-20 text-[#FF7EB6] animate-ping opacity-70" />
+                <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                  <Zap className={`w-20 h-20 text-[#FF7EB6] ${crackProgress > 0 ? 'animate-ping' : ''} opacity-70`} />
                 </div>
               )}
-
-              {/* Interaction Prompt */}
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48">
+              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 text-center pointer-events-none">
                 {isFinished ? (
                   <div className={`flex flex-col items-center ${isHatching ? 'animate-pulse' : 'animate-bounce'}`}>
                     <div className="text-[12px] text-[#FF7EB6] animate-inscription-glow font-black uppercase whitespace-nowrap drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] tracking-wider">
-                      {isHatching ? 'LIFE AWAKENS...' : 'READY TO HATCH!'}
+                      {isHatching ? 'LIFE AWAKENS...' : crackProgress > 0 ? 'TAP TO BREAK!' : 'READY TO HATCH!'}
                     </div>
+                    {!isHatching && crackProgress === 0 && (
+                      <div className="flex items-center gap-1 mt-1 text-[10px] text-white/60 uppercase font-bold animate-pulse"><MousePointer2 className="w-3 h-3" /> Click to Crack</div>
+                    )}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-1">
-                    <div className="text-[14px] text-[#FF7EB6] font-black tracking-[0.2em] animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                      {formatTime(activeHatching.endTime - now)}
-                    </div>
+                    <div className="text-[14px] text-[#FF7EB6] font-black tracking-[0.2em] animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">{formatTime(activeHatching.endTime - now)}</div>
                   </div>
                 )}
               </div>
             </div>
-
-            {/* Label for the Player's Egg */}
             {!isFinished && (
               <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap translate-x-12">
-                <p className="text-[11px] text-[#FF7EB6] animate-inscription-glow font-black uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
-                  {ELEMENT_DISPLAY_NAMES[activeHatching.slime.element]} Spirit
-                </p>
+                <p className="text-[11px] text-[#FF7EB6] animate-inscription-glow font-black uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">{ELEMENT_DISPLAY_NAMES[activeHatching.slime.element]} Slime</p>
               </div>
             )}
           </div>

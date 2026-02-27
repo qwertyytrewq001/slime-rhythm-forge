@@ -87,12 +87,9 @@ function GameLayout() {
             </SheetTrigger>
             <SheetContent
               side="left"
-              className="bg-background/95 backdrop-blur-md p-4 sm:p-6 flex flex-col"
+              className="bg-obsidian-glass p-0 border-r-4 border-primary/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl"
             >
-              <SheetHeader>
-                <SheetTitle>{gallerySlot ? 'Select a slime' : 'Gallery'}</SheetTitle>
-              </SheetHeader>
-              <div className="mt-4 flex-1 overflow-hidden">
+              <div className="flex-1 overflow-hidden">
                 <SlimeGallery onSelect={gallerySlot ? handleGallerySelect : undefined} />
               </div>
             </SheetContent>
