@@ -5,8 +5,15 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // Set base to relative for easier hosting compatibility
+  // 1. Set base to relative so it works on any hosting path
   base: "./", 
+  
+  // 2. Configure build output to use the 'docs' folder for GitHub Pages
+  build: {
+    outDir: "docs",
+    emptyOutDir: true, // Cleans the folder before building
+  },
+
   server: {
     host: "::",
     // Use a non-conflicting dev port; 8080 is taken by Postgres on your machine.
@@ -15,10 +22,12 @@ export default defineConfig(({ mode }) => ({
       overlay: false,
     },
   },
+
   plugins: [
     react(), 
     mode === "development" && componentTagger()
   ].filter(Boolean),
+
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
