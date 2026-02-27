@@ -1,0 +1,9 @@
+# Query: goo: 10
+# ContextLines: 1
+
+1 result - 1 file
+
+src\hooks\useGameState.tsx:
+  100      slimes: createStarterSlimes(),
+  101:     goo: 10,
+  102      selectedSlimeId: null,
