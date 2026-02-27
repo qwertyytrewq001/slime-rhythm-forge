@@ -13,7 +13,11 @@ const App = () => (
     <TooltipProvider>
       <AppToaster />
       <Sonner />
-      <BrowserRouter>
+      {/* The basename tells React Router that the app is living in a subfolder.
+          Without this, it tries to find the route for "/slime-rhythm-forge/" 
+          and fails, showing the NotFound page. 
+      */}
+      <BrowserRouter basename="/slime-rhythm-forge">
         <Routes>
           <Route path="/" element={<Index />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
