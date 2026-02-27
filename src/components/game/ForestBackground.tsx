@@ -34,7 +34,8 @@ export const ForestBackground: FC<ForestBackgroundProps> = ({ parallaxOffset = 0
       <div
         className="absolute inset-0"
         style={{
-          backgroundImage: "url('/Gemini_Generated_Image_m175nhm175nhm175.png')",
+          /* FIXED: Path updated to './' for GitHub Pages compatibility */
+          backgroundImage: "url('./Gemini_Generated_Image_m175nhm175nhm175.png')",
           backgroundSize: 'cover',
           backgroundPosition: 'center',
           backgroundRepeat: 'no-repeat',
@@ -66,7 +67,7 @@ export const ForestBackground: FC<ForestBackgroundProps> = ({ parallaxOffset = 0
         <BackgroundSparkle x="10%" y="85%" color="#40E0D0" delay="3s" size="1.5px" />
         <BackgroundSparkle x="90%" y="10%" color="#FF7EB6" delay="0.5s" size="1px" />
         
-        {/* Subtle radial depth gradient (not circles, just edge lighting) */}
+        {/* Subtle radial depth gradient */}
         <div className="absolute inset-0 bg-gradient-to-tr from-[#FF7EB6]/5 via-transparent to-[#40E0D0]/5 pointer-events-none" />
         
         {/* Grounding Mist */}
@@ -75,3 +76,5 @@ export const ForestBackground: FC<ForestBackgroundProps> = ({ parallaxOffset = 0
     </div>
   );
 };
+
+export default ForestBackground;
