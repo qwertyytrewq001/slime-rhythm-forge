@@ -13,12 +13,14 @@ import { IslandGrid } from '@/components/game/IslandGrid';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Images, Info, ChevronLeft } from 'lucide-react';
+import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { Achievements } from '@/components/game/Achievements';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
   const [currentView, setCurrentView] = useState<'breeding' | 'habitats'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
+  const [showAchievements, setShowAchievements] = useState(false);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
@@ -38,6 +40,11 @@ function GameLayout() {
     setGallerySlot(null);
   };
 
+  const handleMute = () => {
+    dispatch({ type: 'TOGGLE_MUTE' });
+    audioEngine.toggleMute();
+  };
+
   useEffect(() => {
     const startAudio = () => {
       audioEngine.resume();
@@ -50,6 +57,10 @@ function GameLayout() {
       audioEngine.stopLofi();
     };
   }, []);
+
+  const toolbarCircle = "relative bg-black/30 backdrop-blur-md h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/20 rounded-full hover:border-[#FF7EB6]/50 shadow-lg group pointer-events-auto";
+  const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
+  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 backdrop-blur-md rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
@@ -75,99 +86,12 @@ function GameLayout() {
         </div>
 
         <div className="pointer-events-auto relative z-20">
-          <TopBar />
+          <TopBar 
+            currentView={currentView}
+            onBackToAltar={currentView === 'habitats' ? () => setCurrentView('breeding') : undefined} 
+            onOpenHabitats={currentView === 'breeding' ? () => setCurrentView('habitats') : undefined}
+          />
         </div>
-
-        {/* Floating sidebar toggles (Only on Breeding screen) */}
-        {currentView === 'breeding' && (
-          <div className="pointer-events-none absolute inset-y-20 left-0 right-0 flex justify-between px-3 sm:px-6 z-20">
-            {/* Gallery toggle (left) */}
-            <Sheet
-              open={galleryOpen}
-              onOpenChange={open => {
-                setGalleryOpen(open);
-                if (!open) setGallerySlot(null);
-              }}
-            >
-              <SheetTrigger asChild>
-                <div className="group relative mt-4 w-16 h-16 pointer-events-auto">
-                  <div className="absolute inset-0 bg-[#FF7EB6]/40 rounded-full blur-xl group-hover:bg-[#FF7EB6]/60 transition-all animate-pulse" />
-                  <Button
-                    variant="secondary"
-                    size="icon"
-                    className="relative bg-[#140a0a] hover:bg-[#2a1a1a] backdrop-blur-xl border-2 border-[#FF7EB6] shadow-[0_0_20px_rgba(255,126,182,0.4)] h-16 w-16 rounded-full transition-all hover:scale-110 active:scale-90"
-                  >
-                    <Images className="w-10 h-10 text-[#FF7EB6] stroke-[3px] drop-shadow-[0_0_10px_#FF7EB6]" />
-                  </Button>
-                  <span className="absolute left-[110%] top-1/2 -translate-y-1/2 px-3 py-1 bg-obsidian-glass rounded border border-[#FF7EB6]/40 text-[11px] text-[#FF7EB6] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                    Gallery
-                  </span>
-                </div>
-              </SheetTrigger>
-              <SheetContent
-                side="left"
-                className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme"
-              >
-                <div className="flex-1 overflow-hidden">
-                  <SlimeGallery onSelect={gallerySlot ? handleGallerySelect : undefined} />
-                </div>
-              </SheetContent>
-            </Sheet>
-
-            {/* Right side controls: Market & Stats */}
-            <div className="flex flex-col gap-8 pointer-events-auto items-end mt-4">
-              {/* Market Toggle */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <div className="group relative w-16 h-16">
-                    <div className="absolute inset-0 bg-[#FF7EB6]/40 rounded-full blur-xl group-hover:bg-[#FF7EB6]/60 transition-all animate-pulse" />
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="relative bg-[#0a140a] hover:bg-[#1a2a1a] backdrop-blur-xl border-2 border-[#FF7EB6] shadow-[0_0_20px_rgba(255,126,182,0.4)] h-16 w-16 rounded-full transition-all hover:scale-110 active:scale-90"
-                    >
-                      <ShoppingBag className="w-10 h-10 text-[#FF7EB6] stroke-[3px] drop-shadow-[0_0_10px_#FF7EB6]" />
-                    </Button>
-                    <span className="absolute right-[110%] top-1/2 -translate-y-1/2 px-3 py-1 bg-obsidian-glass rounded border border-[#FF7EB6]/40 text-[11px] text-[#FF7EB6] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                      Bazaar
-                    </span>
-                  </div>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme"
-                >
-                  <Shop />
-                </SheetContent>
-              </Sheet>
-
-              {/* Stats Toggle (Codex) */}
-              <Sheet>
-                <SheetTrigger asChild>
-                  <div className="group relative w-16 h-16">
-                    <div className="absolute inset-0 bg-[#FF7EB6]/30 rounded-full blur-xl group-hover:bg-[#FF7EB6]/50 transition-all animate-pulse" />
-                    <Button
-                      variant="secondary"
-                      size="icon"
-                      className="relative bg-[#140a0a] hover:bg-[#2a1a1a] backdrop-blur-xl border-2 border-[#FF7EB6] shadow-[0_0_20px_rgba(255,126,182,0.4)] h-16 w-16 rounded-full transition-all hover:scale-110 active:scale-95"
-                    >
-                      <Info className="w-10 h-10 text-[#FF7EB6] stroke-[3px] drop-shadow-[0_0_10px_#FF7EB6]" />
-                    </Button>
-                    <span className="absolute right-[110%] top-1/2 -translate-y-1/2 px-3 py-1 bg-obsidian-glass rounded border border-[#FF7EB6] text-[11px] text-[#FF7EB6] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]">
-                      Codex
-                    </span>
-                  </div>
-                </SheetTrigger>
-                <SheetContent
-                  side="right"
-                  className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme"
-                >
-                  <StatsPanel onRequestGallery={() => openGalleryForSlot()} />
-                </SheetContent>
-              </Sheet>
-            </div>
-          </div>
-        )}
 
         <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none">
           {currentView === 'breeding' ? (
@@ -176,23 +100,78 @@ function GameLayout() {
               <Hatchery />
             </div>
           ) : (
-            <div className="w-full h-full flex flex-col items-end justify-center p-8 sm:pr-20 relative animate-scale-in pointer-events-auto">
-              {/* Back to Altar Button */}
-              <div className="absolute top-8 left-8 z-30">
-                <Button
-                  onClick={() => setCurrentView('breeding')}
-                  className="bg-black/60 hover:bg-[#FF7EB6] hover:text-black border-2 border-[#FF7EB6] text-[#FF7EB6] font-black rounded-full px-6 py-6 transition-all group"
-                >
-                  <ChevronLeft className="w-6 h-6 mr-2 group-hover:-translate-x-1 transition-transform" />
-                  Back to Altar
-                </Button>
-              </div>
-              
-              <div className="w-full max-w-4xl">
+            <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
+              <div className="w-full max-w-6xl">
                 <IslandGrid onHabitatClick={setSelectedHabitatId} />
               </div>
             </div>
           )}
+        </div>
+
+        {/* UNIFIED TOOLBAR - Bottom Right */}
+        <div className="absolute bottom-8 right-8 flex items-center gap-4 pointer-events-auto z-50">
+          {/* Achievements */}
+          <div className="relative group">
+            <button onClick={() => setShowAchievements(true)} className={toolbarCircle}>
+              <Trophy className={toolbarIcon} />
+              <span className={toolbarLabel}>Trophies</span>
+            </button>
+          </div>
+
+          {/* Gallery */}
+          <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
+            <SheetTrigger asChild>
+              <div className="relative group">
+                <button className={toolbarCircle}>
+                  <Images className={toolbarIcon} />
+                  <span className={toolbarLabel}>Gallery</span>
+                </button>
+              </div>
+            </SheetTrigger>
+            <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+              <div className="flex-1 overflow-hidden">
+                <SlimeGallery onSelect={handleGallerySelect} />
+              </div>
+            </SheetContent>
+          </Sheet>
+
+          {/* Mute */}
+          <div className="relative group">
+            <button onClick={handleMute} className={toolbarCircle}>
+              {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
+              <span className={toolbarLabel}>{state.muted ? 'Unmute' : 'Mute'}</span>
+            </button>
+          </div>
+
+          {/* Bazaar (Market) */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <div className="relative group">
+                <button className={toolbarCircle}>
+                  <ShoppingBag className={toolbarIcon} />
+                  <span className={toolbarLabel}>Bazaar</span>
+                </button>
+              </div>
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+              <Shop />
+            </SheetContent>
+          </Sheet>
+
+          {/* Codex (Stats) */}
+          <Sheet>
+            <SheetTrigger asChild>
+              <div className="relative group">
+                <button className={toolbarCircle}>
+                  <Info className={toolbarIcon} />
+                  <span className={toolbarLabel}>Codex</span>
+                </button>
+              </div>
+            </SheetTrigger>
+            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+              <StatsPanel onRequestGallery={() => openGalleryForSlot()} />
+            </SheetContent>
+          </Sheet>
         </div>
 
         {/* Habitat Viewer Modal */}
@@ -202,6 +181,10 @@ function GameLayout() {
           )}
         </div>
       </div>
+
+      {showAchievements && (
+        <Achievements onClose={() => setShowAchievements(false)} />
+      )}
     </div>
   );
 }

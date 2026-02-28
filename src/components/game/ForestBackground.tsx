@@ -28,7 +28,6 @@ const BackgroundSparkle = ({ x, y, color, delay, size = "1.5px", duration = "4s"
 
 export const ForestBackground: FC<ForestBackgroundProps> = ({ parallaxOffset = 0, mirrored = false, fixed = true, onPortalClick }) => {
   const parallaxY = -(parallaxOffset * 0.2);
-  const [isHoveringPortal, setIsHoveringPortal] = React.useState(false);
 
   return (
     <div
@@ -45,75 +44,9 @@ export const ForestBackground: FC<ForestBackgroundProps> = ({ parallaxOffset = 0
           transform: `${mirrored ? 'scaleX(-1)' : ''} translateY(${fixed ? parallaxY : 0}px)`,
         }}
       >
-        {/* Interactive Floating Island Portal (Precision Hover Area) */}
-        {!mirrored && onPortalClick && (
-          <div 
-            className="absolute left-[8%] top-[50%] -translate-y-1/2 w-32 h-32 pointer-events-auto cursor-pointer group z-[100]"
-            onMouseEnter={() => setIsHoveringPortal(true)}
-            onMouseLeave={() => setIsHoveringPortal(false)}
-            onClick={(e) => {
-              e.stopPropagation();
-              onPortalClick();
-            }}
-          >
-            {/* ETHEREAL CTA: Refined Neon green cloud glow */}
-            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-               {/* 1. Core Radiating Power (Neon Green - Softened) */}
-               <div className="absolute w-40 h-40 rounded-full bg-[#39FF14]/20 blur-[50px] animate-pulse" />
-               
-               {/* 2. Layered "Cloud" Mists (Neon Green - Softened) */}
-               <div className="absolute inset-0 flex items-center justify-center animate-cloud-drift-ultra-slow">
-                  <div 
-                    className="w-56 h-32 bg-[#39FF14]/25 blur-[40px] border border-[#39FF14]/10 shadow-[inset_0_0_30px_#39FF14,0_0_30px_#39FF14]"
-                    style={{
-                      borderRadius: '40% 60% 70% 30% / 40% 50% 60% 50%',
-                      animation: 'morph 10s ease-in-out infinite'
-                    }}
-                  />
-               </div>
-               
-               <div className="absolute inset-0 flex items-center justify-center animate-drift-ultra-slow" style={{ animationDelay: '2s' }}>
-                  <div 
-                    className="w-48 h-24 bg-[#39FF14]/15 blur-[35px]"
-                    style={{
-                      borderRadius: '60% 40% 30% 70% / 50% 60% 40% 50%',
-                      animation: 'morph 12s ease-in-out infinite reverse'
-                    }}
-                  />
-               </div>
+        {/* Ambient background elements kept, portal removed */}
 
-               {/* 3. Fairy Dust (Neon Green) */}
-               {[...Array(8)].map((_, i) => (
-                 <div key={i} className="absolute animate-fairy-sparkle w-1 h-1 rounded-full bg-[#39FF14]"
-                      style={{ 
-                        left: `${30 + Math.random() * 40}%`, 
-                        top: `${30 + Math.random() * 40}%`,
-                        animationDelay: `${Math.random() * 5}s`,
-                        opacity: 0.4,
-                        boxShadow: '0 0 8px #39FF14',
-                        animationDuration: '8s'
-                      }} />
-               ))}
-            </div>
-
-            {/* "Habitats" Text: Only appears and GLOWS on hover */}
-            <div className={`absolute inset-0 flex items-center justify-center transition-all duration-700 ${isHoveringPortal ? 'opacity-100 scale-110' : 'opacity-0 scale-95'}`}>
-               <span 
-                 className="text-[28px] text-[#4ADE80] font-black uppercase tracking-[0.2em] animate-float-slow"
-                 style={{ 
-                   fontFamily: "'VT323', monospace",
-                   /* Noticeable neon glow only visible when the div is hovered */
-                   textShadow: isHoveringPortal ? '0 0 10px #4ADE80, 0 0 20px #22C55E, 1px 1px 2px #000' : '1px 1px 2px #000',
-                   animationDuration: '7s'
-                 }}
-               >
-                 Habitats
-               </span>
-            </div>
-          </div>
-        )}
-
-        {/* --- CUSTOM ANIMATIONS FOR THE PORTAL --- */}
+        {/* --- CUSTOM ANIMATIONS --- */}
         <style>{`
           @keyframes drift-ultra-slow {
             0%, 100% { transform: translate(-15px, -10px); }

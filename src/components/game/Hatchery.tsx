@@ -81,7 +81,7 @@ export function Hatchery() {
   const handleReveal = () => {
     if (!activeHatching) return;
     setIsHatching(true);
-    audioEngine.playSfx('achievement');
+    audioEngine.playSfx('hatch');
     
     // Add slime to state immediately so it can be assigned to habitat in popup
     const newSlime = activeHatching.slime;
@@ -93,6 +93,7 @@ export function Hatchery() {
     setTimeout(() => {
       setDiscoveredSlime(newSlime);
       setIsHatching(false);
+      audioEngine.playSfx('discovery');
     }, 800);
   };
 

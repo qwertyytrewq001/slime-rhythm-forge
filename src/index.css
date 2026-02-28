@@ -56,9 +56,8 @@
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: 'VT323', monospace;
-    font-weight: 600;
+    @apply bg-background text-[#FF7EB6];
+    font-family: 'Press Start 2P', cursive !important;
     image-rendering: pixelated;
     /* Character shadow trick: Multi-directional black shadows for max readability */
     text-shadow: 
@@ -66,17 +65,33 @@
       -1px -1px 0 #000,
       1px -1px 0 #000,
       -1px 1px 0 #000,
+      0 0 10px #FF7EB6,
       0 2px 4px rgba(0,0,0,0.8);
   }
 
-  h1, h2, h3, h4, h5, h6, span, p, div {
-    /* Apply to almost all text elements */
+  h1, h2, h3, h4, h5, h6, span, p, div, button, input, textarea, select {
+    /* Apply to every single text element without exception */
+    font-family: 'Press Start 2P', cursive !important;
+    color: #FF7EB6 !important;
     text-shadow: 
       1px 1px 0 #000,
       -1px -1px 0 #000,
       1px -1px 0 #000,
       -1px 1px 0 #000,
+      0 0 10px #FF7EB6,
       0 2px 4px rgba(0,0,0,0.8);
+  }
+
+  .light-theme, .light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme span, .light-theme p, .light-theme div {
+    /* Even in light theme, we force the pink glow aesthetic */
+    font-family: 'Press Start 2P', cursive !important;
+    color: #FF7EB6 !important;
+    text-shadow: 
+      1px 1px 0 #000,
+      -1px -1px 0 #000,
+      1px -1px 0 #000,
+      -1px 1px 0 #000,
+      0 0 10px #FF7EB6 !important;
   }
 }
 

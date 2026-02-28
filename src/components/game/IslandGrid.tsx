@@ -5,8 +5,8 @@ import { Habitat } from '@/types/slime';
 import { useCallback, useState } from 'react';
 import { Maximize2, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const ITEMS_PER_PAGE = 10;
-const COLS = 5;
+const ITEMS_PER_PAGE = 8;
+const COLS = 4;
 
 interface IslandGridProps {
   onHabitatClick?: (habitatId: string) => void;
@@ -33,7 +33,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
   const startIndex = currentPage * ITEMS_PER_PAGE;
   const pageHabitats = state.habitats.slice(startIndex, startIndex + ITEMS_PER_PAGE);
 
-  // Fill the rest of the 10 slots with null if they don't exist
+  // Fill the rest of the 8 slots with null if they don't exist
   const displayHabitats = [...pageHabitats];
   while (displayHabitats.length < ITEMS_PER_PAGE) {
     displayHabitats.push(null as any);
@@ -41,34 +41,34 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
 
   return (
     <div className="w-full flex flex-col items-center" style={{ fontFamily: "'VT323', monospace" }}>
-      <div className="flex items-center justify-between w-full mb-6 px-4">
+      <div className="flex items-center justify-between w-full mb-8 px-4">
         <button 
           onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
           disabled={currentPage === 0}
-          className="p-2 bg-black/40 border-2 border-[#FF7EB6]/40 rounded-full hover:bg-[#FF7EB6] hover:text-black disabled:opacity-10 transition-all"
+          className="p-3 bg-black/60 border-2 border-[#FF7EB6] rounded-full hover:bg-[#FF7EB6] hover:text-black disabled:opacity-10 transition-all shadow-[0_0_15px_rgba(255,126,182,0.3)]"
         >
-          <ChevronLeft className="w-6 h-6" />
+          <ChevronLeft className="w-8 h-8" />
         </button>
 
-        <h3 className="text-sm text-center text-[#FF7EB6] font-black uppercase tracking-[0.3em]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-          Sanctuaries (Page {currentPage + 1}/{totalPages})
+        <h3 className="text-xl text-center text-[#FF7EB6] font-black uppercase tracking-[0.4em] drop-shadow-[0_2px_10px_#FF7EB660]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+          Mystic Sanctuaries ({currentPage + 1}/{totalPages})
         </h3>
 
         <button 
           onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
           disabled={currentPage >= totalPages - 1}
-          className="p-2 bg-black/40 border-2 border-[#FF7EB6]/40 rounded-full hover:bg-[#FF7EB6] hover:text-black disabled:opacity-10 transition-all"
+          className="p-3 bg-black/60 border-2 border-[#FF7EB6] rounded-full hover:bg-[#FF7EB6] hover:text-black disabled:opacity-10 transition-all shadow-[0_0_15px_rgba(255,126,182,0.3)]"
         >
-          <ChevronRight className="w-6 h-6" />
+          <ChevronRight className="w-8 h-8" />
         </button>
       </div>
 
-      <div className="grid gap-6 w-full max-w-5xl" style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}>
+      <div className="grid gap-8 w-full max-w-6xl" style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}>
         {displayHabitats.map((habitat, i) => {
           if (!habitat) {
             return (
-              <div key={`empty-${i}`} className="aspect-square rounded-[2rem] border-2 border-dashed border-white/5 bg-black/5 flex items-center justify-center">
-                <span className="text-[10px] text-white/10 font-black uppercase tracking-tighter">Empty</span>
+              <div key={`empty-${i}`} className="aspect-square rounded-[2.5rem] border-4 border-dashed border-white/10 bg-black/20 flex items-center justify-center">
+                <span className="text-xs text-white/20 font-black uppercase tracking-widest">Available Slot</span>
               </div>
             );
           }
@@ -81,14 +81,14 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
           return (
             <div
               key={habitat.id}
-              className="aspect-square rounded-[2rem] border-4 p-2 flex flex-col items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-105 group shadow-2xl"
+              className="aspect-square rounded-[2.5rem] border-[6px] p-4 flex flex-col items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-105 group shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
               style={{
-                borderColor: theme.accent + '80',
+                borderColor: theme.accent + '99',
                 backgroundColor: theme.bgImage ? 'transparent' : theme.bg + 'CC',
                 backgroundImage: theme.bgImage ? `url("${theme.bgImage}")` : 'none',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                boxShadow: `0 8px 24px rgba(0,0,0,0.6), inset 0 0 12px ${theme.accent}20`,
+                boxShadow: `0 15px 40px rgba(0,0,0,0.7), inset 0 0 30px ${theme.accent}30`,
               }}
               onDragOver={handleDragOver}
               onDrop={handleDrop(habitat.id)}
@@ -96,30 +96,32 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
               title={theme.desc}
             >
               <div
-                className="absolute inset-0 opacity-20 rounded-lg"
-                style={{ background: `radial-gradient(circle, ${theme.accent}40, transparent)` }}
+                className="absolute inset-0 opacity-30 rounded-lg"
+                style={{ background: `radial-gradient(circle, ${theme.accent}60, transparent)` }}
               />
 
-              <span className="text-[10px] font-black uppercase tracking-widest relative z-10" style={{ color: theme.accent }}>
-                {ELEMENT_DISPLAY_NAMES[habitat.element]}
-              </span>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-black/60 border-2 border-white/10 backdrop-blur-md z-10">
+                <span className="text-[12px] font-black uppercase tracking-[0.2em] relative z-10" style={{ color: theme.accent }}>
+                  {ELEMENT_DISPLAY_NAMES[habitat.element]}
+                </span>
+              </div>
 
-              <div className="flex gap-2 relative z-10 mt-2">
+              <div className="flex gap-4 relative z-10 mt-6">
                 {assignedSlimes.map(slime => slime && (
                   <div key={slime.id} className="flex flex-col items-center animate-float-slow" style={{ animationDelay: `${Math.random() * 3}s`, animationDuration: '6s' }}>
-                    <SlimeCanvas slime={slime} size={56} animated={false} />
+                    <SlimeCanvas slime={slime} size={84} animated={false} />
                   </div>
                 ))}
                 {assignedSlimes.length < habitat.capacity && (
-                  <div className="w-12 h-12 rounded-xl border-2 border-dashed flex items-center justify-center bg-black/40" style={{ borderColor: theme.accent + '30' }}>
-                    <span className="text-lg font-black text-white/20 group-hover:text-[#FF7EB6]">+</span>
+                  <div className="w-20 h-20 rounded-2xl border-4 border-dashed flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors group-hover:border-[#FF7EB6]/60" style={{ borderColor: theme.accent + '40' }}>
+                    <span className="text-3xl font-black text-white/20 group-hover:text-[#FF7EB6] animate-pulse">+</span>
                   </div>
                 )}
               </div>
 
               {assignedSlimes.some(s => s && s.elements.includes(habitat.element)) && (
-                <div className="absolute bottom-2 px-2 rounded-md bg-green-500/20 border border-green-500/30 z-10">
-                  <span className="text-[8px] text-green-400 font-black uppercase tracking-widest">2x Goo</span>
+                <div className="absolute bottom-4 px-3 py-1 rounded-lg bg-green-500/30 border-2 border-green-500/40 backdrop-blur-md z-10 animate-bounce">
+                  <span className="text-[10px] text-green-300 font-black uppercase tracking-[0.15em]">Goo Mastery x2</span>
                 </div>
               )}
 
@@ -128,9 +130,9 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
                   e.stopPropagation();
                   onHabitatClick?.(habitat.id);
                 }}
-                className="absolute top-2 right-2 p-1.5 bg-black/40 hover:bg-black/60 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity z-20"
+                className="absolute top-4 right-4 p-2 bg-black/60 hover:bg-[#FF7EB6] hover:text-black rounded-xl opacity-0 group-hover:opacity-100 transition-all z-20 shadow-xl border-2 border-white/10"
               >
-                <Maximize2 className="w-4 h-4" style={{ color: theme.accent }} />
+                <Maximize2 className="w-5 h-5" />
               </button>
             </div>
           );
