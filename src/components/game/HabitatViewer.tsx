@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { HABITAT_THEMES, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
-import { Habitat } from '@/types/slime';
+import { Habitat, Slime } from '@/types/slime';
 import { ChevronLeft, Plus } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SlimeGallery } from './SlimeGallery';

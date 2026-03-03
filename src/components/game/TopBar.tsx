@@ -3,6 +3,7 @@ import { useState } from 'react';
 import { audioEngine } from '@/utils/audioEngine';
 import { Volume2, VolumeX, Trophy, ChevronLeft, Castle } from 'lucide-react';
 import { FairySparkle } from './FairySparkle';
+import { Achievements } from './Achievements';
 
 interface TopBarProps {
   onBackToAltar?: () => void;
