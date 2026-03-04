@@ -1,7 +1,13 @@
-import { Slime, SlimeElement } from '@/types/slime';
+import { Slime, SlimeElement, SlimeEvolutionStage } from '@/types/slime';
 import { COLOR_PALETTE, ELEMENT_COLORS } from '@/data/traitData';
 
 const INTERNAL_SIZE = 64;
+
+export function getStage(level: number): SlimeEvolutionStage {
+  if (level < 5) return 'baby';
+  if (level < 10) return 'teen';
+  return 'adult';
+}
 
 export function drawSlime(
   ctx: CanvasRenderingContext2D,
@@ -22,6 +28,26 @@ export function drawSlime(
   const c2 = COLOR_PALETTE[t.color2] || '#7FBFFF';
   const element = slime.element || 'nature';
   const stars = slime.rarityStars ?? 1;
+  const level = slime.level ?? 1;
+  const stage = getStage(level);
+
+  // Stage multipliers
+  let stageScale = 1.0;
+  let eyeScaleMult = 1.0;
+  let bounceMult = 1.0;
+  let featureOpacity = 1.0;
+  let spikeLenMult = 1.0;
+
+  if (stage === 'baby') {
+    stageScale = 0.6;
+    eyeScaleMult = 1.3;
+    bounceMult = 1.3;
+    featureOpacity = 0;
+  } else if (stage === 'teen') {
+    stageScale = 0.85;
+    featureOpacity = 0.5;
+    spikeLenMult = 0.5;
+  }
 
   // Model-specific idle animation — MORE EXAGGERATED
   let bounce = 0, squashX = 1, squashY = 1, sway = 0, tilt = 0;
@@ -30,7 +56,7 @@ export function drawSlime(
     switch (model) {
       case 0: { // Blob: deep squash/stretch bounce + happy wiggle
         const hopCycle = Math.sin(phase * 1.3);
-        bounce = Math.abs(hopCycle) * 6.5;
+        bounce = Math.abs(hopCycle) * 6.5 * bounceMult;
         squashX = 1 + hopCycle * 0.18;
         squashY = 1 - hopCycle * 0.18;
         if (frame % 240 < 30) {
@@ -53,7 +79,7 @@ export function drawSlime(
       }
       case 2: { // Jelly: more fluid liquid wave ripple
         const wave = Math.sin(phase * 0.6);
-        bounce = wave * 3.5;
+        bounce = wave * 3.5 * bounceMult;
         squashX = 1 + Math.sin(phase * 0.7) * 0.15;
         squashY = 1 + Math.cos(phase * 0.7) * 0.15;
         sway = Math.sin(phase * 0.3) * 3;
@@ -67,7 +93,7 @@ export function drawSlime(
   }
 
   // Mythic dynamic size scaling (1.2-1.5x)
-  let sizeMultiplier = t.size * 0.42;
+  let sizeMultiplier = t.size * 0.42 * stageScale;
   if (stars >= 5) {
     sizeMultiplier *= animated ? 1.3 + Math.sin(frame * 0.025) * 0.1 : 1.3;
   } else if (stars >= 4) {
@@ -80,17 +106,17 @@ export function drawSlime(
   ctx.scale(squashX * sizeMultiplier, squashY * sizeMultiplier);
 
   // ★ ENHANCED rarity aura glow — deeper bloom for high rarity
-  if (stars >= 2 && animated) {
+  if (stars >= 2 && animated && stage !== 'baby') {
     const glowHue = stars >= 6 ? (frame * 4) % 360 : stars >= 5 ? (frame * 3) % 360 : stars >= 4 ? 45 : 160;
-    const glowAlpha = stars >= 5 ? 0.4 + Math.sin(frame * 0.04) * 0.18 : 0.2 + Math.sin(frame * 0.04) * 0.1;
+    const glowAlpha = (stars >= 5 ? 0.4 + Math.sin(frame * 0.04) * 0.18 : 0.2 + Math.sin(frame * 0.04) * 0.1) * featureOpacity;
     const glowSize = stars >= 5 ? stars * 6 : stars * 4;
     ctx.shadowColor = `hsla(${glowHue}, 90%, 60%, ${glowAlpha})`;
     ctx.shadowBlur = glowSize;
   }
 
   // Trait glow
-  if (t.glow > 0) {
-    const ga = t.glow * 0.14;
+  if (t.glow > 0 && stage !== 'baby') {
+    const ga = t.glow * 0.14 * featureOpacity;
     const gc = t.glow === 5 ? `hsla(${(frame * 3) % 360}, 80%, 60%, ${ga})` : hexToRgba(c1, ga);
     ctx.shadowColor = gc;
     ctx.shadowBlur = t.glow * 7;
@@ -103,13 +129,13 @@ export function drawSlime(
   ctx.shadowColor = 'transparent';
 
   // Dithered noise texture for gooey feel
-  drawDitherTexture(ctx, c1, c2, frame, animated);
+  drawDitherTexture(ctx, c1, c2, frame, animated, element);
 
   // Gradient veins
   drawVeinOverlay(ctx, c1, c2, t.shape, frame, animated);
 
   // Core shadow (bottom-right) — DEEPER
-  drawCoreShadow(ctx, t.shape, stars);
+  drawCoreShadow(ctx, t.shape, stars, bounce, squashY);
 
   // ★ RIM LIGHTING — dynamic, follows animation
   drawRimLight(ctx, c1, stars, frame, animated, model, sway);
@@ -117,46 +143,77 @@ export function drawSlime(
   // Top-left shine highlight
   drawTopShine(ctx, stars);
 
+  // Fresnel/Edge Glow (Subsurface Rim)
+  drawFresnelGlow(ctx, c1, stars, t.shape, model, frame, animated);
+
+  // Element-Specific Body Protrusions
+  if (stage !== 'baby') {
+    ctx.save(); ctx.globalAlpha = featureOpacity;
+    drawElementFeatures(ctx, element, c1, c2, frame, animated, bounce, squashX, squashY);
+    ctx.restore();
+  }
+
   // Pattern
   if (t.pattern > 0) drawPattern(ctx, t.pattern, c2, frame);
 
   // Spikes (model-adapted with rattle)
-  if (t.spikes > 0) drawSpikes(ctx, t.spikes, c2, model, frame, animated);
+  if (t.spikes > 0 && stage !== 'baby') {
+    ctx.save(); ctx.globalAlpha = featureOpacity;
+    drawSpikes(ctx, t.spikes, c2, model, frame, animated, bounce, spikeLenMult);
+    ctx.restore();
+  }
 
   // Shine edge (rarity)
   drawShineEdge(ctx, stars, frame, animated);
 
   // Eyes with bigger expressive pixels + blink cycles
-  drawEyes(ctx, t.eyes, frame, model, animated, stars);
+  drawEyes(ctx, t.eyes, frame, model, animated, stars, sway, eyeScaleMult);
 
   // Mouth with personality
-  drawMouth(ctx, t.mouth, model, frame, animated);
+  const mouthType = stage === 'baby' ? 0 : t.mouth; // Babies are always happy
+  drawMouth(ctx, mouthType, model, frame, animated, sway);
 
   // Accessory
-  if (t.accessory > 0) drawAccessory(ctx, t.accessory, c2);
+  if (t.accessory > 0 && stage !== 'baby') {
+    ctx.save(); ctx.globalAlpha = featureOpacity;
+    drawAccessory(ctx, t.accessory, c2, frame, animated, bounce);
+    ctx.restore();
+  }
 
   // Element particles (MORE density/variety)
-  if (animated) drawElementParticles(ctx, element, frame, stars, model);
+  if (animated && stage !== 'baby') {
+    ctx.save(); ctx.globalAlpha = featureOpacity;
+    drawElementParticles(ctx, element, frame, stars, model);
+    ctx.restore();
+  }
 
   // Aura particles
-  if (t.aura > 0 && animated) drawAura(ctx, t.aura, frame, stars, element);
+  if (t.aura > 0 && animated && stage !== 'baby') {
+    ctx.save(); ctx.globalAlpha = featureOpacity;
+    drawAura(ctx, t.aura, frame, stars, element);
+    ctx.restore();
+  }
 
   // Trait-specific flair
-  if (animated) drawTraitFlair(ctx, t, frame, element);
+  if (animated && stage !== 'baby') {
+    ctx.save(); ctx.globalAlpha = featureOpacity;
+    drawTraitFlair(ctx, t, frame, element);
+    ctx.restore();
+  }
 
   // 5★+ metallic shader + aura trail — ENHANCED
-  if (stars >= 5 && animated) {
+  if (stars >= 5 && animated && stage === 'adult') {
     drawMetallicShader(ctx, frame, stars);
     drawAuraTrail(ctx, frame, stars);
   }
 
   // 4★+ confetti
-  if (stars >= 4 && animated && frame % 80 < 40) {
+  if (stars >= 4 && animated && frame % 80 < 40 && stage === 'adult') {
     drawConfetti(ctx, frame, stars);
   }
 
   // ★ Quantum phase cycling (aura 4 / void element)
-  if (animated && (t.aura === 4 || element === 'void')) {
+  if (animated && (t.aura === 4 || element === 'void') && stage === 'adult') {
     drawQuantumPhase(ctx, frame, stars);
   }
 
@@ -257,6 +314,51 @@ function drawBody(ctx: CanvasRenderingContext2D, shape: number, c1: string, c2: 
     ctx.transform(1 + wobble, wobble * 0.5, -wobble * 0.5, 1 - wobble, 0, 0);
   }
 
+  defineBodyPath(ctx, shape, model, frame, animated);
+  ctx.fill();
+
+  if (model === 2 && animated) ctx.restore();
+
+  // ★ ANIMATED: Specular highlight orbits slightly
+  const orbitX = animated ? Math.sin(frame * 0.008) * 2 : 0;
+  const orbitY = animated ? Math.cos(frame * 0.008) * 2 : 0;
+
+  // Main specular highlight (top-left, larger + brighter)
+  const shineGrad = ctx.createRadialGradient(-14 + orbitX, -16 + orbitY, 1, -10 + orbitX, -12 + orbitY, 20);
+  shineGrad.addColorStop(0, 'rgba(255,255,255,0.65)');
+  shineGrad.addColorStop(0.35, 'rgba(255,255,255,0.3)');
+  shineGrad.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = shineGrad;
+  ctx.beginPath();
+  ctx.ellipse(-12 + orbitX, -15 + orbitY, 15, 11, -0.4, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Secondary small highlight
+  ctx.fillStyle = 'rgba(255,255,255,0.45)';
+  ctx.beginPath();
+  ctx.ellipse(-6 + orbitX * 0.5, -22 + orbitY * 0.5, 5, 3, -0.2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Tiny sparkle dot
+  ctx.fillStyle = 'rgba(255,255,255,0.8)';
+  ctx.beginPath();
+  ctx.arc(-16 + orbitX, -18 + orbitY, 2, 0, Math.PI * 2);
+  ctx.fill();
+
+  // ★ NEW: Inner subsurface scattering glow for gooey/metallic feel
+  if (stars >= 3) {
+    const sssGrad = ctx.createRadialGradient(0, 5, 3, 0, 0, 35);
+    sssGrad.addColorStop(0, hexToRgba(c1, 0.12));
+    sssGrad.addColorStop(0.5, hexToRgba(lightenColor(c1, 1.3), 0.06));
+    sssGrad.addColorStop(1, 'rgba(255,255,255,0)');
+    ctx.fillStyle = sssGrad;
+    ctx.beginPath();
+    ctx.arc(0, 0, 35, 0, Math.PI * 2);
+    ctx.fill();
+  }
+}
+
+function defineBodyPath(ctx: CanvasRenderingContext2D, shape: number, model: number, frame: number, animated: boolean) {
   switch (shape) {
     case 0: ctx.ellipse(0, 0, 45, 40, 0, 0, Math.PI * 2); break;
     case 1: ctx.arc(0, 0, 42, 0, Math.PI * 2); break;
@@ -268,13 +370,12 @@ function drawBody(ctx: CanvasRenderingContext2D, shape: number, c1: string, c2: 
       break;
     case 6:
       ctx.arc(0, 0, 40, 0, Math.PI * 2);
-      ctx.fill();
+      ctx.fill(); // Special case for moon
       ctx.globalCompositeOperation = 'destination-out';
       ctx.beginPath();
       ctx.arc(15, -10, 30, 0, Math.PI * 2);
       ctx.fill();
       ctx.globalCompositeOperation = 'source-over';
-      if (model === 2 && animated) ctx.restore();
       return;
     case 7: drawRegularPolygon(ctx, 0, 0, 40, 6); break;
     case 8:
@@ -314,55 +415,40 @@ function drawBody(ctx: CanvasRenderingContext2D, shape: number, c1: string, c2: 
       break;
     default: ctx.arc(0, 0, 40, 0, Math.PI * 2);
   }
-  ctx.fill();
-
-  if (model === 2 && animated) ctx.restore();
-
-  // Main specular highlight (top-left, larger + brighter)
-  const shineGrad = ctx.createRadialGradient(-14, -16, 1, -10, -12, 20);
-  shineGrad.addColorStop(0, 'rgba(255,255,255,0.65)');
-  shineGrad.addColorStop(0.35, 'rgba(255,255,255,0.3)');
-  shineGrad.addColorStop(1, 'rgba(255,255,255,0)');
-  ctx.fillStyle = shineGrad;
-  ctx.beginPath();
-  ctx.ellipse(-12, -15, 15, 11, -0.4, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Secondary small highlight
-  ctx.fillStyle = 'rgba(255,255,255,0.45)';
-  ctx.beginPath();
-  ctx.ellipse(-6, -22, 5, 3, -0.2, 0, Math.PI * 2);
-  ctx.fill();
-
-  // Tiny sparkle dot
-  ctx.fillStyle = 'rgba(255,255,255,0.8)';
-  ctx.beginPath();
-  ctx.arc(-16, -18, 2, 0, Math.PI * 2);
-  ctx.fill();
-
-  // ★ NEW: Inner subsurface scattering glow for gooey/metallic feel
-  if (stars >= 3) {
-    const sssGrad = ctx.createRadialGradient(0, 5, 3, 0, 0, 35);
-    sssGrad.addColorStop(0, hexToRgba(c1, 0.12));
-    sssGrad.addColorStop(0.5, hexToRgba(lightenColor(c1, 1.3), 0.06));
-    sssGrad.addColorStop(1, 'rgba(255,255,255,0)');
-    ctx.fillStyle = sssGrad;
-    ctx.beginPath();
-    ctx.arc(0, 0, 35, 0, Math.PI * 2);
-    ctx.fill();
-  }
 }
 
-function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string, frame: number, animated: boolean) {
+function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string, frame: number, animated: boolean, element: SlimeElement = 'nature') {
   ctx.globalAlpha = 0.07;
   const offset = animated ? frame * 0.005 : 0;
+  
   for (let i = 0; i < 40; i++) {
     const x = Math.sin(i * 7.3 + offset) * 28;
     const y = Math.cos(i * 5.1 + offset) * 24;
     const isLight = (Math.floor(x + 50) + Math.floor(y + 50)) % 2 === 0;
-    ctx.fillStyle = isLight ? '#fff' : darkenColor(c2, 0.6);
+    
+    // ★ ELEMENT-SPECIFIC DITHER
+    let dotColor = isLight ? '#fff' : darkenColor(c2, 0.6);
+    if (element === 'fire' || element === 'lava') {
+      dotColor = isLight ? '#FFCC33' : '#FF4400';
+    } else if (element === 'ice' || element === 'crystal') {
+      dotColor = isLight ? '#E0FFFF' : '#4682B4';
+    } else if (element === 'metal') {
+      // Horizontal scan lines for metal
+      ctx.fillStyle = isLight ? '#fff' : '#666';
+      ctx.fillRect(x - 4, y, 8, 1);
+      continue;
+    } else if (element === 'plant') {
+      // Small curved marks for plant
+      ctx.strokeStyle = isLight ? '#90EE90' : '#228B22';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath(); ctx.arc(x, y, 2, 0, Math.PI / 2); ctx.stroke();
+      continue;
+    }
+    
+    ctx.fillStyle = dotColor;
     ctx.fillRect(x - 0.5, y - 0.5, 1.5, 1.5);
   }
+  
   ctx.globalAlpha = 0.05;
   ctx.strokeStyle = darkenColor(c1, 0.7);
   ctx.lineWidth = 0.5;
@@ -381,7 +467,7 @@ function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string
   ctx.globalAlpha = 1;
 }
 
-function drawCoreShadow(ctx: CanvasRenderingContext2D, _shape: number, stars: number) {
+function drawCoreShadow(ctx: CanvasRenderingContext2D, _shape: number, stars: number, bounce: number = 0, squashY: number = 1) {
   // Bottom-right core shadow — DEEPER contrast
   const shadowIntensity = 0.22 + Math.min(stars * 0.03, 0.12);
   const shadowGrad = ctx.createRadialGradient(10, 14, 2, 8, 10, 40);
@@ -393,11 +479,15 @@ function drawCoreShadow(ctx: CanvasRenderingContext2D, _shape: number, stars: nu
   ctx.ellipse(8, 12, 32, 27, 0.3, 0, Math.PI * 2);
   ctx.fill();
 
-  // Ground shadow
-  ctx.globalAlpha = 0.15;
+  // ★ DYNAMIC GROUND SHADOW: squashes and lightens as slime bounces
+  const absBounce = Math.abs(bounce);
+  const shadowWidth = 26 + (6 - absBounce) * 1.5;
+  const shadowAlpha = 0.15 + (1 - absBounce/10) * 0.08;
+  ctx.globalAlpha = Math.max(0.04, shadowAlpha);
   ctx.fillStyle = '#000';
   ctx.beginPath();
-  ctx.ellipse(0, 38, 26, 6, 0, 0, Math.PI * 2);
+  // We draw it relative to ground level (38) but counteract the bounce translation
+  ctx.ellipse(0, 38 - bounce, shadowWidth, 6, 0, 0, Math.PI * 2);
   ctx.fill();
   ctx.globalAlpha = 1;
 }
@@ -453,22 +543,28 @@ function drawShineEdge(ctx: CanvasRenderingContext2D, stars: number, frame: numb
   ctx.globalAlpha = 1;
 }
 
-function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, model: number, animated: boolean, stars: number) {
+function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, model: number, animated: boolean, stars: number, sway: number = 0, scaleMult: number = 1.0) {
   const eyeY = -7;
   const eyeSpacing = 13;
+
+  // ★ PARALLAX: Eyes shift and scale slightly with sway
+  const leftSway = sway * 0.4;
+  const rightSway = sway * 0.4;
+  const leftScale = (1 - sway * 0.015) * scaleMult;
+  const rightScale = (1 + sway * 0.015) * scaleMult;
 
   const blinkPhase = animated ? Math.floor(frame / 90) % 12 : -1;
   const isBlinking = (blinkPhase === 0 || blinkPhase === 1) && animated;
 
   if (isBlinking) {
-    ctx.lineWidth = 2.5;
+    ctx.lineWidth = 2.5 * scaleMult;
     ctx.strokeStyle = '#1a1a1a';
     ctx.lineCap = 'round';
     ctx.beginPath();
-    ctx.arc(-eyeSpacing, eyeY, 4, 0.2, Math.PI - 0.2);
+    ctx.arc(-eyeSpacing + leftSway, eyeY, 4 * Math.abs(leftScale), 0.2, Math.PI - 0.2);
     ctx.stroke();
     ctx.beginPath();
-    ctx.arc(eyeSpacing, eyeY, 4, 0.2, Math.PI - 0.2);
+    ctx.arc(eyeSpacing + rightSway, eyeY, 4 * Math.abs(rightScale), 0.2, Math.PI - 0.2);
     ctx.stroke();
     return;
   }
@@ -483,56 +579,56 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
   switch (type) {
     case 0:
       ctx.fillStyle = '#1a1a1a';
-      ctx.fillRect(-eyeSpacing - 3, eyeY - 3, 6, 6);
-      ctx.fillRect(eyeSpacing - 3, eyeY - 3, 6, 6);
+      ctx.fillRect(-eyeSpacing - 3 * leftScale + leftSway, eyeY - 3 * leftScale, 6 * leftScale, 6 * leftScale);
+      ctx.fillRect(eyeSpacing - 3 * rightScale + rightSway, eyeY - 3 * rightScale, 6 * rightScale, 6 * rightScale);
       ctx.fillStyle = '#fff';
-      ctx.fillRect(-eyeSpacing - 1, eyeY - 2, 2, 2);
-      ctx.fillRect(eyeSpacing - 1, eyeY - 2, 2, 2);
+      ctx.fillRect(-eyeSpacing - 1 * leftScale + leftSway, eyeY - 2 * leftScale, 2 * leftScale, 2 * leftScale);
+      ctx.fillRect(eyeSpacing - 1 * rightScale + rightSway, eyeY - 2 * rightScale, 2 * rightScale, 2 * rightScale);
       break;
     case 1: {
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY, 6 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY, 6 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       const lookX = animated ? Math.sin(frame * 0.018) * 2 : 0;
       const lookY = animated ? Math.cos(frame * 0.025) * 1 : 0;
       ctx.fillStyle = '#1a1a1a';
-      ctx.beginPath(); ctx.arc(-eyeSpacing + lookX, eyeY + lookY, 3, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing + lookX, eyeY + lookY, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway + lookX, eyeY + lookY, 3 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway + lookX, eyeY + lookY, 3 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-eyeSpacing - 1.5, eyeY - 2, 1.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing - 1.5, eyeY - 2, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway - 1.5, eyeY - 2, 1.5 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway - 1.5, eyeY - 2, 1.5 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       break;
     }
     case 2:
       ctx.fillStyle = stars >= 4 ? '#FFD700' : '#1a1a1a';
-      drawStarShape(ctx, -eyeSpacing, eyeY, 2, 6, 5); ctx.fill();
-      drawStarShape(ctx, eyeSpacing, eyeY, 2, 6, 5); ctx.fill();
+      drawStarShape(ctx, -eyeSpacing + leftSway, eyeY, 2 * leftScale, 6 * leftScale, 5); ctx.fill();
+      drawStarShape(ctx, eyeSpacing + rightSway, eyeY, 2 * rightScale, 6 * rightScale, 5); ctx.fill();
       break;
     case 3: {
       ctx.fillStyle = '#FF4466';
-      const heartScale = model === 0 && animated ? 1 + Math.sin(frame * 0.15) * 0.25 : 1;
+      const heartScale = (model === 0 && animated ? 1 + Math.sin(frame * 0.15) * 0.25 : 1) * scaleMult;
       ctx.save();
       ctx.scale(heartScale, heartScale);
-      drawMiniHeart(ctx, -eyeSpacing, eyeY, 5);
-      drawMiniHeart(ctx, eyeSpacing, eyeY, 5);
+      drawMiniHeart(ctx, (-eyeSpacing + leftSway) / heartScale, eyeY / heartScale, 5 * leftScale / scaleMult);
+      drawMiniHeart(ctx, (eyeSpacing + rightSway) / heartScale, eyeY / heartScale, 5 * rightScale / scaleMult);
       ctx.restore();
       break;
     }
     case 4:
-      ctx.lineWidth = 2.5; ctx.strokeStyle = '#1a1a1a'; ctx.lineCap = 'round';
-      drawX(ctx, -eyeSpacing, eyeY, 4); drawX(ctx, eyeSpacing, eyeY, 4);
+      ctx.lineWidth = 2.5 * scaleMult; ctx.strokeStyle = '#1a1a1a'; ctx.lineCap = 'round';
+      drawX(ctx, -eyeSpacing + leftSway, eyeY, 4 * leftScale); drawX(ctx, eyeSpacing + rightSway, eyeY, 4 * rightScale);
       break;
     case 5: {
       ctx.fillStyle = '#FF0000';
       ctx.shadowColor = '#FF0000';
-      ctx.shadowBlur = 8;
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 4, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 4, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 8 * scaleMult;
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY, 4 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY, 4 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       if (animated && frame % 120 < 15) {
         ctx.globalAlpha = 0.6;
         ctx.fillStyle = '#FF0000';
-        ctx.fillRect(-eyeSpacing - 1, eyeY, 2, 50);
-        ctx.fillRect(eyeSpacing - 1, eyeY, 2, 50);
+        ctx.fillRect(-eyeSpacing + leftSway - 1 * scaleMult, eyeY, 2 * scaleMult, 50 * scaleMult);
+        ctx.fillRect(eyeSpacing + rightSway - 1 * scaleMult, eyeY, 2 * scaleMult, 50 * scaleMult);
         ctx.globalAlpha = 1;
       }
       ctx.shadowBlur = 0;
@@ -541,93 +637,99 @@ function drawEyes(ctx: CanvasRenderingContext2D, type: number, frame: number, mo
     }
     case 6: {
       ctx.fillStyle = '#0a0020';
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY, 6 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY, 6 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       if (animated) {
         for (let i = 0; i < 4; i++) {
           const sa = frame * 0.08 + i * 1.5;
-          const sd = 2.5 + i * 0.5;
+          const sd = (2.5 + i * 0.5) * scaleMult;
           ctx.fillStyle = i % 2 === 0 ? '#FFD700' : '#87CEEB';
-          ctx.beginPath(); ctx.arc(-eyeSpacing + Math.cos(sa) * sd, eyeY + Math.sin(sa) * sd, 0.8, 0, Math.PI * 2); ctx.fill();
-          ctx.beginPath(); ctx.arc(eyeSpacing + Math.cos(sa + 1) * sd, eyeY + Math.sin(sa + 1) * sd, 0.8, 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway + Math.cos(sa) * sd, eyeY + Math.sin(sa) * sd, 0.8 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+          ctx.beginPath(); ctx.arc(eyeSpacing + rightSway + Math.cos(sa + 1) * sd, eyeY + Math.sin(sa + 1) * sd, 0.8 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
         }
       }
       break;
     }
     case 7:
       ctx.fillStyle = '#FFD700';
-      drawStarShape(ctx, -eyeSpacing, eyeY, 1, 5, 4); ctx.fill();
-      drawStarShape(ctx, eyeSpacing, eyeY, 1, 5, 4); ctx.fill();
+      drawStarShape(ctx, -eyeSpacing + leftSway, eyeY, 1 * leftScale, 5 * leftScale, 4); ctx.fill();
+      drawStarShape(ctx, eyeSpacing + rightSway, eyeY, 1 * rightScale, 5 * rightScale, 4); ctx.fill();
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 1.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY, 1.5 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY, 1.5 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       break;
     case 8:
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 7, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 7, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY, 7 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY, 7 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#1a1a1a';
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY + 1, 3, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY + 1, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY + 1 * scaleMult, 3 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY + 1 * scaleMult, 3 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-eyeSpacing - 2, eyeY - 2, 2, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing - 2, eyeY - 2, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway - 2 * scaleMult, eyeY - 2 * scaleMult, 2 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway - 2 * scaleMult, eyeY - 2 * scaleMult, 2 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       break;
     case 9: {
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.ellipse(-eyeSpacing, eyeY, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(eyeSpacing, eyeY, 5, 3, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-eyeSpacing + leftSway, eyeY, 5 * Math.abs(leftScale), 3 * Math.abs(leftScale), 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(eyeSpacing + rightSway, eyeY, 5 * Math.abs(rightScale), 3 * Math.abs(rightScale), 0, 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#1a1a1a';
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY + 1, 2, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY + 1, 2, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY + 1 * scaleMult, 2 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY + 1 * scaleMult, 2 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       if (model === 2 && animated) {
         ctx.fillStyle = '#8888cc';
-        ctx.font = '7px monospace';
-        const zzOff = Math.sin(frame * 0.03) * 4;
-        ctx.fillText('z', 20, eyeY - 10 + zzOff);
-        ctx.font = '5px monospace';
-        ctx.fillText('z', 24, eyeY - 16 + zzOff * 0.7);
+        ctx.font = `${7 * scaleMult}px monospace`;
+        const zzOff = Math.sin(frame * 0.03) * 4 * scaleMult;
+        ctx.fillText('z', 20 * scaleMult, eyeY - 10 * scaleMult + zzOff);
+        ctx.font = `${5 * scaleMult}px monospace`;
+        ctx.fillText('z', 24 * scaleMult, eyeY - 16 * scaleMult + zzOff * 0.7);
       }
       break;
     }
     case 10: {
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY, 6 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY, 6 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = model === 1 ? '#ff2200' : '#cc0000';
       if (model === 1 && animated) {
         ctx.shadowColor = '#ff0000';
-        ctx.shadowBlur = 4;
+        ctx.shadowBlur = 4 * scaleMult;
       }
-      ctx.beginPath(); ctx.arc(-eyeSpacing + 1, eyeY, 3, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing + 1, eyeY, 3, 0, Math.PI * 2); ctx.fill();
-      ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
-      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.5; ctx.lineCap = 'round';
-      ctx.beginPath(); ctx.moveTo(-eyeSpacing - 6, eyeY - 7); ctx.lineTo(-eyeSpacing + 3, eyeY - 4); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(eyeSpacing + 6, eyeY - 7); ctx.lineTo(eyeSpacing - 3, eyeY - 4); ctx.stroke();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway + 1 * scaleMult, eyeY, 3 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway + 1 * scaleMult, eyeY, 3 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+      ctx.shadowColor = 'transparent';
+      ctx.strokeStyle = '#1a1a1a'; ctx.lineWidth = 2.5 * scaleMult; ctx.lineCap = 'round';
+      ctx.beginPath(); ctx.moveTo(-eyeSpacing + leftSway - 6 * scaleMult, eyeY - 7 * scaleMult); ctx.lineTo(-eyeSpacing + leftSway + 3 * scaleMult, eyeY - 4 * scaleMult); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(eyeSpacing + rightSway + 6 * scaleMult, eyeY - 7 * scaleMult); ctx.lineTo(eyeSpacing + rightSway - 3 * scaleMult, eyeY - 4 * scaleMult); ctx.stroke();
       break;
     }
     default: {
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing, eyeY, 6, 0, Math.PI * 2); ctx.fill();
-      const lkX = animated ? Math.sin(frame * 0.018) * 2 : 0;
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway, eyeY, 6 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway, eyeY, 6 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
+      const lkX = animated ? Math.sin(frame * 0.018) * 2 * scaleMult : 0;
       ctx.fillStyle = '#1a1a1a';
-      ctx.beginPath(); ctx.arc(-eyeSpacing + lkX, eyeY, 3, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing + lkX, eyeY, 3, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway + lkX, eyeY, 3 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway + lkX, eyeY, 3 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
       ctx.fillStyle = '#fff';
-      ctx.beginPath(); ctx.arc(-eyeSpacing - 1.5, eyeY - 2, 1.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.arc(eyeSpacing - 1.5, eyeY - 2, 1.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(-eyeSpacing + leftSway - 1.5 * scaleMult, eyeY - 2 * scaleMult, 1.5 * Math.abs(leftScale), 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.arc(eyeSpacing + rightSway - 1.5 * scaleMult, eyeY - 2 * scaleMult, 1.5 * Math.abs(rightScale), 0, Math.PI * 2); ctx.fill();
     }
   }
 
   if (model === 1) ctx.restore();
 }
 
-function drawMouth(ctx: CanvasRenderingContext2D, type: number, model: number, frame: number, animated: boolean) {
+function drawMouth(ctx: CanvasRenderingContext2D, type: number, model: number, frame: number, animated: boolean, sway: number = 0) {
   ctx.lineCap = 'round';
   ctx.lineJoin = 'round';
   const y = 7;
+  // ★ PARALLAX: Mouth shifts slightly with sway
+  const mouthSway = sway * 0.5;
+
+  ctx.save();
+  ctx.translate(mouthSway, 0);
 
   switch (type) {
     case 0: {
@@ -703,19 +805,24 @@ function drawMouth(ctx: CanvasRenderingContext2D, type: number, model: number, f
       ctx.strokeStyle = '#2a2a2a'; ctx.lineWidth = 1.5;
       ctx.beginPath(); ctx.moveTo(-6, y + 3); ctx.lineTo(6, y + 3); ctx.stroke();
   }
+  ctx.restore();
 }
 
-function drawSpikes(ctx: CanvasRenderingContext2D, type: number, color: string, model: number, frame: number, animated: boolean) {
+function drawSpikes(ctx: CanvasRenderingContext2D, type: number, color: string, model: number, frame: number, animated: boolean, bounce: number = 0, lenMult: number = 1.0) {
   ctx.fillStyle = color;
   ctx.globalAlpha = 0.75;
   const count = Math.min(type + 2, 8);
-  const spikeMultiplier = model === 1 ? 1.6 : model === 2 ? 0.6 : 1;
+  const spikeMultiplier = (model === 1 ? 1.6 : model === 2 ? 0.6 : 1) * lenMult;
   const rattle = model === 1 && animated ? Math.sin(frame * 0.25) * 3 : 0;
+
+  // ★ SECONDARY BOUNCE: Delayed bounce for physical weight
+  const delayedPhase = frame * 0.06;
+  const delayedBounce = animated ? Math.sin(delayedPhase * 1.3 - 0.3) * 2 : 0;
 
   for (let i = 0; i < count; i++) {
     const angle = (i / count) * Math.PI * 2 - Math.PI / 2;
     const x = Math.cos(angle) * 42;
-    const y = Math.sin(angle) * 38;
+    const y = Math.sin(angle) * 38 + delayedBounce;
     ctx.save();
     ctx.translate(x, y);
     ctx.rotate(angle + Math.PI / 2 + (rattle * 0.025 * (i % 2 === 0 ? 1 : -1)));
@@ -732,6 +839,7 @@ function drawSpikes(ctx: CanvasRenderingContext2D, type: number, color: string, 
   }
   ctx.globalAlpha = 1;
 }
+
 
 function drawPattern(ctx: CanvasRenderingContext2D, type: number, color: string, frame: number) {
   ctx.globalAlpha = 0.2;
@@ -771,7 +879,184 @@ function drawPattern(ctx: CanvasRenderingContext2D, type: number, color: string,
   ctx.globalAlpha = 1;
 }
 
-function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: string) {
+function drawFresnelGlow(ctx: CanvasRenderingContext2D, c1: string, stars: number, shape: number, model: number, frame: number, animated: boolean) {
+  if (stars < 2) return;
+  
+  ctx.save();
+  ctx.globalAlpha = 0.15;
+  ctx.strokeStyle = lightenColor(c1, 1.5);
+  ctx.lineWidth = 2;
+  
+  ctx.beginPath();
+  defineBodyPath(ctx, shape, model, frame, animated);
+  ctx.stroke();
+  
+  ctx.restore();
+}
+
+function drawElementFeatures(
+  ctx: CanvasRenderingContext2D, 
+  element: SlimeElement, 
+  c1: string, 
+  c2: string, 
+  frame: number, 
+  animated: boolean,
+  bounce: number,
+  squashX: number,
+  squashY: number
+) {
+  const delayedPhase = frame * 0.06;
+  const delayedBounce = animated ? Math.sin(delayedPhase * 1.3 - 0.2) * 2 : 0;
+  
+  ctx.save();
+  ctx.translate(0, delayedBounce);
+
+  switch (element) {
+    case 'earth': {
+      // Small rocky lumps
+      const lumps = [[-15, -25], [10, -30], [-5, -15]];
+      lumps.forEach(([lx, ly], i) => {
+        const s = 1 + Math.sin(frame * 0.02 + i) * 0.1;
+        ctx.fillStyle = darkenColor(c1, 0.6);
+        ctx.beginPath(); ctx.ellipse(lx, ly, 8 * s, 6 * s, 0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = c1;
+        ctx.beginPath(); ctx.ellipse(lx - 1, ly - 1, 6 * s, 4 * s, 0.2, 0, Math.PI * 2); ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.beginPath(); ctx.arc(lx - 3, ly - 2, 1, 0, Math.PI * 2); ctx.fill();
+      });
+      break;
+    }
+    case 'crystal': {
+      // Faceted gem shards
+      for (let i = 0; i < 3; i++) {
+        ctx.save();
+        ctx.rotate(i * 2 + frame * 0.005);
+        ctx.translate(25, 0);
+        const hue = (frame + i * 60) % 360;
+        ctx.fillStyle = `hsla(${hue}, 70%, 70%, 0.8)`;
+        ctx.beginPath();
+        ctx.moveTo(0, -8); ctx.lineTo(5, 0); ctx.lineTo(0, 8); ctx.lineTo(-5, 0);
+        ctx.fill();
+        ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.4;
+        ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(2, 0); ctx.lineTo(0, 8); ctx.fill();
+        ctx.restore();
+      }
+      break;
+    }
+    case 'fire':
+    case 'lava': {
+      // Flickering flame wisps
+      for (let i = 0; i < 3; i++) {
+        const fx = -15 + i * 15 + Math.sin(frame * 0.1 + i) * 3;
+        const fy = -35 + Math.cos(frame * 0.15 + i) * 5;
+        const grad = ctx.createLinearGradient(fx, fy, fx, fy + 15);
+        grad.addColorStop(0, '#FFFF00');
+        grad.addColorStop(1, '#FF4500');
+        ctx.fillStyle = grad;
+        ctx.beginPath();
+        ctx.moveTo(fx, fy);
+        ctx.quadraticCurveTo(fx + 5, fy + 10, fx, fy + 20);
+        ctx.quadraticCurveTo(fx - 5, fy + 10, fx, fy);
+        ctx.fill();
+      }
+      break;
+    }
+    case 'plant':
+    case 'nature': {
+      // Tiny sprout
+      ctx.fillStyle = '#44AA44';
+      ctx.beginPath(); ctx.ellipse(-5, -42, 6, 3, -0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(5, -42, 6, 3, 0.5, 0, Math.PI * 2); ctx.fill();
+      ctx.strokeStyle = '#226622'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(0, -35); ctx.lineTo(0, -45); ctx.stroke();
+      break;
+    }
+    case 'ice': {
+      // Frosted patches
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      for (let i = 0; i < 4; i++) {
+        const ix = Math.sin(i * 1.5) * 20;
+        const iy = Math.cos(i * 1.5) * 15 - 10;
+        ctx.beginPath();
+        ctx.moveTo(ix, iy);
+        for (let j = 0; j < 5; j++) {
+          ctx.lineTo(ix + Math.cos(j * 1.2) * 8, iy + Math.sin(j * 1.2) * 8);
+        }
+        ctx.fill();
+      }
+      break;
+    }
+    case 'water': {
+      // Dripping droplets
+      const dripY = (frame * 0.5) % 25;
+      ctx.fillStyle = 'rgba(100, 200, 255, 0.6)';
+      ctx.beginPath(); ctx.ellipse(15, 25 + dripY, 3, 4 + dripY * 0.2, 0, 0, Math.PI * 2); ctx.fill();
+      ctx.beginPath(); ctx.ellipse(-10, 20 + ((frame * 0.4) % 20), 2, 3, 0, 0, Math.PI * 2); ctx.fill();
+      break;
+    }
+    case 'electric': {
+      // Lightning antennae
+      ctx.strokeStyle = '#FFFF00'; ctx.lineWidth = 2;
+      for (let i = 0; i < 2; i++) {
+        const ex = (i === 0 ? -15 : 15);
+        ctx.beginPath();
+        ctx.moveTo(ex, -30);
+        ctx.lineTo(ex + (Math.random() - 0.5) * 10, -40);
+        ctx.lineTo(ex + (Math.random() - 0.5) * 10, -50);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'cosmic': {
+      // Orbiting dots
+      for (let i = 0; i < 3; i++) {
+        const ang = frame * 0.05 + i * (Math.PI * 2 / 3);
+        const ox = Math.cos(ang) * 35;
+        const oy = Math.sin(ang) * 10 - 5;
+        ctx.fillStyle = i === 0 ? '#FFD700' : i === 1 ? '#87CEEB' : '#FF69B4';
+        ctx.beginPath(); ctx.arc(ox, oy, 2, 0, Math.PI * 2); ctx.fill();
+      }
+      break;
+    }
+    case 'shadow': {
+      // Dark wisps
+      ctx.fillStyle = 'rgba(20, 0, 40, 0.4)';
+      for (let i = 0; i < 3; i++) {
+        const sx = Math.sin(frame * 0.04 + i) * 30;
+        const sy = Math.cos(frame * 0.04 + i) * 20;
+        ctx.beginPath(); ctx.arc(sx, sy, 10, 0, Math.PI * 2); ctx.fill();
+      }
+      break;
+    }
+    case 'void': {
+      // Cracks with starfield
+      ctx.save();
+      ctx.clip(); // Use body path if possible, but here we just draw over
+      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-20, -10); ctx.lineTo(0, 5); ctx.lineTo(20, -15);
+      ctx.stroke();
+      // Tiny stars in crack
+      ctx.fillStyle = '#fff';
+      for (let i = 0; i < 5; i++) {
+        ctx.fillRect(Math.sin(i) * 10, Math.cos(i) * 5, 1, 1);
+      }
+      ctx.restore();
+      break;
+    }
+  }
+
+  ctx.restore();
+}
+
+function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: string, frame: number = 0, animated: boolean = false, bounce: number = 0) {
+  // ★ SECONDARY BOUNCE: Accessories follow delayed
+  const delayedPhase = frame * 0.06;
+  const delayedBounce = animated ? Math.sin(delayedPhase * 1.3 - 0.4) * 3 : 0;
+  
+  ctx.save();
+  ctx.translate(0, delayedBounce);
+
   switch (type) {
     case 1:
       ctx.fillStyle = '#222';
@@ -836,6 +1121,7 @@ function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: strin
       break;
     default: break;
   }
+  ctx.restore();
 }
 
 function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeElement, frame: number, stars: number, model: number) {

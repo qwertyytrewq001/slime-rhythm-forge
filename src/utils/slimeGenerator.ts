@@ -97,7 +97,7 @@ export function createStarterSlimes(): Slime[] {
 // Create a slime with a specific element (for starter eggs in shop)
 export function createElementSlime(element: SlimeElement): Slime {
   // Map elements to color ranges that will derive that element
-  const elementColorMap: Partial<Record<SlimeElement, { color1: number; shape: number }>> = {
+  const elementColorMap: Record<SlimeElement, { color1: number; shape: number }> = {
     fire:     { color1: 3, shape: 2 },
     water:    { color1: 12, shape: 1 },
     plant:    { color1: 0, shape: 9 },
@@ -109,6 +109,13 @@ export function createElementSlime(element: SlimeElement): Slime {
     cosmic:   { color1: 4, shape: 4 },
     light:    { color1: 15, shape: 5 },
     shadow:   { color1: 4, shape: 13 },
+    metal:    { color1: 19, shape: 3 },
+    toxic:    { color1: 0, shape: 8 },
+    crystal:  { color1: 16, shape: 14 },
+    lava:     { color1: 10, shape: 2 },
+    nature:   { color1: 7, shape: 0 },
+    arcane:   { color1: 8, shape: 12 },
+    divine:   { color1: 10, shape: 4 },
   };
 
   const mapping = elementColorMap[element] || { color1: 0, shape: 0 };

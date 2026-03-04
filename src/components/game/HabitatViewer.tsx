@@ -2,10 +2,11 @@ import { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { HABITAT_THEMES, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
-import { Habitat } from '@/types/slime';
-import { ChevronLeft, Plus } from 'lucide-react';
+import { Habitat, SLIME_FOODS, SlimeFoodType, Slime } from '@/types/slime';
+import { ChevronLeft, Plus, Utensils, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SlimeGallery } from './SlimeGallery';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface HabitatViewerProps {
   habitatId: string;
@@ -13,7 +14,7 @@ interface HabitatViewerProps {
 }
 
 // Pixel-art layered backgrounds for each element type
-const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; backdrop: string; details: JSX.Element }> = {
+const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; backdrop: string; details: JSX.Element | null }> = {
   fire: {
     ground: 'linear-gradient(to top, #1a0a00 0%, #3a1a00 50%, #8B4513 100%)',
     midground: 'linear-gradient(180deg, rgba(255,69,0,0.3) 0%, transparent 50%)',
@@ -209,8 +210,7 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
   }
 };
 
-// Component for animated bouncing slimes with personality-based movement
-function BouncingSlime({ slime, habitatId }: { slime: Slime; habitatId: string }) {
+function BouncingSlime({ slime, habitatId, onSelect }: { slime: Slime; habitatId: string; onSelect: (s: Slime) => void }) {
   const [position, setPosition] = useState({ x: Math.random() * 60 + 20, y: 60 });
   const [velocity, setVelocity] = useState({ x: (Math.random() - 0.5) * 1.5, y: 0 });
   const [rotation, setRotation] = useState(0);
@@ -220,65 +220,53 @@ function BouncingSlime({ slime, habitatId }: { slime: Slime; habitatId: string }
   useEffect(() => {
     const interval = setInterval(() => {
       const elapsed = (Date.now() - startTime.current) / 1000;
-      const element = slime.element;
-      
       setPosition(prev => {
         let newX = prev.x + velocity.x;
         let newY = prev.y + velocity.y;
         let newVelX = velocity.x;
         let newVelY = velocity.y;
 
-        // Apply personality-based physics/logic
+        const element = slime.element;
         switch(element) {
           case 'fire':
           case 'electric':
-            // High energy, jittery
             newVelX += (Math.random() - 0.5) * 0.4;
             newVelY += (Math.random() - 0.5) * 0.4;
             break;
           case 'water':
           case 'wind':
-            // Floating, wavy
             newVelY = Math.sin(elapsed * 2) * 0.5;
             break;
           case 'plant':
           case 'earth':
-            // Slow, heavy
             newVelX *= 0.98; 
             break;
           default:
-            newVelY += 0.12; // Standard Gravity
+            newVelY += 0.12;
         }
 
-        // Standard physics for those not floating
         if (!['water', 'wind', 'cosmic', 'void'].includes(element)) {
-          newVelY += 0.15; // Gravity
+          newVelY += 0.15;
         }
 
-        // Bounce off walls
         if (newX < 10 || newX > 90) {
           newVelX *= -0.8;
           newX = newX < 10 ? 10 : 90;
         }
 
-        // Ground collision
         const groundLevel = 75;
         if (newY > groundLevel) {
           newVelY *= -0.6;
           newY = groundLevel;
-          // Small jump logic for heavy/standard
           if (Math.random() > 0.97) newVelY = -3 - (Math.random() * 2);
         }
 
-        // Apply air friction
         newVelX *= 0.99;
         newVelY *= 0.99;
 
         setVelocity({ x: newVelX, y: newVelY });
-        
-        // Visual polish
         setRotation(newVelX * 10);
-        setScale(1 + Math.sin(elapsed * 4) * 0.05); // Idle breathing
+        setScale(1 + Math.sin(elapsed * 4) * 0.05);
 
         return { x: newX, y: newY };
       });
@@ -289,7 +277,8 @@ function BouncingSlime({ slime, habitatId }: { slime: Slime; habitatId: string }
 
   return (
     <div
-      className="absolute transition-none"
+      className="absolute transition-none cursor-pointer group"
+      onClick={() => onSelect(slime)}
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
@@ -298,6 +287,9 @@ function BouncingSlime({ slime, habitatId }: { slime: Slime; habitatId: string }
         filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.3))'
       }}
     >
+      <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 backdrop-blur-md border border-white/20 px-2 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap">
+        {slime.name}
+      </div>
       <SlimeCanvas slime={slime} size={120} animated={true} />
     </div>
   );
@@ -306,6 +298,7 @@ function BouncingSlime({ slime, habitatId }: { slime: Slime; habitatId: string }
 export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
   const { state, dispatch } = useGameState();
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [selectedSlime, setSelectedSlime] = useState<Slime | null>(null);
   const habitat = state.habitats.find(h => h.id === habitatId);
 
   if (!habitat) return null;
@@ -324,121 +317,121 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
     }
   };
 
-  // Prevent body scroll when modal is open
+  const handleFeed = (foodType: SlimeFoodType) => {
+    if (!selectedSlime) return;
+    dispatch({ type: 'FEED_SLIME_XP', slimeId: selectedSlime.id, foodType });
+  };
+
+  const activeSlime = selectedSlime ? state.slimes.find(s => s.id === selectedSlime.id) || null : null;
+
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => {
-      document.body.style.overflow = originalOverflow;
-    };
+    return () => { document.body.style.overflow = originalOverflow; };
   }, []);
 
   return (
     <div className="fixed inset-0 z-50 flex flex-col bg-black/80 overflow-hidden" style={{ pointerEvents: 'auto' }}>
-      {/* Sticky Header */}
       <div className="sticky top-0 z-40 flex-shrink-0 bg-gradient-to-b from-black/95 via-black/90 to-black/70 pt-4 pb-8 px-6 backdrop-blur-md border-b border-white/10">
-        <button
-          onClick={onClose}
-          className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-lg transition-all"
-        >
+        <button onClick={onClose} className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-lg transition-all">
           <ChevronLeft className="w-6 h-6 text-[#FF7EB6]" />
         </button>
-        <h2 
-          className="text-center text-2xl font-black uppercase tracking-widest"
-          style={{ fontFamily: "'Press Start 2P', cursive", color: theme.accent }}
-        >
+        <h2 className="text-center text-2xl font-black uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive", color: theme.accent }}>
           {ELEMENT_DISPLAY_NAMES[habitat.element]} Sanctuary
         </h2>
-        <p className="text-center text-xs text-white/60 mt-2 font-bold tracking-wider">
-          {theme.desc}
-        </p>
+        <p className="text-center text-xs text-white/60 mt-2 font-bold tracking-wider">{theme.desc}</p>
       </div>
 
-      {/* Habitat Viewport */}
       <div className="flex-1 relative overflow-hidden">
-        {/* Background */}
-        <div 
-          className="absolute inset-0"
-          style={{ 
-            background: theme.bgImage ? `url("${theme.bgImage}")` : layers.backdrop,
-            backgroundSize: 'cover',
-            backgroundPosition: 'center'
-          }}
-        />
+        <div className="absolute inset-0" style={{ background: theme.bgImage ? `url("${theme.bgImage}")` : layers.backdrop, backgroundSize: 'cover', backgroundPosition: 'center' }} />
+        {!theme.bgImage && <div className="absolute inset-0" style={{ background: layers.midground }} />}
+        {!theme.bgImage && <div className="absolute bottom-0 left-0 right-0 h-1/2" style={{ background: layers.ground }} />}
+        {!theme.bgImage && <div className="absolute inset-0 pointer-events-none">{layers.details}</div>}
 
-        {/* Midground effect (only if no bgImage) */}
-        {!theme.bgImage && (
-          <div 
-            className="absolute inset-0"
-            style={{ background: layers.midground }}
-          />
-        )}
-
-        {/* Ground (only if no bgImage) */}
-        {!theme.bgImage && (
-          <div 
-            className="absolute bottom-0 left-0 right-0 h-1/2"
-            style={{ background: layers.ground }}
-          />
-        )}
-
-        {/* Environment Details Layer (only if no bgImage) */}
-        {!theme.bgImage && (
-          <div className="absolute inset-0 pointer-events-none">
-            {layers.details}
-          </div>
-        )}
-
-        {/* Slimes Container */}
         <div className="absolute inset-0">
           {assignedSlimes.map((slime) => slime && (
-            <BouncingSlime key={slime.id} slime={slime} habitatId={habitatId} />
+            <BouncingSlime key={slime.id} slime={slime} habitatId={habitatId} onSelect={setSelectedSlime} />
           ))}
-          
-          {/* Plus button for adding slimes */}
           {assignedSlimes.length < habitat.capacity && (
             <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30">
-              <button
-                onClick={() => setGalleryOpen(true)}
-                className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#FF7EB6] hover:scale-110 transition-all flex items-center justify-center group"
-              >
+              <button onClick={() => setGalleryOpen(true)} className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#FF7EB6] hover:scale-110 transition-all flex items-center justify-center group">
                 <Plus className="w-8 h-8 text-white/40 group-hover:text-[#FF7EB6]" />
               </button>
             </div>
           )}
         </div>
 
-        {/* Empty state (handled by the plus button above now, but keeping text) */}
-        {assignedSlimes.length === 0 && (
-          <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-            <div className="text-center translate-y-20">
-              <p className="text-white/40 font-bold text-sm tracking-wider">
-                This sanctuary is empty...
-              </p>
+        {activeSlime && (
+          <div className="absolute right-0 top-0 bottom-0 w-80 bg-black/60 backdrop-blur-xl border-l border-white/10 p-6 z-50 animate-in slide-in-from-right duration-300">
+            <button onClick={() => setSelectedSlime(null)} className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full">
+              <X className="w-5 h-5 text-white/60" />
+            </button>
+            <div className="flex flex-col items-center gap-4 mt-8">
+              <div className="bg-white/5 p-4 rounded-3xl border border-white/10">
+                <SlimeCanvas slime={activeSlime} size={100} animated />
+              </div>
+              <div className="text-center">
+                <h3 className="text-lg font-black text-white uppercase tracking-wider">{activeSlime.name}</h3>
+                <p className="text-[10px] text-[#FF7EB6] font-bold">LEVEL {activeSlime.level}</p>
+              </div>
+              <div className="w-full space-y-6 mt-4 flex-1 min-h-0">
+                <div className="space-y-2 h-full flex flex-col">
+                  <div className="flex items-center gap-2 text-white/60 shrink-0">
+                    <Utensils className="w-4 h-4" />
+                    <span className="text-[10px] font-black uppercase tracking-widest">Nourishment</span>
+                  </div>
+
+                  <ScrollArea className="flex-1 -mr-4 pr-4">
+                    <div className="space-y-2 pb-4">
+                      {(Object.keys(SLIME_FOODS) as SlimeFoodType[]).map(foodId => {
+                        const food = SLIME_FOODS[foodId];
+                        const canAfford = state.goo >= food.cost;
+                        return (
+                          <button
+                            key={foodId}
+                            onClick={() => handleFeed(foodId)}
+                            disabled={!canAfford || activeSlime.level >= 15}
+                            className={`w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all active:scale-95 ${
+                              canAfford ? 'bg-white/5 border-white/10 hover:border-[#FF7EB6] hover:bg-white/10' : 'opacity-30 grayscale'
+                            }`}
+                          >
+                            <div className="flex items-center gap-3">
+                              <span className="text-xl">{food.icon}</span>
+                              <div className="text-left">
+                                <p className="text-[11px] font-black text-white uppercase leading-none">{food.name}</p>
+                                <p className="text-[8px] text-white/40 font-bold">+{food.xpValue} XP</p>
+                              </div>
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <span className="text-xs font-black text-[#FF7EB6]">{food.cost}</span>
+                              <span className="text-[10px]">💧</span>
+                            </div>
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </ScrollArea>
+                </div>
+              </div>
+
             </div>
           </div>
         )}
       </div>
 
-      {/* Info Bar */}
       <div className="sticky bottom-0 z-40 flex-shrink-0 bg-gradient-to-t from-black/95 via-black/90 to-black/70 px-6 py-4 mt-4 backdrop-blur-md border-t border-white/10">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-white/60 font-bold tracking-wider uppercase">Inhabitants</p>
-            <p className="text-lg font-black text-white">
-              {assignedSlimes.length} <span className="text-white/60">/ {habitat.capacity}</span>
-            </p>
+            <p className="text-lg font-black text-white">{assignedSlimes.length} <span className="text-white/60">/ {habitat.capacity}</span></p>
           </div>
-          {assignedSlimes.some(s => s && s.elements.includes(habitat.element)) && (
-            <div className="bg-green-500/20 border border-green-500 rounded-lg px-4 py-2">
-              <p className="text-xs font-black text-green-400 tracking-wider">ELEMENT MATCH!</p>
-              <p className="text-sm font-bold text-green-300">2x Goo Production</p>
-            </div>
-          )}
+          <div className="text-right">
+            <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">Available Goo</p>
+            <p className="text-lg font-black text-[#FF7EB6]">{state.goo.toFixed(1)} 💧</p>
+          </div>
         </div>
       </div>
 
-      {/* Slime Selection Gallery */}
       <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
         <SheetContent side="bottom" className="h-[80vh] bg-obsidian-glass p-0 border-t-4 border-[#FF7EB6]/50 shadow-2xl">
           <SheetHeader className="p-4 border-b border-white/10 bg-black/40">
@@ -447,29 +440,16 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
             </SheetTitle>
           </SheetHeader>
           <div className="h-full overflow-hidden">
-             <SlimeGallery onSelect={handleSlimeSelect} />
+             <SlimeGallery onSelect={handleSlimeSelect} filterElement={habitat.element} />
           </div>
         </SheetContent>
       </Sheet>
 
-      {/* Styles for animations */}
       <style>{`
-        @keyframes float {
-          0%, 100% { transform: translateY(0px); }
-          50% { transform: translateY(-10px); }
-        }
-        @keyframes wave {
-          0%, 100% { transform: scaleY(1); }
-          50% { transform: scaleY(0.8); }
-        }
-        @keyframes spark-flash {
-          0%, 100% { opacity: 0.2; }
-          50% { opacity: 1; }
-        }
-        @keyframes drift {
-          0%, 100% { transform: translateX(0px); }
-          50% { transform: translateX(20px); }
-        }
+        @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
+        @keyframes wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.8); } }
+        @keyframes spark-flash { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
+        @keyframes drift { 0%, 100% { transform: translateX(0px); } 50% { transform: translateX(20px); } }
       `}</style>
     </div>
   );

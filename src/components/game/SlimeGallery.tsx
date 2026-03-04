@@ -2,6 +2,7 @@ import { useState, useMemo, useEffect } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
+import { getStage } from '@/utils/slimeRenderer';
 import { Search, ChevronLeft, ChevronRight, ShoppingCart, Sparkles } from 'lucide-react';
 
 const PER_PAGE = 8; // Reduced per page for 2-column layout
@@ -99,9 +100,18 @@ export function SlimeGallery({ onSelect }: SlimeGalleryProps = {}) {
               </div>
               <div className="mt-4 w-full text-center">
                 <p className="text-base font-black text-slate-700 uppercase leading-none mb-1 break-words px-1">{slime.name}</p>
-                <p className="text-[11px] font-black tracking-widest" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
-                  {slime.rarityTier}
-                </p>
+                <div className="flex items-center justify-center gap-2">
+                  <p className="text-[11px] font-black tracking-widest" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
+                    {slime.rarityTier}
+                  </p>
+                  <span className={`text-[9px] font-black px-1.5 py-0.5 rounded-full uppercase tracking-tighter ${
+                    getStage(slime.level) === 'baby' ? 'bg-blue-100 text-blue-500' :
+                    getStage(slime.level) === 'teen' ? 'bg-orange-100 text-orange-500' :
+                    'bg-purple-100 text-purple-500'
+                  }`}>
+                    {getStage(slime.level)}
+                  </span>
+                </div>
               </div>
             </div>
           ))}

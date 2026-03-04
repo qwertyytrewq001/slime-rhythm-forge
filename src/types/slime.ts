@@ -24,6 +24,8 @@ export type SlimeElement =
 // Rarity tiers (DML-inspired scaling)
 export type RarityTier = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Divine' | 'Ancient';
 
+export type SlimeEvolutionStage = 'baby' | 'teen' | 'adult';
+
 export interface Slime {
   id: string;
   name: string;
@@ -36,6 +38,8 @@ export interface Slime {
   createdAt: number;
   parentIds?: [string, string];
   isNew?: boolean;
+  level: number;
+  xp: number;
 }
 
 export interface Habitat {
@@ -99,7 +103,50 @@ export interface GameState {
   discoveredElements: string[];
   habitats: Habitat[];
   happiness: Record<string, number>;
+  lastEvolution: {
+    slimeId: string;
+    stage: SlimeEvolutionStage;
+    timestamp: number;
+  } | null;
 }
+
+export type SlimeFoodType = 'basic' | 'elemental' | 'royal';
+
+export interface SlimeFood {
+  id: SlimeFoodType;
+  name: string;
+  description: string;
+  cost: number;
+  xpValue: number;
+  icon: string;
+}
+
+export const SLIME_FOODS: Record<SlimeFoodType, SlimeFood> = {
+  basic: {
+    id: 'basic',
+    name: 'Sun-Ripened Berries',
+    description: 'Freshly foraged berries bursting with natural sweetness. A simple, wholesome snack.',
+    cost: 5,
+    xpValue: 10,
+    icon: '🍓',
+  },
+  elemental: {
+    id: 'elemental',
+    name: 'Wildflower Honey',
+    description: 'Pure, golden nectar collected from rare spirit blooms. Provides a significant energy boost.',
+    cost: 20,
+    xpValue: 55,
+    icon: '🍯',
+  },
+  royal: {
+    id: 'royal',
+    name: 'Enchanted Dragonfruit',
+    description: 'A legendary fruit that grows once a century. Radiates powerful energy that accelerates evolution.',
+    cost: 100,
+    xpValue: 350,
+    icon: '🌵',
+  },
+};
 
 export type GameAction =
   | { type: 'ADD_SLIME'; slime: Slime }
@@ -129,4 +176,5 @@ export type GameAction =
   | { type: 'BUY_HABITAT'; element: SlimeElement }
   | { type: 'ASSIGN_SLIME_TO_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'REMOVE_SLIME_FROM_HABITAT'; habitatId: string; slimeId: string }
-  | { type: 'FEED_SLIME'; slimeId: string };
+  | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType }
+  | { type: 'CLEAR_EVOLUTION' };

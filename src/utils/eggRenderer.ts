@@ -154,6 +154,59 @@ export function drawEnhancedEgg(ctx: CanvasRenderingContext2D, options: EggRende
     ctx.fill();
   }
 
+  // ★ NEW: Element-Specific Pixel Details (Sprouts, etc.)
+  ctx.globalAlpha = 1.0;
+  if (element === 'plant' || element === 'nature') {
+    // Little plant sprout on top
+    ctx.fillStyle = '#44AA44';
+    const sx = centerX + (getRand(seed + 'sprout') - 0.5) * 10;
+    const sy = centerY - height * 0.45;
+    ctx.beginPath();
+    ctx.ellipse(sx - 5, sy - 5, 6, 3, -0.5, 0, Math.PI * 2); 
+    ctx.fill();
+    ctx.beginPath();
+    ctx.ellipse(sx + 5, sy - 5, 6, 3, 0.5, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.strokeStyle = '#226622';
+    ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx, sy - 8); ctx.stroke();
+  } else if (element === 'fire' || element === 'lava') {
+    // Ember particles
+    ctx.fillStyle = '#FFDD00';
+    for(let i=0; i<5; i++) {
+      const px = centerX + (getRand(seed+'emberX'+i)-0.5) * width;
+      const py = centerY + (getRand(seed+'emberY'+i)-0.5) * height;
+      ctx.fillRect(px, py, 2, 2);
+    }
+  } else if (element === 'water' || element === 'ice') {
+    // Droplets
+    ctx.fillStyle = 'rgba(255,255,255,0.6)';
+    for(let i=0; i<3; i++) {
+      const dx = centerX + (getRand(seed+'dropX'+i)-0.5) * width * 0.8;
+      const dy = centerY + (getRand(seed+'dropY'+i)-0.5) * height * 0.8;
+      ctx.beginPath(); ctx.arc(dx, dy, 2, 0, Math.PI*2); ctx.fill();
+    }
+  } else if (element === 'void') {
+    // Dark cracks
+    ctx.strokeStyle = '#000';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(centerX - 10, centerY); ctx.lineTo(centerX + 10, centerY + 5);
+    ctx.stroke();
+  } else if (element === 'divine' || element === 'light') {
+    // Halo ring
+    ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.ellipse(centerX, centerY - height * 0.4, 15, 4, 0, 0, Math.PI*2);
+    ctx.stroke();
+  } else if (element === 'arcane') {
+    // Rune mark
+    ctx.fillStyle = '#D8BFD8';
+    ctx.font = '10px monospace';
+    ctx.fillText('⚡', centerX - 5, centerY);
+  }
+
   ctx.restore();
 
   // 6. SPECULAR SHINE

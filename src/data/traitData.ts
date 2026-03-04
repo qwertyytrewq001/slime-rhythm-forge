@@ -59,7 +59,7 @@ export const ELEMENT_NAMES: Record<SlimeElement, string> = {
   electric: '⚡ Electric', metal: '⚙️ Metal',   light: '✨ Light',
   shadow: '🌑 Shadow',   cosmic: '🌌 Cosmic',  void: '🕳️ Void',
   toxic: '☠️ Toxic',     crystal: '💎 Crystal', lava: '🌋 Lava',
-  nature: '🌿 Nature',   arcane: '🔮 Arcane',  divine: '👼 Divine',
+  nature: '🌿 Nature',   arcane: '📜 Ancient',  divine: '👼 Divine',
 };
 
 // Clean display names without emojis
@@ -67,7 +67,7 @@ export const ELEMENT_DISPLAY_NAMES: Record<SlimeElement, string> = {
   fire: 'Fire', water: 'Water', plant: 'Plant', earth: 'Earth', wind: 'Wind',
   ice: 'Ice', electric: 'Electric', metal: 'Metal', light: 'Light', shadow: 'Shadow',
   cosmic: 'Cosmic', void: 'Void', toxic: 'Toxic', crystal: 'Crystal', lava: 'Lava',
-  nature: 'Nature', arcane: 'Arcane', divine: 'Divine',
+  nature: 'Nature', arcane: 'Ancient', divine: 'Divine',
 };
 
 export const ELEMENT_ICONS: Record<SlimeElement, string> = {
@@ -209,9 +209,9 @@ export const RARITY_TIER_STARS: Record<string, number> = {
 // ===== PROGRESSIVE ELEMENT UNLOCKING =====
 
 export const ELEMENT_TIERS: Record<number, SlimeElement[]> = {
-  1: ['fire', 'water', 'plant', 'earth', 'light', 'shadow'],
-  2: ['ice', 'wind', 'electric'],
-  3: ['void', 'cosmic'],
+  1: ['fire', 'water', 'wind', 'earth'],
+  2: ['plant', 'light', 'shadow', 'nature'],
+  3: ['void', 'cosmic', 'divine', 'arcane', 'ice', 'electric', 'metal', 'toxic', 'crystal', 'lava'],
 };
 
 export function getPlayerLevel(totalBreeds: number, slimeCount: number): number {
@@ -248,19 +248,19 @@ export const HABITAT_THEMES: Record<SlimeElement, { bg: string; accent: string; 
   plant:    { bg: '#0A2810', accent: '#32CD32', desc: 'Vine-covered floral dome', bgImage: './plant_habitat.png' },
   earth:    { bg: '#2A1A08', accent: '#A0522D', desc: 'Rocky cavern with crystals', bgImage: './earth_habitat.png' },
   ice:      { bg: '#102838', accent: '#87CEEB', desc: 'Shimmering ice cave' },
-  wind:     { bg: '#1A2838', accent: '#B0C4DE', desc: 'Floating cloud platform' },
+  wind:     { bg: '#1A2838', accent: '#B0C4DE', desc: 'Floating cloud platform', bgImage: './Wind habitat.png' },
   electric: { bg: '#282008', accent: '#FFD700', desc: 'Tesla coil chamber' },
   metal:    { bg: '#1A1A1A', accent: '#C0C0C0', desc: 'Forge and anvil pit' },
   light:    { bg: '#2A2810', accent: '#FFFACD', desc: 'Sunlit crystal garden', bgImage: './light_habitat.png' },
   shadow:   { bg: '#0A0A1A', accent: '#483D8B', desc: 'Dark mist hollow', bgImage: './shadow_habitat_2.png' },
   cosmic:   { bg: '#100A28', accent: '#9B59B6', desc: 'Starfield observatory' },
-  void:     { bg: '#050508', accent: '#2D1B69', desc: 'Reality rift chamber' },
+  void:     { bg: '#050508', accent: '#2D1B69', desc: 'Reality rift chamber', bgImage: './Void Habitat.png' },
   toxic:    { bg: '#0A1A08', accent: '#7FFF00', desc: 'Bubbling acid swamp' },
   crystal:  { bg: '#1A0A28', accent: '#DA70D6', desc: 'Prism geode cavern' },
   lava:     { bg: '#280808', accent: '#FF0000', desc: 'Molten core pit' },
   nature:   { bg: '#0A2018', accent: '#3CB371', desc: 'Enchanted grove' },
-  arcane:   { bg: '#140A28', accent: '#8A2BE2', desc: 'Rune circle sanctum' },
-  divine:   { bg: '#28280A', accent: '#FFD700', desc: 'Celestial shrine' },
+  arcane:   { bg: '#140A28', accent: '#8A2BE2', desc: 'Rune circle sanctum', bgImage: './Ancient Habitat.png' },
+  divine:   { bg: '#28280A', accent: '#FFD700', desc: 'Celestial shrine', bgImage: './Divine Habitat.png' },
 };
 
 // Rarity weights

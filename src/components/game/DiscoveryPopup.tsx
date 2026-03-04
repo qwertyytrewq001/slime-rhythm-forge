@@ -156,10 +156,11 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
           {/* CTA Button */}
           <Button 
             onClick={onClose}
-            className="mt-8 w-full bg-[#FF7EB6] hover:bg-[#FF7EB6]/90 text-black font-black py-8 rounded-[1.5rem] border-b-6 border-black/40 shadow-2xl transition-all uppercase tracking-[0.2em] hover:translate-y-1 hover:border-b-4 active:translate-y-2 active:border-b-0"
+            disabled={compatibleHabitats.length === 0}
+            className="mt-8 w-full bg-[#FF7EB6] hover:bg-[#FF7EB6]/90 text-black font-black py-8 rounded-[1.5rem] border-b-6 border-black/40 shadow-2xl transition-all uppercase tracking-[0.2em] hover:translate-y-1 hover:border-b-4 active:translate-y-2 active:border-b-0 disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '12px' }}
           >
-            Send to Gallery
+            {compatibleHabitats.length > 0 ? "Assign to Sanctum" : "Build Sanctum First"}
           </Button>
         </div>
       </div>

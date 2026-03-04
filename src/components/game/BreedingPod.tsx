@@ -6,9 +6,11 @@ import { breedSlimes } from '@/utils/slimeGenerator';
 import { audioEngine } from '@/utils/audioEngine';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Slime } from '@/types/slime';
-import { Sparkles, Diamond } from 'lucide-react';
+import { Sparkles, Diamond, AlertCircle } from 'lucide-react';
 import { drawEnhancedEgg } from '@/utils/eggRenderer';
 import { FairySparkle } from './FairySparkle';
+import { getStage } from '@/utils/slimeRenderer';
+import { toast } from '@/hooks/use-toast';
 
 interface BreedingPodProps {
   onRequestGallery?: (slot: 1 | 2) => void; 
@@ -126,11 +128,20 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
     e.preventDefault();
     const id = e.dataTransfer.getData('slimeId');
     if (id) {
+      const slime = state.slimes.find(s => s.id === id);
+      if (slime && getStage(slime.level) !== 'adult') {
+        toast({
+          title: "Invalid Spirit",
+          description: "Only Adult spirits (Lv.10+) can participate in the ritual!",
+          variant: "destructive"
+        });
+        return;
+      }
       if (slot === 1 && id === state.breedSlot2) return;
       if (slot === 2 && id === state.breedSlot1) return;
       dispatch({ type: 'SET_BREED_SLOT', slot, id });
     }
-  }, [state.breedSlot1, state.breedSlot2, state.activeBreeding, dispatch]);
+  }, [state.slimes, state.breedSlot1, state.breedSlot2, state.activeBreeding, dispatch]);
 
   const handleDragOver = (e: React.DragEvent) => {
     if (state.activeBreeding) return;
@@ -141,6 +152,15 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
   const handleBreed = useCallback((e?: React.MouseEvent) => {
     if (e) e.stopPropagation();
     if (!slot1Slime || !slot2Slime || state.activeBreeding || state.activeHatching) return;
+
+    if (getStage(slot1Slime.level) !== 'adult' || getStage(slot2Slime.level) !== 'adult') {
+      toast({
+        title: "Incomplete Spirit",
+        description: "Both spirits must be Adults to begin the ritual.",
+        variant: "destructive"
+      });
+      return;
+    }
 
     setMergeParticles(true);
     audioEngine.playSfx('breed');
@@ -168,6 +188,20 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
     if (!state.activeBreeding || !breedFinished) return;
     const child = state.activeBreeding.resultSlime;
     
+    // Check if there is an available habitat for this child
+    const availableHabitat = state.habitats.find(h => 
+      child.elements.includes(h.element) && h.assignedSlimeIds.length < h.capacity
+    );
+
+    if (!availableHabitat) {
+      toast({
+        title: "No Sanctum Available",
+        description: "There's no sanctum available for the spirit. Please build a matching habitat first!",
+        variant: "destructive"
+      });
+      return;
+    }
+
     dispatch({ type: 'START_HATCHING', slime: child, duration: 30000 });
     dispatch({ type: 'ADD_BREED_HISTORY', result: {
       parent1Id: state.activeBreeding.parent1Id,
@@ -179,7 +213,7 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
     dispatch({ type: 'INCREMENT_BREEDS' });
     dispatch({ type: 'COLLECT_EGG' });
     audioEngine.playSfx('achievement');
-  }, [state.activeBreeding, breedFinished, dispatch]);
+  }, [state.activeBreeding, breedFinished, state.habitats, dispatch]);
 
   const handleSlotClick = (slot: 1 | 2) => {
     if (state.activeBreeding) return;

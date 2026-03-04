@@ -2,14 +2,17 @@ import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS, MODEL_NAMES } from '@/data/traitData';
 import { generateSlimeLore } from '@/utils/loreGenerator';
-import { Sparkles, BookOpen, Layers, Star, Zap } from 'lucide-react';
+import { getStage } from '@/utils/slimeRenderer';
+import { SLIME_FOODS, SlimeFoodType } from '@/types/slime';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sparkles, BookOpen, Layers, Star, Zap, Utensils } from 'lucide-react';
 
 interface StatsPanelProps {
   onRequestGallery?: () => void;
 }
 
 export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
-  const { state } = useGameState();
+  const { state, dispatch } = useGameState();
   const slime = state.slimes.find(s => s.id === state.selectedSlimeId);
 
   const getElementNames = (s: any) => {
@@ -17,10 +20,19 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
     return elems.map((e: string) => ELEMENT_DISPLAY_NAMES[e as keyof typeof ELEMENT_DISPLAY_NAMES] || e).join(', ');
   };
 
+  const handleFeed = (foodType: SlimeFoodType) => {
+    if (!slime) return;
+    dispatch({ type: 'FEED_SLIME_XP', slimeId: slime.id, foodType });
+  };
+
+  const xpToNext = slime ? (slime.level ?? 1) * 15 : 0;
+  const xpProgress = slime ? Math.min(100, ((slime.xp ?? 0) / xpToNext) * 100) : 0;
+  const stage = slime ? getStage(slime.level ?? 1) : 'baby';
+
   return (
     <div className="flex flex-col h-full bg-rose-50/90 text-slate-900 border-l-4 border-[#FF7EB6]/20 p-8 overflow-y-auto"
       style={{ fontFamily: "'VT323', monospace" }}>
-      
+
       <div className="flex items-center justify-center gap-4 mb-8">
         <BookOpen className="w-6 h-6 text-[#FF7EB6] animate-soft-pulse" />
         <h2 className="text-center text-sm text-[#FF7EB6] uppercase tracking-[0.3em] font-black" style={{ fontFamily: "'Press Start 2P', cursive" }}>
@@ -36,6 +48,61 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
                 style={{ backgroundColor: RARITY_TIER_COLORS[slime.rarityTier] }} />
             <div className="relative z-10 bg-white rounded-3xl p-8 border-4 border-[#FF7EB6]/10 backdrop-blur-md shadow-xl">
               <SlimeCanvas slime={slime} size={180} animated />
+            </div>
+          </div>
+
+          {/* Level & Stage */}
+          <div className="w-full space-y-4">
+            <div className="flex justify-between items-end px-1">
+              <span className={`text-[13px] font-black uppercase tracking-widest ${
+                stage === 'baby' ? 'text-blue-500' : stage === 'teen' ? 'text-orange-500' : 'text-purple-500'
+              }`}>
+                {stage}
+              </span>
+              <span className="text-xl font-black text-slate-700">LV.{slime.level ?? 1}</span>
+            </div>
+            <div className="h-4 w-full bg-slate-200/50 rounded-full overflow-hidden border-2 border-white shadow-inner">
+              <div 
+                className="h-full bg-gradient-to-r from-[#FF7EB6] to-[#FF9AD1] transition-all duration-500"
+                style={{ width: `${xpProgress}%` }}
+              />
+            </div>
+
+            {/* Food Selection */}
+            <div className="grid grid-cols-1 gap-2 mt-4 max-h-48">
+              <span className="text-[10px] text-slate-400 font-black uppercase tracking-[0.2em] mb-1 text-center shrink-0">Nourishment</span>
+              <ScrollArea className="flex-1 pr-2">
+                <div className="space-y-2">
+                  {(Object.keys(SLIME_FOODS) as SlimeFoodType[]).map(foodId => {
+                    const food = SLIME_FOODS[foodId];
+                    const canAfford = state.goo >= food.cost;
+                    const isMaxLevel = (slime.level ?? 1) >= 15;
+
+                    return (
+                      <button 
+                        key={foodId}
+                        onClick={() => handleFeed(foodId)}
+                        disabled={!canAfford || isMaxLevel}
+                        className={`w-full group relative flex items-center justify-between px-4 py-2 border-2 rounded-2xl transition-all active:scale-95 shadow-sm ${
+                          canAfford ? 'bg-white border-[#FF7EB6] hover:bg-[#FF7EB6] hover:text-white' : 'bg-slate-50 border-slate-200 text-slate-300'
+                        }`}
+                      >
+                        <div className="flex items-center gap-2">
+                          <span className="text-lg">{food.icon}</span>
+                          <div className="flex flex-col items-start text-left">
+                            <span className="text-[12px] font-black uppercase leading-none">{food.name}</span>
+                            <span className="text-[9px] font-bold opacity-60">+{food.xpValue} XP</span>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 font-black text-[13px]">
+                          <span>{food.cost}</span>
+                          <span className="text-[10px] opacity-60">💧</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </ScrollArea>
             </div>
           </div>
 
@@ -86,7 +153,10 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
                   <Zap className="w-4 h-4" />
                   <span className="text-[11px] uppercase font-black tracking-widest">Resonance Strength</span>
                 </div>
-                <span className="text-lg font-bold text-slate-700">{(slime.rarityScore * 0.1).toFixed(1)} <span className="text-xs text-slate-400 font-normal">Goo/Cycle</span></span>
+                <span className="text-lg font-bold text-slate-700">
+                  {(((slime.rarityScore * 0.1) * (1 + ((slime.level ?? 1) - 1) * 0.1)) * 0.1).toFixed(2)} 
+                  <span className="text-xs text-slate-400 font-normal"> Goo/Cycle</span>
+                </span>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center border-2 border-[#FF7EB6]/10 animate-float">
                 <div className="text-2xl">💧</div>

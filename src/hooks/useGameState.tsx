@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useRef, useMemo } from 'react';
-import { GameState, GameAction, Achievement, SlimeElement, Habitat } from '@/types/slime';
+import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType } from '@/types/slime';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel } from '@/data/traitData';
@@ -13,13 +13,19 @@ const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'rhythm_master', name: 'Rhythm Master', description: 'Hit 10 perfect rhythm taps in a row', reward: '100 goo', rewardAmount: 100, unlocked: false },
 ];
 
+export function getStage(level: number): SlimeEvolutionStage {
+  if (level < 5) return 'baby';
+  if (level < 10) return 'teen';
+  return 'adult';
+}
+
 function migrateRarityTier(tier: string): string {
   if (tier === 'Mythic') return 'Divine';
   if (tier === 'Supreme') return 'Ancient';
   return tier;
 }
 
-function migrateSlime(s: any) {
+function migrateSlime(s: any): Slime {
   if (!s || typeof s !== 'object') return s;
 
   const rawTraits = s.traits ?? {};
@@ -54,6 +60,8 @@ function migrateSlime(s: any) {
     elements: s.elements ?? elements,
     rarityTier: tier,
     rarityStars: stars,
+    level: s.level ?? 1,
+    xp: s.xp ?? 0,
   };
 }
 
@@ -94,6 +102,7 @@ function createInitialState(): GameState {
       discoveredElements: saved.discoveredElements ?? [],
       habitats: saved.habitats ?? [],
       happiness: saved.happiness ?? {},
+      lastEvolution: null,
     };
   }
   return {
@@ -115,13 +124,30 @@ function createInitialState(): GameState {
     discoveredElements: [],
     habitats: [],
     happiness: {},
+    lastEvolution: null,
   };
 }
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
-    case 'ADD_SLIME':
-      return { ...state, slimes: [...state.slimes, action.slime] };
+    case 'ADD_SLIME': {
+      const slime = action.slime;
+      // Find available habitat
+      const availableHabitat = state.habitats.find(h => 
+        slime.elements.includes(h.element) && h.assignedSlimeIds.length < h.capacity
+      );
+
+      if (availableHabitat) {
+        const habitats = state.habitats.map(h => {
+          if (h.id === availableHabitat.id) {
+            return { ...h, assignedSlimeIds: [...h.assignedSlimeIds, slime.id] };
+          }
+          return h;
+        });
+        return { ...state, slimes: [...state.slimes, slime], habitats };
+      }
+      return { ...state, slimes: [...state.slimes, slime] };
+    }
     case 'SELECT_SLIME':
       return { ...state, selectedSlimeId: action.id };
     case 'SET_BREED_SLOT':
@@ -249,13 +275,44 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       });
       return { ...state, habitats };
     }
-    case 'FEED_SLIME': {
-      const current = state.happiness[action.slimeId] || 0;
-      return {
-        ...state,
-        happiness: { ...state.happiness, [action.slimeId]: Math.min(100, current + 20) },
+    case 'FEED_SLIME_XP': {
+      const food = SLIME_FOODS[action.foodType];
+      if (state.goo < food.cost) return state;
+
+      let evolved: { slimeId: string; stage: SlimeEvolutionStage; timestamp: number } | null = null;
+
+      const slimes = state.slimes.map(s => {
+        if (s.id !== action.slimeId) return s;
+        
+        let newXp = s.xp + food.xpValue;
+        let newLevel = s.level;
+        let xpToNext = newLevel * 15;
+
+        const oldStage = getStage(newLevel);
+
+        while (newXp >= xpToNext && newLevel < 15) {
+          newXp -= xpToNext;
+          newLevel++;
+          xpToNext = newLevel * 15;
+        }
+
+        const newStage = getStage(newLevel);
+        if (newStage !== oldStage) {
+          evolved = { slimeId: s.id, stage: newStage, timestamp: Date.now() };
+        }
+
+        return { ...s, level: newLevel, xp: newXp };
+      });
+
+      return { 
+        ...state, 
+        slimes, 
+        goo: Math.round((state.goo - food.cost) * 100) / 100,
+        lastEvolution: evolved || state.lastEvolution
       };
     }
+    case 'CLEAR_EVOLUTION':
+      return { ...state, lastEvolution: null };
     default:
       return state;
   }
@@ -286,24 +343,31 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      // Base goo from slimes
-      let gooPerTick = state.slimes.reduce((sum, s) => sum + s.rarityScore * 0.1, 0) / 10;
+      // Base goo output multiplied by 1 + (level - 1) * 0.1, then cut to 20% total
+      let gooPerTick = (state.slimes.reduce((sum, s) => {
+        const levelMult = 1 + (s.level - 1) * 0.1;
+        return sum + (s.rarityScore * 0.1 * levelMult);
+      }, 0) / 10) * 0.2;
 
-      // Habitat bonus: element-matched slimes produce 2x
+      // Habitat bonus: element-matched slimes produce 2x, also cut to 20%
       for (const habitat of state.habitats) {
         for (const slimeId of habitat.assignedSlimeIds) {
           const slime = state.slimes.find(s => s.id === slimeId);
           if (slime && slime.elements.includes(habitat.element)) {
-            gooPerTick += slime.rarityScore * 0.1 / 10; // Double their contribution
+            const levelMult = 1 + (slime.level - 1) * 0.1;
+            gooPerTick += ((slime.rarityScore * 0.1 * levelMult) / 10) * 0.2; // Double their contribution
           }
         }
       }
 
-      // Happiness bonus
+      // Happiness bonus, cut to 20%
       for (const [slimeId, happiness] of Object.entries(state.happiness)) {
         if (happiness > 50) {
           const slime = state.slimes.find(s => s.id === slimeId);
-          if (slime) gooPerTick += (happiness / 100) * slime.rarityScore * 0.05 / 10;
+          if (slime) {
+            const levelMult = 1 + (slime.level - 1) * 0.1;
+            gooPerTick += ((happiness / 100) * (slime.rarityScore * 0.05 * levelMult) / 10) * 0.2;
+          }
         }
       }
 

@@ -15,6 +15,7 @@ import { audioEngine } from '@/utils/audioEngine';
 import { Button } from '@/components/ui/button';
 import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
+import { EvolutionPopup } from '@/components/game/EvolutionPopup';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
@@ -185,6 +186,8 @@ function GameLayout() {
       {showAchievements && (
         <Achievements onClose={() => setShowAchievements(false)} />
       )}
+
+      <EvolutionPopup />
     </div>
   );
 }

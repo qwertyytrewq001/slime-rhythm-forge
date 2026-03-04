@@ -2,7 +2,7 @@ import { useGameState } from '@/hooks/useGameState';
 import { createElementSlime } from '@/utils/slimeGenerator';
 import { audioEngine } from '@/utils/audioEngine';
 import { SlimeTraits, SlimeElement, Slime } from '@/types/slime';
-import { getUnlockedElements, ELEMENT_DISPLAY_NAMES, HABITAT_COSTS, HABITAT_THEMES, getPlayerLevel, ELEMENT_COLORS } from '@/data/traitData';
+import { getUnlockedElements, ELEMENT_DISPLAY_NAMES, HABITAT_COSTS, HABITAT_THEMES, getPlayerLevel, ELEMENT_COLORS, ALL_ELEMENTS } from '@/data/traitData';
 import { useState, useRef, useEffect, useMemo } from 'react';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -62,14 +62,32 @@ const ITEM_SHOP = [
   { id: 'element_treat', name: 'Element Treat', desc: 'Feed selected slime (+happiness)', cost: 15, icon: '🍬' },
 ];
 
-const STARTER_EGG_COST = 40;
+const STARTER_EGG_COST = 50;
+
+const SHOP_EGG_ELEMENTS: SlimeElement[] = ['earth', 'water', 'plant', 'fire', 'light', 'shadow', 'void', 'wind'];
+const SHOP_HABITAT_ELEMENTS: SlimeElement[] = ['earth', 'plant', 'water', 'fire', 'light', 'shadow', 'void', 'divine', 'arcane', 'wind'];
 
 export function Shop() {
   const { state, dispatch, playerLevel } = useGameState();
   const { toast } = useToast();
   const unlockedElements = getUnlockedElements(playerLevel);
 
+  const getRequiredLevel = (element: SlimeElement): number => {
+    if (['fire', 'water', 'plant', 'earth', 'light', 'shadow'].includes(element)) return 1;
+    if (['ice', 'wind', 'electric', 'nature'].includes(element)) return 6;
+    return 11;
+  };
+
   const handleBuyEgg = (element: SlimeElement) => {
+    const reqLevel = getRequiredLevel(element);
+    if (playerLevel < reqLevel) {
+      toast({
+        title: "Level Too Low",
+        description: `Your spirit resonance must reach Level ${reqLevel} to summon this egg!`,
+        variant: "destructive"
+      });
+      return;
+    }
     if (state.goo < STARTER_EGG_COST) return;
     if (state.activeHatching) {
       toast({
@@ -119,7 +137,7 @@ export function Shop() {
           </div>
           <div>
             <h2 className="text-base font-black text-[#FF7EB6] uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-              Mystic Bazaar
+              MystIC Bazaar
             </h2>
             <p className="text-sm text-slate-500 italic mt-1 font-bold">
               Treasures from the slime world...
@@ -150,24 +168,33 @@ export function Shop() {
           <TabsContent value="eggs" className="h-full m-0 outline-none">
             <ScrollArea className="h-full px-6 pb-6">
               <div className="grid grid-cols-2 gap-5">
-                {unlockedElements.map(elem => (
-                  <div
-                    key={elem}
-                    onClick={() => handleBuyEgg(elem)}
-                    className={`group relative flex flex-col items-center p-6 rounded-3xl border-2 transition-all duration-300
-                      ${state.goo >= STARTER_EGG_COST 
-                        ? 'bg-white border-[#FF7EB6]/20 hover:border-[#FF7EB6] hover:shadow-lg cursor-pointer active:scale-95' 
-                        : 'bg-slate-100 border-slate-200 opacity-40 grayscale'}`}
-                  >
-                    <EggCanvas element={elem} />
-                    <span className="mt-4 text-sm font-black text-slate-700 group-hover:text-[#FF7EB6] uppercase tracking-widest transition-colors">
-                      {ELEMENT_DISPLAY_NAMES[elem]} Slime
-                    </span>
-                    <div className="mt-2 flex items-center gap-1 bg-white px-3 py-1 rounded-full border border-[#FF7EB6]/20">
-                      <span className="text-xs font-bold text-[#FF7EB6]">{STARTER_EGG_COST}g</span>
+                {SHOP_EGG_ELEMENTS.map(elem => {
+                  const reqLevel = getRequiredLevel(elem);
+                  const isUnlocked = playerLevel >= reqLevel;
+                  return (
+                    <div
+                      key={elem}
+                      onClick={() => handleBuyEgg(elem)}
+                      className={`group relative flex flex-col items-center p-6 rounded-3xl border-2 transition-all duration-300
+                        ${isUnlocked && state.goo >= STARTER_EGG_COST 
+                          ? 'bg-white border-[#FF7EB6]/20 hover:border-[#FF7EB6] hover:shadow-lg cursor-pointer active:scale-95' 
+                          : 'bg-slate-100 border-slate-200 opacity-40 grayscale overflow-hidden'}`}
+                    >
+                      {!isUnlocked && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/5 backdrop-blur-[1px]">
+                           <span className="bg-slate-800 text-white text-[8px] px-2 py-1 rounded font-black tracking-widest uppercase">LV.{reqLevel} REQ</span>
+                        </div>
+                      )}
+                      <EggCanvas element={elem} />
+                      <span className="mt-4 text-sm font-black text-slate-700 group-hover:text-[#FF7EB6] uppercase tracking-widest transition-colors">
+                        {ELEMENT_DISPLAY_NAMES[elem]} Slime
+                      </span>
+                      <div className="mt-2 flex items-center gap-1 bg-white px-3 py-1 rounded-full border border-[#FF7EB6]/20">
+                        <span className="text-xs font-bold text-[#FF7EB6]">{STARTER_EGG_COST}g</span>
+                      </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </ScrollArea>
           </TabsContent>
@@ -203,22 +230,37 @@ export function Shop() {
           <TabsContent value="habitats" className="h-full m-0">
             <ScrollArea className="h-full px-6 pb-6">
               <div className="grid grid-cols-1 gap-4">
-                {unlockedElements.map(elem => {
+                {SHOP_HABITAT_ELEMENTS.map(elem => {
                   const cost = HABITAT_COSTS[elem];
                   const theme = HABITAT_THEMES[elem];
+                  const reqLevel = getRequiredLevel(elem);
+                  const isUnlocked = playerLevel >= reqLevel;
                   return (
                     <button
                       key={elem}
                       onClick={() => {
+                        if (!isUnlocked) {
+                          toast({
+                            title: "Sanctum Locked",
+                            description: `You must reach resonance Level ${reqLevel} to build this sanctum.`,
+                            variant: "destructive"
+                          });
+                          return;
+                        }
                         if (state.goo >= cost && state.habitats.length < 16) {
                           dispatch({ type: 'SPEND_GOO', amount: cost });
                           dispatch({ type: 'BUY_HABITAT', element: elem });
                           audioEngine.playSfx('purchase');
                         }
                       }}
-                      disabled={state.goo < cost || state.habitats.length >= 16}
-                      className="group flex items-center gap-5 p-4 bg-white border-2 border-[#FF7EB6]/10 hover:border-[#FF7EB6] transition-all active:scale-[0.98] disabled:opacity-30 text-left rounded-3xl"
+                      disabled={(isUnlocked && state.goo < cost) || state.habitats.length >= 16}
+                      className="group relative flex items-center gap-5 p-4 bg-white border-2 border-[#FF7EB6]/10 hover:border-[#FF7EB6] transition-all active:scale-[0.98] disabled:opacity-30 text-left rounded-3xl overflow-hidden"
                     >
+                      {!isUnlocked && (
+                        <div className="absolute inset-0 z-10 flex items-center justify-end pr-8 bg-black/5 backdrop-blur-[1px] pointer-events-none">
+                           <span className="bg-slate-800 text-white text-[8px] px-2 py-1 rounded font-black tracking-widest uppercase">LV.{reqLevel} REQ</span>
+                        </div>
+                      )}
                       <div className="w-14 h-14 rounded-2xl border-2 shadow-inner flex-shrink-0" 
                            style={{ 
                              backgroundColor: theme.bgImage ? 'transparent' : theme.bg, 
