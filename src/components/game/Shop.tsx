@@ -64,8 +64,17 @@ const ITEM_SHOP = [
 
 const STARTER_EGG_COST = 50;
 
-const SHOP_EGG_ELEMENTS: SlimeElement[] = ['earth', 'water', 'plant', 'fire', 'light', 'shadow', 'void', 'wind'];
-const SHOP_HABITAT_ELEMENTS: SlimeElement[] = ['earth', 'plant', 'water', 'fire', 'light', 'shadow', 'void', 'divine', 'arcane', 'wind'];
+const SHOP_EGG_ELEMENTS: SlimeElement[] = [
+  'fire', 'water', 'wind', 'earth', // Tier 1
+  'plant', 'light', 'shadow', 'nature', // Tier 2
+  'void', 'cosmic', 'ice', 'electric' // Tier 3
+];
+
+const SHOP_HABITAT_ELEMENTS: SlimeElement[] = [
+  'fire', 'water', 'wind', 'earth', // Tier 1
+  'plant', 'light', 'shadow', 'nature', // Tier 2
+  'metal', 'toxic', 'crystal', 'lava', 'ice', 'electric', 'void', 'cosmic', 'arcane', 'divine' // Tier 3
+];
 
 export function Shop() {
   const { state, dispatch, playerLevel } = useGameState();
@@ -73,8 +82,8 @@ export function Shop() {
   const unlockedElements = getUnlockedElements(playerLevel);
 
   const getRequiredLevel = (element: SlimeElement): number => {
-    if (['fire', 'water', 'plant', 'earth', 'light', 'shadow'].includes(element)) return 1;
-    if (['ice', 'wind', 'electric', 'nature'].includes(element)) return 6;
+    if (['fire', 'water', 'wind', 'earth'].includes(element)) return 1;
+    if (['plant', 'light', 'shadow', 'nature'].includes(element)) return 6;
     return 11;
   };
 

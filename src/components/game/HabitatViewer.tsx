@@ -398,6 +398,10 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
         @keyframes wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.8); } }
         @keyframes spark-flash { 0%, 100% { opacity: 0.2; } 50% { opacity: 1; } }
         @keyframes drift { 0%, 100% { transform: translateX(0px); } 50% { transform: translateX(20px); } }
+        @keyframes sway { 0%, 100% { transform: rotate(-5deg); } 50% { transform: rotate(5deg); } }
+        @keyframes snowfall { to { transform: translateY(1000%); } }
+        @keyframes spark-jump { 0% { transform: translate(0,0); opacity:1; } 100% { transform: translate(0, -50px); opacity:0; } }
+        @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
       `}</style>
     </div>
   );
