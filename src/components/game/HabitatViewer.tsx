@@ -21,13 +21,11 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
     backdrop: 'radial-gradient(ellipse at 50% 30%, #FF6347 0%, #3D1408 100%)',
     details: (
       <>
-        {/* Volcano */}
         <div className="absolute bottom-0 left-1/4 w-32 h-40" style={{
           background: 'linear-gradient(135deg, #8B4513 0%, #1a0a00 50%, #FF4500 100%)',
           clipPath: 'polygon(20% 100%, 0% 0%, 50% 20%, 100% 0%, 80% 100%)',
           filter: 'drop-shadow(-4px 0px 8px rgba(255,69,0,0.4))'
         }} />
-        {/* Lava flows */}
         <div className="absolute bottom-8 right-12 w-16 h-2 rounded-full" style={{ background: '#FF4500', filter: 'blur(2px)' }} />
         <div className="absolute bottom-4 right-24 w-12 h-1.5 rounded-full" style={{ background: '#FF6347', opacity: 0.7, filter: 'blur(1px)' }} />
       </>
@@ -39,21 +37,14 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
     backdrop: 'radial-gradient(ellipse at 50% 40%, #87CEEB 0%, #082038 100%)',
     details: (
       <>
-        {/* Water reflection */}
         <div className="absolute inset-x-0 bottom-1/3 h-1/3 opacity-20" style={{
           background: 'linear-gradient(180deg, transparent, #87CEEB)',
           animation: 'wave 3s ease-in-out infinite'
         }} />
-        {/* Bubbles */}
         {[...Array(5)].map((_, i) => (
           <div key={i} className="absolute rounded-full border border-blue-300" style={{
-            width: '8px',
-            height: '8px',
-            left: `${20 + i * 15}%`,
-            bottom: `${10 + i % 3 * 20}%`,
-            animation: `float 2s ease-in-out infinite`,
-            animationDelay: `${i * 0.3}s`,
-            opacity: 0.5
+            width: '8px', height: '8px', left: `${20 + i * 15}%`, bottom: `${10 + i % 3 * 20}%`,
+            animation: `float 2s ease-in-out infinite`, animationDelay: `${i * 0.3}s`, opacity: 0.5
           }} />
         ))}
       </>
@@ -65,33 +56,20 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
     backdrop: 'radial-gradient(ellipse at 50% 30%, #90EE90 0%, #0A2810 100%)',
     details: (
       <>
-        {/* Trees/Vines */}
         {[...Array(4)].map((_, i) => (
           <div key={i} className="absolute" style={{
-            left: `${15 + i * 20}%`,
-            bottom: '0',
-            width: '24px',
-            height: '120px',
+            left: `${15 + i * 20}%`, bottom: '0', width: '24px', height: '120px',
             background: 'linear-gradient(180deg, transparent, #228B22 50%, #1a4a20)',
-            opacity: 0.8,
-            filter: 'drop-shadow(2px 2px 3px rgba(0,0,0,0.4))'
+            opacity: 0.8, filter: 'drop-shadow(2px 2px 3px rgba(0,0,0,0.4))'
           }}>
-            {/* Leaf clusters */}
             <div style={{
-              position: 'absolute',
-              top: '-30px',
-              left: '-20px',
-              width: '60px',
-              height: '60px',
-              background: 'radial-gradient(circle, #32CD32 0%, transparent 70%)',
-              borderRadius: '50% 50% 30% 70%'
+              position: 'absolute', top: '-30px', left: '-20px', width: '60px', height: '60px',
+              background: 'radial-gradient(circle, #32CD32 0%, transparent 70%)', borderRadius: '50% 50% 30% 70%'
             }} />
           </div>
         ))}
-        {/* Ground grass */}
         <div className="absolute bottom-0 left-0 right-0 h-6" style={{
-          background: 'repeating-linear-gradient(90deg, transparent, transparent 4px, #32CD32 4px, #32CD32 8px)',
-          opacity: 0.7
+          background: 'repeating-linear-gradient(90deg, transparent, transparent 4px, #32CD32 4px, #32CD32 8px)', opacity: 0.7
         }} />
       </>
     )
@@ -102,22 +80,14 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
     backdrop: 'radial-gradient(ellipse at 50% 30%, #E0FFFF 0%, #102838 100%)',
     details: (
       <>
-        {/* Icicles */}
         {[...Array(6)].map((_, i) => (
           <div key={i} className="absolute" style={{
-            left: `${10 + i * 15}%`,
-            top: '20px',
-            width: '6px',
-            height: `${40 + i % 3 * 20}px`,
-            background: 'linear-gradient(180deg, #E0FFFF 0%, #B0E0E6 100%)',
-            clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)',
-            opacity: 0.8
+            left: `${10 + i * 15}%`, top: '20px', width: '6px', height: `${40 + i % 3 * 20}px`,
+            background: 'linear-gradient(180deg, #E0FFFF 0%, #B0E0E6 100%)', clipPath: 'polygon(50% 0%, 100% 100%, 0% 100%)', opacity: 0.8
           }} />
         ))}
-        {/* Ice crystals on ground */}
         <div className="absolute bottom-0 left-0 right-0 h-8" style={{
-          background: 'linear-gradient(90deg, transparent 0%, #ADD8E6 25%, transparent 50%, #ADD8E6 75%, transparent 100%)',
-          opacity: 0.6
+          background: 'linear-gradient(90deg, transparent 0%, #ADD8E6 25%, transparent 50%, #ADD8E6 75%, transparent 100%)', opacity: 0.6
         }} />
       </>
     )
@@ -128,22 +98,13 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
     backdrop: 'radial-gradient(ellipse at 50% 30%, #FFF8DC 0%, #282008 100%)',
     details: (
       <>
-        {/* Tesla coils */}
         <div className="absolute bottom-16 left-1/4 w-8 h-32 border-2 border-yellow-300" style={{
-          background: 'linear-gradient(90deg, transparent, #FFD700, transparent)',
-          opacity: 0.6
+          background: 'linear-gradient(90deg, transparent, #FFD700, transparent)', opacity: 0.6
         }} />
-        {/* Sparks */}
         {[...Array(8)].map((_, i) => (
           <div key={i} className="absolute rounded-full" style={{
-            width: '3px',
-            height: '3px',
-            left: `${30 + i * 10}%`,
-            bottom: `${50 + (i % 4) * 15}%`,
-            background: '#FFD700',
-            animation: `spark-flash 0.5s ease-in-out infinite`,
-            animationDelay: `${i * 0.1}s`,
-            opacity: 0.8
+            width: '3px', height: '3px', left: `${30 + i * 10}%`, bottom: `${50 + (i % 4) * 15}%`,
+            background: '#FFD700', animation: `spark-flash 0.5s ease-in-out infinite`, animationDelay: `${i * 0.1}s`, opacity: 0.8
           }} />
         ))}
       </>
@@ -155,19 +116,14 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
     backdrop: 'radial-gradient(ellipse at 50% 30%, #DEB887 0%, #2A1A08 100%)',
     details: (
       <>
-        {/* Rocks scattered */}
         {[...Array(8)].map((_, i) => (
           <div key={i} className="absolute rounded-lg" style={{
-            left: `${10 + (i * 11) % 80}%`,
-            bottom: `${5 + (i % 3) * 20}%`,
-            width: `${12 + (i % 3) * 8}px`,
-            height: `${12 + (i % 3) * 8}px`,
+            left: `${10 + (i * 11) % 80}%`, bottom: `${5 + (i % 3) * 20}%`,
+            width: `${12 + (i % 3) * 8}px`, height: `${12 + (i % 3) * 8}px`,
             background: `linear-gradient(135deg, #A0522D 0%, #8B4513 100%)`,
-            opacity: 0.7 + (i % 3) * 0.1,
-            transform: `rotate(${i * 45}deg)`
+            opacity: 0.7 + (i % 3) * 0.1, transform: `rotate(${i * 45}deg)`
           }} />
         ))}
-        {/* Dirt layers */}
         <div className="absolute bottom-0 left-0 right-0 h-4" style={{
           background: 'repeating-linear-gradient(90deg, #8B4513, #8B4513 3px, #A0522D 3px, #A0522D 6px)'
         }} />
@@ -180,21 +136,13 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
     backdrop: 'radial-gradient(ellipse at 50% 50%, #F0F8FF 0%, #1A2838 100%)',
     details: (
       <>
-        {/* Clouds */}
         {[...Array(3)].map((_, i) => (
           <div key={i} className="absolute opacity-70" style={{
-            left: `${10 + i * 30}%`,
-            top: `${20 + i * 15}%`,
-            width: '60px',
-            height: '20px',
-            background: 'white',
-            borderRadius: '50%',
-            boxShadow: 'inset -5px -5px 10px rgba(0,0,0,0.1)',
-            animation: `drift 4s linear infinite`,
-            animationDelay: `${i * 1}s`
+            left: `${10 + i * 30}%`, top: `${20 + i * 15}%`, width: '60px', height: '20px',
+            background: 'white', borderRadius: '50%', boxShadow: 'inset -5px -5px 10px rgba(0,0,0,0.1)',
+            animation: `drift 4s linear infinite`, animationDelay: `${i * 1}s`
           }} />
         ))}
-        {/* Wind wisps */}
         <div className="absolute inset-0" style={{
           background: 'repeating-linear-gradient(90deg, transparent, transparent 30px, rgba(255,255,255,0.1) 30px, rgba(255,255,255,0.1) 60px)',
           animation: `float 3s ease-in-out infinite`

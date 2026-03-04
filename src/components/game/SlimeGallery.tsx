@@ -5,14 +5,17 @@ import { ELEMENT_DISPLAY_NAMES, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/t
 import { getStage } from '@/utils/slimeRenderer';
 import { Search, ChevronLeft, ChevronRight, ShoppingCart, Sparkles } from 'lucide-react';
 
+import { SlimeElement } from '@/types/slime';
+
 const PER_PAGE = 8; // Reduced per page for 2-column layout
 type SortMode = 'rarity' | 'name' | 'newest';
 
 interface SlimeGalleryProps {
   onSelect?: (id: string) => void;
+  filterElement?: SlimeElement;
 }
 
-export function SlimeGallery({ onSelect }: SlimeGalleryProps = {}) {
+export function SlimeGallery({ onSelect, filterElement }: SlimeGalleryProps = {}) {
   const { state, dispatch } = useGameState();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortMode>('newest');
@@ -22,6 +25,10 @@ export function SlimeGallery({ onSelect }: SlimeGalleryProps = {}) {
     const unhatchedId = state.activeHatching?.slime.id;
     let list = state.slimes.filter(s => s.id !== unhatchedId);
     
+    if (filterElement) {
+      list = list.filter(s => s.elements.includes(filterElement));
+    }
+
     if (search) {
       const q = search.toLowerCase();
       list = list.filter(s => s.name.toLowerCase().includes(q));
@@ -32,7 +39,7 @@ export function SlimeGallery({ onSelect }: SlimeGalleryProps = {}) {
       case 'newest': list = [...list].sort((a, b) => b.createdAt - a.createdAt); break;
     }
     return list;
-  }, [state.slimes, state.activeHatching, search, sort]);
+  }, [state.slimes, state.activeHatching, search, sort, filterElement]);
 
   const totalPages = Math.max(1, Math.ceil(filtered.length / PER_PAGE));
   const currentPage = Math.min(page, totalPages - 1);
