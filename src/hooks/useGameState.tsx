@@ -103,6 +103,7 @@ function createInitialState(): GameState {
       habitats: saved.habitats ?? [],
       happiness: saved.happiness ?? {},
       lastEvolution: null,
+      lastLevelUp: null,
     };
   }
   return {
