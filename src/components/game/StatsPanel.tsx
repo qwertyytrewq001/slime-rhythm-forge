@@ -6,6 +6,9 @@ import { getStage } from '@/utils/slimeRenderer';
 import { SLIME_FOODS, SlimeFoodType } from '@/types/slime';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sparkles, BookOpen, Layers, Star, Zap, Utensils } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { audioEngine } from '@/utils/audioEngine';
 
 interface StatsPanelProps {
   onRequestGallery?: () => void;
