@@ -1,43 +1,65 @@
 
 
-## Plan: Fix Build Errors + Fast & Satisfying Leveling
+## Evolution System: Baby → Teen → Adult Slimes
 
-### 1. Fix Build Errors (3 files)
+### Concept
 
-**`src/utils/slimeGenerator.ts`** (line 44-56): Add `level: 1, xp: 0` to the `buildSlime` return object.
+Each slime has a **level** (1-15) and an **evolution stage** derived from it:
+- **Baby** (Lv 1-4): Smaller body (~0.6x scale), bigger eyes relative to body, simpler features, no spikes/accessories
+- **Teen** (Lv 5-9): Medium body (~0.85x scale), normal eyes, spikes start showing, partial accessories
+- **Adult** (Lv 10+): Full size (1.0x), all features rendered, glow/aura at full intensity
 
-**`src/components/game/Shop.tsx`** (line 18): Add `level: 1, xp: 0` to the mock slime object.
+Feeding costs goo and grants XP. When XP reaches a threshold, the slime levels up. Each evolution stage change triggers a visual "evolution burst" animation.
 
-**`src/components/game/Shop.tsx`** (line 133): Change `'FEED_SLIME'` to `'FEED_SLIME_XP'` with proper `foodType` parameter.
+### Data Changes (`src/types/slime.ts`)
 
-### 2. Make Leveling Fast & Dopamine-Hitting
+Add to the `Slime` interface:
+- `level: number` (default 1)
+- `xp: number` (default 0)
+- `stage: 'baby' | 'teen' | 'adult'` (derived from level, or stored)
 
-**Current formula**: XP to next level = `level * 15`, feed gives 10 XP. Level 12 requires 180 XP (18 feeds). Too slow and grindy.
+Add `GameAction`:
+- `FEED_SLIME_XP` — spends goo, adds XP, checks for level-up and stage evolution
 
-**New formula**: XP to next level = `5 + level * 3`. This means:
-- Lv 1→2: 8 XP (1 feed)
-- Lv 5→6: 20 XP (2 feeds)  
-- Lv 10→11: 35 XP (4 feeds)
-- Lv 12→13: 41 XP (5 feeds)
+### XP & Leveling Formula
 
-Reaching level 12 total = ~240 XP (~24 feeds) but each individual level feels fast and achievable.
+- XP to next level: `level * 15` (so Lv1→2 = 15 XP, Lv9→10 = 135 XP)
+- Each feed gives 10 XP, costs 5 goo
+- Stage thresholds: Baby < 5, Teen < 10, Adult >= 10
 
-**Files**: `src/hooks/useGameState.tsx` — change `xpToNext = newLevel * 15` to `xpToNext = 5 + newLevel * 3` in the FEED_SLIME_XP reducer (line 289, 296).
+### Rendering Changes (`src/utils/slimeRenderer.ts`)
 
-### 3. Level-Up Celebration Effect
+Derive stage from `slime.level` at render time. Apply a **stage scale multiplier** to the body radius and offset all features accordingly:
 
-**`src/hooks/useGameState.tsx`**: On every level-up (not just stage evolution), play `achievement` SFX and show a toast. Add a `lastLevelUp` field to GameState tracking `{ slimeId, newLevel, timestamp }`.
+- **Baby**: Scale body to 60%. Draw eyes 30% larger relative to body (cute/chibi). Skip spikes, accessories, and aura. Increase bounce amplitude by 1.3x (bouncier). Simpler mouth (only happy expressions).
+- **Teen**: Scale body to 85%. Eyes normal ratio. Render spikes at 50% length. Accessories at 50% opacity. Aura at 50% opacity.
+- **Adult**: Full render as current code, no changes needed.
 
-**`src/components/game/StatsPanel.tsx`** or wherever the feed button lives: Show a brief "LEVEL UP!" burst animation with screen shake and particle effects when level increases. Use `sonner` toast with a custom styled message like "⚡ LEVEL UP! Lv X → Lv Y" with the slime name.
+This only requires wrapping the existing radius/feature calculations with a stage multiplier — no rewrite of the rendering pipeline.
 
-**`src/components/game/EvolutionPopup.tsx`**: Already exists for stage changes — keep this for baby→teen→adult transitions. For regular level-ups, use a lighter toast notification so it's frequent and snappy rather than a full modal.
+### Migration
 
-### Summary of Changes
+- `migrateSlime()` adds `level: s.level ?? 1` and `xp: s.xp ?? 0` for existing saves
+- Stage is computed as a helper function `getStage(level)`, not stored
 
-| File | Change |
-|------|--------|
-| `src/utils/slimeGenerator.ts` | Add `level: 1, xp: 0` to buildSlime |
-| `src/components/game/Shop.tsx` | Add `level: 1, xp: 0` to mock; fix action type |
-| `src/hooks/useGameState.tsx` | Flatten XP curve to `5 + level * 3`; track level-ups for celebration |
-| `src/components/game/StatsPanel.tsx` | Add level-up toast/animation on feed |
+### UI Changes
+
+- **Gallery cards**: Show "Baby", "Teen", or "Adult" tag next to species name
+- **StatsPanel / detail view**: Show level, XP bar, and a "Feed" button (costs 5 goo, +10 XP)
+- **Evolution popup**: When crossing a stage threshold, show a brief "Evolving!" popup with a glow burst effect, similar to the discovery popup
+
+### Game Balance Impact
+
+- Feeding is the primary goo sink, encouraging habitat-based goo farming
+- Adult slimes produce more goo passively (multiply base goo output by `1 + (level - 1) * 0.1`)
+- Only Adult slimes (Lv 10+) can breed — this gates breeding behind investment and makes progression feel earned
+
+### Files to Change
+
+1. **`src/types/slime.ts`** — Add `level`, `xp` to `Slime`; add `FEED_SLIME_XP` action
+2. **`src/hooks/useGameState.tsx`** — Handle `FEED_SLIME_XP` reducer logic (spend goo, add xp, level up); update goo tick to factor in level; migrate old slimes
+3. **`src/utils/slimeRenderer.ts`** — Add `getStage()` helper; apply stage-based scale/feature gating to existing render pipeline
+4. **`src/components/game/SlimeGallery.tsx`** — Show stage tag on cards
+5. **`src/components/game/StatsPanel.tsx`** — Show level, XP bar, feed button
+6. **`src/components/game/DiscoveryPopup.tsx`** or new `EvolutionPopup.tsx` — Evolution celebration
 

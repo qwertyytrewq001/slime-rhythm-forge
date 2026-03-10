@@ -24,6 +24,8 @@ function EggCanvas({ element }: { element: SlimeElement }) {
     rarityStars: 1,
     rarityTier: 'Common',
     createdAt: 0,
+    level: 1,
+    xp: 0,
     traits: {
       shape: element.length,
       color1: element.charCodeAt(0),
@@ -130,7 +132,7 @@ export function Shop() {
         }
         break;
       case 'element_treat':
-        if (state.selectedSlimeId) dispatch({ type: 'FEED_SLIME', slimeId: state.selectedSlimeId });
+        if (state.selectedSlimeId) dispatch({ type: 'FEED_SLIME_XP', slimeId: state.selectedSlimeId, foodType: 'elemental' });
         break;
     }
   };

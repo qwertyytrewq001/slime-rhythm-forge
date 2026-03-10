@@ -109,6 +109,13 @@ export interface GameState {
     stage: SlimeEvolutionStage;
     timestamp: number;
   } | null;
+  lastLevelUp: {
+    slimeId: string;
+    slimeName: string;
+    oldLevel: number;
+    newLevel: number;
+    timestamp: number;
+  } | null;
 }
 
 export type SlimeFoodType = 'basic' | 'elemental' | 'royal';

@@ -53,6 +53,8 @@ function buildSlime(traits: SlimeTraits, parentIds?: [string, string], bonusScor
     createdAt: Date.now(),
     parentIds,
     isNew: !!parentIds,
+    level: 1,
+    xp: 0,
   };
 }
 
