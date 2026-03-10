@@ -126,6 +126,7 @@ function createInitialState(): GameState {
     habitats: [],
     happiness: {},
     lastEvolution: null,
+    lastLevelUp: null,
   };
 }
 
