@@ -116,6 +116,10 @@ export interface GameState {
     newLevel: number;
     timestamp: number;
   } | null;
+  lastPlayerLevelUp: {
+    level: number;
+    timestamp: number;
+  } | null;
 }
 
 export type SlimeFoodType = 'basic' | 'elemental' | 'royal';
@@ -186,4 +190,6 @@ export type GameAction =
   | { type: 'ASSIGN_SLIME_TO_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'REMOVE_SLIME_FROM_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType }
-  | { type: 'CLEAR_EVOLUTION' };
+  | { type: 'CLEAR_EVOLUTION' }
+  | { type: 'CLEAR_LEVEL_UP' }
+  | { type: 'CLEAR_PLAYER_LEVEL_UP' };

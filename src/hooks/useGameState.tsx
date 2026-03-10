@@ -325,6 +325,10 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     }
     case 'CLEAR_EVOLUTION':
       return { ...state, lastEvolution: null };
+    case 'CLEAR_LEVEL_UP':
+      return { ...state, lastLevelUp: null };
+    case 'CLEAR_PLAYER_LEVEL_UP':
+      return { ...state, lastPlayerLevelUp: null };
     default:
       return state;
   }
@@ -341,11 +345,33 @@ const GameContext = createContext<GameContextType | null>(null);
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
+  const lastKnownLevel = useRef<number>(0);
 
   const playerLevel = useMemo(() =>
     getPlayerLevel(state.totalBreeds, state.slimes.length),
     [state.totalBreeds, state.slimes.length]
   );
+
+  // Initialize and track player level changes
+  useEffect(() => {
+    if (lastKnownLevel.current === 0) {
+      lastKnownLevel.current = playerLevel;
+      return;
+    }
+
+    if (playerLevel > lastKnownLevel.current) {
+      dispatch({ 
+        type: 'LOAD_STATE', 
+        state: { 
+          lastPlayerLevelUp: { 
+            level: playerLevel, 
+            timestamp: Date.now() 
+          } 
+        } as Partial<GameState> 
+      });
+      lastKnownLevel.current = playerLevel;
+    }
+  }, [playerLevel]);
 
   useEffect(() => {
     if (saveTimer.current) clearTimeout(saveTimer.current);

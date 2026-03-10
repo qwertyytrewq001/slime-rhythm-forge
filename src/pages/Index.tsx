@@ -16,6 +16,8 @@ import { Button } from '@/components/ui/button';
 import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
+import { LevelUpPopup } from '@/components/game/LevelUpPopup';
+import { PlayerLevelUpPopup } from '@/components/game/PlayerLevelUpPopup';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
