@@ -25,7 +25,7 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
     dispatch({ type: 'FEED_SLIME_XP', slimeId: slime.id, foodType });
   };
 
-  const xpToNext = slime ? (slime.level ?? 1) * 15 : 0;
+  const xpToNext = slime ? 5 + (slime.level ?? 1) * 3 : 0;
   const xpProgress = slime ? Math.min(100, ((slime.xp ?? 0) / xpToNext) * 100) : 0;
   const stage = slime ? getStage(slime.level ?? 1) : 'baby';
 

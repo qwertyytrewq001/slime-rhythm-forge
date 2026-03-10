@@ -306,11 +306,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return { ...s, level: newLevel, xp: newXp };
       });
 
+      // Find if any slime leveled up for celebration
+      const fedSlime = slimes.find(s => s.id === action.slimeId);
+      const originalSlime = state.slimes.find(s => s.id === action.slimeId);
+      const leveledUp = fedSlime && originalSlime && fedSlime.level > originalSlime.level 
+        ? { slimeId: fedSlime.id, slimeName: fedSlime.name, oldLevel: originalSlime.level, newLevel: fedSlime.level, timestamp: Date.now() }
+        : null;
+
       return { 
         ...state, 
         slimes, 
         goo: Math.round((state.goo - food.cost) * 100) / 100,
-        lastEvolution: evolved || state.lastEvolution
+        lastEvolution: evolved || state.lastEvolution,
+        lastLevelUp: leveledUp || state.lastLevelUp
       };
     }
     case 'CLEAR_EVOLUTION':
