@@ -6,6 +6,9 @@ import { getStage } from '@/utils/slimeRenderer';
 import { SLIME_FOODS, SlimeFoodType } from '@/types/slime';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sparkles, BookOpen, Layers, Star, Zap, Utensils } from 'lucide-react';
+import { useEffect, useRef } from 'react';
+import { toast } from 'sonner';
+import { audioEngine } from '@/utils/audioEngine';
 
 interface StatsPanelProps {
   onRequestGallery?: () => void;
@@ -25,9 +28,24 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
     dispatch({ type: 'FEED_SLIME_XP', slimeId: slime.id, foodType });
   };
 
-  const xpToNext = slime ? (slime.level ?? 1) * 15 : 0;
+  const xpToNext = slime ? 5 + (slime.level ?? 1) * 3 : 0;
   const xpProgress = slime ? Math.min(100, ((slime.xp ?? 0) / xpToNext) * 100) : 0;
   const stage = slime ? getStage(slime.level ?? 1) : 'baby';
+  const lastLevelUpRef = useRef<number>(0);
+
+  // Level-up celebration toast
+  useEffect(() => {
+    const lu = state.lastLevelUp;
+    if (lu && lu.timestamp > lastLevelUpRef.current) {
+      lastLevelUpRef.current = lu.timestamp;
+      audioEngine.playSfx('achievement');
+      const stageEmoji = lu.newLevel >= 10 ? '👑' : lu.newLevel >= 5 ? '⚔️' : '🌱';
+      toast(`⚡ LEVEL UP! ${stageEmoji}`, {
+        description: `${lu.slimeName} reached Lv ${lu.newLevel}!`,
+        duration: 2000,
+      });
+    }
+  }, [state.lastLevelUp]);
 
   return (
     <div className="flex flex-col h-full bg-rose-50/90 text-slate-900 border-l-4 border-[#FF7EB6]/20 p-8 overflow-y-auto"
