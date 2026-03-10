@@ -38,7 +38,7 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
     const lu = state.lastLevelUp;
     if (lu && lu.timestamp > lastLevelUpRef.current) {
       lastLevelUpRef.current = lu.timestamp;
-      audioEngine.play('achievement');
+      audioEngine.playSfx('achievement');
       const stageEmoji = lu.newLevel >= 10 ? '👑' : lu.newLevel >= 5 ? '⚔️' : '🌱';
       toast(`⚡ LEVEL UP! ${stageEmoji}`, {
         description: `${lu.slimeName} reached Lv ${lu.newLevel}!`,
