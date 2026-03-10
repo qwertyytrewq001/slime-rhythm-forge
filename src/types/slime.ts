@@ -66,6 +66,7 @@ export interface Achievement {
   rewardAmount: number;
   unlocked: boolean;
   unlockedAt?: number;
+  claimed: boolean;
 }
 
 export interface ShopItem {
@@ -162,6 +163,7 @@ export type GameAction =
   | { type: 'ACTIVATE_MUTATION_JUICE' }
   | { type: 'DEACTIVATE_MUTATION_JUICE' }
   | { type: 'UNLOCK_ACHIEVEMENT'; id: string }
+  | { type: 'CLAIM_ACHIEVEMENT'; id: string }
   | { type: 'ADD_BREED_HISTORY'; result: BreedResult }
   | { type: 'INCREMENT_BREEDS' }
   | { type: 'INCREMENT_PERFECT_TAPS' }

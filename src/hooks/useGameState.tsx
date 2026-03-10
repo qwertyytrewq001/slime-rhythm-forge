@@ -6,11 +6,11 @@ import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS
 import { audioEngine } from '@/utils/audioEngine';
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_fusion', name: 'First Fusion', description: 'Breed your first slime', reward: '50 goo', rewardAmount: 50, unlocked: false },
-  { id: 'rare_find', name: 'Rare Find', description: 'Obtain a Rare+ slime', reward: 'Free Mutation Juice', rewardAmount: 0, unlocked: false },
-  { id: 'slime_hoarder', name: 'Slime Hoarder', description: 'Collect 20 slimes', reward: '200 goo', rewardAmount: 200, unlocked: false },
-  { id: 'mythic_hunter', name: 'Legendary Hunter', description: 'Obtain a Legendary slime', reward: '500 goo + Crown', rewardAmount: 500, unlocked: false },
-  { id: 'rhythm_master', name: 'Rhythm Master', description: 'Hit 10 perfect rhythm taps in a row', reward: '100 goo', rewardAmount: 100, unlocked: false },
+  { id: 'first_fusion', name: 'First Fusion', description: 'Breed your first slime', reward: '50 goo', rewardAmount: 50, unlocked: false, claimed: false },
+  { id: 'rare_find', name: 'Rare Find', description: 'Obtain a Rare+ slime', reward: '50 goo', rewardAmount: 50, unlocked: false, claimed: false },
+  { id: 'slime_hoarder', name: 'Slime Hoarder', description: 'Collect 20 slimes', reward: '200 goo', rewardAmount: 200, unlocked: false, claimed: false },
+  { id: 'mythic_hunter', name: 'Legendary Hunter', description: 'Obtain a Legendary slime', reward: '500 goo', rewardAmount: 500, unlocked: false, claimed: false },
+  { id: 'rhythm_master', name: 'Rhythm Master', description: 'Hit 10 perfect rhythm taps in a row', reward: '100 goo', rewardAmount: 100, unlocked: false, claimed: false },
 ];
 
 export function getStage(level: number): SlimeEvolutionStage {
