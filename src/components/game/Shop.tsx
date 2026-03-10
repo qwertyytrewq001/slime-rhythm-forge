@@ -132,7 +132,7 @@ export function Shop() {
         }
         break;
       case 'element_treat':
-        if (state.selectedSlimeId) dispatch({ type: 'FEED_SLIME_XP', slimeId: state.selectedSlimeId, foodType: 'element_treat' });
+        if (state.selectedSlimeId) dispatch({ type: 'FEED_SLIME_XP', slimeId: state.selectedSlimeId, foodType: 'elemental' });
         break;
     }
   };
