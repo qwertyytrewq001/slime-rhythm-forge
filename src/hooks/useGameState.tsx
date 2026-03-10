@@ -2,7 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, useRef, useMem
 import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType } from '@/types/slime';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
-import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel } from '@/data/traitData';
+import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [

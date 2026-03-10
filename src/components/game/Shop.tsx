@@ -244,20 +244,11 @@ export function Shop() {
                 {SHOP_HABITAT_ELEMENTS.map(elem => {
                   const cost = HABITAT_COSTS[elem];
                   const theme = HABITAT_THEMES[elem];
-                  const reqLevel = getRequiredLevel(elem);
-                  const isUnlocked = playerLevel >= reqLevel;
+                  const isUnlocked = true; // Habitats are always unlocked from the start
                   return (
                     <button
                       key={elem}
                       onClick={() => {
-                        if (!isUnlocked) {
-                          toast({
-                            title: "Sanctum Locked",
-                            description: `You must reach resonance Level ${reqLevel} to build this sanctum.`,
-                            variant: "destructive"
-                          });
-                          return;
-                        }
                         if (state.goo >= cost && state.habitats.length < 16) {
                           dispatch({ type: 'SPEND_GOO', amount: cost });
                           dispatch({ type: 'BUY_HABITAT', element: elem });
@@ -267,11 +258,6 @@ export function Shop() {
                       disabled={(isUnlocked && state.goo < cost) || state.habitats.length >= 16}
                       className="group relative flex items-center gap-5 p-4 bg-white border-2 border-[#FF7EB6]/10 hover:border-[#FF7EB6] transition-all active:scale-[0.98] disabled:opacity-30 text-left rounded-3xl overflow-hidden"
                     >
-                      {!isUnlocked && (
-                        <div className="absolute inset-0 z-10 flex items-center justify-end pr-8 bg-black/5 backdrop-blur-[1px] pointer-events-none">
-                           <span className="bg-slate-800 text-white text-[8px] px-2 py-1 rounded font-black tracking-widest uppercase">LV.{reqLevel} REQ</span>
-                        </div>
-                      )}
                       <div className="w-14 h-14 rounded-2xl border-2 shadow-inner flex-shrink-0" 
                            style={{ 
                              backgroundColor: theme.bgImage ? 'transparent' : theme.bg, 
