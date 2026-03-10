@@ -286,14 +286,16 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         
         let newXp = s.xp + food.xpValue;
         let newLevel = s.level;
-        let xpToNext = newLevel * 15;
+        let xpToNext = 5 + newLevel * 3;
+        let didLevelUp = false;
 
         const oldStage = getStage(newLevel);
 
         while (newXp >= xpToNext && newLevel < 15) {
           newXp -= xpToNext;
           newLevel++;
-          xpToNext = newLevel * 15;
+          xpToNext = 5 + newLevel * 3;
+          didLevelUp = true;
         }
 
         const newStage = getStage(newLevel);
