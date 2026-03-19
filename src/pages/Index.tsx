@@ -13,7 +13,7 @@ import { IslandGrid } from '@/components/game/IslandGrid';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX, Swords } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
 import { LevelUpPopup } from '@/components/game/LevelUpPopup';
