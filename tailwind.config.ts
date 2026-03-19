@@ -86,26 +86,15 @@ export default {
         },
         "shake": {
           "0%, 100%": { transform: "translateX(0)" },
-<<<<<<< HEAD
           "10%, 30%, 50%, 70%, 90%": { transform: "translateX(-5px)" },
           "20%, 40%, 60%, 80%": { transform: "translateX(5px)" },
-=======
-          "20%": { transform: "translateX(-8px)" },
-          "40%": { transform: "translateX(8px)" },
-          "60%": { transform: "translateX(-4px)" },
-          "80%": { transform: "translateX(4px)" },
->>>>>>> ee7780da1f8543a719a150126d95f2bb1838f514
         },
       },
       animation: {
         "accordion-down": "accordion-down 0.2s ease-out",
         "accordion-up": "accordion-up 0.2s ease-out",
         "float": "float 3s ease-in-out infinite",
-<<<<<<< HEAD
         "shake": "shake 0.5s ease-in-out",
-=======
-        "shake": "shake 0.4s ease-in-out",
->>>>>>> ee7780da1f8543a719a150126d95f2bb1838f514
       },
     },
   },

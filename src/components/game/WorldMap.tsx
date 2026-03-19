@@ -43,7 +43,9 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
       {/* The Map Background - Pure Art */}
       <div 
         className="absolute inset-0 bg-cover bg-center"
-        style={{ backgroundImage: 'url("/battle_map.png")' }}
+        style={{
+          backgroundImage: `url("${import.meta.env.BASE_URL}${encodeURIComponent('battle map.png')}")`,
+        }}
       />
       
       {/* Hitbox Overlay Layer */}

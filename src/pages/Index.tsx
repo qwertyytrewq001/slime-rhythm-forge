@@ -12,7 +12,6 @@ import { ForestBackground } from '@/components/game/ForestBackground';
 import { IslandGrid } from '@/components/game/IslandGrid';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
-<<<<<<< HEAD
 import { ShoppingBag, Images, Info, Trophy, Volume2, VolumeX, Sword } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
@@ -20,30 +19,17 @@ import { WorldMap } from '@/components/game/WorldMap';
 import { BattlePreview } from '@/components/game/BattlePreview';
 import { BattleArena } from '@/components/game/BattleArena';
 import { BattleSlime } from '@/types/slime';
-=======
-import { Button } from '@/components/ui/button';
-import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX, Swords } from 'lucide-react';
-import { Achievements } from '@/components/game/Achievements';
-import { EvolutionPopup } from '@/components/game/EvolutionPopup';
-import { LevelUpPopup } from '@/components/game/LevelUpPopup';
-import { PlayerLevelUpPopup } from '@/components/game/PlayerLevelUpPopup';
-import { BattleArena } from '@/components/game/BattleArena';
->>>>>>> ee7780da1f8543a719a150126d95f2bb1838f514
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
   const [currentView, setCurrentView] = useState<'breeding' | 'habitats' | 'battleMap'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
-<<<<<<< HEAD
   
   // Battle Flow State
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
   const [showBattlePreview, setShowBattlePreview] = useState(false);
   const [battleTeam, setBattleTeam] = useState<{ player: BattleSlime[], opponent: BattleSlime[] } | null>(null);
-=======
-  const [showBattle, setShowBattle] = useState(false);
->>>>>>> ee7780da1f8543a719a150126d95f2bb1838f514
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
@@ -159,18 +145,6 @@ function GameLayout() {
 
         {/* BOTTOM TOOLBAR */}
         <div className="absolute bottom-8 right-8 flex items-center gap-4 pointer-events-auto z-50">
-<<<<<<< HEAD
-=======
-          {/* Battle Arena */}
-          <div className="relative group">
-            <button onClick={() => setShowBattle(true)} className={toolbarCircle}>
-              <Swords className={toolbarIcon} />
-              <span className={toolbarLabel}>Battle</span>
-            </button>
-          </div>
-
-          {/* Achievements */}
->>>>>>> ee7780da1f8543a719a150126d95f2bb1838f514
           <div className="relative group">
             <button onClick={() => setShowAchievements(true)} className={toolbarCircle}>
               <Trophy className={toolbarIcon} />
@@ -265,10 +239,6 @@ function GameLayout() {
       )}
 
       <EvolutionPopup />
-      
-      {showBattle && (
-        <BattleArena onClose={() => setShowBattle(false)} />
-      )}
     </div>
   );
 }

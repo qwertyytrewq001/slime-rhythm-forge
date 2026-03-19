@@ -3,6 +3,11 @@ import { COLOR_PALETTE, ELEMENT_COLORS } from '@/data/traitData';
 
 const INTERNAL_SIZE = 64;
 
+interface SlimeRenderOptions {
+  // Strictly opt-in: preserve existing look by default.
+  enhanced3D?: boolean;
+}
+
 export function getStage(level: number): SlimeEvolutionStage {
   if (level < 5) return 'baby';
   if (level < 10) return 'teen';
@@ -15,7 +20,8 @@ export function drawSlime(
   canvasSize: number,
   frame: number = 0,
   animated: boolean = true,
-  isHurt: boolean = false
+  isHurt: boolean = false,
+  options: SlimeRenderOptions = {}
 ): void {
   const s = INTERNAL_SIZE;
   ctx.canvas.width = s;
@@ -240,6 +246,75 @@ export function drawSlime(
     drawQuantumPhase(ctx, frame, stars);
   }
 
+  if (options.enhanced3D) {
+    drawEnhancedDepthPass(ctx, c1, c2, frame, animated, stars, stage);
+  }
+
+  ctx.restore();
+}
+
+function drawEnhancedDepthPass(
+  ctx: CanvasRenderingContext2D,
+  c1: string,
+  c2: string,
+  frame: number,
+  animated: boolean,
+  stars: number,
+  stage: SlimeEvolutionStage
+) {
+  // Keep baby slimes softer to preserve cute/readable silhouettes.
+  const stageIntensity = stage === 'baby' ? 0.45 : stage === 'teen' ? 0.85 : 1.15;
+  const pulse = animated ? 0.94 + Math.sin(frame * 0.04) * 0.1 : 0.98;
+
+  // Subtle contact AO at lower hemisphere.
+  ctx.save();
+  ctx.globalCompositeOperation = 'multiply';
+  const ao = ctx.createRadialGradient(6, 16, 4, 4, 12, 38);
+  ao.addColorStop(0, `rgba(0,0,0,${0.28 * stageIntensity * pulse})`);
+  ao.addColorStop(0.6, `rgba(0,0,0,${0.16 * stageIntensity})`);
+  ao.addColorStop(1, 'rgba(0,0,0,0)');
+  ctx.fillStyle = ao;
+  ctx.beginPath();
+  ctx.ellipse(4, 10, 34, 28, 0.15, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Back-scatter glow (fake subsurface translucency).
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  const scatter = ctx.createRadialGradient(-18, -8, 2, -6, -2, 30);
+  scatter.addColorStop(0, hexToRgba(lightenColor(c1, 1.55), 0.22 * stageIntensity));
+  scatter.addColorStop(0.45, hexToRgba(lightenColor(c2, 1.35), 0.14 * stageIntensity));
+  scatter.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = scatter;
+  ctx.beginPath();
+  ctx.arc(-2, -2, 33, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Tighter glossy specular streaks to sell curvature.
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  const streakShift = animated ? Math.sin(frame * 0.03) * 1.8 : 0;
+  const streak = ctx.createLinearGradient(-20 + streakShift, -30, 12 + streakShift, 16);
+  streak.addColorStop(0, `rgba(255,255,255,${0.3 * stageIntensity})`);
+  streak.addColorStop(0.35, `rgba(255,255,255,${0.16 * stageIntensity})`);
+  streak.addColorStop(1, 'rgba(255,255,255,0)');
+  ctx.fillStyle = streak;
+  ctx.beginPath();
+  ctx.ellipse(-10 + streakShift, -10, 14, 28, -0.42, 0, Math.PI * 2);
+  ctx.fill();
+  ctx.restore();
+
+  // Edge fresnel boost for perceived thickness.
+  ctx.save();
+  ctx.globalCompositeOperation = 'screen';
+  ctx.globalAlpha = Math.min(0.24, 0.13 + stars * 0.015) * stageIntensity;
+  ctx.strokeStyle = lightenColor(c2, 1.45);
+  ctx.lineWidth = 1.2;
+  ctx.beginPath();
+  ctx.arc(0, 0, 36, -Math.PI * 0.88, -Math.PI * 0.12);
+  ctx.stroke();
   ctx.restore();
 }
 
@@ -986,12 +1061,72 @@ function drawElementFeatures(
     }
     case 'plant':
     case 'nature': {
-      // Tiny sprout
-      ctx.fillStyle = '#44AA44';
-      ctx.beginPath(); ctx.ellipse(-5, -42, 6, 3, -0.5, 0, Math.PI * 2); ctx.fill();
-      ctx.beginPath(); ctx.ellipse(5, -42, 6, 3, 0.5, 0, Math.PI * 2); ctx.fill();
-      ctx.strokeStyle = '#226622'; ctx.lineWidth = 1;
-      ctx.beginPath(); ctx.moveTo(0, -35); ctx.lineTo(0, -45); ctx.stroke();
+      // Pronounced leaf crown + side vines for stronger 3D silhouette.
+      const wind = animated ? Math.sin(frame * 0.08) * 2.2 : 0;
+      const leafGreen = element === 'plant' ? '#5BCB5B' : '#4CAF6A';
+      const leafDark = '#2D7A3E';
+
+      // Top stem
+      ctx.strokeStyle = leafDark;
+      ctx.lineWidth = 1.2;
+      ctx.beginPath();
+      ctx.moveTo(0, -34);
+      ctx.quadraticCurveTo(wind * 0.3, -40, wind * 0.4, -47);
+      ctx.stroke();
+
+      // Crown leaves
+      const crownLeaves = [
+        { x: -10, y: -44, rx: 9, ry: 4, rot: -0.65 },
+        { x: 10, y: -44, rx: 9, ry: 4, rot: 0.65 },
+        { x: 0, y: -47, rx: 7, ry: 3.4, rot: 0 },
+      ];
+      crownLeaves.forEach((leaf, i) => {
+        ctx.save();
+        ctx.translate(leaf.x + wind * 0.35, leaf.y);
+        ctx.rotate(leaf.rot + Math.sin(frame * 0.06 + i) * 0.06);
+        ctx.fillStyle = leafGreen;
+        ctx.beginPath();
+        ctx.ellipse(0, 0, leaf.rx, leaf.ry, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = leafDark;
+        ctx.lineWidth = 0.9;
+        ctx.beginPath();
+        ctx.moveTo(-leaf.rx * 0.6, 0);
+        ctx.lineTo(leaf.rx * 0.65, 0);
+        ctx.stroke();
+        ctx.restore();
+      });
+
+      // Side vine growths hugging the body.
+      ctx.strokeStyle = leafDark;
+      ctx.lineWidth = 1;
+      const vineSway = animated ? Math.sin(frame * 0.045) * 2.5 : 0;
+      ctx.beginPath();
+      ctx.moveTo(-22, -8);
+      ctx.quadraticCurveTo(-30 + vineSway, -2, -26 + vineSway * 0.6, 10);
+      ctx.stroke();
+      ctx.beginPath();
+      ctx.moveTo(22, -10);
+      ctx.quadraticCurveTo(30 - vineSway, -2, 26 - vineSway * 0.6, 11);
+      ctx.stroke();
+
+      // Small leaf buds on vines.
+      ctx.fillStyle = leafGreen;
+      const buds = [
+        { x: -27 + vineSway * 0.5, y: 3, rot: -0.5 },
+        { x: -24 + vineSway * 0.4, y: 10, rot: 0.3 },
+        { x: 27 - vineSway * 0.5, y: 3, rot: 0.5 },
+        { x: 24 - vineSway * 0.4, y: 10, rot: -0.3 },
+      ];
+      buds.forEach((b) => {
+        ctx.save();
+        ctx.translate(b.x, b.y);
+        ctx.rotate(b.rot);
+        ctx.beginPath();
+        ctx.ellipse(0, 0, 4.4, 2.2, 0, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.restore();
+      });
       break;
     }
     case 'ice': {

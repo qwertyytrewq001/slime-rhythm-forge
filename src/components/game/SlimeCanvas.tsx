@@ -6,6 +6,7 @@ interface SlimeCanvasProps {
   slime: Slime;
   size: number;
   animated?: boolean;
+  renderEnhancement?: 'classic' | 'enhanced3d';
   className?: string;
   onClick?: () => void;
   draggable?: boolean;
@@ -13,7 +14,17 @@ interface SlimeCanvasProps {
   isHurt?: boolean;
 }
 
-export function SlimeCanvas({ slime, size, animated = false, className = '', onClick, draggable, onDragStart, isHurt = false }: SlimeCanvasProps) {
+export function SlimeCanvas({
+  slime,
+  size,
+  animated = false,
+  renderEnhancement = 'enhanced3d',
+  className = '',
+  onClick,
+  draggable,
+  onDragStart,
+  isHurt = false,
+}: SlimeCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const frameRef = useRef(0);
   const rafRef = useRef<number>();
@@ -26,7 +37,9 @@ export function SlimeCanvas({ slime, size, animated = false, className = '', onC
 
     const render = () => {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawSlime(ctx, slime, size, animated ? frameRef.current : 0, animated);
+      drawSlime(ctx, slime, size, animated ? frameRef.current : 0, animated, isHurt, {
+        enhanced3D: renderEnhancement === 'enhanced3d',
+      });
       
       if (isHurt) {
         ctx.globalCompositeOperation = 'source-atop';
@@ -47,7 +60,7 @@ export function SlimeCanvas({ slime, size, animated = false, className = '', onC
     } else {
       render();
     }
-  }, [slime, size, animated, isHurt]);
+  }, [slime, size, animated, isHurt, renderEnhancement]);
 
   // Pause when tab hidden
   useEffect(() => {
@@ -62,7 +75,9 @@ export function SlimeCanvas({ slime, size, animated = false, className = '', onC
         const ctx = canvas.getContext('2d');
         if (!ctx) return;
         const animate = () => {
-          drawSlime(ctx, slime, size, frameRef.current, true);
+          drawSlime(ctx, slime, size, frameRef.current, true, isHurt, {
+            enhanced3D: renderEnhancement === 'enhanced3d',
+          });
           frameRef.current++;
           rafRef.current = requestAnimationFrame(animate);
         };
@@ -71,7 +86,7 @@ export function SlimeCanvas({ slime, size, animated = false, className = '', onC
     };
     document.addEventListener('visibilitychange', onVisibility);
     return () => document.removeEventListener('visibilitychange', onVisibility);
-  }, [animated, slime, size]);
+  }, [animated, slime, size, isHurt, renderEnhancement]);
 
   return (
     <canvas
