@@ -32,7 +32,7 @@ for (const [attacker, targets] of Object.entries(SUPER_EFFECTIVE)) {
   }
 }
 
-export function getEffectiveness(attackElement: SlimeElement, defenderElements: SlimeElement[]): 'super' | 'normal' | 'weak' {
+function getEffectiveness(attackElement: SlimeElement, defenderElements: SlimeElement[]): 'super' | 'normal' | 'weak' {
   for (const def of defenderElements) {
     if (SUPER_EFFECTIVE[attackElement]?.includes(def)) return 'super';
   }

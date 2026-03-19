@@ -126,9 +126,10 @@ function createInitialState(): GameState {
     discoveredElements: [],
     habitats: [],
     happiness: {},
-    lastEvolution: null,
-    lastLevelUp: null,
-  };
+      lastEvolution: null,
+      lastLevelUp: null,
+      lastPlayerLevelUp: null,
+    };
 }
 
 function gameReducer(state: GameState, action: GameAction): GameState {
