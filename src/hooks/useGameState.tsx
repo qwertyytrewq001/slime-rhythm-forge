@@ -104,6 +104,7 @@ function createInitialState(): GameState {
       happiness: saved.happiness ?? {},
       lastEvolution: null,
       lastLevelUp: null,
+      lastPlayerLevelUp: saved.lastPlayerLevelUp ?? null,
     };
   }
   return {
