@@ -200,6 +200,10 @@ function GameLayout() {
       )}
 
       <EvolutionPopup />
+      
+      {showBattle && (
+        <BattleArena onClose={() => setShowBattle(false)} />
+      )}
     </div>
   );
 }
