@@ -23,7 +23,7 @@ const SUPER_EFFECTIVE: Record<SlimeElement, SlimeElement[]> = {
   divine: ['shadow', 'toxic', 'arcane'],
 };
 
-const WEAK_AGAINST: Record<SlimeElement, SlimeElement[]> = {};
+const WEAK_AGAINST: Partial<Record<SlimeElement, SlimeElement[]>> = {};
 // Build reverse map
 for (const [attacker, targets] of Object.entries(SUPER_EFFECTIVE)) {
   for (const target of targets) {
