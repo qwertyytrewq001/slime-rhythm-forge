@@ -77,6 +77,35 @@ export interface ShopItem {
   icon: string;
 }
 
+export interface BattleSlime extends Slime {
+  battleStats: {
+    hp: number;
+    maxHp: number;
+    attack: number;
+    defense: number;
+    speed: number;
+  };
+}
+
+export interface BattleTurn {
+  attackerId: string;
+  defenderId: string;
+  damage: number;
+  effectiveness: 'super' | 'weak' | 'neutral';
+  isCritical: boolean;
+  message: string;
+  remainingHp: number;
+}
+
+export interface BattleResult {
+  playerTeam: Slime[];
+  opponentTeam: Slime[];
+  winner: 'player' | 'opponent';
+  gooReward: number;
+  xpReward: number;
+  levelReached: number;
+}
+
 export interface GameState {
   slimes: Slime[];
   goo: number;
@@ -120,6 +149,7 @@ export interface GameState {
     level: number;
     timestamp: number;
   } | null;
+  currentLevel: number; // For battle map progression
 }
 
 export type SlimeFoodType = 'basic' | 'elemental' | 'royal';
@@ -192,4 +222,6 @@ export type GameAction =
   | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType }
   | { type: 'CLEAR_EVOLUTION' }
   | { type: 'CLEAR_LEVEL_UP' }
-  | { type: 'CLEAR_PLAYER_LEVEL_UP' };
+  | { type: 'CLEAR_PLAYER_LEVEL_UP' }
+  | { type: 'BATTLE_REWARD'; result: BattleResult }
+  | { type: 'SET_CURRENT_LEVEL'; level: number };

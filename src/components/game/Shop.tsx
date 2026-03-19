@@ -66,17 +66,9 @@ const ITEM_SHOP = [
 
 const STARTER_EGG_COST = 50;
 
-const SHOP_EGG_ELEMENTS: SlimeElement[] = [
-  'fire', 'water', 'wind', 'earth', // Tier 1
-  'plant', 'light', 'shadow', 'nature', // Tier 2
-  'void', 'cosmic', 'ice', 'electric' // Tier 3
-];
+const SHOP_EGG_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 
-const SHOP_HABITAT_ELEMENTS: SlimeElement[] = [
-  'fire', 'water', 'wind', 'earth', // Tier 1
-  'plant', 'light', 'shadow', 'nature', // Tier 2
-  'metal', 'toxic', 'crystal', 'lava', 'ice', 'electric', 'void', 'cosmic', 'arcane', 'divine' // Tier 3
-];
+const SHOP_HABITAT_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 
 export function Shop() {
   const { state, dispatch, playerLevel } = useGameState();
@@ -84,9 +76,7 @@ export function Shop() {
   const unlockedElements = getUnlockedElements(playerLevel);
 
   const getRequiredLevel = (element: SlimeElement): number => {
-    if (['fire', 'water', 'wind', 'earth'].includes(element)) return 1;
-    if (['plant', 'light', 'shadow', 'nature'].includes(element)) return 6;
-    return 11;
+    return 1;
   };
 
   const handleBuyEgg = (element: SlimeElement) => {
@@ -181,21 +171,16 @@ export function Shop() {
               <div className="grid grid-cols-2 gap-5">
                 {SHOP_EGG_ELEMENTS.map(elem => {
                   const reqLevel = getRequiredLevel(elem);
-                  const isUnlocked = playerLevel >= reqLevel;
+                  const isUnlocked = true;
                   return (
                     <div
                       key={elem}
                       onClick={() => handleBuyEgg(elem)}
                       className={`group relative flex flex-col items-center p-6 rounded-3xl border-2 transition-all duration-300
-                        ${isUnlocked && state.goo >= STARTER_EGG_COST 
+                        ${state.goo >= STARTER_EGG_COST 
                           ? 'bg-white border-[#FF7EB6]/20 hover:border-[#FF7EB6] hover:shadow-lg cursor-pointer active:scale-95' 
                           : 'bg-slate-100 border-slate-200 opacity-40 grayscale overflow-hidden'}`}
                     >
-                      {!isUnlocked && (
-                        <div className="absolute inset-0 z-10 flex items-center justify-center bg-black/5 backdrop-blur-[1px]">
-                           <span className="bg-slate-800 text-white text-[8px] px-2 py-1 rounded font-black tracking-widest uppercase">LV.{reqLevel} REQ</span>
-                        </div>
-                      )}
                       <EggCanvas element={elem} />
                       <span className="mt-4 text-sm font-black text-slate-700 group-hover:text-[#FF7EB6] uppercase tracking-widest transition-colors">
                         {ELEMENT_DISPLAY_NAMES[elem]} Slime
@@ -249,13 +234,13 @@ export function Shop() {
                     <button
                       key={elem}
                       onClick={() => {
-                        if (state.goo >= cost && state.habitats.length < 16) {
+                        if (state.goo >= cost) {
                           dispatch({ type: 'SPEND_GOO', amount: cost });
                           dispatch({ type: 'BUY_HABITAT', element: elem });
                           audioEngine.playSfx('purchase');
                         }
                       }}
-                      disabled={(isUnlocked && state.goo < cost) || state.habitats.length >= 16}
+                      disabled={isUnlocked && state.goo < cost}
                       className="group relative flex items-center gap-5 p-4 bg-white border-2 border-[#FF7EB6]/10 hover:border-[#FF7EB6] transition-all active:scale-[0.98] disabled:opacity-30 text-left rounded-3xl overflow-hidden"
                     >
                       <div className="w-14 h-14 rounded-2xl border-2 shadow-inner flex-shrink-0" 

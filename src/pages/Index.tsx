@@ -10,20 +10,26 @@ import { Shop } from '@/components/game/Shop';
 import { Hatchery } from '@/components/game/Hatchery';
 import { ForestBackground } from '@/components/game/ForestBackground';
 import { IslandGrid } from '@/components/game/IslandGrid';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
-import { Button } from '@/components/ui/button';
-import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { ShoppingBag, Images, Info, Trophy, Volume2, VolumeX, Sword } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
-import { LevelUpPopup } from '@/components/game/LevelUpPopup';
-import { PlayerLevelUpPopup } from '@/components/game/PlayerLevelUpPopup';
+import { WorldMap } from '@/components/game/WorldMap';
+import { BattlePreview } from '@/components/game/BattlePreview';
+import { BattleArena } from '@/components/game/BattleArena';
+import { BattleSlime } from '@/types/slime';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
-  const [currentView, setCurrentView] = useState<'breeding' | 'habitats'>('breeding');
+  const [currentView, setCurrentView] = useState<'breeding' | 'habitats' | 'battleMap'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
+  
+  // Battle Flow State
+  const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
+  const [showBattlePreview, setShowBattlePreview] = useState(false);
+  const [battleTeam, setBattleTeam] = useState<{ player: BattleSlime[], opponent: BattleSlime[] } | null>(null);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
@@ -48,6 +54,16 @@ function GameLayout() {
     audioEngine.toggleMute();
   };
 
+  const handleSelectLevel = (level: number) => {
+    setSelectedLevel(level);
+    setShowBattlePreview(true);
+  };
+
+  const handleStartBattle = (player: BattleSlime[], opponent: BattleSlime[]) => {
+    setBattleTeam({ player, opponent });
+    setShowBattlePreview(false);
+  };
+
   useEffect(() => {
     const startAudio = () => {
       audioEngine.resume();
@@ -67,9 +83,21 @@ function GameLayout() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
-      <div className="relative z-10 flex flex-col h-full pointer-events-none">
-        {/* Background Layer inside z-10 but behind other content */}
-        <div className="absolute inset-0 z-0">
+      {/* 1. BATTLE MAP LAYER (Highest Priority when active) */}
+      {currentView === 'battleMap' && (
+        <div className="fixed inset-0 z-[100] pointer-events-auto">
+          <WorldMap 
+            onSelectLevel={handleSelectLevel}
+            onClose={() => setCurrentView('breeding')}
+          />
+        </div>
+      )}
+
+      {/* 2. MAIN GAME INTERFACE */}
+      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' ? 'hidden' : ''}`}>
+        
+        {/* Background Layer */}
+        <div className="absolute inset-0 z-0 pointer-events-none">
           {currentView === 'breeding' ? (
             <ForestBackground 
               fixed={false} 
@@ -88,21 +116,25 @@ function GameLayout() {
           )}
         </div>
 
+        {/* TopBar (Navigation) */}
         <div className="pointer-events-auto relative z-20">
           <TopBar 
             currentView={currentView}
-            onBackToAltar={currentView === 'habitats' ? () => setCurrentView('breeding') : undefined} 
-            onOpenHabitats={currentView === 'breeding' ? () => setCurrentView('habitats') : undefined}
+            onBackToAltar={() => setCurrentView('breeding')} 
+            onOpenHabitats={() => setCurrentView('habitats')}
+            onOpenBattle={() => setCurrentView('battleMap')}
           />
         </div>
 
+        {/* Central Content */}
         <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none">
-          {currentView === 'breeding' ? (
+          {currentView === 'breeding' && (
             <div className="w-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
               <BreedingPod onRequestGallery={openGalleryForSlot} />
               <Hatchery />
             </div>
-          ) : (
+          )}
+          {currentView === 'habitats' && (
             <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
               <div className="w-full max-w-6xl">
                 <IslandGrid onHabitatClick={setSelectedHabitatId} />
@@ -111,9 +143,8 @@ function GameLayout() {
           )}
         </div>
 
-        {/* UNIFIED TOOLBAR - Bottom Right */}
+        {/* BOTTOM TOOLBAR */}
         <div className="absolute bottom-8 right-8 flex items-center gap-4 pointer-events-auto z-50">
-          {/* Achievements */}
           <div className="relative group">
             <button onClick={() => setShowAchievements(true)} className={toolbarCircle}>
               <Trophy className={toolbarIcon} />
@@ -121,7 +152,6 @@ function GameLayout() {
             </button>
           </div>
 
-          {/* Gallery */}
           <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
             <SheetTrigger asChild>
               <div className="relative group">
@@ -138,7 +168,6 @@ function GameLayout() {
             </SheetContent>
           </Sheet>
 
-          {/* Mute */}
           <div className="relative group">
             <button onClick={handleMute} className={toolbarCircle}>
               {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
@@ -146,7 +175,6 @@ function GameLayout() {
             </button>
           </div>
 
-          {/* Bazaar (Market) */}
           <Sheet>
             <SheetTrigger asChild>
               <div className="relative group">
@@ -161,7 +189,6 @@ function GameLayout() {
             </SheetContent>
           </Sheet>
 
-          {/* Codex (Stats) */}
           <Sheet>
             <SheetTrigger asChild>
               <div className="relative group">
@@ -185,8 +212,30 @@ function GameLayout() {
         </div>
       </div>
 
+      {/* 3. GLOBAL POPUPS */}
       {showAchievements && (
         <Achievements onClose={() => setShowAchievements(false)} />
+      )}
+
+      {showBattlePreview && selectedLevel !== null && (
+        <div className="fixed inset-0 z-[200]">
+          <BattlePreview 
+            level={selectedLevel}
+            onStartBattle={handleStartBattle}
+            onClose={() => setShowBattlePreview(false)}
+          />
+        </div>
+      )}
+
+      {battleTeam && selectedLevel !== null && (
+        <div className="fixed inset-0 z-[300]">
+          <BattleArena 
+            level={selectedLevel}
+            playerTeam={battleTeam.player}
+            opponentTeam={battleTeam.opponent}
+            onClose={() => setBattleTeam(null)}
+          />
+        </div>
       )}
 
       <EvolutionPopup />

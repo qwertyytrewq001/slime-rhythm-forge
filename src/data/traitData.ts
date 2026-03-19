@@ -219,17 +219,11 @@ export function getPlayerLevel(totalBreeds: number, slimeCount: number): number 
 }
 
 export function getUnlockedElements(level: number): SlimeElement[] {
-  const elements: SlimeElement[] = [];
-  if (level >= 1) elements.push(...ELEMENT_TIERS[1]);
-  if (level >= 6) elements.push(...ELEMENT_TIERS[2]);
-  if (level >= 11) elements.push(...ELEMENT_TIERS[3]);
-  return elements;
+  return [...ELEMENT_TIERS[1], ...ELEMENT_TIERS[2], ...ELEMENT_TIERS[3]];
 }
 
 export function getElementTierForLevel(level: number): number {
-  if (level >= 11) return 3;
-  if (level >= 6) return 2;
-  return 1;
+  return 3;
 }
 
 // Habitat costs per element

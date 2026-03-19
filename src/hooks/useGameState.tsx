@@ -71,12 +71,13 @@ function randomId(): string {
 
 function findNextGridSlot(habitats: Habitat[]): { x: number; y: number } {
   const occupied = new Set(habitats.map(h => `${h.gridX},${h.gridY}`));
-  for (let y = 0; y < 4; y++) {
+  // Support up to 100x100 grid if needed, though we primarily use array index for display
+  for (let y = 0; y < 100; y++) {
     for (let x = 0; x < 4; x++) {
       if (!occupied.has(`${x},${y}`)) return { x, y };
     }
   }
-  return { x: 0, y: 0 }; // Grid full, stack
+  return { x: 0, y: 0 };
 }
 
 function createInitialState(): GameState {
@@ -104,6 +105,8 @@ function createInitialState(): GameState {
       happiness: saved.happiness ?? {},
       lastEvolution: null,
       lastLevelUp: null,
+      lastPlayerLevelUp: saved.lastPlayerLevelUp ?? null,
+      currentLevel: saved.currentLevel ?? 1,
     };
   }
   return {
@@ -127,11 +130,45 @@ function createInitialState(): GameState {
     happiness: {},
     lastEvolution: null,
     lastLevelUp: null,
+    lastPlayerLevelUp: null,
+    currentLevel: 1,
   };
 }
 
 function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
+    case 'BATTLE_REWARD': {
+      const { result } = action;
+      const isWin = result.winner === 'player';
+      
+      const updatedSlimes = state.slimes.map(s => {
+        const teamSlime = result.playerTeam.find(ps => ps.id === s.id);
+        if (!teamSlime) return s;
+
+        let newXp = s.xp + result.xpReward;
+        let newLevel = s.level;
+        let xpToNext = 5 + newLevel * 3;
+        
+        while (newXp >= xpToNext && newLevel < 15) {
+          newXp -= xpToNext;
+          newLevel++;
+          xpToNext = 5 + newLevel * 3;
+        }
+        
+        return { ...s, level: newLevel, xp: newXp };
+      });
+
+      const nextLevel = isWin ? Math.max(state.currentLevel, result.levelReached + 1) : state.currentLevel;
+
+      return {
+        ...state,
+        slimes: updatedSlimes,
+        goo: Math.round((state.goo + result.gooReward) * 100) / 100,
+        currentLevel: nextLevel,
+      };
+    }
+    case 'SET_CURRENT_LEVEL':
+      return { ...state, currentLevel: action.level };
     case 'ADD_SLIME': {
       const slime = action.slime;
       // Find available habitat

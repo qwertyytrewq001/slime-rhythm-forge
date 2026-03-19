@@ -12,7 +12,7 @@ export function EvolutionPopup() {
 
   useEffect(() => {
     if (evolution && !show) {
-      setShow(true);
+setShow(true);
       audioEngine.playSfx('achievement');
     }
   }, [evolution]);

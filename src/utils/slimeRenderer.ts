@@ -14,7 +14,8 @@ export function drawSlime(
   slime: Slime,
   canvasSize: number,
   frame: number = 0,
-  animated: boolean = true
+  animated: boolean = true,
+  isHurt: boolean = false
 ): void {
   const s = INTERNAL_SIZE;
   ctx.canvas.width = s;
@@ -53,41 +54,48 @@ export function drawSlime(
   let bounce = 0, squashX = 1, squashY = 1, sway = 0, tilt = 0;
   if (animated) {
     const phase = frame * 0.06;
-    switch (model) {
-      case 0: { // Blob: deep squash/stretch bounce + happy wiggle
-        const hopCycle = Math.sin(phase * 1.3);
-        bounce = Math.abs(hopCycle) * 6.5 * bounceMult;
-        squashX = 1 + hopCycle * 0.18;
-        squashY = 1 - hopCycle * 0.18;
-        if (frame % 240 < 30) {
-          sway = Math.sin(frame * 0.4) * 4;
-          tilt = Math.sin(frame * 0.4) * 0.12;
+    if (isHurt) {
+      // Violent shake when hurt
+      sway = Math.sin(frame * 0.8) * 4;
+      bounce = Math.cos(frame * 0.8) * 2;
+      tilt = Math.sin(frame * 0.4) * 0.2;
+    } else {
+      switch (model) {
+        case 0: { // Blob: deep squash/stretch bounce + happy wiggle
+          const hopCycle = Math.sin(phase * 1.3);
+          bounce = Math.abs(hopCycle) * 6.5 * bounceMult;
+          squashX = 1 + hopCycle * 0.18;
+          squashY = 1 - hopCycle * 0.18;
+          if (frame % 240 < 30) {
+            sway = Math.sin(frame * 0.4) * 4;
+            tilt = Math.sin(frame * 0.4) * 0.12;
+          }
+          break;
         }
-        break;
-      }
-      case 1: { // Spiky: sharper side-to-side rock + spike rattle
-        const rockPhase = Math.sin(phase * 0.8);
-        sway = rockPhase * 5.5;
-        tilt = rockPhase * 0.09;
-        squashX = 1 + Math.abs(Math.sin(phase * 1.5)) * 0.06;
-        squashY = 1;
-        if (t.eyes === 10) {
-          sway *= 1.6;
-          tilt *= 2.2;
+        case 1: { // Spiky: sharper side-to-side rock + spike rattle
+          const rockPhase = Math.sin(phase * 0.8);
+          sway = rockPhase * 5.5;
+          tilt = rockPhase * 0.09;
+          squashX = 1 + Math.abs(Math.sin(phase * 1.5)) * 0.06;
+          squashY = 1;
+          if (t.eyes === 10) {
+            sway *= 1.6;
+            tilt *= 2.2;
+          }
+          break;
         }
-        break;
-      }
-      case 2: { // Jelly: more fluid liquid wave ripple
-        const wave = Math.sin(phase * 0.6);
-        bounce = wave * 3.5 * bounceMult;
-        squashX = 1 + Math.sin(phase * 0.7) * 0.15;
-        squashY = 1 + Math.cos(phase * 0.7) * 0.15;
-        sway = Math.sin(phase * 0.3) * 3;
-        if (t.rhythm >= 4) {
-          sway += Math.sin(frame * 0.12) * 4;
-          tilt = Math.sin(frame * 0.12) * 0.07;
+        case 2: { // Jelly: more fluid liquid wave ripple
+          const wave = Math.sin(phase * 0.6);
+          bounce = wave * 3.5 * bounceMult;
+          squashX = 1 + Math.sin(phase * 0.7) * 0.15;
+          squashY = 1 + Math.cos(phase * 0.7) * 0.15;
+          sway = Math.sin(phase * 0.3) * 3;
+          if (t.rhythm >= 4) {
+            sway += Math.sin(frame * 0.12) * 4;
+            tilt = Math.sin(frame * 0.12) * 0.07;
+          }
+          break;
         }
-        break;
       }
     }
   }
@@ -167,11 +175,26 @@ export function drawSlime(
   drawShineEdge(ctx, stars, frame, animated);
 
   // Eyes with bigger expressive pixels + blink cycles
-  drawEyes(ctx, t.eyes, frame, model, animated, stars, sway, eyeScaleMult);
+  if (isHurt) {
+    const eyeY = -7;
+    const eyeSpacing = 13;
+    ctx.lineWidth = 3; ctx.strokeStyle = '#1a1a1a'; ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(-eyeSpacing - 4, eyeY - 4); ctx.lineTo(-eyeSpacing + 2, eyeY); ctx.lineTo(-eyeSpacing - 4, eyeY + 4); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(eyeSpacing + 4, eyeY - 4); ctx.lineTo(eyeSpacing - 2, eyeY); ctx.lineTo(eyeSpacing + 4, eyeY + 4); ctx.stroke();
+  } else {
+    drawEyes(ctx, t.eyes, frame, model, animated, stars, sway, eyeScaleMult);
+  }
 
   // Mouth with personality
-  const mouthType = stage === 'baby' ? 0 : t.mouth; // Babies are always happy
-  drawMouth(ctx, mouthType, model, frame, animated, sway);
+  if (isHurt) {
+    ctx.fillStyle = '#3a1a1a';
+    ctx.beginPath(); ctx.ellipse(0, 10, 8, 12, 0, 0, Math.PI * 2); ctx.fill();
+    ctx.fillStyle = '#ff8888';
+    ctx.beginPath(); ctx.ellipse(0, 14, 5, 4, 0, 0, Math.PI * 2); ctx.fill();
+  } else {
+    const mouthType = stage === 'baby' ? 0 : t.mouth;
+    drawMouth(ctx, mouthType, model, frame, animated, sway);
+  }
 
   // Accessory
   if (t.accessory > 0 && stage !== 'baby') {
