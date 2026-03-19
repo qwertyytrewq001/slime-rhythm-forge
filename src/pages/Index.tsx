@@ -13,17 +13,19 @@ import { IslandGrid } from '@/components/game/IslandGrid';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
 import { Button } from '@/components/ui/button';
-import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX } from 'lucide-react';
+import { ShoppingBag, Images, Info, ChevronLeft, Trophy, Volume2, VolumeX, Swords } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
 import { LevelUpPopup } from '@/components/game/LevelUpPopup';
 import { PlayerLevelUpPopup } from '@/components/game/PlayerLevelUpPopup';
+import { BattleArena } from '@/components/game/BattleArena';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
   const [currentView, setCurrentView] = useState<'breeding' | 'habitats'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showBattle, setShowBattle] = useState(false);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
@@ -113,6 +115,14 @@ function GameLayout() {
 
         {/* UNIFIED TOOLBAR - Bottom Right */}
         <div className="absolute bottom-8 right-8 flex items-center gap-4 pointer-events-auto z-50">
+          {/* Battle Arena */}
+          <div className="relative group">
+            <button onClick={() => setShowBattle(true)} className={toolbarCircle}>
+              <Swords className={toolbarIcon} />
+              <span className={toolbarLabel}>Battle</span>
+            </button>
+          </div>
+
           {/* Achievements */}
           <div className="relative group">
             <button onClick={() => setShowAchievements(true)} className={toolbarCircle}>
@@ -190,6 +200,10 @@ function GameLayout() {
       )}
 
       <EvolutionPopup />
+      
+      {showBattle && (
+        <BattleArena onClose={() => setShowBattle(false)} />
+      )}
     </div>
   );
 }
