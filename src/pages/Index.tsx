@@ -25,6 +25,7 @@ function GameLayout() {
   const [currentView, setCurrentView] = useState<'breeding' | 'habitats'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showBattle, setShowBattle] = useState(false);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);

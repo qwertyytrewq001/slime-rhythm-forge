@@ -331,6 +331,32 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, lastLevelUp: null };
     case 'CLEAR_PLAYER_LEVEL_UP':
       return { ...state, lastPlayerLevelUp: null };
+    case 'BATTLE_REWARD': {
+      const food = { xpValue: action.xp };
+      const slimes = state.slimes.map(s => {
+        if (s.id !== action.slimeId) return s;
+        let newXp = s.xp + action.xp;
+        let newLevel = s.level;
+        let xpToNext = 5 + newLevel * 3;
+        while (newXp >= xpToNext && newLevel < 15) {
+          newXp -= xpToNext;
+          newLevel++;
+          xpToNext = 5 + newLevel * 3;
+        }
+        return { ...s, level: newLevel, xp: newXp };
+      });
+      const fedSlime = slimes.find(s => s.id === action.slimeId);
+      const originalSlime = state.slimes.find(s => s.id === action.slimeId);
+      const leveledUp = fedSlime && originalSlime && fedSlime.level > originalSlime.level 
+        ? { slimeId: fedSlime.id, slimeName: fedSlime.name, oldLevel: originalSlime.level, newLevel: fedSlime.level, timestamp: Date.now() }
+        : null;
+      return { 
+        ...state, 
+        slimes, 
+        goo: Math.round((state.goo + action.goo) * 100) / 100,
+        lastLevelUp: leveledUp || state.lastLevelUp,
+      };
+    }
     default:
       return state;
   }
