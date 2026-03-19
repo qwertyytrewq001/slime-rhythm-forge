@@ -160,6 +160,40 @@ export const SLIME_FOODS: Record<SlimeFoodType, SlimeFood> = {
   },
 };
 
+// === BATTLE TYPES ===
+export interface BattleSlime {
+  slime: Slime;
+  hp: number;
+  maxHp: number;
+  attack: number;
+  defense: number;
+  speed: number;
+}
+
+export interface BattleMove {
+  name: string;
+  damage: number;
+  element: SlimeElement;
+  emoji: string;
+  isCrit: boolean;
+  effectiveness: 'super' | 'normal' | 'weak';
+}
+
+export interface BattleTurn {
+  attacker: 'player' | 'enemy';
+  move: BattleMove;
+  damageDealt: number;
+  remainingHp: number;
+}
+
+export interface BattleResult {
+  won: boolean;
+  turns: BattleTurn[];
+  gooReward: number;
+  xpReward: number;
+  playerSlimeId: string;
+}
+
 export type GameAction =
   | { type: 'ADD_SLIME'; slime: Slime }
   | { type: 'SELECT_SLIME'; id: string | null }
@@ -192,4 +226,5 @@ export type GameAction =
   | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType }
   | { type: 'CLEAR_EVOLUTION' }
   | { type: 'CLEAR_LEVEL_UP' }
-  | { type: 'CLEAR_PLAYER_LEVEL_UP' };
+  | { type: 'CLEAR_PLAYER_LEVEL_UP' }
+  | { type: 'BATTLE_REWARD'; slimeId: string; goo: number; xp: number };
