@@ -18,6 +18,7 @@ import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
 import { LevelUpPopup } from '@/components/game/LevelUpPopup';
 import { PlayerLevelUpPopup } from '@/components/game/PlayerLevelUpPopup';
+import { BattleArena } from '@/components/game/BattleArena';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
