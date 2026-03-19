@@ -40,7 +40,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
         {/* Background Layer */}
         <div 
           className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none"
-          style={{ backgroundImage: 'url("/Preview arena.png")' }}
+          style={{ backgroundImage: 'url("/preview_arena.png")' }}
         />
 
         {/* Header */}
