@@ -115,6 +115,14 @@ function GameLayout() {
 
         {/* UNIFIED TOOLBAR - Bottom Right */}
         <div className="absolute bottom-8 right-8 flex items-center gap-4 pointer-events-auto z-50">
+          {/* Battle Arena */}
+          <div className="relative group">
+            <button onClick={() => setShowBattle(true)} className={toolbarCircle}>
+              <Swords className={toolbarIcon} />
+              <span className={toolbarLabel}>Battle</span>
+            </button>
+          </div>
+
           {/* Achievements */}
           <div className="relative group">
             <button onClick={() => setShowAchievements(true)} className={toolbarCircle}>
