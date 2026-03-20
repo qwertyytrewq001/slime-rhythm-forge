@@ -36,8 +36,9 @@ function GameLayout() {
     if (!hasLaunchedBefore) {
       // Mark as launched
       localStorage.setItem('glim_first_launch_completed', 'true');
-      // Trigger first launch tutorial
+      // Trigger first launch tutorial and open it
       triggerDialogue('firstLaunch');
+      setShowTutorial(true);
     }
   }, []);
   const [showLevelDialogue, setShowLevelDialogue] = useState(false);
