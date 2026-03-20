@@ -217,7 +217,6 @@ export function LoreTutorial({ isOpen, onClose, startChapter = 'intro' }: LoreTu
   };
 
   const handleComplete = () => {
-    dispatch({ type: 'COMPLETE_TUTORIAL_CHAPTER', chapterId: currentChapter.id });
     dispatch({ type: 'COMPLETE_TUTORIAL' });
     onClose();
   };
