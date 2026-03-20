@@ -33,14 +33,14 @@ export function GlimCharacter({ expression, size = 200 }: GlimCharacterProps) {
 
   const getImagePath = () => {
     const expressionMap = {
-      explainingsomething: '/explainingsomething_glim.png',
-      exicted: '/glim_exicted.png',
-      kind: '/glim_kind.png',
-      smug: '/smug_glim.png',
-      tearfull_emotional: '/tearfull_emotional_glim.png',
-      worried: '/worried_glim.png'
+      explainingsomething: 'explainingsomething_glim.png',
+      exicted: 'glim_exicted.png',
+      kind: 'glim_kind.png',
+      smug: 'smug_glim.png',
+      tearfull_emotional: 'tearfull_emotional_glim.png',
+      worried: 'worried_glim.png'
     };
-    return expressionMap[expression];
+    return `${import.meta.env.BASE_URL}${expressionMap[expression]}`;
   };
 
   return (

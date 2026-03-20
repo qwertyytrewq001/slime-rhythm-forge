@@ -236,25 +236,26 @@ export const HABITAT_COSTS: Record<SlimeElement, number> = {
 };
 
 // Habitat visual themes
+const base = import.meta.env.BASE_URL;
 export const HABITAT_THEMES: Record<SlimeElement, { bg: string; accent: string; desc: string; bgImage?: string }> = {
-  fire:     { bg: '#3D1408', accent: '#FF4500', desc: 'Volcanic nest with lava cracks', bgImage: './fire_habitat.png' },
-  water:    { bg: '#082038', accent: '#4169E1', desc: 'Crystal blue pool with ripples', bgImage: './Water_habitat.png' },
-  plant:    { bg: '#0A2810', accent: '#32CD32', desc: 'Vine-covered floral dome', bgImage: './plant_habitat.png' },
-  earth:    { bg: '#2A1A08', accent: '#A0522D', desc: 'Rocky cavern with crystals', bgImage: './earth_habitat.png' },
-  ice:      { bg: '#102838', accent: '#87CEEB', desc: 'Shimmering ice cave', bgImage: './ice glacial habitat.png' },
-  wind:     { bg: '#1A2838', accent: '#B0C4DE', desc: 'Floating cloud platform', bgImage: './Wind habitat.png' },
-  electric: { bg: '#282008', accent: '#FFD700', desc: 'Tesla coil chamber', bgImage: './electric habitat.png' },
-  metal:    { bg: '#1A1A1A', accent: '#C0C0C0', desc: 'Forge and anvil pit', bgImage: './metal habitat.png' },
-  light:    { bg: '#2A2810', accent: '#FFFACD', desc: 'Sunlit crystal garden', bgImage: './light_habitat.png' },
-  shadow:   { bg: '#0A0A1A', accent: '#483D8B', desc: 'Dark mist hollow', bgImage: './shadow_habitat_2.png' },
-  cosmic:   { bg: '#100A28', accent: '#9B59B6', desc: 'Starfield observatory', bgImage: './Cosmic Habitat.png' },
-  void:     { bg: '#050508', accent: '#2D1B69', desc: 'Reality rift chamber', bgImage: './Void Habitat.png' },
-  toxic:    { bg: '#0A1A08', accent: '#7FFF00', desc: 'Bubbling acid swamp', bgImage: './toxic habitats.png' },
-  crystal:  { bg: '#1A0A28', accent: '#DA70D6', desc: 'Prism geode cavern', bgImage: './Crystal Habitat.png' },
-  lava:     { bg: '#280808', accent: '#FF0000', desc: 'Molten core pit', bgImage: './lava habitat.png' },
-  nature:   { bg: '#0A2018', accent: '#3CB371', desc: 'Enchanted grove', bgImage: './Forest Habitats.png' },
-  arcane:   { bg: '#140A28', accent: '#8A2BE2', desc: 'Rune circle sanctum', bgImage: './Ancient Habitat.png' },
-  divine:   { bg: '#28280A', accent: '#FFD700', desc: 'Celestial shrine', bgImage: './Divine Habitat.png' },
+  fire:     { bg: '#3D1408', accent: '#FF4500', desc: 'Volcanic nest with lava cracks', bgImage: `${base}fire_habitat.png` },
+  water:    { bg: '#082038', accent: '#4169E1', desc: 'Crystal blue pool with ripples', bgImage: `${base}Water_habitat.png` },
+  plant:    { bg: '#0A2810', accent: '#32CD32', desc: 'Vine-covered floral dome', bgImage: `${base}plant_habitat.png` },
+  earth:    { bg: '#2A1A08', accent: '#A0522D', desc: 'Rocky cavern with crystals', bgImage: `${base}earth_habitat.png` },
+  ice:      { bg: '#102838', accent: '#87CEEB', desc: 'Shimmering ice cave', bgImage: `${base}ice glacial habitat.png` },
+  wind:     { bg: '#1A2838', accent: '#B0C4DE', desc: 'Floating cloud platform', bgImage: `${base}Wind habitat.png` },
+  electric: { bg: '#282008', accent: '#FFD700', desc: 'Tesla coil chamber', bgImage: `${base}electric habitat.png` },
+  metal:    { bg: '#1A1A1A', accent: '#C0C0C0', desc: 'Forge and anvil pit', bgImage: `${base}metal habitat.png` },
+  light:    { bg: '#2A2810', accent: '#FFFACD', desc: 'Sunlit crystal garden', bgImage: `${base}light_habitat.png` },
+  shadow:   { bg: '#0A0A1A', accent: '#483D8B', desc: 'Dark mist hollow', bgImage: `${base}shadow_habitat_2.png` },
+  cosmic:   { bg: '#100A28', accent: '#9B59B6', desc: 'Starfield observatory', bgImage: `${base}Cosmic Habitat.png` },
+  void:     { bg: '#050508', accent: '#2D1B69', desc: 'Reality rift chamber', bgImage: `${base}Void Habitat.png` },
+  toxic:    { bg: '#0A1A08', accent: '#7FFF00', desc: 'Bubbling acid swamp', bgImage: `${base}toxic habitats.png` },
+  crystal:  { bg: '#1A0A28', accent: '#DA70D6', desc: 'Prism geode cavern', bgImage: `${base}Crystal Habitat.png` },
+  lava:     { bg: '#280808', accent: '#FF0000', desc: 'Molten core pit', bgImage: `${base}lava habitat.png` },
+  nature:   { bg: '#0A2018', accent: '#3CB371', desc: 'Enchanted grove', bgImage: `${base}Forest Habitats.png` },
+  arcane:   { bg: '#140A28', accent: '#8A2BE2', desc: 'Rune circle sanctum', bgImage: `${base}Ancient Habitat.png` },
+  divine:   { bg: '#28280A', accent: '#FFD700', desc: 'Celestial shrine', bgImage: `${base}Divine Habitat.png` },
 };
 
 // Rarity weights
