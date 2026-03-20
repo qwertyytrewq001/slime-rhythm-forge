@@ -766,8 +766,9 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
             <div className="flex items-center gap-2">
               <button
                 onClick={handleNext}
-                className="px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all text-xs"
               >
+                <ChevronRight className="w-3 h-3" />
                 {isTyping ? 'Skip' : 
                  currentDialogueIndex < currentDialogue.length - 1 ? 'Next' : 'Got it'}
               </button>
