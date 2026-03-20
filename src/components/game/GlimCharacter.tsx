@@ -39,9 +39,30 @@ export function GlimCharacter({ expression, size = 200 }: GlimCharacterProps) {
       kind: 'glim_kind.png',
       smug: 'smug_glim.png',
       tearfull_emotional: 'tearfull_emotional.png',
-      worried: 'worried_glim.png'
+      worried: 'worried_glim.png',
+      shocked: 'shocked_glim.png',
+      composed: 'composed_glim.png',
+      urgent: 'urgent_glim.png',
+      dramatic: 'dramatic_glim.png',
+      excited: 'excited_glim.png',
+      nudging: 'nudging_glim.png',
+      frozen: 'frozen_glim.png',
+      emotional: 'emotional_glim.png',
+      warm: 'warm_glim.png',
+      determined: 'determined_glim.png',
+      watching: 'watching_glim.png',
+      reverent: 'reverent_glim.png',
+      serious: 'serious_glim.png',
+      gesturing: 'gesturing_glim.png',
+      delighted: 'delighted_glim.png',
+      surveying: 'surveying_glim.png',
+      important: 'important_glim.png',
+      smirk: 'smirk_glim.png',
+      relieved: 'relieved_glim.png',
+      grim: 'grim_glim.png',
+      dreadful: 'dreadful_glim.png'
     };
-    return `${import.meta.env.BASE_URL}${expressionMap[expression]}`;
+    return `${import.meta.env.BASE_URL}${expressionMap[expression] || 'glim_kind.png'}`;
   };
 
   return (
