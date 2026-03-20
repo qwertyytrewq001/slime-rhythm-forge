@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ChevronRight, ChevronLeft, SkipForward } from 'lucide-react';
 import { useGameState } from '@/hooks/useGameState';
 import { GlimCharacter } from './GlimCharacter';
@@ -474,6 +474,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   const [currentDialogue, setCurrentDialogue] = useState<any[]>([]);
   const [currentExpression, setCurrentExpression] = useState('shocked');
   const [glimPosition, setGlimPosition] = useState<'center' | 'bottom-left'>('center');
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
   // Listen for dialogue triggers
   useDialogueTrigger(useCallback((triggerId: TriggerType, data) => {
@@ -604,23 +605,36 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     const currentCard = currentDialogue[currentDialogueIndex];
     if (!currentCard) return;
 
+    // Clear any existing interval
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+
     setIsTyping(true);
     setDisplayedText('');
     
-    const text = currentCard.text;
+    const text = currentCard.text || '';
     let charIndex = 0;
     
-    const typeInterval = setInterval(() => {
+    intervalRef.current = setInterval(() => {
       if (charIndex < text.length) {
         setDisplayedText(prev => prev + text[charIndex]);
         charIndex++;
       } else {
         setIsTyping(false);
-        clearInterval(typeInterval);
+        if (intervalRef.current) {
+          clearInterval(intervalRef.current);
+          intervalRef.current = null;
+        }
       }
     }, 30);
 
-    return () => clearInterval(typeInterval);
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
+    };
   }, [currentDialogue, currentDialogueIndex, isOpen]);
 
   const handleNext = () => {
@@ -685,14 +699,15 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
       {/* Dialogue Box */}
       <div 
-        className={`absolute bottom-4 left-4 right-8 rounded-2xl shadow-lg relative`}
+        className="absolute bottom-[20px] left-1/2 transform -translate-x-1/2 rounded-2xl shadow-lg relative pointer-events-auto"
         style={{
-          width: glimPosition === 'center' ? '800px' : 'calc(100vw - 48px)',
-          maxWidth: '1200px',
-          height: '180px',
-          background: 'rgba(255, 255, 255, 0.9)',
+          width: '600px',
+          maxWidth: '70vw',
+          background: 'rgba(20, 10, 40, 0.92)',
+          borderRadius: '16px',
           border: '2px solid #ff6eb4',
-          margin: '0 auto'
+          padding: '20px 24px',
+          zIndex: 9999
         }}
       >
         <div className="p-4 pl-6 h-full flex flex-col">
@@ -703,7 +718,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
           {/* Dialogue Text */}
           <div className="flex-1 overflow-y-auto pr-2">
-            <p className="text-gray-800 text-lg leading-relaxed font-medium" style={{ color: '#1a1a1a' }}>
+            <p className="text-white text-lg leading-relaxed font-medium">
               {displayedText}
               {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
             </p>
