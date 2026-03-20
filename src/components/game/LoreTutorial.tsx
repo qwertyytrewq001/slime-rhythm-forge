@@ -493,7 +493,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       markEventSeen('firstLaunch');
       setCurrentDialogue(FIRST_LAUNCH_DIALOGUE);
       setCurrentExpression('shocked');
-      setGlimPosition('center');
+      setGlimPosition('bottom-left'); // Changed from 'center' to 'bottom-left'
     }
 
     if (triggerId === 'firstBazaarOpen' && !hasSeenEvent('firstBazaarOpen')) {
