@@ -747,20 +747,20 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
                 className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handlePrevious}
               >
-                ← Back
+                ◀
               </button>
               <button
                 disabled={isTyping || currentDialogueIndex === currentDialogue.length - 1}
                 className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handleNext}
               >
-                Next →
+                ▶
               </button>
               <button
                 className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handleSkip}
               >
-                ✕ Skip
+                ✕
               </button>
             </div>
           </div>
