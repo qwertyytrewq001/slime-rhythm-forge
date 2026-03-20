@@ -698,8 +698,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
             height: '400px',
             width: '350px',
           } : {
-            bottom: '160px', // Positioned above dialogue box
-            left: '20px',
+            bottom: '20px', // Above dialogue box
+            left: '20px', // Left side, not overlapping text
             height: '250px',
             width: '200px',
           }),
