@@ -641,52 +641,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     };
   }, [currentDialogue, currentDialogueIndex, isOpen]);
 
-  // Auto-advance on click or key press
-  useEffect(() => {
-    if (!isOpen || !currentDialogue.length) return;
-
-    const handleProgress = () => {
-      if (isTyping) {
-        setIsTyping(false);
-        setDisplayedText(currentDialogue[currentDialogueIndex]?.text || '');
-        return;
-      }
-
-      if (currentDialogueIndex < currentDialogue.length - 1) {
-        setCurrentDialogueIndex(prev => prev + 1);
-        setDisplayedText('');
-      } else {
-        onClose();
-        setTimeout(() => setCurrentDialogueIndex(0), 500);
-      }
-    };
-
-    // Click anywhere to advance
-    const handleClick = () => handleProgress();
-    
-    // Key press to advance
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if (e.key === ' ' || e.key === 'Enter' || e.key === 'Space') {
-        handleProgress();
-      }
-    };
-
-    document.addEventListener('click', handleClick);
-    document.addEventListener('keydown', handleKeyPress);
-
-    return () => {
-      document.removeEventListener('click', handleClick);
-      document.removeEventListener('keydown', handleKeyPress);
-    };
-  }, [isOpen, currentDialogue, currentDialogueIndex, isTyping]);
-
-  const handlePrevious = () => {
-    if (currentDialogueIndex > 0) {
-      setCurrentDialogueIndex(prev => prev - 1);
-      setDisplayedText('');
-    }
-  };
-
   const handleNext = () => {
     if (isTyping) {
       if (intervalRef.current) {
@@ -694,16 +648,26 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         intervalRef.current = null;
       }
       setIsTyping(false);
-      setDisplayedText(currentDialogue[currentDialogueIndex]?.text || '');
+      setDisplayedText(currentDialogue[currentDialogueIndex]?.text ?? '');
       return;
     }
 
     if (currentDialogueIndex < currentDialogue.length - 1) {
       setCurrentDialogueIndex(prev => prev + 1);
+      // Reset text for the new card
       setDisplayedText('');
     } else {
+      // End of dialogue - dismiss
       onClose();
+      // Reset for next time
       setTimeout(() => setCurrentDialogueIndex(0), 500);
+    }
+  };
+
+  const handlePrevious = () => {
+    if (currentDialogueIndex > 0) {
+      setCurrentDialogueIndex(prev => prev - 1);
+      setDisplayedText(''); // Reset text
     }
   };
 
@@ -718,23 +682,28 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   const progress = ((currentDialogueIndex + 1) / currentDialogue.length) * 100;
 
   return (
-    <>
+    <div 
+      className="fixed inset-0 z-[200] pointer-events-none"
+      // The main container for dialogue should not be styled itself
+      // but should act as a portal root for its children.
+    >
       {/* Glim Character - positioned based on context */}
       <div 
+        className="fixed pointer-events-none transition-all duration-500"
         style={{
           position: 'fixed',
           bottom: '20px',
           left: '20px',
-          zIndex: 10000,
+          zIndex: 10000, // Higher than dialogue box
           height: '250px',
           width: '200px',
-          ...(glimPosition === 'center' ? {
+          ...(glimPosition === 'center' && {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             height: '400px',
-            width: '350px'
-          } : {})
+            width: '350px',
+          })
         }}
       >
         <GlimCharacter 
@@ -743,7 +712,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         />
       </div>
 
-      {/* Dialogue Box - Separate container to avoid global styles */}
+      {/* Dialogue Box - Correctly styled and positioned */}
       <div 
         className="absolute shadow-lg pointer-events-auto"
         style={{
@@ -761,31 +730,55 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         }}
       >
         {/* Using a separate inner div for content padding */}
-        <div className="p-4 pl-6 h-full flex flex-col">
+        <div className="h-full flex flex-col">
           {/* Character Name */}
-          <div className="mb-3">
-            <h3 className="text-[#FF7EB6] font-bold text-lg">Glim</h3>
+          <div className="mb-2">
+            <h3 className="text-[#FF7EB6] font-bold text-xl">Glim</h3>
           </div>
 
           {/* Dialogue Text */}
-          <div className="flex-1 overflow-y-auto pr-2">
+          <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '60px'}}>
             <p className="text-white text-lg leading-relaxed font-medium">
-              {displayedText}
+              {/* Ensure displayedText is always a string */}
+              {displayedText ?? ''}
               {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
             </p>
           </div>
 
-          {/* Progress indicator */}
-          <div className="flex items-center justify-center mt-3">
-            <div className="text-white text-sm">
-              {currentDialogueIndex + 1} / {currentDialogue.length}
+          {/* Navigation Controls */}
+          <div className="flex items-center justify-between mt-4">
+            <div className="flex gap-2">
+              <button
+                onClick={handlePrevious}
+                disabled={currentDialogueIndex === 0}
+                className="p-1.5 rounded-full bg-black/30 hover:bg-black/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                aria-label="Previous"
+              >
+                <ChevronLeft className="w-4 h-4 text-white" />
+              </button>
             </div>
-            <div className="text-white text-xs">
-              Click anywhere or press Space to continue
+
+            <div className="flex items-center gap-2">
+              <button
+                onClick={handleNext}
+                className="px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
+              >
+                {isTyping ? 'Skip' : 
+                 currentDialogueIndex < currentDialogue.length - 1 ? 'Next' : 'Got it'}
+              </button>
+
+              <button
+                onClick={handleSkip}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all text-xs"
+                aria-label="Skip dialogue"
+              >
+                <SkipForward className="w-3 h-3" />
+                Skip
+              </button>
             </div>
           </div>
         </div>
       </div>
-    </>
+    </div>
   );
 }
