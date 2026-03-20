@@ -691,18 +691,9 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       <div 
         className="fixed pointer-events-none transition-all duration-500"
         style={{
-          position: 'fixed',
-          bottom: '20px',
-          left: '20px',
-          zIndex: 10000, // Higher than dialogue box
-          height: '250px',
-          width: '200px',
+          cssText: 'position: fixed !important; bottom: 20px !important; left: 20px !important; z-index: 10000 !important; height: 250px; width: 200px;',
           ...(glimPosition === 'center' && {
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            height: '400px',
-            width: '350px',
+            cssText: 'top: 50%; left: 50%; transform: translate(-50%, -50%); height: 400px; width: 350px;'
           })
         }}
       >
