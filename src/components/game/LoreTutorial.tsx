@@ -682,11 +682,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   const progress = ((currentDialogueIndex + 1) / currentDialogue.length) * 100;
 
   return (
-    <div 
-      className="fixed inset-0 z-[200] pointer-events-none"
-      // The main container for dialogue should not be styled itself
-      // but should act as a portal root for its children.
-    >
+    <>
       {/* Glim Character - positioned based on context */}
       <div 
         style={{
@@ -711,7 +707,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         />
       </div>
 
-      {/* Dialogue Box - Correctly styled and positioned */}
+      {/* Dialogue Box - Separate container to avoid global styles */}
       <div 
         className="absolute shadow-lg pointer-events-auto"
         style={{
@@ -729,55 +725,47 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         }}
       >
         {/* Using a separate inner div for content padding */}
-        <div className="h-full flex flex-col">
+        <div className="p-4 pl-6 h-full flex flex-col">
           {/* Character Name */}
-          <div className="mb-2">
-            <h3 className="text-[#FF7EB6] font-bold text-xl">Glim</h3>
+          <div className="mb-3">
+            <h3 className="text-[#FF7EB6] font-bold text-lg">Glim</h3>
           </div>
 
           {/* Dialogue Text */}
-          <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '60px'}}>
+          <div className="flex-1 overflow-y-auto pr-2">
             <p className="text-white text-lg leading-relaxed font-medium">
-              {/* Ensure displayedText is always a string */}
-              {displayedText ?? ''}
+              {displayedText}
               {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
             </p>
           </div>
 
           {/* Navigation Controls */}
-          <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center justify-between mt-3">
             <div className="flex gap-2">
               <button
-                onClick={handlePrevious}
                 disabled={currentDialogueIndex === 0}
-                className="p-1.5 rounded-full bg-black/30 hover:bg-black/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                aria-label="Previous"
-              >
-                <ChevronLeft className="w-4 h-4 text-white" />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleNext}
                 className="px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
+                onClick={handlePrevious}
               >
-                {isTyping ? 'Skip' : 
-                 currentDialogueIndex < currentDialogue.length - 1 ? 'Next' : 'Got it'}
+                <ChevronLeft className="w-4 h-4" />
               </button>
-
               <button
-                onClick={handleSkip}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all text-xs"
-                aria-label="Skip dialogue"
+                disabled={isTyping || currentDialogueIndex === currentDialogue.length - 1}
+                className="px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
+                onClick={handleNext}
               >
-                <SkipForward className="w-3 h-3" />
-                Skip
+                <ChevronRight className="w-4 h-4" />
+              </button>
+              <button
+                className="px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
+                onClick={handleSkip}
+              >
+                <SkipForward className="w-4 h-4" />
               </button>
             </div>
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 }
