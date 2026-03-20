@@ -89,6 +89,8 @@ const RitualInscription = ({
   </div>
 );
 
+import { triggerDialogue } from '@/utils/dialogueTriggers';
+
 export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
   const { state, dispatch } = useGameState();
   const [mergeParticles, setMergeParticles] = useState(false);
@@ -96,6 +98,11 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
   const [whisperIndex, setWhisperIndex] = useState(0);
 
   useEffect(() => {
+    // Trigger breeding intro lore if tutorial not finished
+    if (!state.tutorialCompleted) {
+      triggerDialogue('breeding-intro');
+    }
+    
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);
@@ -178,6 +185,10 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
         resultSlime: resultSlime
       }
     });
+
+    if (!state.tutorialCompleted) {
+      triggerDialogue('breeding-complete');
+    }
 
     if (state.mutationJuiceActive) dispatch({ type: 'DEACTIVATE_MUTATION_JUICE' });
     setTimeout(() => setMergeParticles(false), 2000);

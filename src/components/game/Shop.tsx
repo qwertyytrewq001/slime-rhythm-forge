@@ -70,6 +70,8 @@ const SHOP_EGG_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 
 const SHOP_HABITAT_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 
+import { triggerDialogue } from '@/utils/dialogueTriggers';
+
 export function Shop() {
   const { state, dispatch, playerLevel } = useGameState();
   const { toast } = useToast();
@@ -100,6 +102,11 @@ export function Shop() {
     }
     dispatch({ type: 'SPEND_GOO', amount: STARTER_EGG_COST });
     audioEngine.playSfx('purchase');
+    
+    if (!state.tutorialCompleted) {
+      triggerDialogue('shop-purchase');
+    }
+
     const newSlime = createElementSlime(element);
     dispatch({ type: 'START_HATCHING', slime: newSlime, duration: 10000 });
     toast({
@@ -112,6 +119,11 @@ export function Shop() {
     if (state.goo < cost) return;
     dispatch({ type: 'SPEND_GOO', amount: cost });
     audioEngine.playSfx('purchase');
+
+    if (!state.tutorialCompleted) {
+      triggerDialogue('shop-purchase');
+    }
+
     switch (itemId) {
       case 'mutation_juice': dispatch({ type: 'ACTIVATE_MUTATION_JUICE' }); break;
       case 'wild_food':
@@ -124,6 +136,18 @@ export function Shop() {
       case 'element_treat':
         if (state.selectedSlimeId) dispatch({ type: 'FEED_SLIME_XP', slimeId: state.selectedSlimeId, foodType: 'elemental' });
         break;
+    }
+  };
+
+  const handleBuyHabitat = (elem: SlimeElement, cost: number) => {
+    if (state.goo >= cost) {
+      dispatch({ type: 'SPEND_GOO', amount: cost });
+      dispatch({ type: 'BUY_HABITAT', element: elem });
+      audioEngine.playSfx('purchase');
+      
+      if (!state.tutorialCompleted) {
+        triggerDialogue('habitat-purchase');
+      }
     }
   };
 
@@ -233,13 +257,7 @@ export function Shop() {
                   return (
                     <button
                       key={elem}
-                      onClick={() => {
-                        if (state.goo >= cost) {
-                          dispatch({ type: 'SPEND_GOO', amount: cost });
-                          dispatch({ type: 'BUY_HABITAT', element: elem });
-                          audioEngine.playSfx('purchase');
-                        }
-                      }}
+                      onClick={() => handleBuyHabitat(elem, cost)}
                       disabled={isUnlocked && state.goo < cost}
                       className="group relative flex items-center gap-5 p-4 bg-white border-2 border-[#FF7EB6]/10 hover:border-[#FF7EB6] transition-all active:scale-[0.98] disabled:opacity-30 text-left rounded-3xl overflow-hidden"
                     >

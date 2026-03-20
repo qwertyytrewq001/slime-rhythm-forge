@@ -39,6 +39,8 @@ function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackPro
   );
 }
 
+import { triggerDialogue } from '@/utils/dialogueTriggers';
+
 export function Hatchery() {
   const { state, dispatch } = useGameState();
   const [now, setNow] = useState(Date.now());
@@ -83,6 +85,10 @@ export function Hatchery() {
     setIsHatching(true);
     audioEngine.playSfx('hatch');
     
+    if (!state.tutorialCompleted) {
+      triggerDialogue('hatch-egg');
+    }
+
     // Add slime to state immediately so it can be assigned to habitat in popup
     const newSlime = activeHatching.slime;
     dispatch({ type: 'ADD_SLIME', slime: newSlime });

@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect } from 'react';
 
 // Global dialogue trigger system
-type DialogueTrigger = 
+export type DialogueTrigger = 
   | 'breeding-intro'
   | 'breeding-complete' 
   | 'shop-purchase'
@@ -12,13 +12,13 @@ type DialogueTrigger =
 let globalTrigger: DialogueTrigger | null = null;
 let globalTriggerData: any = null;
 
-export const triggerDialogue = (trigger: DialogueTrigger, data?: any) => {
-  globalTrigger = trigger;
+export const triggerDialogue = (triggerId: DialogueTrigger, data?: any) => {
+  globalTrigger = triggerId;
   globalTriggerData = data;
   
   // Create a custom event that other components can listen for
   window.dispatchEvent(new CustomEvent('dialogueTrigger', { 
-    detail: { trigger, data } 
+    detail: { triggerId, data } 
   }));
 };
 
@@ -36,10 +36,10 @@ export const clearDialogueTrigger = () => {
 };
 
 // Hook for components to listen for dialogue triggers
-export const useDialogueTrigger = (callback: (trigger: DialogueTrigger, data?: any) => void) => {
+export const useDialogueTrigger = (callback: (triggerId: DialogueTrigger, data?: any) => void) => {
   const handleTrigger = useCallback((event: any) => {
-    if (event.detail?.trigger) {
-      callback(event.detail.trigger, event.detail.data);
+    if (event.detail?.triggerId) {
+      callback(event.detail.triggerId, event.detail.data);
     }
   }, [callback]);
 

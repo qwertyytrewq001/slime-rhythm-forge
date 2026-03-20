@@ -103,38 +103,38 @@ export function LoreTutorial({ isOpen, onClose, startChapter = 'intro' }: LoreTu
   const fullText = currentChapter.dialogue[currentDialogueIndex] || '';
 
   // Listen for dialogue triggers
-  useDialogueTrigger((trigger, data) => {
-    if (trigger === 'breeding-intro') {
+  useDialogueTrigger((triggerId, data) => {
+    if (triggerId === 'breeding-intro') {
       setCurrentChapterIndex(2); // Breeding chapter
       setCurrentDialogueIndex(0);
       dispatch({ type: 'COMPLETE_TUTORIAL' });
     }
 
-    if (trigger === 'breeding-complete') {
+    if (triggerId === 'breeding-complete') {
       setCurrentChapterIndex(2); // Breeding chapter
       setCurrentDialogueIndex(3); // "Okay. Now breed two slimes."
       dispatch({ type: 'COMPLETE_TUTORIAL' });
     }
 
-    if (trigger === 'shop-purchase') {
+    if (triggerId === 'shop-purchase') {
       setCurrentChapterIndex(2); // Breeding chapter
       setCurrentDialogueIndex(4); // "Sometimes you get me."
       dispatch({ type: 'COMPLETE_TUTORIAL' });
     }
 
-    if (trigger === 'habitat-purchase') {
+    if (triggerId === 'habitat-purchase') {
       setCurrentChapterIndex(3); // Habitats chapter
       setCurrentDialogueIndex(6); // "We'll get there again."
       dispatch({ type: 'COMPLETE_TUTORIAL' });
     }
 
-    if (trigger === 'hatch-egg') {
+    if (triggerId === 'hatch-egg') {
       setCurrentChapterIndex(3); // Habitats chapter  
       setCurrentDialogueIndex(7); // "Moving on."
       dispatch({ type: 'COMPLETE_TUTORIAL' });
     }
 
-    if (trigger === 'battle-start') {
+    if (triggerId === 'battle-start') {
       setCurrentChapterIndex(4); // Battle chapter
       setCurrentDialogueIndex(0); // "And now. The part I've been preparing you for."
       dispatch({ type: 'COMPLETE_TUTORIAL' });

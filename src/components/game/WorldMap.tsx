@@ -34,6 +34,8 @@ const LEVEL_NODES: Record<number, { x: number; y: number }> = {
   46: { x: 48, y: 4 }, 47: { x: 52, y: 8 }, 48: { x: 50, y: 12 }, 49: { x: 54, y: 14 }, 50: { x: 50, y: 2 },
 };
 
+import { triggerDialogue } from '@/utils/dialogueTriggers';
+
 export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) => {
   const { state } = useGameState();
   const unlockedLevel = state.currentLevel || 1;
@@ -71,6 +73,9 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
               <button
                 onClick={() => {
                   if (isUnlocked) {
+                    if (!state.tutorialCompleted) {
+                      triggerDialogue('battle-start');
+                    }
                     onSelectLevel(levelNum);
                   }
                 }}
