@@ -744,26 +744,23 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
             <div className="flex gap-2">
               <button
                 disabled={currentDialogueIndex === 0}
-                className="px-4 py-2 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
+                className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handlePrevious}
               >
-                <ChevronLeft className="w-4 h-4 mr-2" />
-                Previous
+                ← Back
               </button>
               <button
                 disabled={isTyping || currentDialogueIndex === currentDialogue.length - 1}
-                className="px-4 py-2 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
+                className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handleNext}
               >
-                Next
-                <ChevronRight className="w-4 h-4 ml-2" />
+                Next →
               </button>
               <button
-                className="px-4 py-2 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
+                className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handleSkip}
               >
-                <SkipForward className="w-4 h-4 mr-2" />
-                Skip
+                ✕ Skip
               </button>
             </div>
           </div>
