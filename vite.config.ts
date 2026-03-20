@@ -5,8 +5,8 @@ import { componentTagger } from "lovable-tagger";
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
-  // 1. Set base to relative so it works on any hosting path
-  base: "./", 
+  // Set base path for GitHub Pages
+  base: mode === 'production' ? '/slime-rhythm-forge/' : '/',
   
   // 2. Configure build output to use the 'docs' folder for GitHub Pages
   build: {
