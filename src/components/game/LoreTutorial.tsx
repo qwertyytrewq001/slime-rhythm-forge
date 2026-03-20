@@ -747,20 +747,23 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
                 className="px-4 py-2 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handlePrevious}
               >
-                <ChevronLeft className="w-4 h-4" />
+                <ChevronLeft className="w-4 h-4 mr-2" />
+                Previous
               </button>
               <button
                 disabled={isTyping || currentDialogueIndex === currentDialogue.length - 1}
                 className="px-4 py-2 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handleNext}
               >
-                <ChevronRight className="w-4 h-4" />
+                Next
+                <ChevronRight className="w-4 h-4 ml-2" />
               </button>
               <button
                 className="px-4 py-2 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
                 onClick={handleSkip}
               >
-                <SkipForward className="w-4 h-4" />
+                <SkipForward className="w-4 h-4 mr-2" />
+                Skip
               </button>
             </div>
           </div>
