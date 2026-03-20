@@ -689,23 +689,17 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     >
       {/* Glim Character - positioned based on context */}
       <div 
-        className="absolute pointer-events-none z-10 transition-all duration-500"
+        className="fixed bottom-20 left-20 z-[150] pointer-events-none transition-all duration-500"
         style={{
-          ...(glimPosition === 'center' ? {
+          height: '250px',
+          width: '200px',
+          ...(glimPosition === 'center' && {
             top: '50%',
             left: '50%',
             transform: 'translate(-50%, -50%)',
             height: '400px',
             width: '350px',
-          } : {
-            bottom: '20px', // Same level as dialogue box
-            left: '20px', // Left side of screen, not overlapping
-            height: '250px',
-            width: '200px',
-          }),
-          background: 'none',
-          border: 'none',
-          boxShadow: 'none'
+          })
         }}
       >
         <GlimCharacter 
