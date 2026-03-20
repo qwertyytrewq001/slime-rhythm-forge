@@ -36,10 +36,10 @@ export const clearDialogueTrigger = () => {
 };
 
 // Hook for components to listen for dialogue triggers
-export const useDialogueTrigger = (callback: (triggerType: DialogueTrigger, data?: any) => void) => {
+export const useDialogueTrigger = (callback: (trigger: DialogueTrigger, data?: any) => void) => {
   const handleTrigger = useCallback((event: any) => {
-    if (event.detail?.trigger === triggerType) {
-      callback(event.detail.data);
+    if (event.detail?.trigger) {
+      callback(event.detail.trigger, event.detail.data);
     }
   }, [callback]);
 
