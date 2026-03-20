@@ -641,6 +641,52 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     };
   }, [currentDialogue, currentDialogueIndex, isOpen]);
 
+  // Auto-advance on click or key press
+  useEffect(() => {
+    if (!isOpen || !currentDialogue.length) return;
+
+    const handleProgress = () => {
+      if (isTyping) {
+        setIsTyping(false);
+        setDisplayedText(currentDialogue[currentDialogueIndex]?.text || '');
+        return;
+      }
+
+      if (currentDialogueIndex < currentDialogue.length - 1) {
+        setCurrentDialogueIndex(prev => prev + 1);
+        setDisplayedText('');
+      } else {
+        onClose();
+        setTimeout(() => setCurrentDialogueIndex(0), 500);
+      }
+    };
+
+    // Click anywhere to advance
+    const handleClick = () => handleProgress();
+    
+    // Key press to advance
+    const handleKeyPress = (e: KeyboardEvent) => {
+      if (e.key === ' ' || e.key === 'Enter' || e.key === 'Space') {
+        handleProgress();
+      }
+    };
+
+    document.addEventListener('click', handleClick);
+    document.addEventListener('keydown', handleKeyPress);
+
+    return () => {
+      document.removeEventListener('click', handleClick);
+      document.removeEventListener('keydown', handleKeyPress);
+    };
+  }, [isOpen, currentDialogue, currentDialogueIndex, isTyping]);
+
+  const handlePrevious = () => {
+    if (currentDialogueIndex > 0) {
+      setCurrentDialogueIndex(prev => prev - 1);
+      setDisplayedText('');
+    }
+  };
+
   const handleNext = () => {
     if (isTyping) {
       if (intervalRef.current) {
@@ -648,26 +694,16 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         intervalRef.current = null;
       }
       setIsTyping(false);
-      setDisplayedText(currentDialogue[currentDialogueIndex]?.text ?? '');
+      setDisplayedText(currentDialogue[currentDialogueIndex]?.text || '');
       return;
     }
 
     if (currentDialogueIndex < currentDialogue.length - 1) {
       setCurrentDialogueIndex(prev => prev + 1);
-      // Reset text for the new card
       setDisplayedText('');
     } else {
-      // End of dialogue - dismiss
       onClose();
-      // Reset for next time
       setTimeout(() => setCurrentDialogueIndex(0), 500);
-    }
-  };
-
-  const handlePrevious = () => {
-    if (currentDialogueIndex > 0) {
-      setCurrentDialogueIndex(prev => prev - 1);
-      setDisplayedText(''); // Reset text
     }
   };
 
@@ -739,29 +775,13 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
             </p>
           </div>
 
-          {/* Navigation Controls */}
-          <div className="flex items-center justify-between mt-3">
-            <div className="flex gap-2">
-              <button
-                disabled={currentDialogueIndex === 0}
-                className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
-                onClick={handlePrevious}
-              >
-                ◀
-              </button>
-              <button
-                disabled={isTyping || currentDialogueIndex === currentDialogue.length - 1}
-                className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
-                onClick={handleNext}
-              >
-                ▶
-              </button>
-              <button
-                className="px-6 py-3 rounded-lg bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
-                onClick={handleSkip}
-              >
-                ✕
-              </button>
+          {/* Progress indicator */}
+          <div className="flex items-center justify-center mt-3">
+            <div className="text-white text-sm">
+              {currentDialogueIndex + 1} / {currentDialogue.length}
+            </div>
+            <div className="text-white text-xs">
+              Click anywhere or press Space to continue
             </div>
           </div>
         </div>
