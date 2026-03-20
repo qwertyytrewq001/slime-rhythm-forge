@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { TriggerType } from '@/types/dialogueTypes';
 
 interface GlimCharacterProps {
-  expression: TriggerType;
+  expression: string;
   size?: number;
 }
 

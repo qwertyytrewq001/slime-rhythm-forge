@@ -599,7 +599,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
   // Typewriter effect
   useEffect(() => {
-    if (!isOpen || isTyping || !currentDialogue.length) return;
+    if (!isOpen || !currentDialogue.length || isTyping) return;
 
     const currentCard = currentDialogue[currentDialogueIndex];
     if (!currentCard) return;
