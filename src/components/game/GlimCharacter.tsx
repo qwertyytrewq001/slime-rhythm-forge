@@ -32,7 +32,7 @@ export function GlimCharacter({ expression, size = 200 }: GlimCharacterProps) {
     };
   }, []);
 
-  const getImagePath = () => {
+  const getImagePath = (expression: string) => {
     const expressionMap = {
       explainingsomething: 'explainingsomething_glim.png',
       exicted: 'glim_exicted.png',
@@ -81,7 +81,7 @@ export function GlimCharacter({ expression, size = 200 }: GlimCharacterProps) {
       }}
     >
       <img
-        src={getImagePath()}
+        src={getImagePath(expression)}
         alt={`Glim - ${expression}`}
         className="w-full h-full object-contain"
         style={{
