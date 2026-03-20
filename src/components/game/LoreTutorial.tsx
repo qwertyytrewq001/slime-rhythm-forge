@@ -94,41 +94,49 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'introduc
 
   // Listen for dialogue triggers
   useDialogueTrigger(useCallback((triggerId, data) => {
+    console.log('🎮 Dialogue Trigger Received:', triggerId, 'isOpen:', isOpen, 'onOpen:', !!onOpen);
+    
     // Re-open if closed
     if (!isOpen && onOpen) {
       onOpen();
     }
 
     if (triggerId === 'breeding-intro') {
+      console.log('🎯 Showing breeding intro tutorial');
       setCurrentChapterIndex(1); // Breeding chapter
       setCurrentDialogueIndex(0);
       onOpen(); // Show tutorial
     }
 
     if (triggerId === 'breeding-complete') {
+      console.log('🎯 Hiding tutorial after breeding complete');
       // Hide tutorial after breeding
       onClose();
     }
 
     if (triggerId === 'shop-purchase') {
+      console.log('🎯 Showing shop purchase tutorial');
       setCurrentChapterIndex(1); // Breeding chapter
       setCurrentDialogueIndex(4); // Voss part
       onOpen(); // Show tutorial
     }
 
     if (triggerId === 'habitat-purchase') {
+      console.log('🎯 Showing habitat purchase tutorial');
       setCurrentChapterIndex(2); // Habitats chapter
       setCurrentDialogueIndex(0);
       onOpen(); // Show tutorial
     }
 
     if (triggerId === 'hatch-egg') {
+      console.log('🎯 Showing hatch egg tutorial');
       setCurrentChapterIndex(2); // Habitats chapter
       setCurrentDialogueIndex(3);
       onOpen(); // Show tutorial
     }
 
     if (triggerId === 'battle-start') {
+      console.log('🎯 Showing battle start tutorial');
       setCurrentChapterIndex(3); // Battle chapter
       setCurrentDialogueIndex(0);
       onOpen(); // Show tutorial
