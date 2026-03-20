@@ -33,10 +33,14 @@ function GameLayout() {
   // Check for first launch and trigger tutorial
   useEffect(() => {
     const hasLaunchedBefore = localStorage.getItem('glim_first_launch_completed');
-    if (!hasLaunchedBefore) {
+    console.log('🔍 First launch check:', hasLaunchedBefore);
+    
+    // Temporarily force tutorial to open for testing
+    if (!hasLaunchedBefore || true) { // Added || true for testing
       // Mark as launched
       localStorage.setItem('glim_first_launch_completed', 'true');
       // Trigger first launch tutorial and open it
+      console.log('🚀 Triggering first launch tutorial');
       triggerDialogue('firstLaunch');
       setShowTutorial(true);
     }

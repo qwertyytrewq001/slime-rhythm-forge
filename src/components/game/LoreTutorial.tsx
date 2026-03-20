@@ -476,6 +476,9 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   const [glimPosition, setGlimPosition] = useState<'center' | 'bottom-left'>('center');
   const intervalRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Debug logging
+  console.log('🔍 LoreTutorial state:', { isOpen, currentDialogueLength: currentDialogue.length, currentExpression, glimPosition });
+
   // Listen for dialogue triggers
   useDialogueTrigger(useCallback((triggerId: TriggerType, data) => {
     console.log('🎮 Dialogue Trigger Received:', triggerId);
