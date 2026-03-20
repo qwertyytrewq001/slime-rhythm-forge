@@ -37,16 +37,27 @@ export const clearDialogueTrigger = () => {
 
 // Hook for components to listen for dialogue triggers
 export const useDialogueTrigger = (callback: (triggerId: DialogueTrigger, data?: any) => void) => {
-  const handleTrigger = useCallback((event: any) => {
-    if (event.detail?.triggerId) {
-      callback(event.detail.triggerId, event.detail.data);
-    }
+  const savedCallback = React.useRef(callback);
+  
+  useEffect(() => {
+    savedCallback.current = callback;
   }, [callback]);
 
   useEffect(() => {
+    // Check for pending trigger on mount
+    if (globalTrigger) {
+      savedCallback.current(globalTrigger, globalTriggerData);
+    }
+
+    const handleTrigger = (event: any) => {
+      if (event.detail?.triggerId) {
+        savedCallback.current(event.detail.triggerId, event.detail.data);
+      }
+    };
+
     window.addEventListener('dialogueTrigger', handleTrigger);
     return () => {
       window.removeEventListener('dialogueTrigger', handleTrigger);
     };
-  }, [handleTrigger]);
+  }, []);
 };

@@ -268,6 +268,7 @@ function GameLayout() {
       <LoreTutorial 
         isOpen={showTutorial}
         onClose={() => setShowTutorial(false)}
+        onOpen={() => setShowTutorial(true)}
       />
       
       {/* Level Dialogue Modal */}

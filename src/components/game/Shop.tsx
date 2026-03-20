@@ -103,7 +103,7 @@ export function Shop() {
     dispatch({ type: 'SPEND_GOO', amount: STARTER_EGG_COST });
     audioEngine.playSfx('purchase');
     
-    if (!state.tutorialCompleted) {
+    if (!state.completedTutorialChapters.includes('breeding')) {
       triggerDialogue('shop-purchase');
     }
 
@@ -120,7 +120,7 @@ export function Shop() {
     dispatch({ type: 'SPEND_GOO', amount: cost });
     audioEngine.playSfx('purchase');
 
-    if (!state.tutorialCompleted) {
+    if (!state.completedTutorialChapters.includes('breeding')) {
       triggerDialogue('shop-purchase');
     }
 
@@ -145,7 +145,7 @@ export function Shop() {
       dispatch({ type: 'BUY_HABITAT', element: elem });
       audioEngine.playSfx('purchase');
       
-      if (!state.tutorialCompleted) {
+      if (!state.completedTutorialChapters.includes('habitats')) {
         triggerDialogue('habitat-purchase');
       }
     }

@@ -98,8 +98,8 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
   const [whisperIndex, setWhisperIndex] = useState(0);
 
   useEffect(() => {
-    // Trigger breeding intro lore if tutorial not finished
-    if (!state.tutorialCompleted) {
+    // Trigger breeding intro lore if chapter not finished
+    if (!state.completedTutorialChapters.includes('breeding')) {
       triggerDialogue('breeding-intro');
     }
     

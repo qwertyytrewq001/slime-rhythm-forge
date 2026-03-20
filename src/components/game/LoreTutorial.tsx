@@ -89,10 +89,11 @@ const LORE_CHAPTERS: LoreChapter[] = [
 interface LoreTutorialProps {
   isOpen: boolean;
   onClose: () => void;
+  onOpen?: () => void;
   startChapter?: string;
 }
 
-export function LoreTutorial({ isOpen, onClose, startChapter = 'intro' }: LoreTutorialProps) {
+export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'intro' }: LoreTutorialProps) {
   const { state, dispatch } = useGameState();
   const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [currentDialogueIndex, setCurrentDialogueIndex] = useState(0);
@@ -103,43 +104,42 @@ export function LoreTutorial({ isOpen, onClose, startChapter = 'intro' }: LoreTu
   const fullText = currentChapter.dialogue[currentDialogueIndex] || '';
 
   // Listen for dialogue triggers
-  useDialogueTrigger((triggerId, data) => {
+  useDialogueTrigger(useCallback((triggerId, data) => {
+    // Re-open if closed
+    if (!isOpen && onOpen) {
+      onOpen();
+    }
+
     if (triggerId === 'breeding-intro') {
       setCurrentChapterIndex(2); // Breeding chapter
-      setCurrentDialogueIndex(0);
-      dispatch({ type: 'COMPLETE_TUTORIAL' });
+      setCurrentDialogueIndex(0); // "The Altar."
     }
 
     if (triggerId === 'breeding-complete') {
       setCurrentChapterIndex(2); // Breeding chapter
-      setCurrentDialogueIndex(3); // "Okay. Now breed two slimes."
-      dispatch({ type: 'COMPLETE_TUTORIAL' });
+      setCurrentDialogueIndex(4); // "The point is — Altar is sacred."
     }
 
     if (triggerId === 'shop-purchase') {
       setCurrentChapterIndex(2); // Breeding chapter
-      setCurrentDialogueIndex(4); // "Sometimes you get me."
-      dispatch({ type: 'COMPLETE_TUTORIAL' });
+      setCurrentDialogueIndex(3); // "Sometimes you get me."
     }
 
     if (triggerId === 'habitat-purchase') {
       setCurrentChapterIndex(3); // Habitats chapter
-      setCurrentDialogueIndex(6); // "We'll get there again."
-      dispatch({ type: 'COMPLETE_TUTORIAL' });
+      setCurrentDialogueIndex(0); // "Your slime needs a home."
     }
 
     if (triggerId === 'hatch-egg') {
       setCurrentChapterIndex(3); // Habitats chapter  
-      setCurrentDialogueIndex(7); // "Moving on."
-      dispatch({ type: 'COMPLETE_TUTORIAL' });
+      setCurrentDialogueIndex(4); // "We'll get there again."
     }
 
     if (triggerId === 'battle-start') {
       setCurrentChapterIndex(4); // Battle chapter
       setCurrentDialogueIndex(0); // "And now. The part I've been preparing you for."
-      dispatch({ type: 'COMPLETE_TUTORIAL' });
     }
-  });
+  }, [isOpen, onOpen]));
 
   // Auto-hide tutorial after completion
   useEffect(() => {
@@ -195,7 +195,10 @@ export function LoreTutorial({ isOpen, onClose, startChapter = 'intro' }: LoreTu
     if (currentDialogueIndex < currentChapter.dialogue.length - 1) {
       setCurrentDialogueIndex(prev => prev + 1);
     } else {
-      // Move to next chapter
+      // END OF CHAPTER - CLOSE THE TUTORIAL
+      onClose();
+
+      // Move to next chapter index internally for next trigger or manual open
       if (currentChapterIndex < LORE_CHAPTERS.length - 1) {
         dispatch({ type: 'COMPLETE_TUTORIAL_CHAPTER', chapterId: currentChapter.id });
         setCurrentChapterIndex(prev => prev + 1);

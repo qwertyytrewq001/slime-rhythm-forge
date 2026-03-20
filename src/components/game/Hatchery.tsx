@@ -85,7 +85,7 @@ export function Hatchery() {
     setIsHatching(true);
     audioEngine.playSfx('hatch');
     
-    if (!state.tutorialCompleted) {
+    if (!state.completedTutorialChapters.includes('habitats')) {
       triggerDialogue('hatch-egg');
     }
 

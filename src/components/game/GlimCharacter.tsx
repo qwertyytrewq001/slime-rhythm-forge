@@ -37,7 +37,7 @@ export function GlimCharacter({ expression, size = 200 }: GlimCharacterProps) {
       exicted: 'glim_exicted.png',
       kind: 'glim_kind.png',
       smug: 'smug_glim.png',
-      tearfull_emotional: 'tearfull_emotional_glim.png',
+      tearfull_emotional: 'tearfull_emotional.png',
       worried: 'worried_glim.png'
     };
     return `${import.meta.env.BASE_URL}${expressionMap[expression]}`;

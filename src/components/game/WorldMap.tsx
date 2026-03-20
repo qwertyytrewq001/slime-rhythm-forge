@@ -73,7 +73,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
               <button
                 onClick={() => {
                   if (isUnlocked) {
-                    if (!state.tutorialCompleted) {
+                    if (!state.completedTutorialChapters.includes('battle')) {
                       triggerDialogue('battle-start');
                     }
                     onSelectLevel(levelNum);
