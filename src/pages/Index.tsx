@@ -21,6 +21,7 @@ import { BattleArena } from '@/components/game/BattleArena';
 import { BattleSlime } from '@/types/slime';
 import { LoreTutorial } from '@/components/game/LoreTutorial';
 import { LevelDialogue } from '@/components/game/LevelDialogue';
+import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
@@ -28,6 +29,17 @@ function GameLayout() {
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
+
+  // Check for first launch and trigger tutorial
+  useEffect(() => {
+    const hasLaunchedBefore = localStorage.getItem('glim_first_launch_completed');
+    if (!hasLaunchedBefore) {
+      // Mark as launched
+      localStorage.setItem('glim_first_launch_completed', 'true');
+      // Trigger first launch tutorial
+      triggerDialogue('firstLaunch');
+    }
+  }, []);
   const [showLevelDialogue, setShowLevelDialogue] = useState(false);
   const [dialogueLevel, setDialogueLevel] = useState(1);
   
