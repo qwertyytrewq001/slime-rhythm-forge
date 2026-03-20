@@ -600,25 +600,29 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
   // Typewriter effect
   useEffect(() => {
-    if (!isOpen || !currentDialogue.length || isTyping) return;
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+    }
+    
+    if (!isOpen || !currentDialogue.length) return;
 
     const currentCard = currentDialogue[currentDialogueIndex];
     if (!currentCard) return;
 
-    // Clear any existing interval
-    if (intervalRef.current) {
-      clearInterval(intervalRef.current);
-    }
-
-    setIsTyping(true);
-    setDisplayedText('');
+    const text = currentCard.text ?? '';
     
-    const text = currentCard.text || '';
+    // Don't re-trigger for the same text
+    if (displayedText === text && !isTyping) return;
+
+    setDisplayedText('');
+    setIsTyping(true);
+    
     let charIndex = 0;
     
     intervalRef.current = setInterval(() => {
       if (charIndex < text.length) {
-        setDisplayedText(prev => prev + text[charIndex]);
+        // Use slice to avoid character-by-character scrambling
+        setDisplayedText(text.slice(0, charIndex + 1));
         charIndex++;
       } else {
         setIsTyping(false);
@@ -639,27 +643,37 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
   const handleNext = () => {
     if (isTyping) {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+        intervalRef.current = null;
+      }
       setIsTyping(false);
-      setDisplayedText(currentDialogue[currentDialogueIndex]?.text || '');
+      setDisplayedText(currentDialogue[currentDialogueIndex]?.text ?? '');
       return;
     }
 
     if (currentDialogueIndex < currentDialogue.length - 1) {
       setCurrentDialogueIndex(prev => prev + 1);
+      // Reset text for the new card
+      setDisplayedText('');
     } else {
       // End of dialogue - dismiss
       onClose();
+      // Reset for next time
+      setTimeout(() => setCurrentDialogueIndex(0), 500);
     }
   };
 
   const handlePrevious = () => {
     if (currentDialogueIndex > 0) {
       setCurrentDialogueIndex(prev => prev - 1);
+      setDisplayedText(''); // Reset text
     }
   };
 
   const handleSkip = () => {
     onClose();
+    setTimeout(() => setCurrentDialogueIndex(0), 500);
   };
 
   if (!isOpen || !currentDialogue.length) return null;
@@ -668,10 +682,14 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   const progress = ((currentDialogueIndex + 1) / currentDialogue.length) * 100;
 
   return (
-    <div className="fixed inset-0 z-[200] pointer-events-none">
+    <div 
+      className="fixed inset-0 z-[200] pointer-events-none"
+      // The main container for dialogue should not be styled itself
+      // but should act as a portal root for its children.
+    >
       {/* Glim Character - positioned based on context */}
       <div 
-        className="absolute pointer-events-none z-10"
+        className="absolute pointer-events-none z-10 transition-all duration-500"
         style={{
           ...(glimPosition === 'center' ? {
             top: '50%',
@@ -680,27 +698,30 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
             height: '400px',
             width: '350px',
           } : {
-            bottom: '160px',
+            bottom: '160px', // Positioned above dialogue box
             left: '20px',
             height: '250px',
             width: '200px',
           }),
-          background: 'none !important',
-          backgroundColor: 'transparent !important',
+          background: 'none',
           border: 'none',
           boxShadow: 'none'
         }}
       >
         <GlimCharacter 
-          expression={currentExpression}
+          expression={currentCard?.expression ?? 'shocked'}
           size={glimPosition === 'center' ? 400 : 250}
         />
       </div>
 
-      {/* Dialogue Box */}
+      {/* Dialogue Box - Correctly styled and positioned */}
       <div 
-        className="absolute bottom-[20px] left-1/2 transform -translate-x-1/2 rounded-2xl shadow-lg relative pointer-events-auto"
+        className="absolute shadow-lg pointer-events-auto"
         style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '50%',
+          transform: 'translateX(-50%)',
           width: '600px',
           maxWidth: '70vw',
           background: 'rgba(20, 10, 40, 0.92)',
@@ -710,44 +731,50 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
           zIndex: 9999
         }}
       >
-        <div className="p-4 pl-6 h-full flex flex-col">
+        {/* Using a separate inner div for content padding */}
+        <div className="h-full flex flex-col">
           {/* Character Name */}
-          <div className="mb-3">
-            <h3 className="text-[#FF7EB6] font-bold text-lg">Glim</h3>
+          <div className="mb-2">
+            <h3 className="text-[#FF7EB6] font-bold text-xl">Glim</h3>
           </div>
 
           {/* Dialogue Text */}
-          <div className="flex-1 overflow-y-auto pr-2">
+          <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '60px'}}>
             <p className="text-white text-lg leading-relaxed font-medium">
-              {displayedText}
+              {/* Ensure displayedText is always a string */}
+              {displayedText ?? ''}
               {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
             </p>
           </div>
 
           {/* Navigation Controls */}
-          <div className="flex items-center justify-between mt-3">
+          <div className="flex items-center justify-between mt-4">
             <div className="flex gap-2">
               <button
+                onClick={handlePrevious}
                 disabled={currentDialogueIndex === 0}
                 className="p-1.5 rounded-full bg-black/30 hover:bg-black/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+                aria-label="Previous"
               >
-                <ChevronLeft className="w-3 h-3 text-white" />
+                <ChevronLeft className="w-4 h-4 text-white" />
               </button>
             </div>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-2">
               <button
-                disabled={isTyping}
-                className="px-3 py-1.5 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-sm transition-all hover:scale-105"
+                onClick={handleNext}
+                className="px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-base transition-all hover:scale-105"
               >
                 {isTyping ? 'Skip' : 
                  currentDialogueIndex < currentDialogue.length - 1 ? 'Next' : 'Got it'}
               </button>
 
               <button
-                className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all text-xs"
+                onClick={handleSkip}
+                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all text-xs"
+                aria-label="Skip dialogue"
               >
-                <SkipForward className="w-2.5 h-2.5" />
+                <SkipForward className="w-3 h-3" />
                 Skip
               </button>
             </div>
