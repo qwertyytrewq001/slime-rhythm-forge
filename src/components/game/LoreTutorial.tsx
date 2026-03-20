@@ -87,7 +87,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'introduc
   const [currentDialogueIndex, setCurrentDialogueIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const hasTriggeredOnMount = useRef(false);
+  const [hasTriggeredOnMount, setHasTriggeredOnMount] = useState(false);
 
   const currentChapter = LORE_CHAPTERS[currentChapterIndex];
   const fullText = currentChapter?.dialogue[currentDialogueIndex] || '';
@@ -102,42 +102,47 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'introduc
     if (triggerId === 'breeding-intro') {
       setCurrentChapterIndex(1); // Breeding chapter
       setCurrentDialogueIndex(0);
+      onOpen(); // Show tutorial
     }
 
     if (triggerId === 'breeding-complete') {
-      setCurrentChapterIndex(1); 
-      setCurrentDialogueIndex(3); // "The point is — Altar is sacred."
+      // Hide tutorial after breeding
+      onClose();
     }
 
     if (triggerId === 'shop-purchase') {
-      setCurrentChapterIndex(1);
+      setCurrentChapterIndex(1); // Breeding chapter
       setCurrentDialogueIndex(4); // Voss part
+      onOpen(); // Show tutorial
     }
 
     if (triggerId === 'habitat-purchase') {
       setCurrentChapterIndex(2); // Habitats chapter
       setCurrentDialogueIndex(0);
+      onOpen(); // Show tutorial
     }
 
     if (triggerId === 'hatch-egg') {
-      setCurrentChapterIndex(2);
+      setCurrentChapterIndex(2); // Habitats chapter
       setCurrentDialogueIndex(3);
+      onOpen(); // Show tutorial
     }
 
     if (triggerId === 'battle-start') {
       setCurrentChapterIndex(3); // Battle chapter
       setCurrentDialogueIndex(0);
+      onOpen(); // Show tutorial
     }
     
-    hasTriggeredOnMount.current = true;
+    setHasTriggeredOnMount(true);
   }, [isOpen, onOpen]));
 
   // Auto-hide tutorial after completion
   useEffect(() => {
     if (currentChapter && currentDialogueIndex >= currentChapter.dialogue.length - 1) {
       const timer = setTimeout(() => {
-        // We don't dispatch COMPLETE_TUTORIAL here anymore, let the user close it
-        // clearDialogueTrigger();
+        dispatch({ type: 'COMPLETE_TUTORIAL_CHAPTER', chapterId: currentChapter.id });
+        onClose(); // Hide tutorial
       }, 2000);
       return () => clearTimeout(timer);
     }
@@ -145,7 +150,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'introduc
 
   // Initial chapter setup - only if NO trigger happened on mount
   useEffect(() => {
-    if (isOpen && !hasTriggeredOnMount.current) {
+    if (isOpen && !hasTriggeredOnMount) {
       const pendingTrigger = getDialogueTrigger();
       if (!pendingTrigger) {
         const startIndex = LORE_CHAPTERS.findIndex(ch => ch.id === startChapter);
@@ -161,7 +166,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'introduc
   // Reset trigger flag when tutorial closes
   useEffect(() => {
     if (!isOpen) {
-      hasTriggeredOnMount.current = false;
+      setHasTriggeredOnMount(false);
     }
   }, [isOpen]);
 
