@@ -694,7 +694,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
           position: 'fixed',
           bottom: '20px',
           left: '20px',
-          zIndex: 150,
+          zIndex: 10000, // Higher than dialogue box
           height: '250px',
           width: '200px',
           ...(glimPosition === 'center' && {
