@@ -689,8 +689,12 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     >
       {/* Glim Character - positioned based on context */}
       <div 
-        className="fixed bottom-20 left-20 z-[150] pointer-events-none transition-all duration-500"
+        className="fixed pointer-events-none transition-all duration-500"
         style={{
+          position: 'fixed',
+          bottom: '20px',
+          left: '20px',
+          zIndex: 150,
           height: '250px',
           width: '200px',
           ...(glimPosition === 'center' && {
