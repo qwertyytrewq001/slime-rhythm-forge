@@ -698,8 +698,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
             height: '400px',
             width: '350px',
           } : {
-            bottom: '160px',
-            left: '20px',
+            bottom: '16px', // Same level as dialogue box
+            left: '20px', // Left side of screen, next to dialogue box
             height: '250px',
             width: '200px',
           }),
@@ -716,14 +716,18 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
       {/* Dialogue Box */}
       <div 
-        className={`absolute bottom-4 left-4 right-8 rounded-2xl shadow-lg relative pointer-events-auto`}
+        className={`absolute rounded-2xl shadow-lg relative pointer-events-auto`}
         style={{
+          position: 'fixed',
+          bottom: '16px',
+          left: '50%',
+          transform: 'translateX(-50%)',
           width: glimPosition === 'center' ? '800px' : 'calc(100vw - 48px)',
           maxWidth: '1200px',
           height: '180px',
           background: 'rgba(255, 255, 255, 0.9)',
           border: '2px solid #ff6eb4',
-          margin: '0 auto'
+          zIndex: 9999
         }}
       >
         {/* Using a separate inner div for content padding */}
