@@ -147,12 +147,32 @@ function gameReducer(state: GameState, action: GameAction): GameState {
 
         let newXp = s.xp + result.xpReward;
         let newLevel = s.level;
-        let xpToNext = 5 + newLevel * 3;
+        let xpToNext: number;
         
-        while (newXp >= xpToNext && newLevel < 15) {
+        // Progressive food requirements: harder as levels increase
+        if (newLevel < 15) {
+          // Levels 1-14: Standard progression (battle rewards as main source)
+          xpToNext = 8 + newLevel * 4;
+        } else if (newLevel < 30) {
+          // Levels 15-29: Harder progression
+          xpToNext = 60 + (newLevel - 15) * 12;
+        } else {
+          // Levels 30-50: Very hard progression
+          xpToNext = 240 + (newLevel - 30) * 25;
+        }
+        
+        while (newXp >= xpToNext && newLevel < 50) {
           newXp -= xpToNext;
           newLevel++;
-          xpToNext = 5 + newLevel * 3;
+          
+          // Recalculate XP needed for next level
+          if (newLevel < 15) {
+            xpToNext = 8 + newLevel * 4;
+          } else if (newLevel < 30) {
+            xpToNext = 60 + (newLevel - 15) * 12;
+          } else {
+            xpToNext = 240 + (newLevel - 30) * 25;
+          }
         }
         
         return { ...s, level: newLevel, xp: newXp };
@@ -325,15 +345,36 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         
         let newXp = s.xp + food.xpValue;
         let newLevel = s.level;
-        let xpToNext = 5 + newLevel * 3;
+        let xpToNext: number;
         let didLevelUp = false;
 
         const oldStage = getStage(newLevel);
 
-        while (newXp >= xpToNext && newLevel < 15) {
+        // Progressive food requirements: harder as levels increase
+        if (newLevel < 15) {
+          // Levels 1-14: Standard progression (battle rewards as main source)
+          xpToNext = 8 + newLevel * 4; // More food needed each level
+        } else if (newLevel < 30) {
+          // Levels 15-29: Harder progression
+          xpToNext = 60 + (newLevel - 15) * 12; // Significantly more food needed
+        } else {
+          // Levels 30-50: Very hard progression
+          xpToNext = 240 + (newLevel - 30) * 25; // Much more food needed
+        }
+
+        while (newXp >= xpToNext && newLevel < 50) {
           newXp -= xpToNext;
           newLevel++;
-          xpToNext = 5 + newLevel * 3;
+          
+          // Recalculate XP needed for next level
+          if (newLevel < 15) {
+            xpToNext = 8 + newLevel * 4;
+          } else if (newLevel < 30) {
+            xpToNext = 60 + (newLevel - 15) * 12;
+          } else {
+            xpToNext = 240 + (newLevel - 30) * 25;
+          }
+          
           didLevelUp = true;
         }
 

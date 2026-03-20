@@ -168,7 +168,7 @@ export const SLIME_FOODS: Record<SlimeFoodType, SlimeFood> = {
     id: 'basic',
     name: 'Sun-Ripened Berries',
     description: 'Freshly foraged berries bursting with natural sweetness. A simple, wholesome snack.',
-    cost: 5,
+    cost: 20, // Increased from 5 to 20
     xpValue: 10,
     icon: '🍓',
   },
@@ -176,7 +176,7 @@ export const SLIME_FOODS: Record<SlimeFoodType, SlimeFood> = {
     id: 'elemental',
     name: 'Wildflower Honey',
     description: 'Pure, golden nectar collected from rare spirit blooms. Provides a significant energy boost.',
-    cost: 20,
+    cost: 50, // Increased from 20 to 50
     xpValue: 55,
     icon: '🍯',
   },

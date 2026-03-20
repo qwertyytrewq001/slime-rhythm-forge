@@ -1130,18 +1130,65 @@ function drawElementFeatures(
       break;
     }
     case 'ice': {
-      // Frosted patches
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      for (let i = 0; i < 4; i++) {
-        const ix = Math.sin(i * 1.5) * 20;
-        const iy = Math.cos(i * 1.5) * 15 - 10;
+      // Jagged crystal crown on forehead + translucent body with ice cracks
+      ctx.save();
+      ctx.translate(0, -30);
+      
+      // Crystal crown
+      const crystalGrad = ctx.createLinearGradient(-8, -10, 8, 0);
+      crystalGrad.addColorStop(0, '#E0FFFF');
+      crystalGrad.addColorStop(0.5, '#87CEEB');
+      crystalGrad.addColorStop(1, '#B0E0E6');
+      
+      ctx.fillStyle = crystalGrad;
+      ctx.strokeStyle = '#4682B4';
+      ctx.lineWidth = 1;
+      
+      // Jagged crown points
+      ctx.beginPath();
+      ctx.moveTo(-8, 0);
+      ctx.lineTo(-6, -12);
+      ctx.lineTo(-3, -8);
+      ctx.lineTo(0, -15);
+      ctx.lineTo(3, -8);
+      ctx.lineTo(6, -12);
+      ctx.lineTo(8, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Inner crystal detail
+      ctx.fillStyle = '#FFFFFF';
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      ctx.moveTo(-3, -5);
+      ctx.lineTo(0, -10);
+      ctx.lineTo(3, -5);
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.restore();
+      
+      // Ice cracks on body (translucent effect)
+      ctx.globalAlpha = 0.3;
+      ctx.strokeStyle = '#B0E0E6';
+      ctx.lineWidth = 1;
+      
+      const cracks = [
+        { x1: -10, y1: -5, x2: -5, y2: 5 },
+        { x1: 5, y1: -8, x2: 8, y2: 2 },
+        { x1: -3, y1: 10, x2: 3, y2: 15 },
+        { x1: -15, y1: 0, x2: -10, y2: 8 },
+      ];
+      
+      cracks.forEach(crack => {
         ctx.beginPath();
-        ctx.moveTo(ix, iy);
-        for (let j = 0; j < 5; j++) {
-          ctx.lineTo(ix + Math.cos(j * 1.2) * 8, iy + Math.sin(j * 1.2) * 8);
-        }
-        ctx.fill();
-      }
+        ctx.moveTo(crack.x1, crack.y1);
+        ctx.lineTo(crack.x2, crack.y2);
+        ctx.stroke();
+      });
+      
+      ctx.globalAlpha = 1.0;
       break;
     }
     case 'water': {
@@ -1150,6 +1197,209 @@ function drawElementFeatures(
       ctx.fillStyle = 'rgba(100, 200, 255, 0.6)';
       ctx.beginPath(); ctx.ellipse(15, 25 + dripY, 3, 4 + dripY * 0.2, 0, 0, Math.PI * 2); ctx.fill();
       ctx.beginPath(); ctx.ellipse(-10, 20 + ((frame * 0.4) % 20), 2, 3, 0, 0, Math.PI * 2); ctx.fill();
+      break;
+    }
+    case 'metal': {
+      // Pointed steel spike on forehead + chrome finish with welding seams
+      ctx.save();
+      ctx.translate(0, -25);
+      
+      // Chrome spike
+      const metalGrad = ctx.createLinearGradient(-3, 0, 3, -12);
+      metalGrad.addColorStop(0, '#C0C0C0');
+      metalGrad.addColorStop(0.3, '#E5E5E5');
+      metalGrad.addColorStop(0.7, '#A8A8A8');
+      metalGrad.addColorStop(1, '#FFFFFF');
+      
+      ctx.fillStyle = metalGrad;
+      ctx.strokeStyle = '#808080';
+      ctx.lineWidth = 1;
+      
+      // Pointed spike
+      ctx.beginPath();
+      ctx.moveTo(-3, 0);
+      ctx.lineTo(-2, -8);
+      ctx.lineTo(0, -12);
+      ctx.lineTo(2, -8);
+      ctx.lineTo(3, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Welding seams on sides
+      ctx.strokeStyle = '#606060';
+      ctx.lineWidth = 0.5;
+      ctx.beginPath();
+      ctx.moveTo(-3, -2);
+      ctx.lineTo(-3, -10);
+      ctx.moveTo(3, -2);
+      ctx.lineTo(3, -10);
+      ctx.stroke();
+      
+      // High-shine highlight
+      ctx.fillStyle = '#FFFFFF';
+      ctx.globalAlpha = 0.8;
+      ctx.beginPath();
+      ctx.moveTo(0, -12);
+      ctx.lineTo(1, -8);
+      ctx.lineTo(0, -6);
+      ctx.closePath();
+      ctx.fill();
+      
+      ctx.restore();
+      
+      // Welding seams on body sides
+      ctx.globalAlpha = 0.4;
+      ctx.strokeStyle = '#808080';
+      ctx.lineWidth = 1;
+      
+      const seams = [
+        { x1: -20, y1: -10, x2: -18, y2: 5 },
+        { x1: 20, y1: -10, x2: 18, y2: 5 },
+        { x1: -10, y1: 8, x2: -8, y2: 15 },
+        { x1: 10, y1: 8, x2: 8, y2: 15 },
+      ];
+      
+      seams.forEach(seam => {
+        ctx.beginPath();
+        ctx.moveTo(seam.x1, seam.y1);
+        ctx.lineTo(seam.x2, seam.y2);
+        ctx.stroke();
+      });
+      
+      ctx.globalAlpha = 1.0;
+      break;
+    }
+    case 'light': {
+      // Floating golden halo + pure white body with soft bloom effect
+      ctx.save();
+      ctx.translate(0, -35);
+      
+      // Golden halo
+      const haloGrad = ctx.createRadialGradient(0, 0, 8, 0, 0, 15);
+      haloGrad.addColorStop(0, 'rgba(255, 215, 0, 0.8)');
+      haloGrad.addColorStop(0.5, 'rgba(255, 215, 0, 0.4)');
+      haloGrad.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      
+      ctx.fillStyle = haloGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Inner halo ring
+      ctx.strokeStyle = '#FFD700';
+      ctx.lineWidth = 2;
+      ctx.globalAlpha = 0.9;
+      ctx.beginPath();
+      ctx.arc(0, 0, 10, 0, Math.PI * 2);
+      ctx.stroke();
+      
+      // Tiny glowing sun orb
+      const sunGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 4);
+      sunGrad.addColorStop(0, '#FFFFFF');
+      sunGrad.addColorStop(0.7, '#FFD700');
+      sunGrad.addColorStop(1, '#FFA500');
+      
+      ctx.fillStyle = sunGrad;
+      ctx.globalAlpha = 1.0;
+      ctx.beginPath();
+      ctx.arc(0, 0, 4, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+      
+      // Soft bloom/glow effect around body
+      const bloomGrad = ctx.createRadialGradient(0, 0, 20, 0, 0, 45);
+      bloomGrad.addColorStop(0, 'rgba(255, 255, 255, 0.3)');
+      bloomGrad.addColorStop(0.5, 'rgba(255, 255, 255, 0.1)');
+      bloomGrad.addColorStop(1, 'rgba(255, 255, 255, 0)');
+      
+      ctx.fillStyle = bloomGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 45, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
+    case 'shadow': {
+      // Shadowy demon horns + swirling purple void eye + smoky body with purple particles
+      ctx.save();
+      ctx.translate(0, -25);
+      
+      // Demon horns
+      const hornGrad = ctx.createLinearGradient(-4, 0, 4, -15);
+      hornGrad.addColorStop(0, '#2C003E');
+      hornGrad.addColorStop(0.5, '#4B0082');
+      hornGrad.addColorStop(1, '#663399');
+      
+      // Left horn
+      ctx.fillStyle = hornGrad;
+      ctx.strokeStyle = '#1A0033';
+      ctx.lineWidth = 1;
+      ctx.beginPath();
+      ctx.moveTo(-8, 0);
+      ctx.quadraticCurveTo(-10, -8, -6, -15);
+      ctx.quadraticCurveTo(-4, -12, -2, -5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Right horn
+      ctx.beginPath();
+      ctx.moveTo(8, 0);
+      ctx.quadraticCurveTo(10, -8, 6, -15);
+      ctx.quadraticCurveTo(4, -12, 2, -5);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Swirling purple void eye
+      const eyeGrad = ctx.createRadialGradient(0, -5, 0, 0, -5, 6);
+      eyeGrad.addColorStop(0, '#9400D3');
+      eyeGrad.addColorStop(0.5, '#4B0082');
+      eyeGrad.addColorStop(1, '#000000');
+      
+      ctx.fillStyle = eyeGrad;
+      ctx.beginPath();
+      ctx.arc(0, -5, 6, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Swirling effect in eye
+      ctx.strokeStyle = '#9400D3';
+      ctx.lineWidth = 1;
+      ctx.globalAlpha = 0.6;
+      ctx.beginPath();
+      const swirlAngle = frame * 0.05;
+      ctx.arc(0, -5, 4, swirlAngle, swirlAngle + Math.PI);
+      ctx.stroke();
+      
+      ctx.restore();
+      
+      // Smoky semi-transparent body effect
+      const smokeGrad = ctx.createRadialGradient(0, 0, 15, 0, 0, 35);
+      smokeGrad.addColorStop(0, 'rgba(26, 0, 51, 0.4)');
+      smokeGrad.addColorStop(0.5, 'rgba(75, 0, 130, 0.2)');
+      smokeGrad.addColorStop(1, 'rgba(0, 0, 0, 0)');
+      
+      ctx.fillStyle = smokeGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 35, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Purple particles dripping off
+      ctx.globalAlpha = 0.7;
+      ctx.fillStyle = '#9400D3';
+      
+      for (let i = 0; i < 4; i++) {
+        const particleY = 20 + ((frame * 0.3 + i * 15) % 25);
+        const particleX = (Math.sin(frame * 0.04 + i) * 15);
+        const size = 2 + Math.sin(frame * 0.1 + i) * 1;
+        
+        ctx.beginPath();
+        ctx.arc(particleX, particleY, size, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.globalAlpha = 1.0;
       break;
     }
     case 'electric': {
@@ -1173,16 +1423,6 @@ function drawElementFeatures(
         const oy = Math.sin(ang) * 10 - 5;
         ctx.fillStyle = i === 0 ? '#FFD700' : i === 1 ? '#87CEEB' : '#FF69B4';
         ctx.beginPath(); ctx.arc(ox, oy, 2, 0, Math.PI * 2); ctx.fill();
-      }
-      break;
-    }
-    case 'shadow': {
-      // Dark wisps
-      ctx.fillStyle = 'rgba(20, 0, 40, 0.4)';
-      for (let i = 0; i < 3; i++) {
-        const sx = Math.sin(frame * 0.04 + i) * 30;
-        const sy = Math.cos(frame * 0.04 + i) * 20;
-        ctx.beginPath(); ctx.arc(sx, sy, 10, 0, Math.PI * 2); ctx.fill();
       }
       break;
     }

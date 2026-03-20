@@ -338,7 +338,7 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
                           <button
                             key={foodId}
                             onClick={() => handleFeed(foodId)}
-                            disabled={!canAfford || activeSlime.level >= 15}
+                            disabled={!canAfford || activeSlime.level >= 50}
                             className={`w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all active:scale-95 ${
                               canAfford ? 'bg-white/5 border-white/10 hover:border-[#FF7EB6] hover:bg-white/10' : 'opacity-30 grayscale'
                             }`}

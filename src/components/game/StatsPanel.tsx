@@ -94,7 +94,7 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
                   {(Object.keys(SLIME_FOODS) as SlimeFoodType[]).map(foodId => {
                     const food = SLIME_FOODS[foodId];
                     const canAfford = state.goo >= food.cost;
-                    const isMaxLevel = (slime.level ?? 1) >= 15;
+                    const isMaxLevel = (slime.level ?? 1) >= 50;
 
                     return (
                       <button 

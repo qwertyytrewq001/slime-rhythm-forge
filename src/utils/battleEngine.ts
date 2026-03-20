@@ -46,20 +46,20 @@ export function getEffectivenessMultiplier(eff: 'super' | 'weak' | 'neutral'): n
 export function deriveBattleStats(slime: Slime): BattleSlime['battleStats'] {
   const { traits, level } = slime;
 
-  // Base scaling factor by level
-  const levelMult = 1 + (level - 1) * 0.15;
+  // Fixed: More linear scaling to prevent exponential power creep
+  const levelMult = 1 + (level - 1) * 0.08; // Reduced from 0.15 to 0.08
 
   // HP from size
-  const hp = Math.floor((traits.size * 50 + 50) * levelMult);
+  const hp = Math.floor((traits.size * 40 + 60) * levelMult);
 
-  // Attack from spikes + glow
-  const attack = Math.floor((traits.spikes * 2 + traits.glow * 3 + 10) * levelMult);
+  // Attack from spikes + glow (increased for challenge)
+  const attack = Math.floor((traits.spikes * 4 + traits.glow * 5 + 15) * levelMult);
 
   // Defense from pattern + aura
-  const defense = Math.floor((traits.pattern * 1.5 + traits.aura * 4 + 10) * levelMult);
+  const defense = Math.floor((traits.pattern * 2 + traits.aura * 3 + 8) * levelMult);
 
   // Speed from rhythm
-  const speed = Math.floor((traits.rhythm * 4 + 10) * levelMult);
+  const speed = Math.floor((traits.rhythm * 3 + 12) * levelMult);
 
   return {
     hp,
@@ -82,15 +82,30 @@ export function generateAIOpponents(level: number, playerAverageLevel: number): 
   const team: BattleSlime[] = [];
 
   for (let i = 0; i < 3; i++) {
-    const variance = 0.8 + Math.random() * 0.4;
-    const targetLevel = Math.max(1, Math.floor(playerAverageLevel * variance));
+    let baseLevel: number;
+    
+    // Progressive difficulty: Each level has slightly higher slimes
+    if (level === 1) {
+      // Level 1: LV15 opponents (more challenging)
+      baseLevel = 15;
+    } else if (level === 2) {
+      // Level 2: LV15 + maybe one LV16
+      baseLevel = i === 0 ? 16 : 15; // First slime is LV16, others LV15
+    } else {
+      // Level 3+: More aggressive scaling for challenge
+      baseLevel = Math.min(50, 14 + level + Math.floor(level * 1.5) + (i === 0 ? 2 : (i === 1 ? 1 : 0)));
+    }
+    
+    // Small variance for each slime (±1 level)
+    const variance = 0.95 + Math.random() * 0.1;
+    const targetLevel = Math.max(1, Math.floor(baseLevel * variance));
 
     const randomElement = ALL_ELEMENTS[Math.floor(Math.random() * ALL_ELEMENTS.length)];
     const aiSlime = createRandomSlime();
     aiSlime.level = targetLevel;
     aiSlime.element = randomElement;
     aiSlime.elements = [randomElement];
-    aiSlime.name = `Wild ${randomElement.charAt(0).toUpperCase() + randomElement.slice(1)} Slime`;
+    aiSlime.name = `LV${targetLevel} ${randomElement.charAt(0).toUpperCase() + randomElement.slice(1)} Slime`;
 
     team.push(toBattleSlime(aiSlime));
   }
@@ -116,8 +131,11 @@ export function calculateDamage(
 
   const randomFactor = 0.85 + Math.random() * 0.3;
 
-  let damage = Math.floor((attacker.battleStats.attack * mult * randomFactor * critMult) - defender.battleStats.defense / 2);
-  damage = Math.max(1, damage);
+  // Fixed: More balanced damage formula with level scaling
+  const baseDamage = attacker.battleStats.attack * mult * randomFactor * critMult;
+  const defenseReduction = defender.battleStats.defense * 0.3; // 30% of defense instead of 50%
+  let damage = Math.floor(baseDamage - defenseReduction);
+  damage = Math.max(1, damage); // Minimum 1 damage
 
   return { damage, effectiveness: eff, isCritical };
 }
@@ -183,8 +201,8 @@ export function simulateBattle(
   const winner = playerIndex < pTeam.length ? 'player' : 'opponent';
   const rewards =
     winner === 'player'
-      ? { goo: 15 + Math.floor(Math.random() * 11), xp: 20 + Math.floor(Math.random() * 11) }
-      : { goo: 5, xp: 5 };
+      ? { goo: 25 + Math.floor(Math.random() * 16), xp: 40 + Math.floor(Math.random() * 21) } // Increased rewards
+      : { goo: 8, xp: 12 }; // Small consolation reward
 
   return { turns, winner, rewards };
 }
