@@ -2,23 +2,31 @@ import React, { useCallback, useEffect } from 'react';
 
 // Global dialogue trigger system
 export type DialogueTrigger = 
-  | 'breeding-intro'
-  | 'breeding-complete' 
-  | 'shop-purchase'
-  | 'habitat-purchase'
-  | 'hatch-egg'
-  | 'battle-start';
+  | 'firstLaunch'
+  | 'firstBazaarOpen'
+  | 'firstEggBought'
+  | 'firstHatch'
+  | 'firstHabitatBuilt'
+  | 'firstFeed'
+  | 'firstAltarVisit'
+  | 'firstBreedComplete'
+  | 'firstBattleMapOpen'
+  | 'levelUp'
+  | 'vossEncounter'
+  | 'finalBattle';
+
+export { DialogueTrigger };
 
 let globalTrigger: DialogueTrigger | null = null;
 let globalTriggerData: any = null;
 
-export const triggerDialogue = (triggerId: DialogueTrigger, data?: any) => {
-  globalTrigger = triggerId;
+export const triggerDialogue = (trigger: DialogueTrigger, data?: any) => {
+  globalTrigger = trigger;
   globalTriggerData = data;
   
   // Create a custom event that other components can listen for
   window.dispatchEvent(new CustomEvent('dialogueTrigger', { 
-    detail: { triggerId, data } 
+    detail: { trigger, data } 
   }));
 };
 
@@ -36,7 +44,7 @@ export const clearDialogueTrigger = () => {
 };
 
 // Hook for components to listen for dialogue triggers
-export const useDialogueTrigger = (callback: (triggerId: DialogueTrigger, data?: any) => void) => {
+export const useDialogueTrigger = (callback: (trigger: DialogueTrigger, data?: any) => void) => {
   const savedCallback = React.useRef(callback);
   
   useEffect(() => {
@@ -50,8 +58,8 @@ export const useDialogueTrigger = (callback: (triggerId: DialogueTrigger, data?:
     }
 
     const handleTrigger = (event: any) => {
-      if (event.detail?.triggerId) {
-        savedCallback.current(event.detail.triggerId, event.detail.data);
+      if (event.detail?.trigger) {
+        savedCallback.current(event.detail.trigger, event.detail.data);
       }
     };
 

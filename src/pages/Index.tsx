@@ -185,7 +185,7 @@ function GameLayout() {
           <Sheet>
             <SheetTrigger asChild>
               <div className="relative group">
-                <button className={toolbarCircle}>
+                <button data-testid="gallery-button" className={toolbarCircle}>
                   <Images className={toolbarIcon} />
                   <span className={toolbarLabel}>Gallery</span>
                 </button>

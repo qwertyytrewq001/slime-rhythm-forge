@@ -1,78 +1,463 @@
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { X, ChevronRight, ChevronLeft, SkipForward } from 'lucide-react';
 import { useGameState } from '@/hooks/useGameState';
 import { GlimCharacter } from './GlimCharacter';
 import { triggerDialogue, clearDialogueTrigger, useDialogueTrigger, getDialogueTrigger } from '@/utils/dialogueTriggers';
 
+// Define the actual trigger types that match the triggerDialogue function
+type TriggerType = 
+  | 'firstLaunch'
+  | 'firstBazaarOpen'
+  | 'firstEggBought'
+  | 'firstHatch'
+  | 'firstHabitatBuilt'
+  | 'firstFeed'
+  | 'firstAltarVisit'
+  | 'firstBreedComplete'
+  | 'firstBattleMapOpen'
+  | 'levelUp'
+  | 'vossEncounter'
+  | 'finalBattle';
+
 interface LoreChapter {
   id: string;
   title: string;
   dialogue: string[];
-  expression: 'explainingsomething' | 'exicted' | 'kind' | 'smug' | 'tearfull_emotional' | 'worried';
-  background?: string;
+  expression: string;
 }
 
-const LORE_CHAPTERS: LoreChapter[] = [
+// First-time tutorial events
+const FIRST_TIME_EVENTS = {
+  firstLaunch: false,
+  firstBazaarOpen: false,
+  firstEggBought: false,
+  firstHatch: false,
+  firstHabitatBuilt: false,
+  firstFeed: false,
+  firstAltarVisit: false,
+  firstBreedComplete: false,
+  firstBattleMapOpen: false,
+};
+
+// Check if event has been seen
+const hasSeenEvent = (eventName: keyof typeof FIRST_TIME_EVENTS): boolean => {
+  return localStorage.getItem(`glim_event_${eventName}`) === 'true';
+};
+
+// Mark event as seen
+const markEventSeen = (eventName: keyof typeof FIRST_TIME_EVENTS): void => {
+  localStorage.setItem(`glim_event_${eventName}`, 'true');
+  FIRST_TIME_EVENTS[eventName] = true;
+};
+
+// PART 1 - FIRST TIME TUTORIAL FLOW
+const FIRST_LAUNCH_DIALOGUE = [
   {
-    id: 'introduction',
-    title: 'The Guardian Awakens',
-    dialogue: [
-      "Oh. OH. Someone's here.",
-      "After four HUNDRED years. Do you know how long that is? I'll tell you — it is VERY long. I had nothing to do but count the stars. There are a lot of stars.",
-      "...Sorry. I'm being dramatic. It's a coping mechanism.",
-      "My name is Glim. I am — or was — guardian of Slime Forge. And you, whether you meant to or not, have just walked into the most important moment in four centuries.",
-      "Welcome. No pressure.",
-      "This world was not always so quiet.",
-      "Once, Slime Forge was the heart of everything. Forgers — people like you — would come here to breed, raise, and bond with slimes of every element. Electric, Shadow, Light, Metal… hundreds of species.",
-      "The Goo kept everything balanced. Slimes thrived. Sanctuaries flourished. And the great Mystic Altar — where I have lived for longer than I'd like to admit — was always busy with new life being forged.",
-      "Then Forgotten Castle went dark.",
-      "No one knows exactly what happened. One night, lights. The next — silence. And slowly, like a sickness, Goo began to drain. Slimes turned feral without it.",
-      "...I waited. Because that is what guardians do.",
-      "And now you're here. So let's not waste it. There's a lot of work to do."
-    ],
-    expression: 'kind'
+    id: 'firstLaunch',
+    expression: 'shocked',
+    text: "Oh. OH. Someone's actually here."
   },
   {
-    id: 'breeding',
-    title: 'The Art of Creation',
-    dialogue: [
-      "The Altar.",
-      "This is where I was born, you know. A long time ago, a Forger bred two ancient slimes here and I was the result.",
-      "Breeding two slimes here creates something new. A combination of their elements, their traits, their essence.",
-      "The point is — Altar is sacred. Every slime bred here is a new life that couldn't have existed without a Forger's intention. Without your choice.",
-      "Voss extracts Goo from slimes. Takes it by force. He thinks that's power.",
-      "But this — creating life, bonding with it, letting it become something — this is what Goo is actually for.",
-      "He'll never understand that. And that's exactly why we'll beat him.",
-      "Now. Select your parents. Let's make something new."
-    ],
-    expression: 'exicted'
+    id: 'firstLaunch',
+    expression: 'shocked', 
+    text: "After four HUNDRED years. Do you know how long that is?"
   },
   {
-    id: 'habitats',
-    title: 'Sanctuaries of Life',
-    dialogue: [
-      "Your slime needs a home. Not just a place to sit — a Sanctuary. Somewhere designed for its element, its energy, its nature.",
-      "Electric slimes need charge in air. Metal slimes need pressure and weight. Shadow slimes need… well. Darkness, obviously.",
-      "Each Sanctuary you build is one more piece of this world coming back to life.",
-      "There used to be dozens of these. Spread across the whole world. All of them full. We'll get there again. I genuinely believe that.",
-      "...Okay. Sentimental moment over. Moving on."
-    ],
-    expression: 'kind'
+    id: 'firstLaunch',
+    expression: 'shocked',
+    text: "...It is very long. I counted the stars. Twice."
   },
   {
-    id: 'battle',
-    title: 'The Path to Restoration',
-    dialogue: [
-      "And now. The part I've been preparing you for.",
-      "The Battle Map. The world beyond the Forge. Once a network of safe paths between Sanctuaries — now overrun.",
-      "They're not evil. They're lost. Defeating them in battle doesn't destroy them — it shocks them back to awareness.",
-      "Long enough for restored Goo from your Sanctuaries to reach them. Long enough for things to start healing.",
-      "That's what this is, by the way. Not conquest. Not collection. Restoration.",
-      "Also those slimes at Level 5 are genuinely quite rude and I will not pretend otherwise. Defeat them thoroughly."
-    ],
-    expression: 'smug'
+    id: 'firstLaunch',
+    expression: 'composed',
+    text: "My name is Glim. Guardian of Slime Forge."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'composed',
+    text: "This world — Sanctuaries, Goo, slimes — it's dying."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'composed',
+    text: "Someone has been draining it. Deliberately."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'urgent',
+    text: "You're a Forger. That means you can fix this."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'urgent',
+    text: "Breed slimes. Build Sanctuaries. Restore the Goo."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'urgent',
+    text: "Fight back through Battle Map and take this world back."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'dramatic',
+    text: "Start at the Bazaar. Buy an egg. Begin."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'dramatic',
+    text: "I'll be watching."
   }
 ];
+
+const FIRST_BAZAAR_DIALOGUE = [
+  {
+    id: 'firstBazaarOpen',
+    expression: 'excited',
+    text: "Eggs! Each one is a different slime species waiting to exist."
+  },
+  {
+    id: 'firstBazaarOpen',
+    expression: 'excited',
+    text: "Electric, Metal, Shadow, Light — each type has its own strengths."
+  },
+  {
+    id: 'firstBazaarOpen',
+    expression: 'nudging',
+    text: "Go on. Pick one. I personally recommend Electric — reliable, powerful, only occasionally causes explosions."
+  }
+];
+
+const FIRST_EGG_DIALOGUE = [
+  {
+    id: 'firstEggBought',
+    expression: 'proud',
+    text: "Good. Now head to the hatchery and get that egg warm."
+  }
+];
+
+const FIRST_HATCH_DIALOGUE = [
+  {
+    id: 'firstHatch',
+    expression: 'frozen',
+    text: "..."
+  },
+  {
+    id: 'firstHatch',
+    expression: 'frozen',
+    text: "I haven't seen a hatching in four hundred years."
+  },
+  {
+    id: 'firstHatch',
+    expression: 'emotional',
+    text: "When a slime hatches for a Forger, it bonds with you. That bond is everything."
+  },
+  {
+    id: 'firstHatch',
+    expression: 'emotional',
+    text: "It's also exactly what our enemy doesn't understand. Remember that."
+  },
+  {
+    id: 'firstHatch',
+    expression: 'emotional',
+    text: "Now — it needs a home. Build it a Sanctuary."
+  }
+];
+
+const FIRST_HABITAT_DIALOGUE = [
+  {
+    id: 'firstHabitatBuilt',
+    expression: 'warm',
+    text: "There used to be dozens of these. Full of life. All of them."
+  },
+  {
+    id: 'firstHabitatBuilt',
+    expression: 'warm',
+    text: "Voss drained every single one."
+  },
+  {
+    id: 'firstHabitatBuilt',
+    expression: 'determined',
+    text: "Each Sanctuary you build restores Goo to the world and pulls feral slimes back from the edge."
+  },
+  {
+    id: 'firstHabitatBuilt',
+    expression: 'determined',
+    text: "Place your slime inside. Then feed it. It needs to grow."
+  }
+];
+
+const FIRST_FEED_DIALOGUE = [
+  {
+    id: 'firstFeed',
+    expression: 'watching',
+    text: "Feeding strengthens the bond. It doesn't just make them bigger —"
+  },
+  {
+    id: 'firstFeed',
+    expression: 'watching',
+    text: "— it makes them more fully what they were always meant to become."
+  },
+  {
+    id: 'firstFeed',
+    expression: 'excited',
+    text: "Strong slime. Strong Forger. Strong case for us winning this thing."
+  },
+  {
+    id: 'firstFeed',
+    expression: 'excited',
+    text: "Now — it's time to breed."
+  }
+];
+
+const FIRST_ALTAR_DIALOGUE = [
+  {
+    id: 'firstAltarVisit',
+    expression: 'reverent',
+    text: "This is the heart of the Forge. I was born here, actually."
+  },
+  {
+    id: 'firstAltarVisit',
+    expression: 'reverent',
+    text: "The Forger who bred me apparently screamed. I choose to believe it was excitement."
+  },
+  {
+    id: 'firstAltarVisit',
+    expression: 'serious',
+    text: "Breeding combines two slimes into something new — their elements, their traits, their essence."
+  },
+  {
+    id: 'firstAltarVisit',
+    expression: 'serious',
+    text: "Voss extracts Goo by force. We create new life. That's the difference between us."
+  },
+  {
+    id: 'firstAltarVisit',
+    expression: 'gesturing',
+    text: "Select two slimes as parents. Place them on the platform."
+  },
+  {
+    id: 'firstAltarVisit',
+    expression: 'gesturing',
+    text: "The Altar will do the rest."
+  }
+];
+
+const FIRST_BREED_DIALOGUE = [
+  {
+    id: 'firstBreedComplete',
+    expression: 'delighted',
+    text: "New life. Created by a Forger. At the Altar."
+  },
+  {
+    id: 'firstBreedComplete',
+    expression: 'delighted',
+    text: "Four hundred years and it still works."
+  }
+];
+
+const FIRST_BATTLE_DIALOGUE = [
+  {
+    id: 'firstBattleMapOpen',
+    expression: 'surveying',
+    text: "The Whispering Wilds. Once a safe network of paths between Sanctuaries."
+  },
+  {
+    id: 'firstBattleMapOpen',
+    expression: 'surveying',
+    text: "Now overrun. Every feral slime out there was someone's companion before Goo ran dry."
+  },
+  {
+    id: 'firstBattleMapOpen',
+    expression: 'important',
+    text: "Defeating them in battle doesn't destroy them — it shocks them back to awareness."
+  },
+  {
+    id: 'firstBattleMapOpen',
+    expression: 'important',
+    text: "Your restored Goo reaches them. They heal. The world heals."
+  },
+  {
+    id: 'firstBattleMapOpen',
+    expression: 'important',
+    text: "This is restoration. Not conquest."
+  },
+  {
+    id: 'firstBattleMapOpen',
+    expression: 'smirk',
+    text: "Also those slimes at Level 5 are genuinely quite rude and I will not pretend otherwise."
+  },
+  {
+    id: 'firstBattleMapOpen',
+    expression: 'smirk',
+    text: "Go. Fight. Win."
+  }
+];
+
+// PART 2 - LEVEL-BASED LORE DIALOGUE
+const LEVEL_DIALOGUE = {
+  1: [
+    {
+      expression: 'relieved',
+      text: "First battle done. The woods haven't seen a Forger in centuries."
+    },
+    {
+      expression: 'relieved',
+      text: "The trees are gossiping about you. I can tell."
+    }
+  ],
+  5: [
+    {
+      expression: 'serious',
+      text: "...Wait. Those tracks. Human boots. Fresh."
+    },
+    {
+      expression: 'serious',
+      text: "Someone else has been through Glimmerswell recently. And they weren't here to help."
+    }
+  ],
+  10: [
+    {
+      expression: 'grim',
+      text: "I found what's left of the Crystal Ridge Goo pool."
+    },
+    {
+      expression: 'grim',
+      text: "Drained completely. Extracted by force. This isn't natural — this is someone's plan."
+    },
+    {
+      expression: 'grim',
+      text: "Keep moving. I need to think."
+    }
+  ],
+  14: [
+    {
+      expression: 'dreadful',
+      text: "I know who it is."
+    },
+    {
+      expression: 'dreadful',
+      text: "I was hoping I was wrong."
+    },
+    {
+      expression: 'dreadful',
+      text: "His name is Voss. Do not underestimate him."
+    }
+  ],
+  15: [
+    {
+      expression: 'grim',
+      text: "...We move faster now."
+    }
+  ],
+  20: [
+    {
+      expression: 'urgent',
+      text: "He's heading for the Marsh. The Shadow slimes there are ancient."
+    },
+    {
+      expression: 'urgent',
+      text: "If he extracts them, Goo imbalance could become permanent."
+    },
+    {
+      expression: 'urgent',
+      text: "We can't let him reach them first."
+    }
+  ],
+  25: [
+    {
+      expression: 'holding',
+      text: "A feral slime dropped this. Voss's insignia."
+    },
+    {
+      expression: 'holding',
+      text: "He's using extracted Goo to drive slimes feral on purpose — creating chaos so no one can protect the Sanctuaries while he harvests them."
+    },
+    {
+      expression: 'holding',
+      text: "This isn't greed. This is a strategy."
+    }
+  ],
+  30: [
+    {
+      expression: 'quiet',
+      text: "I need to tell you something."
+    },
+    {
+      expression: 'quiet',
+      text: "The Forgotten Castle didn't just fall silent. It was silenced. By a Forger who wanted power over all slime-kind."
+    },
+    {
+      expression: 'quiet',
+      text: "Voss found the old texts. He knows what's buried there."
+    },
+    {
+      expression: 'quiet',
+      text: "And so do I."
+    }
+  ],
+  35: [
+    {
+      expression: 'still',
+      text: "Before you go in — I want you to know something."
+    },
+    {
+      expression: 'still',
+      text: "The first Forger who went dark... I knew him."
+    },
+    {
+      expression: 'still',
+      text: "Before everything went wrong, before the castle fell — I knew him."
+    },
+    {
+      expression: 'still',
+      text: "Just keep fighting."
+    }
+  ],
+  40: [
+    {
+      expression: 'serious',
+      text: "This is it."
+    },
+    {
+      expression: 'serious',
+      text: "Everything you've bred, every Sanctuary restored, every bond forged — it all comes down to this."
+    },
+    {
+      expression: 'serious',
+      text: "Voss extracts. We create. Show him what that means."
+    }
+  ],
+  45: [
+    {
+      expression: 'smirk',
+      text: "You can't control it."
+    }
+  ],
+  49: [
+    {
+      expression: 'scared',
+      text: "Everything we've built — every slime, every Sanctuary, every bond — it matters now more than ever."
+    },
+    {
+      expression: 'scared',
+      text: "Don't stop."
+    }
+  ],
+  50: [
+    {
+      expression: 'determined',
+      text: "This is it."
+    },
+    {
+      expression: 'determined',
+      text: "Everything you've bred, every Sanctuary restored, every bond forged — it all comes down to this."
+    },
+    {
+      expression: 'determined',
+      text: "Voss extracts. We create. Show him what that means."
+    }
+  ]
+};
 
 interface LoreTutorialProps {
   isOpen: boolean;
@@ -81,114 +466,153 @@ interface LoreTutorialProps {
   startChapter?: string;
 }
 
-export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'introduction' }: LoreTutorialProps) {
+export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLaunch' }: LoreTutorialProps) {
   const { state, dispatch } = useGameState();
-  const [currentChapterIndex, setCurrentChapterIndex] = useState(0);
   const [currentDialogueIndex, setCurrentDialogueIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
-  const [hasTriggeredOnMount, setHasTriggeredOnMount] = useState(false);
-
-  const currentChapter = LORE_CHAPTERS[currentChapterIndex];
-  const fullText = currentChapter?.dialogue[currentDialogueIndex] || '';
+  const [currentDialogue, setCurrentDialogue] = useState<any[]>([]);
+  const [currentExpression, setCurrentExpression] = useState('shocked');
+  const [glimPosition, setGlimPosition] = useState<'center' | 'bottom-left'>('center');
 
   // Listen for dialogue triggers
-  useDialogueTrigger(useCallback((triggerId, data) => {
-    console.log('🎮 Dialogue Trigger Received:', triggerId, 'isOpen:', isOpen, 'onOpen:', !!onOpen);
+  useDialogueTrigger(useCallback((triggerId: TriggerType, data) => {
+    console.log('🎮 Dialogue Trigger Received:', triggerId);
     
     // Re-open if closed
     if (!isOpen && onOpen) {
       onOpen();
     }
 
-    if (triggerId === 'breeding-intro') {
-      console.log('🎯 Showing breeding intro tutorial');
-      setCurrentChapterIndex(1); // Breeding chapter
-      setCurrentDialogueIndex(0);
-      onOpen(); // Show tutorial
+    // Handle first-time events
+    if (triggerId === 'firstLaunch' && !hasSeenEvent('firstLaunch')) {
+      markEventSeen('firstLaunch');
+      setCurrentDialogue(FIRST_LAUNCH_DIALOGUE);
+      setCurrentExpression('shocked');
+      setGlimPosition('center');
     }
 
-    if (triggerId === 'breeding-complete') {
-      console.log('🎯 Hiding tutorial after breeding complete');
-      // Hide tutorial after breeding
-      onClose();
+    if (triggerId === 'firstBazaarOpen' && !hasSeenEvent('firstBazaarOpen')) {
+      markEventSeen('firstBazaarOpen');
+      setCurrentDialogue(FIRST_BAZAAR_DIALOGUE);
+      setCurrentExpression('excited');
+      setGlimPosition('bottom-left');
     }
 
-    if (triggerId === 'shop-purchase') {
-      console.log('🎯 Showing shop purchase tutorial');
-      setCurrentChapterIndex(1); // Breeding chapter
-      setCurrentDialogueIndex(4); // Voss part
-      onOpen(); // Show tutorial
+    if (triggerId === 'firstEggBought' && !hasSeenEvent('firstEggBought')) {
+      markEventSeen('firstEggBought');
+      setCurrentDialogue(FIRST_EGG_DIALOGUE);
+      setCurrentExpression('proud');
+      setGlimPosition('bottom-left');
     }
 
-    if (triggerId === 'habitat-purchase') {
-      console.log('🎯 Showing habitat purchase tutorial');
-      setCurrentChapterIndex(2); // Habitats chapter
-      setCurrentDialogueIndex(0);
-      onOpen(); // Show tutorial
+    if (triggerId === 'firstHatch' && !hasSeenEvent('firstHatch')) {
+      markEventSeen('firstHatch');
+      setCurrentDialogue(FIRST_HATCH_DIALOGUE);
+      setCurrentExpression('frozen');
+      setGlimPosition('bottom-left');
     }
 
-    if (triggerId === 'hatch-egg') {
-      console.log('🎯 Showing hatch egg tutorial');
-      setCurrentChapterIndex(2); // Habitats chapter
-      setCurrentDialogueIndex(3);
-      onOpen(); // Show tutorial
+    if (triggerId === 'firstHabitatBuilt' && !hasSeenEvent('firstHabitatBuilt')) {
+      markEventSeen('firstHabitatBuilt');
+      setCurrentDialogue(FIRST_HABITAT_DIALOGUE);
+      setCurrentExpression('warm');
+      setGlimPosition('bottom-left');
     }
 
-    if (triggerId === 'battle-start') {
-      console.log('🎯 Showing battle start tutorial');
-      setCurrentChapterIndex(3); // Battle chapter
-      setCurrentDialogueIndex(0);
-      onOpen(); // Show tutorial
+    if (triggerId === 'firstFeed' && !hasSeenEvent('firstFeed')) {
+      markEventSeen('firstFeed');
+      setCurrentDialogue(FIRST_FEED_DIALOGUE);
+      setCurrentExpression('watching');
+      setGlimPosition('bottom-left');
     }
-    
-    setHasTriggeredOnMount(true);
-  }, [isOpen, onOpen]));
 
-  // Auto-hide tutorial after completion
-  useEffect(() => {
-    if (currentChapter && currentDialogueIndex >= currentChapter.dialogue.length - 1) {
-      const timer = setTimeout(() => {
-        dispatch({ type: 'COMPLETE_TUTORIAL_CHAPTER', chapterId: currentChapter.id });
-        onClose(); // Hide tutorial
-      }, 2000);
-      return () => clearTimeout(timer);
-    }
-  }, [currentDialogueIndex, currentChapter]);
-
-  // Initial chapter setup - only if NO trigger happened on mount
-  useEffect(() => {
-    if (isOpen && !hasTriggeredOnMount) {
-      const pendingTrigger = getDialogueTrigger();
-      if (!pendingTrigger) {
-        const startIndex = LORE_CHAPTERS.findIndex(ch => ch.id === startChapter);
-        if (startIndex !== -1) {
-          setCurrentChapterIndex(startIndex);
-          setCurrentDialogueIndex(0);
-          setDisplayedText('');
+    if (triggerId === 'firstAltarVisit' && !hasSeenEvent('firstAltarVisit')) {
+      markEventSeen('firstAltarVisit');
+      setCurrentDialogue(FIRST_ALTAR_DIALOGUE);
+      setCurrentExpression('reverent');
+      setGlimPosition('bottom-left');
+      
+      // Auto-open gallery when dialogue says "Select two slimes as parents"
+      setTimeout(() => {
+        const galleryButton = document.querySelector('[data-testid="gallery-button"]');
+        if (galleryButton) {
+          (galleryButton as HTMLElement).click();
         }
+      }, 3000);
+    }
+
+    if (triggerId === 'firstBreedComplete' && !hasSeenEvent('firstBreedComplete')) {
+      markEventSeen('firstBreedComplete');
+      setCurrentDialogue(FIRST_BREED_DIALOGUE);
+      setCurrentExpression('delighted');
+      setGlimPosition('bottom-left');
+    }
+
+    if (triggerId === 'firstBattleMapOpen' && !hasSeenEvent('firstBattleMapOpen')) {
+      markEventSeen('firstBattleMapOpen');
+      setCurrentDialogue(FIRST_BATTLE_DIALOGUE);
+      setCurrentExpression('surveying');
+      setGlimPosition('bottom-left');
+    }
+
+    // Handle level-based dialogue
+    if (triggerId === 'levelUp') {
+      const playerLevel = data?.level || 1;
+      const levelDialogue = LEVEL_DIALOGUE[playerLevel as keyof typeof LEVEL_DIALOGUE];
+      if (levelDialogue) {
+        setCurrentDialogue(levelDialogue);
+        setCurrentExpression(levelDialogue[0].expression);
+        setGlimPosition('bottom-left');
       }
     }
-  }, [isOpen, startChapter]);
 
-  // Reset trigger flag when tutorial closes
-  useEffect(() => {
-    if (!isOpen) {
-      setHasTriggeredOnMount(false);
+    // Handle Voss encounters (cutscenes)
+    if (triggerId === 'vossEncounter') {
+      const vossLevel = data?.level || 15;
+      if (vossLevel === 15) {
+        // First Voss encounter - cutscene
+        // This would need special cutscene handling
+        console.log('🎭 Voss Encounter Level 15 - Cutscene');
+      } else if (vossLevel === 30) {
+        console.log('🎭 Voss Encounter Level 30 - Cutscene');
+      } else if (vossLevel === 45) {
+        console.log('🎭 Voss Encounter Level 45 - Cutscene');
+      }
     }
-  }, [isOpen]);
+
+    if (triggerId === 'finalBattle') {
+      setCurrentDialogue([{
+        expression: 'determined',
+        text: "This is it."
+      }, {
+        expression: 'determined',
+        text: "Everything you've bred, every Sanctuary restored, every bond forged — it all comes down to this."
+      }, {
+        expression: 'determined',
+        text: "Voss extracts. We create. Show him what that means."
+      }]);
+      setCurrentExpression('determined');
+      setGlimPosition('bottom-left');
+    }
+  }, [isOpen, onOpen]));
 
   // Typewriter effect
   useEffect(() => {
-    if (!isOpen || isTyping || !fullText) return;
+    if (!isOpen || isTyping || !currentDialogue.length) return;
+
+    const currentCard = currentDialogue[currentDialogueIndex];
+    if (!currentCard) return;
 
     setIsTyping(true);
     setDisplayedText('');
     
+    const text = currentCard.text;
     let charIndex = 0;
+    
     const typeInterval = setInterval(() => {
-      if (charIndex < fullText.length) {
-        setDisplayedText(fullText.slice(0, charIndex + 1));
+      if (charIndex < text.length) {
+        setDisplayedText(prev => prev + text[charIndex]);
         charIndex++;
       } else {
         setIsTyping(false);
@@ -197,27 +621,20 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'introduc
     }, 30);
 
     return () => clearInterval(typeInterval);
-  }, [fullText, isOpen]);
+  }, [currentDialogue, currentDialogueIndex, isOpen]);
 
   const handleNext = () => {
     if (isTyping) {
       setIsTyping(false);
-      setDisplayedText(fullText);
+      setDisplayedText(currentDialogue[currentDialogueIndex]?.text || '');
       return;
     }
 
-    if (currentDialogueIndex < currentChapter.dialogue.length - 1) {
+    if (currentDialogueIndex < currentDialogue.length - 1) {
       setCurrentDialogueIndex(prev => prev + 1);
     } else {
-      // END OF CHAPTER - CLOSE AND MARK COMPLETE
-      dispatch({ type: 'COMPLETE_TUTORIAL_CHAPTER', chapterId: currentChapter.id });
-      clearDialogueTrigger();
+      // End of dialogue - dismiss
       onClose();
-      
-      // If it was the very last chapter, complete the whole tutorial
-      if (currentChapterIndex === LORE_CHAPTERS.length - 1) {
-        dispatch({ type: 'COMPLETE_TUTORIAL' });
-      }
     }
   };
 
@@ -228,80 +645,95 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'introduc
   };
 
   const handleSkip = () => {
-    dispatch({ type: 'COMPLETE_TUTORIAL' });
     onClose();
   };
 
-  if (!isOpen || !currentChapter) return null;
+  if (!isOpen || !currentDialogue.length) return null;
+
+  const currentCard = currentDialogue[currentDialogueIndex];
+  const progress = ((currentDialogueIndex + 1) / currentDialogue.length) * 100;
 
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
-      <div className="absolute bottom-0 left-0 right-0 h-[220px] pointer-events-auto">
-        {/* Character Portrait */}
-        <div 
-          className="absolute pointer-events-none z-10"
-          style={{
+      {/* Glim Character - positioned based on context */}
+      <div 
+        className="absolute pointer-events-none z-10"
+        style={{
+          ...(glimPosition === 'center' ? {
+            top: '50%',
+            left: '50%',
+            transform: 'translate(-50%, -50%)',
+            height: '400px',
+            width: '350px',
+          } : {
             bottom: '160px',
             left: '20px',
-            height: '350px',
-            width: '300px',
-          }}
-        >
-          <GlimCharacter 
-            expression={currentChapter.expression}
-            size={350}
-          />
-        </div>
+            height: '250px',
+            width: '200px',
+          }),
+          background: 'none !important',
+          backgroundColor: 'transparent !important',
+          border: 'none',
+          boxShadow: 'none'
+        }}
+      >
+        <GlimCharacter 
+          expression={currentExpression}
+          size={glimPosition === 'center' ? 400 : 250}
+        />
+      </div>
 
-        {/* Speech Bubble */}
-        <div 
-          className="absolute bottom-4 left-4 right-8 rounded-2xl shadow-lg relative"
-          style={{
-            width: 'calc(100vw - 48px)',
-            maxWidth: '1200px',
-            height: '180px',
-            background: 'rgba(255, 255, 255, 0.9)',
-            border: '2px solid #ff6eb4',
-            margin: '0 auto'
-          }}
-        >
-          <div className="p-4 pl-6 h-full flex flex-col">
-            <div className="mb-3">
-              <h3 className="text-[#FF7EB6] font-bold text-lg">Glim</h3>
+      {/* Dialogue Box */}
+      <div 
+        className={`absolute bottom-4 left-4 right-8 rounded-2xl shadow-lg relative`}
+        style={{
+          width: glimPosition === 'center' ? '800px' : 'calc(100vw - 48px)',
+          maxWidth: '1200px',
+          height: '180px',
+          background: 'rgba(255, 255, 255, 0.9)',
+          border: '2px solid #ff6eb4',
+          margin: '0 auto'
+        }}
+      >
+        <div className="p-4 pl-6 h-full flex flex-col">
+          {/* Character Name */}
+          <div className="mb-3">
+            <h3 className="text-[#FF7EB6] font-bold text-lg">Glim</h3>
+          </div>
+
+          {/* Dialogue Text */}
+          <div className="flex-1 overflow-y-auto pr-2">
+            <p className="text-gray-800 text-lg leading-relaxed font-medium" style={{ color: '#1a1a1a' }}>
+              {displayedText}
+              {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
+            </p>
+          </div>
+
+          {/* Navigation Controls */}
+          <div className="flex items-center justify-between mt-3">
+            <div className="flex gap-2">
+              <button
+                disabled={currentDialogueIndex === 0}
+                className="p-1.5 rounded-full bg-black/30 hover:bg-black/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
+              >
+                <ChevronLeft className="w-3 h-3 text-white" />
+              </button>
             </div>
 
-            <div className="flex-1 overflow-y-auto pr-2">
-              <p className="text-gray-800 text-lg leading-relaxed font-medium" style={{ color: '#1a1a1a' }}>
-                {displayedText}
-                {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
-              </p>
-            </div>
-
-            <div className="flex items-center justify-between mt-3">
-              <div className="flex gap-2">
-                <button
-                  onClick={handlePrevious}
-                  disabled={currentDialogueIndex === 0}
-                  className="p-1.5 rounded-full bg-black/30 hover:bg-black/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                >
-                  <ChevronLeft className="w-3 h-3 text-white" />
-                </button>
-                
-                <button
-                  onClick={handleNext}
-                  className="px-3 py-1.5 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-sm transition-all hover:scale-105"
-                >
-                  {isTyping ? 'Skip' : 
-                   currentDialogueIndex < currentChapter.dialogue.length - 1 ? 'Next' : 'Finish Section'}
-                </button>
-              </div>
+            <div className="flex items-center gap-1">
+              <button
+                disabled={isTyping}
+                className="px-3 py-1.5 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-sm transition-all hover:scale-105"
+              >
+                {isTyping ? 'Skip' : 
+                 currentDialogueIndex < currentDialogue.length - 1 ? 'Next' : 'Got it'}
+              </button>
 
               <button
-                onClick={handleSkip}
                 className="flex items-center gap-1 px-2 py-1.5 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all text-xs"
               >
                 <SkipForward className="w-2.5 h-2.5" />
-                Skip Tutorial
+                Skip
               </button>
             </div>
           </div>

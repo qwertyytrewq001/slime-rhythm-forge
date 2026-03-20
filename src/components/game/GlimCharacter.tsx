@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { TriggerType } from '@/utils/dialogueTriggers';
 
 interface GlimCharacterProps {
-  expression: 'explainingsomething' | 'exicted' | 'kind' | 'smug' | 'tearfull_emotional' | 'worried';
+  expression: TriggerType;
   size?: number;
 }
 
