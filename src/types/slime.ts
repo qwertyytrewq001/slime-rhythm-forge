@@ -150,6 +150,8 @@ export interface GameState {
     timestamp: number;
   } | null;
   currentLevel: number; // For battle map progression
+  tutorialCompleted: boolean;
+  completedTutorialChapters: string[];
 }
 
 export type SlimeFoodType = 'basic' | 'elemental' | 'royal';
@@ -224,4 +226,6 @@ export type GameAction =
   | { type: 'CLEAR_LEVEL_UP' }
   | { type: 'CLEAR_PLAYER_LEVEL_UP' }
   | { type: 'BATTLE_REWARD'; result: BattleResult }
-  | { type: 'SET_CURRENT_LEVEL'; level: number };
+  | { type: 'SET_CURRENT_LEVEL'; level: number }
+  | { type: 'COMPLETE_TUTORIAL' }
+  | { type: 'COMPLETE_TUTORIAL_CHAPTER'; chapterId: string };

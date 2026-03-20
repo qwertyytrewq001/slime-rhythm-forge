@@ -107,6 +107,8 @@ function createInitialState(): GameState {
       lastLevelUp: null,
       lastPlayerLevelUp: saved.lastPlayerLevelUp ?? null,
       currentLevel: saved.currentLevel ?? 1,
+      tutorialCompleted: saved.tutorialCompleted ?? false,
+      completedTutorialChapters: saved.completedTutorialChapters ?? [],
     };
   }
   return {
@@ -132,6 +134,8 @@ function createInitialState(): GameState {
     lastLevelUp: null,
     lastPlayerLevelUp: null,
     currentLevel: 1,
+    tutorialCompleted: false,
+    completedTutorialChapters: [],
   };
 }
 
@@ -407,6 +411,13 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, lastLevelUp: null };
     case 'CLEAR_PLAYER_LEVEL_UP':
       return { ...state, lastPlayerLevelUp: null };
+    case 'COMPLETE_TUTORIAL':
+      return { ...state, tutorialCompleted: true };
+    case 'COMPLETE_TUTORIAL_CHAPTER':
+      return { 
+        ...state, 
+        completedTutorialChapters: [...state.completedTutorialChapters, action.chapterId].filter((id, index, arr) => arr.indexOf(id) === index)
+      };
     default:
       return state;
   }

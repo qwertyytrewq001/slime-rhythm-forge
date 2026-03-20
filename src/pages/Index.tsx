@@ -19,12 +19,17 @@ import { WorldMap } from '@/components/game/WorldMap';
 import { BattlePreview } from '@/components/game/BattlePreview';
 import { BattleArena } from '@/components/game/BattleArena';
 import { BattleSlime } from '@/types/slime';
+import { LoreTutorial } from '@/components/game/LoreTutorial';
+import { LevelDialogue } from '@/components/game/LevelDialogue';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
   const [currentView, setCurrentView] = useState<'breeding' | 'habitats' | 'battleMap'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
+  const [showTutorial, setShowTutorial] = useState(false);
+  const [showLevelDialogue, setShowLevelDialogue] = useState(false);
+  const [dialogueLevel, setDialogueLevel] = useState(1);
   
   // Battle Flow State
   const [selectedLevel, setSelectedLevel] = useState<number | null>(null);
@@ -64,6 +69,19 @@ function GameLayout() {
     setShowBattlePreview(false);
   };
 
+  const handleBattleComplete = (result: { winner: 'player' | 'opponent'; level: number }) => {
+    setBattleTeam(null);
+    
+    // Show level dialogue for specific levels after player wins
+    if (result.winner === 'player') {
+      const dialogueLevels = [1, 5, 10, 14, 15, 16];
+      if (dialogueLevels.includes(result.level)) {
+        setDialogueLevel(result.level);
+        setShowLevelDialogue(true);
+      }
+    }
+  };
+
   useEffect(() => {
     const startAudio = () => {
       audioEngine.resume();
@@ -76,6 +94,17 @@ function GameLayout() {
       audioEngine.stopLofi();
     };
   }, []);
+
+  // Show tutorial for first-time players
+  useEffect(() => {
+    if (!state.tutorialCompleted && state.slimes.length > 0) {
+      // Small delay to let the game load first
+      const timer = setTimeout(() => {
+        setShowTutorial(true);
+      }, 1000);
+      return () => clearTimeout(timer);
+    }
+  }, [state.tutorialCompleted, state.slimes.length]);
 
   const toolbarCircle = "relative bg-black/30 backdrop-blur-md h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/20 rounded-full hover:border-[#FF7EB6]/50 shadow-lg group pointer-events-auto";
   const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
@@ -144,15 +173,16 @@ function GameLayout() {
         </div>
 
         {/* BOTTOM TOOLBAR */}
-        <div className="absolute bottom-8 right-8 flex items-center gap-4 pointer-events-auto z-50">
+        <div className="fixed bottom-4 right-4 z-[150] flex items-center gap-2 pointer-events-auto">
+          {/* Bottom Toolbar - Moved down to avoid dialogue interference */}
           <div className="relative group">
-            <button onClick={() => setShowAchievements(true)} className={toolbarCircle}>
-              <Trophy className={toolbarIcon} />
-              <span className={toolbarLabel}>Trophies</span>
+            <button onClick={handleMute} className={toolbarCircle}>
+              {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
+              <span className={toolbarLabel}>{state.muted ? 'Unmute' : 'Mute'}</span>
             </button>
           </div>
 
-          <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
+          <Sheet>
             <SheetTrigger asChild>
               <div className="relative group">
                 <button className={toolbarCircle}>
@@ -167,13 +197,6 @@ function GameLayout() {
               </div>
             </SheetContent>
           </Sheet>
-
-          <div className="relative group">
-            <button onClick={handleMute} className={toolbarCircle}>
-              {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
-              <span className={toolbarLabel}>{state.muted ? 'Unmute' : 'Mute'}</span>
-            </button>
-          </div>
 
           <Sheet>
             <SheetTrigger asChild>
@@ -234,11 +257,25 @@ function GameLayout() {
             playerTeam={battleTeam.player}
             opponentTeam={battleTeam.opponent}
             onClose={() => setBattleTeam(null)}
+            onBattleComplete={handleBattleComplete}
           />
         </div>
       )}
 
       <EvolutionPopup />
+      
+      {/* Tutorial Modal */}
+      <LoreTutorial 
+        isOpen={showTutorial}
+        onClose={() => setShowTutorial(false)}
+      />
+      
+      {/* Level Dialogue Modal */}
+      <LevelDialogue 
+        isOpen={showLevelDialogue}
+        onClose={() => setShowLevelDialogue(false)}
+        level={dialogueLevel}
+      />
     </div>
   );
 }

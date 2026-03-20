@@ -13,6 +13,7 @@ interface BattleArenaProps {
   playerTeam: BattleSlime[];
   opponentTeam: BattleSlime[];
   onClose: () => void;
+  onBattleComplete?: (result: { winner: 'player' | 'opponent'; level: number }) => void;
 }
 
 interface Move {
@@ -31,7 +32,7 @@ interface Projectile {
   progress: number;
 }
 
-export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opponentTeam, onClose }) => {
+export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opponentTeam, onClose, onBattleComplete }) => {
   const { dispatch } = useGameState();
   const [pTeam, setPTeam] = useState<BattleSlime[]>(playerTeam.map(s => ({ ...s, battleStats: { ...s.battleStats } })));
   const [oTeam, setOTeam] = useState<BattleSlime[]>(opponentTeam.map(s => ({ ...s, battleStats: { ...s.battleStats } })));
@@ -79,6 +80,11 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
         levelReached: level
       }
     });
+
+    // Call the battle complete callback
+    if (onBattleComplete) {
+      onBattleComplete({ winner: resultWinner, level });
+    }
   };
 
   const executeAttack = (attacker: BattleSlime, defender: BattleSlime, move: Move, isPlayerAttacker: boolean) => {
