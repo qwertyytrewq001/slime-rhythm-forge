@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { TriggerType } from '@/utils/dialogueTriggers';
+import { TriggerType } from '@/types/dialogueTypes';
 
 interface GlimCharacterProps {
   expression: TriggerType;
