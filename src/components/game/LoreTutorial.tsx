@@ -716,17 +716,18 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
       {/* Dialogue Box */}
       <div 
-        className={`absolute rounded-2xl shadow-lg relative pointer-events-auto`}
+        className="absolute shadow-lg relative pointer-events-auto"
         style={{
           position: 'fixed',
-          bottom: '16px',
+          bottom: '20px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: glimPosition === 'center' ? '800px' : 'calc(100vw - 48px)',
-          maxWidth: '1200px',
-          height: '180px',
-          background: 'rgba(255, 255, 255, 0.9)',
+          width: '600px',
+          maxWidth: '70vw',
+          background: 'rgba(20, 10, 40, 0.92)',
+          borderRadius: '16px',
           border: '2px solid #ff6eb4',
+          padding: '20px 24px',
           zIndex: 9999
         }}
       >
