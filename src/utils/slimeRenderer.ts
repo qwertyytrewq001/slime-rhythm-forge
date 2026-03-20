@@ -1442,6 +1442,267 @@ function drawElementFeatures(
       ctx.restore();
       break;
     }
+    case 'toxic': {
+      // Bubbling dripping exhaust pipe + neon green radioactive core
+      ctx.save();
+      ctx.translate(0, -25);
+      
+      // Melted-looking exhaust pipe horn
+      const pipeGrad = ctx.createLinearGradient(-4, 0, 4, -15);
+      pipeGrad.addColorStop(0, '#2F4F2F');
+      pipeGrad.addColorStop(0.3, '#696969');
+      pipeGrad.addColorStop(0.7, '#556B2F');
+      pipeGrad.addColorStop(1, '#8B4513');
+      
+      ctx.fillStyle = pipeGrad;
+      ctx.strokeStyle = '#1C1C1C';
+      ctx.lineWidth = 1;
+      
+      // Melted drippy pipe shape
+      ctx.beginPath();
+      ctx.moveTo(-3, 0);
+      ctx.quadraticCurveTo(-4, -5, -2, -10);
+      ctx.quadraticCurveTo(-1, -12, 1, -13);
+      ctx.quadraticCurveTo(3, -12, 4, -8);
+      ctx.quadraticCurveTo(3, -3, 2, 0);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+      
+      // Dripping toxic drops from pipe
+      ctx.fillStyle = '#7FFF00';
+      ctx.globalAlpha = 0.8;
+      for (let i = 0; i < 3; i++) {
+        const dripY = -15 + ((frame * 0.4 + i * 8) % 20);
+        const dripX = (Math.sin(frame * 0.1 + i) * 2);
+        const dripSize = 2 + Math.sin(frame * 0.2 + i) * 1;
+        
+        ctx.beginPath();
+        ctx.arc(dripX, dripY, dripSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.restore();
+      
+      // Neon green radioactive core inside body
+      const radioactiveGrad = ctx.createRadialGradient(0, 0, 3, 0, 0, 20);
+      radioactiveGrad.addColorStop(0, 'rgba(127, 255, 0, 0.8)');
+      radioactiveGrad.addColorStop(0.3, 'rgba(50, 205, 50, 0.6)');
+      radioactiveGrad.addColorStop(0.6, 'rgba(0, 128, 0, 0.4)');
+      radioactiveGrad.addColorStop(1, 'rgba(0, 100, 0, 0.1)');
+      
+      ctx.fillStyle = radioactiveGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 20, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Rising bubbles from radioactive core
+      ctx.fillStyle = '#7FFF00';
+      for (let i = 0; i < 6; i++) {
+        const bubbleY = -10 + ((frame * 0.3 + i * 12) % 30);
+        const bubbleX = (Math.sin(frame * 0.05 + i) * 15);
+        const bubbleSize = 1 + Math.sin(frame * 0.15 + i) * 0.5;
+        
+        ctx.globalAlpha = 0.6 - (bubbleY + 10) / 50; // Fade as they rise
+        ctx.beginPath();
+        ctx.arc(bubbleX, bubbleY, bubbleSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      
+      ctx.globalAlpha = 1.0;
+      break;
+    }
+    case 'wind': {
+      // Rotating mini-cyclone + blurred edges for high-speed vibration
+      ctx.save();
+      ctx.translate(0, -30);
+      
+      // Rotating mini-cyclone on head
+      const cycloneAngle = frame * 0.1;
+      for (let i = 0; i < 3; i++) {
+        ctx.save();
+        ctx.rotate(cycloneAngle + i * (Math.PI * 2 / 3));
+        
+        // Wind spiral
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        for (let j = 0; j < 10; j++) {
+          const spiralRadius = j * 1.5;
+          const spiralAngle = j * 0.5;
+          const x = Math.cos(spiralAngle) * spiralRadius;
+          const y = Math.sin(spiralAngle) * spiralRadius - j * 2;
+          if (j === 0) ctx.moveTo(x, y);
+          else ctx.lineTo(x, y);
+        }
+        ctx.stroke();
+        
+        // White vapor tufts
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+        ctx.beginPath();
+        ctx.arc(8, -5, 3 + Math.sin(frame * 0.15 + i) * 1, 0, Math.PI * 2);
+        ctx.fill();
+        
+        ctx.restore();
+      }
+      
+      ctx.restore();
+      
+      // Blurred motion edges to show high-speed vibration
+      const blurGrad = ctx.createRadialGradient(0, 0, 25, 0, 0, 40);
+      blurGrad.addColorStop(0, 'rgba(255, 255, 255, 0)');
+      blurGrad.addColorStop(0.7, 'rgba(255, 255, 255, 0.1)');
+      blurGrad.addColorStop(1, 'rgba(255, 255, 255, 0.3)');
+      
+      ctx.fillStyle = blurGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 40, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Motion blur lines
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.2)';
+      ctx.lineWidth = 1;
+      for (let i = 0; i < 6; i++) {
+        const blurAngle = (i / 6) * Math.PI * 2;
+        ctx.beginPath();
+        ctx.moveTo(Math.cos(blurAngle) * 30, Math.sin(blurAngle) * 30);
+        ctx.lineTo(Math.cos(blurAngle) * 45, Math.sin(blurAngle) * 45);
+        ctx.stroke();
+      }
+      break;
+    }
+    case 'arcane': {
+      // Three floating runic stones + galaxy/nebula texture inside body
+      ctx.save();
+      
+      // Orbiting runic stones around head
+      const runeAngle = frame * 0.03;
+      for (let i = 0; i < 3; i++) {
+        const stoneAngle = runeAngle + i * (Math.PI * 2 / 3);
+        const stoneX = Math.cos(stoneAngle) * 20;
+        const stoneY = Math.sin(stoneAngle) * 8 - 25;
+        
+        // Runic stone
+        const stoneGrad = ctx.createRadialGradient(stoneX, stoneY, 0, stoneX, stoneY, 6);
+        stoneGrad.addColorStop(0, '#9400D3');
+        stoneGrad.addColorStop(0.5, '#4B0082');
+        stoneGrad.addColorStop(1, '#1A0033');
+        
+        ctx.fillStyle = stoneGrad;
+        ctx.beginPath();
+        ctx.arc(stoneX, stoneY, 6, 0, Math.PI * 2);
+        ctx.fill();
+        
+        // Runic symbol on stone
+        ctx.strokeStyle = '#FFD700';
+        ctx.lineWidth = 1;
+        ctx.globalAlpha = 0.8;
+        ctx.beginPath();
+        // Simple rune pattern
+        ctx.moveTo(stoneX - 3, stoneY - 2);
+        ctx.lineTo(stoneX + 3, stoneY - 2);
+        ctx.moveTo(stoneX, stoneY - 4);
+        ctx.lineTo(stoneX, stoneY + 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1.0;
+      }
+      
+      ctx.restore();
+      
+      // Galaxy/nebula texture inside body
+      const galaxyGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, 25);
+      galaxyGrad.addColorStop(0, 'rgba(138, 43, 226, 0.6)');
+      galaxyGrad.addColorStop(0.3, 'rgba(75, 0, 130, 0.4)');
+      galaxyGrad.addColorStop(0.6, 'rgba(148, 0, 211, 0.3)');
+      galaxyGrad.addColorStop(1, 'rgba(26, 0, 51, 0.2)');
+      
+      ctx.fillStyle = galaxyGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 25, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // White star sparks
+      ctx.fillStyle = '#FFFFFF';
+      for (let i = 0; i < 8; i++) {
+        const sparkAngle = (i / 8) * Math.PI * 2 + frame * 0.02;
+        const sparkRadius = 15 + Math.sin(frame * 0.1 + i) * 5;
+        const sparkX = Math.cos(sparkAngle) * sparkRadius;
+        const sparkY = Math.sin(sparkAngle) * sparkRadius;
+        const sparkSize = 1 + Math.sin(frame * 0.15 + i) * 0.5;
+        
+        ctx.globalAlpha = 0.6 + Math.sin(frame * 0.2 + i) * 0.4;
+        ctx.beginPath();
+        ctx.arc(sparkX, sparkY, sparkSize, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      ctx.globalAlpha = 1.0;
+      break;
+    }
+    case 'divine': {
+      // Floating third eye + translucent glass-like body with spirit world reflections
+      ctx.save();
+      ctx.translate(0, -28);
+      
+      // Floating third eye
+      const eyeGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 8);
+      eyeGrad.addColorStop(0, '#FFD700');
+      eyeGrad.addColorStop(0.3, '#FFA500');
+      eyeGrad.addColorStop(0.7, '#FF6347');
+      eyeGrad.addColorStop(1, '#8B0000');
+      
+      ctx.fillStyle = eyeGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 8, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Eye detail - mystical pupil
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.arc(0, 0, 3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.fillStyle = '#4B0082';
+      ctx.beginPath();
+      ctx.arc(0, 0, 1.5, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Divine glow around eye
+      const divineGlow = ctx.createRadialGradient(0, 0, 8, 0, 0, 15);
+      divineGlow.addColorStop(0, 'rgba(255, 215, 0, 0.4)');
+      divineGlow.addColorStop(0.5, 'rgba(255, 215, 0, 0.2)');
+      divineGlow.addColorStop(1, 'rgba(255, 215, 0, 0)');
+      
+      ctx.fillStyle = divineGlow;
+      ctx.beginPath();
+      ctx.arc(0, 0, 15, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.restore();
+      
+      // Translucent glass-like body with shifting spirit colors
+      const spiritGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, 30);
+      const spiritHue = (frame * 2) % 360;
+      spiritGrad.addColorStop(0, `hsla(${spiritHue}, 70%, 80%, 0.3)`);
+      spiritGrad.addColorStop(0.3, `hsla(${(spiritHue + 60) % 360}, 70%, 70%, 0.2)`);
+      spiritGrad.addColorStop(0.6, `hsla(${(spiritHue + 120) % 360}, 70%, 60%, 0.15)`);
+      spiritGrad.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
+      
+      ctx.fillStyle = spiritGrad;
+      ctx.beginPath();
+      ctx.arc(0, 0, 30, 0, Math.PI * 2);
+      ctx.fill();
+      
+      // Glass reflection effect
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
+      ctx.beginPath();
+      ctx.ellipse(-8, -10, 6, 8, -0.3, 0, Math.PI * 2);
+      ctx.fill();
+      
+      ctx.beginPath();
+      ctx.ellipse(5, -5, 4, 6, 0.2, 0, Math.PI * 2);
+      ctx.fill();
+      break;
+    }
   }
 
   ctx.restore();
