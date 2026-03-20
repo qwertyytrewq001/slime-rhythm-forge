@@ -127,10 +127,10 @@ export function LevelDialogue({ isOpen, onClose, level, onVossEncounter }: Level
         
         {/* Character Portrait - Life size, positioned for engagement */}
         <div 
-          className="absolute pointer-events-none z-10"
+          className="absolute pointer-events-none"
           style={{
-            bottom: '160px', // Positioned above dialogue
-            left: '20px',
+            bottom: '20px', // Positioned in bottom-left corner, aligned with dialogue
+            left: '4px',
             height: '350px', // Life size - much larger
             width: '300px', // Life size proportions
             background: 'none !important',
