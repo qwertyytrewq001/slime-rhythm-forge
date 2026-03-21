@@ -696,8 +696,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         style={{
           bottom: '16px', // Same level as dialogue box
           left: '20px', // Left side of screen, next to dialogue box
-          height: '350px',
-          width: '300px',
+          height: '500px',
+          width: '400px',
           background: 'none',
           border: 'none',
           boxShadow: 'none'
@@ -705,7 +705,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       >
         <GlimCharacter 
           expression={currentCard?.expression ?? 'shocked'}
-          size={350}
+          size={500}
         />
       </div>
 
