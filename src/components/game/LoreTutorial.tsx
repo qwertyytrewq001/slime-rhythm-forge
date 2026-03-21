@@ -17,7 +17,8 @@ type TriggerType =
   | 'firstBattleMapOpen'
   | 'levelUp'
   | 'vossEncounter'
-  | 'finalBattle';
+  | 'finalBattle'
+  | 'breeding-intro';
 
 interface LoreChapter {
   id: string;
@@ -488,6 +489,17 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     // Re-open if closed
     if (!isOpen && onOpen) {
       onOpen();
+    }
+
+    // Handle breeding-intro trigger (what actually fires when egg is bought)
+    if (triggerId === 'breeding-intro' && !hasSeenEvent('firstEggBought')) {
+      console.log('🚀 Executing breeding-intro trigger for firstEggBought');
+      markEventSeen('firstEggBought');
+      setCurrentDialogue(FIRST_EGG_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
+      setCurrentExpression('proud');
+      setGlimPosition('bottom-left');
     }
 
     // Handle first-time events
