@@ -89,22 +89,37 @@ const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
     expression: 'sad',
-    text: "This world was not always so quiet."
+    text: "This world — Sanctuaries, Goo, slimes — it's dying."
   },
   {
     id: 'firstLaunch',
     expression: 'sad',
-    text: "Once, the Slime Forge was the heart of everything. Forgers — people like you — would come here to breed, raise, and bond with slimes of every element. Electric, Shadow, Light, Metal… hundreds of species. Each one tied to the Goo — the living energy that flows through this world like blood."
+    text: "Someone has been draining it. Deliberately."
   },
   {
     id: 'firstLaunch',
     expression: 'sad',
-    text: "...I waited. Because that is what guardians do."
+    text: "The Sanctuaries that once teemed with life are now silent. The Goo that once flowed like rivers is now barely a trickle."
   },
   {
     id: 'firstLaunch',
     expression: 'sad',
-    text: "So let's not waste it. There's a lot of work to do."
+    text: "And the slimes... they're fading. Without the Goo, they can't survive."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'sad',
+    text: "But you can change that. You can restore the Forge."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'kind',
+    text: "Let's start with the basics. You'll need slimes to begin."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'kind',
+    text: "Let's head to the Bazaar and get your first egg."
   }
 ];
 
