@@ -233,7 +233,14 @@ export function BreedingPod(props: BreedingPodProps) {
 
   const handleSlotClick = (slot: 1 | 2) => {
     if (state.activeBreeding) return;
-    if (onRequestGallery) onRequestGallery(slot);
+    console.log(`🖼️ handleSlotClick called with slot ${slot}`);
+    console.log(`🖼️ onRequestGallery available: ${!!onRequestGallery}`);
+    if (onRequestGallery) {
+      console.log(`🖼️ Calling onRequestGallery(${slot})`);
+      onRequestGallery(slot);
+    } else {
+      console.log('❌ onRequestGallery not available');
+    }
     // Also open gallery when clicking on "Select Parent" text in breeding pod
     console.log(`🖼️ Breeding Pod Select Parent ${slot} clicked - opening gallery`);
     const event = new CustomEvent('openBreedingGallery', { detail: { slot: slot } });

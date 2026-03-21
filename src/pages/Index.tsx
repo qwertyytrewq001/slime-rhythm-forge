@@ -62,8 +62,6 @@ function GameLayout() {
     else setGallerySlot(null);
     setGalleryOpen(true);
     console.log(`🖼️ Opening breeding gallery for slot ${slot}`);
-    // Add very visible alert to debug
-    alert(`🖼️ GALLERY OPENING FOR SLOT ${slot} - Can you see this?`);
   };
 
   const handleGallerySelect = (id: string) => {
