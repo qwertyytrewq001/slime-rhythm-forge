@@ -75,7 +75,7 @@ const RitualInscription = ({
   blueGlow?: boolean;
 }) => (
   <div 
-    onClick={(e) => {
+    onClick={() => {
       // Handle click to open gallery
       console.log(`🖼️ RitualInscription clicked - opening gallery for parent selection`);
       const event = new CustomEvent('openBreedingGallery', { detail: { slot: 1 } });
