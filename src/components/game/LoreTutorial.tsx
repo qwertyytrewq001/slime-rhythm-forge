@@ -705,7 +705,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       >
         <GlimCharacter 
           expression={currentCard?.expression ?? 'shocked'}
-          size={glimPosition === 'center' ? 500 : 350}
+          size={350}
         />
       </div>
 
