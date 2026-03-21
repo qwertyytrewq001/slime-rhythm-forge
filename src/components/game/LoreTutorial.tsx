@@ -63,7 +63,7 @@ const markEventSeen = (eventName: keyof typeof FIRST_TIME_EVENTS): void => {
 const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
-    expression: 'glim_exicted',
+    expression: 'exicted',
     text: "Oh. OH. Someone's actually here."
   },
   {
