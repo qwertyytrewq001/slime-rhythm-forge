@@ -108,9 +108,9 @@ function GameLayout() {
     document.addEventListener('click', startAudio);
     
     // Handle custom event to open breeding gallery
-    const handleOpenBreedingGallery = (event: CustomEvent) => {
+    const handleOpenBreedingGallery = (event: any) => {
       console.log('🖼️ Received openBreedingGallery event:', event.detail);
-      openGalleryForSlot(event.detail.slot || 1);
+      openGalleryForSlot(event.detail?.slot || 1);
     };
     window.addEventListener('openBreedingGallery', handleOpenBreedingGallery);
     
