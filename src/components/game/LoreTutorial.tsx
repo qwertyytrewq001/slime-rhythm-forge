@@ -88,17 +88,17 @@ const FIRST_LAUNCH_DIALOGUE = [
   },
   {
     id: 'firstLaunch',
-    expression: 'sad_glim',
+    expression: 'worried',
     text: "Someone has been draining it. Deliberately."
   },
   {
     id: 'firstLaunch',
-    expression: 'sad_glim',
+    expression: 'worried',
     text: "You're a Forger. That means you can fix this."
   },
   {
     id: 'firstLaunch',
-    expression: 'sad_glim',
+    expression: 'worried',
     text: "Breed slimes. Build Sanctuaries. Restore the Goo."
   },
   {
@@ -262,12 +262,12 @@ const FIRST_BREED_DIALOGUE = [
 const FIRST_BATTLE_DIALOGUE = [
   {
     id: 'firstBattleMapOpen',
-    expression: 'surveying',
+    expression: 'worried',
     text: "The Whispering Wilds. Once a safe network of paths between Sanctuaries."
   },
   {
     id: 'firstBattleMapOpen',
-    expression: 'surveying',
+    expression: 'worried',
     text: "Now overrun. Every feral slime out there was someone's companion before Goo ran dry."
   },
   {
