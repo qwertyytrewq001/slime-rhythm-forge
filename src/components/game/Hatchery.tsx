@@ -97,9 +97,10 @@ export function Hatchery() {
     // Add slime to state immediately so it can be assigned to habitat in popup
     const newSlime = activeHatching.slime;
     dispatch({ type: 'ADD_SLIME', slime: newSlime });
-    dispatch({ type: 'SELECT_SLIME', id: newSlime.id });
-    dispatch({ type: 'SET_BEST_RARITY', score: newSlime.rarityScore });
+    // Don't change global selection when adding hatched slime
+    // dispatch({ type: 'SET_BEST_RARITY', score: newSlime.rarityScore });
     dispatch({ type: 'ADD_GOO', amount: 500 });
+    // dispatch({ type: 'SELECT_SLIME', id: newSlime.id });
     
     setTimeout(() => {
       setDiscoveredSlime(newSlime);
