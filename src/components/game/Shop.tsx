@@ -150,8 +150,12 @@ export function Shop() {
       audioEngine.playSfx('purchase');
       
       if (!state.completedTutorialChapters.includes('habitats')) {
-        triggerDialogue('habitat-purchase');
-      }
+      console.log('🏠 Shop: About to trigger habitat-purchase dialogue');
+      console.log('🔍 Shop: hasSeenEvent firstHabitatBuilt:', hasSeenEvent('firstHabitatBuilt'));
+      triggerDialogue('habitat-purchase');
+    } else {
+      console.log('🏠 Shop: habitats chapter already completed, skipping habitat dialogue');
+    }
     }
   };
 

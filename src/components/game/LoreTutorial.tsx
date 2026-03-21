@@ -491,7 +491,10 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   useDialogueTrigger(useCallback((triggerId: TriggerType, data) => {
     console.log('🎮 Dialogue Trigger Received:', triggerId);
     console.log('🔍 hasSeenEvent firstEggBought:', hasSeenEvent('firstEggBought'));
-    console.log('🔍 hasSeenEvent firstLaunch:', hasSeenEvent('firstLaunch'));
+    console.log('🔍 hasSeenEvent firstHabitatBuilt:', hasSeenEvent('firstHabitatBuilt'));
+    console.log('🔍 hasSeenEvent firstBazaarOpen:', hasSeenEvent('firstBazaarOpen'));
+    console.log('🔍 hasSeenEvent firstHatch:', hasSeenEvent('firstHatch'));
+    console.log('🔍 hasSeenEvent secondHatch:', hasSeenEvent('secondHatch'));
     
     // Re-open if closed
     if (!isOpen && onOpen) {
@@ -552,14 +555,20 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     }
 
     // Handle habitat-purchase trigger
-    if (triggerId === 'habitat-purchase' && !hasSeenEvent('firstHabitatBuilt')) {
-      console.log('🚀 Executing habitat-purchase trigger for firstHabitatBuilt');
-      markEventSeen('firstHabitatBuilt');
-      setCurrentDialogue(FIRST_HABITAT_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('warm');
-      setGlimPosition('bottom-left');
+    if (triggerId === 'habitat-purchase') {
+      console.log('🏠 habitat-purchase trigger received');
+      console.log('🔍 hasSeenEvent firstHabitatBuilt:', hasSeenEvent('firstHabitatBuilt'));
+      if (!hasSeenEvent('firstHabitatBuilt')) {
+        console.log('🚀 Executing habitat-purchase trigger for firstHabitatBuilt');
+        markEventSeen('firstHabitatBuilt');
+        setCurrentDialogue(FIRST_HABITAT_DIALOGUE);
+        setCurrentDialogueIndex(0); // Reset to start
+        setDisplayedText(''); // Clear displayed text
+        setCurrentExpression('warm');
+        setGlimPosition('bottom-left');
+      } else {
+        console.log('❌ firstHabitatBuilt already seen, skipping habitat dialogue');
+      }
     }
 
     // Handle hatch-egg trigger
