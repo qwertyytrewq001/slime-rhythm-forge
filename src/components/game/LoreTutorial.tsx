@@ -63,32 +63,32 @@ const markEventSeen = (eventName: keyof typeof FIRST_TIME_EVENTS): void => {
 const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
-    expression: 'shocked',
+    expression: 'excited',
     text: "Oh. OH. Someone's actually here."
   },
   {
     id: 'firstLaunch',
-    expression: 'shocked', 
+    expression: 'explaining',
     text: "After four HUNDRED years. Do you know how long that is?"
   },
   {
     id: 'firstLaunch',
-    expression: 'shocked',
+    expression: 'explaining',
     text: "...It is very long. I counted the stars. Twice."
   },
   {
     id: 'firstLaunch',
     expression: 'composed',
-    text: "My name is Glim. Guardian of the Slime Forge."
+    text: "My name is Glim. Guardian of Slime Forge."
   },
   {
     id: 'firstLaunch',
     expression: 'composed',
-    text: "This world — the Sanctuaries, the Goo, the slimes — it's dying."
+    text: "This world — Sanctuaries, Goo, slimes — it's dying."
   },
   {
     id: 'firstLaunch',
-    expression: 'composed',
+    expression: 'sad',
     text: "Someone has been draining it. Deliberately."
   },
   {
@@ -103,12 +103,12 @@ const FIRST_LAUNCH_DIALOGUE = [
   },
   {
     id: 'firstLaunch',
-    expression: 'dramatic point toward the Bazaar',
+    expression: 'dramatic point toward\'s Bazaar',
     text: "Start at the Bazaar. Buy an egg. Begin."
   },
   {
     id: 'firstLaunch',
-    expression: 'dramatic point toward the Bazaar',
+    expression: 'dramatic point toward\'s Bazaar',
     text: "I'll be watching."
   }
 ];
