@@ -68,46 +68,6 @@ const FIRST_LAUNCH_DIALOGUE = [
   },
   {
     id: 'firstLaunch',
-    expression: 'shocked', 
-    text: "After four HUNDRED years. Do you know how long that is?"
-  },
-  {
-    id: 'firstLaunch',
-    expression: 'shocked',
-    text: "...It is very long. I counted the stars. Twice."
-  },
-  {
-    id: 'firstLaunch',
-    expression: 'composed',
-    text: "My name is Glim. Guardian of Slime Forge."
-  },
-  {
-    id: 'firstLaunch',
-    expression: 'composed',
-    text: "This world — Sanctuaries, Goo, slimes — it's dying."
-  },
-  {
-    id: 'firstLaunch',
-    expression: 'composed',
-    text: "Someone has been draining it. Deliberately."
-  },
-  {
-    id: 'firstLaunch',
-    expression: 'urgent',
-    text: "You're a Forger. That means you can fix this."
-  },
-  {
-    id: 'firstLaunch',
-    expression: 'urgent',
-    text: "Breed slimes. Build Sanctuaries. Restore the Goo."
-  },
-  {
-    id: 'firstLaunch',
-    expression: 'urgent',
-    text: "Fight back through Battle Map and take this world back."
-  },
-  {
-    id: 'firstLaunch',
     expression: 'dramatic',
     text: "Start at the Bazaar. Buy an egg. Begin."
   },
@@ -175,22 +135,22 @@ const FIRST_HATCH_DIALOGUE = [
 const FIRST_HABITAT_DIALOGUE = [
   {
     id: 'firstHabitatBuilt',
-    expression: 'warm',
+    expression: 'excited',
     text: "There used to be dozens of these. Full of life. All of them."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'warm',
+    expression: 'excited',
     text: "Voss drained every single one."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'determined',
+    expression: 'excited',
     text: "Each Sanctuary you build restores Goo to the world and pulls feral slimes back from the edge."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'determined',
+    expression: 'excited',
     text: "Place your slime inside. Then feed it. It needs to grow."
   }
 ];
@@ -221,22 +181,22 @@ const FIRST_FEED_DIALOGUE = [
 const FIRST_ALTAR_DIALOGUE = [
   {
     id: 'firstAltarVisit',
-    expression: 'reverent',
+    expression: 'smug',
     text: "This is the heart of the Forge. I was born here, actually."
   },
   {
     id: 'firstAltarVisit',
-    expression: 'reverent',
+    expression: 'smug',
     text: "The Forger who bred me apparently screamed. I choose to believe it was excitement."
   },
   {
     id: 'firstAltarVisit',
-    expression: 'serious',
+    expression: 'smug',
     text: "Breeding combines two slimes into something new — their elements, their traits, their essence."
   },
   {
     id: 'firstAltarVisit',
-    expression: 'serious',
+    expression: 'smug',
     text: "Voss extracts Goo by force. We create new life. That's the difference between us."
   },
   {
