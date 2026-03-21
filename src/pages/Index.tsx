@@ -67,18 +67,10 @@ function GameLayout() {
   const handleGallerySelect = (id: string) => {
     if (gallerySlot) {
       dispatch({ type: 'SET_BREED_SLOT', slot: gallerySlot, id });
-      // Don't clear gallerySlot yet - wait for both slots to be filled
-      console.log(`🖼️ Set breeding slot ${gallerySlot} with slime ${id}`);
     }
     dispatch({ type: 'SELECT_SLIME', id });
-    // Only close gallery if both slots are filled
-    if (state.breedSlot1 && state.breedSlot2) {
-      setGalleryOpen(false);
-      setGallerySlot(null);
-      console.log('🖼️ Both slots filled, closing gallery');
-    } else {
-      console.log(`🖼️ Slot 1: ${state.breedSlot1 ? 'filled' : 'empty'}, Slot 2: ${state.breedSlot2 ? 'filled' : 'empty'}`);
-    }
+    setGalleryOpen(false);
+    setGallerySlot(null);
   };
 
   const handleMute = () => {
