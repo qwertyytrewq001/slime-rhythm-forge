@@ -63,7 +63,7 @@ const markEventSeen = (eventName: keyof typeof FIRST_TIME_EVENTS): void => {
 const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
-    expression: 'shocked',
+    expression: 'glim_exicted',
     text: "Oh. OH. Someone's actually here."
   },
   {
@@ -78,27 +78,27 @@ const FIRST_LAUNCH_DIALOGUE = [
   },
   {
     id: 'firstLaunch',
-    expression: 'composed',
+    expression: 'glim_kind',
     text: "My name is Glim. Guardian of Slime Forge."
   },
   {
     id: 'firstLaunch',
-    expression: 'composed',
+    expression: 'glim_kind',
     text: "This world — Sanctuaries, Goo, slimes — it's dying."
   },
   {
     id: 'firstLaunch',
-    expression: 'sad',
+    expression: 'sad_glim',
     text: "Someone has been draining it. Deliberately."
   },
   {
     id: 'firstLaunch',
-    expression: 'urgent',
+    expression: 'sad_glim',
     text: "You're a Forger. That means you can fix this."
   },
   {
     id: 'firstLaunch',
-    expression: 'urgent',
+    expression: 'sad_glim',
     text: "Breed slimes. Build Sanctuaries. Restore the Goo."
   },
   {
