@@ -76,10 +76,16 @@ const RitualInscription = ({
 }) => (
   <div 
     onClick={() => {
-      // Handle click to open gallery
-      console.log(`🖼️ RitualInscription clicked - opening gallery for parent selection`);
-      const event = new CustomEvent('openBreedingGallery', { detail: { slot: 1 } });
-      window.dispatchEvent(event);
+      // Handle click to open gallery - SIMPLIFIED
+      console.log(`🖼️ Breeding Pedestal clicked - opening gallery`);
+      // Just click the existing gallery button that we know works
+      const galleryButton = document.querySelector('[data-testid="gallery-button"]') as HTMLButtonElement;
+      if (galleryButton) {
+        console.log('🖼️ Found and clicking gallery button');
+        galleryButton.click();
+      } else {
+        console.log('❌ Gallery button not found');
+      }
     }}
     className={`relative flex flex-col items-center group pointer-events-auto transition-all duration-500 cursor-pointer ${className}`}
   >
