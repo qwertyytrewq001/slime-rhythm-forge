@@ -76,15 +76,12 @@ const RitualInscription = ({
 }) => (
   <div 
     onClick={() => {
-      // Handle click to open gallery - SIMPLIFIED
-      console.log(`🖼️ Breeding Pedestal clicked - opening gallery`);
-      // Just click the existing gallery button that we know works
-      const galleryButton = document.querySelector('[data-testid="gallery-button"]') as HTMLButtonElement;
-      if (galleryButton) {
-        console.log('🖼️ Found and clicking gallery button');
-        galleryButton.click();
+      // Use the existing onRequestGallery system - THIS IS HOW IT WAS DESIGNED
+      console.log(`🖼️ Breeding Pedestal clicked - calling onRequestGallery(1)`);
+      if (onRequestGallery) {
+        onRequestGallery(1); // Left slot
       } else {
-        console.log('❌ Gallery button not found');
+        console.log('❌ onRequestGallery not available');
       }
     }}
     className={`relative flex flex-col items-center group pointer-events-auto transition-all duration-500 cursor-pointer ${className}`}
@@ -299,10 +296,13 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
             onDragOver={handleDragOver}
             onDrop={handleDrop(2)}
             onClick={() => {
-              const slot = 2; // Right pedestal
-              console.log(`🖼️ Breeding Pedestal Right clicked - opening gallery`);
-              const event = new CustomEvent('openBreedingGallery', { detail: { slot } });
-              window.dispatchEvent(event);
+              // Use the existing onRequestGallery system - THIS IS HOW IT WAS DESIGNED
+              console.log(`🖼️ Breeding Pedestal clicked - calling onRequestGallery(2)`);
+              if (onRequestGallery) {
+                onRequestGallery(2); // Right slot
+              } else {
+                console.log('❌ onRequestGallery not available');
+              }
             }}
           >
             {slot2Slime ? (
