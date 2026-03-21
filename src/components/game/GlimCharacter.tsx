@@ -40,6 +40,7 @@ export function GlimCharacter({ expression, size = 200 }: GlimCharacterProps) {
       smug: 'smug_glim.png',
       tearfull_emotional: 'tearfull_emotional.png',
       worried: 'worried_glim.png',
+      sad_glim: 'sad_glim.png',
       // Use existing images for all expressions
       shocked: 'worried_glim.png',
       composed: 'glim_kind.png',
