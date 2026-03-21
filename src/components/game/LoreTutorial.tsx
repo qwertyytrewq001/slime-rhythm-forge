@@ -507,6 +507,25 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       setGlimPosition('bottom-left');
     }
 
+    // Handle breeding-intro trigger after feeding (for breeding tutorial)
+    if (triggerId === 'breeding-intro' && hasSeenEvent('firstEggBought') && hasSeenEvent('firstHabitatBuilt')) {
+      console.log('🚀 Executing breeding-intro trigger for firstAltarVisit');
+      markEventSeen('firstAltarVisit');
+      setCurrentDialogue(FIRST_ALTAR_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
+      setCurrentExpression('reverent');
+      setGlimPosition('bottom-left');
+      
+      // Auto-open gallery when dialogue says "Select two slimes as parents"
+      setTimeout(() => {
+        const galleryButton = document.querySelector('[data-testid="gallery-button"]') as HTMLButtonElement;
+        if (galleryButton) {
+          galleryButton.click();
+        }
+      }, 3000); // 3 seconds after dialogue starts
+    }
+
     // Handle battle-start trigger
     if (triggerId === 'battle-start' && !hasSeenEvent('firstBattleMapOpen')) {
       console.log('🚀 Executing battle-start trigger for firstBattleMapOpen');
