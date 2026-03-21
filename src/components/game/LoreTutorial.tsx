@@ -44,6 +44,7 @@ const FIRST_TIME_EVENTS = {
   firstFeed: false,
   firstAltarVisit: false,
   firstBreedComplete: false,
+  breedingIntroShown: false, // Prevent repeated breeding-intro triggers
   firstBattleMapOpen: false,
 };
 
@@ -495,6 +496,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     console.log('🔍 hasSeenEvent firstBazaarOpen:', hasSeenEvent('firstBazaarOpen'));
     console.log('🔍 hasSeenEvent firstHatch:', hasSeenEvent('firstHatch'));
     console.log('🔍 hasSeenEvent secondHatch:', hasSeenEvent('secondHatch'));
+    console.log('🔍 hasSeenEvent breedingIntroShown:', hasSeenEvent('breedingIntroShown'));
     
     // Re-open if closed
     if (!isOpen && onOpen) {
@@ -505,6 +507,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'breeding-intro' && !hasSeenEvent('firstEggBought')) {
       console.log('🚀 Executing breeding-intro trigger for firstEggBought');
       markEventSeen('firstEggBought');
+      markEventSeen('breedingIntroShown'); // Prevent repeated triggers
       setCurrentDialogue(FIRST_EGG_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text

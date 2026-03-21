@@ -103,7 +103,7 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
 
   useEffect(() => {
     // Trigger breeding intro lore if chapter not finished AND only once
-    if (!state.completedTutorialChapters.includes('breeding') && !hasSeenEvent('secondHatch')) {
+    if (!state.completedTutorialChapters.includes('breeding') && !hasSeenEvent('secondHatch') && !hasSeenEvent('breedingIntroShown')) {
       triggerDialogue('breeding-intro');
     }
     
