@@ -595,33 +595,9 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       setGlimPosition('bottom-left'); // Changed from 'center' to 'bottom-left'
     }
 
-    if (triggerId === 'firstBazaarOpen' && !hasSeenEvent('firstBazaarOpen')) {
-      console.log('🚀 Executing firstBazaarOpen trigger');
-      markEventSeen('firstBazaarOpen');
-      setCurrentDialogue(FIRST_BAZAAR_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('excited');
-      setGlimPosition('bottom-left');
-    }
-
-    if (triggerId === 'firstEggBought' && !hasSeenEvent('firstEggBought')) {
-      console.log('🚀 Executing firstEggBought trigger');
-      markEventSeen('firstEggBought');
-      setCurrentDialogue(FIRST_EGG_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('proud');
-      setGlimPosition('bottom-left');
-    }
-
     if (triggerId === 'firstHatch' && !hasSeenEvent('firstHatch')) {
       markEventSeen('firstHatch');
-      setCurrentDialogue(FIRST_HATCH_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('frozen');
-      setGlimPosition('bottom-left');
+      // Note: FIRST_HATCH_DIALOGUE is already handled by hatch-egg trigger above
     }
 
     if (triggerId === 'firstFeed' && !hasSeenEvent('firstFeed')) {
@@ -635,37 +611,17 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
     if (triggerId === 'firstAltarVisit' && !hasSeenEvent('firstAltarVisit')) {
       markEventSeen('firstAltarVisit');
-      setCurrentDialogue(FIRST_ALTAR_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('reverent');
-      setGlimPosition('bottom-left');
-      
-      // Auto-open gallery when dialogue says "Select two slimes as parents"
-      setTimeout(() => {
-        const galleryButton = document.querySelector('[data-testid="gallery-button"]') as HTMLButtonElement;
-        if (galleryButton) {
-          galleryButton.click();
-        }
-      }, 3000); // 3 seconds after dialogue starts
+      // Note: FIRST_ALTAR_DIALOGUE is already handled by second hatch trigger above
     }
 
     if (triggerId === 'firstBreedComplete' && !hasSeenEvent('firstBreedComplete')) {
       markEventSeen('firstBreedComplete');
-      setCurrentDialogue(FIRST_BREED_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('delighted');
-      setGlimPosition('bottom-left');
+      // Note: FIRST_BREED_DIALOGUE is already handled by breeding-complete trigger above
     }
 
     if (triggerId === 'firstBattleMapOpen' && !hasSeenEvent('firstBattleMapOpen')) {
       markEventSeen('firstBattleMapOpen');
-      setCurrentDialogue(FIRST_BATTLE_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('surveying');
-      setGlimPosition('bottom-left');
+      // Note: FIRST_BATTLE_DIALOGUE is already handled by battle-start trigger above
     }
 
     // Handle level-based dialogue
