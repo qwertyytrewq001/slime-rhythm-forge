@@ -75,8 +75,13 @@ const RitualInscription = ({
   blueGlow?: boolean;
 }) => (
   <div 
-    onClick={onClick}
-    className={`relative flex flex-col items-center group pointer-events-auto transition-all duration-500 ${onClick ? 'cursor-pointer' : 'cursor-default'} ${className}`}
+    onClick={(e) => {
+      // Handle click to open gallery
+      console.log(`🖼️ RitualInscription clicked - opening gallery for parent selection`);
+      const event = new CustomEvent('openBreedingGallery', { detail: { slot: 1 } });
+      window.dispatchEvent(event);
+    }}
+    className={`relative flex flex-col items-center group pointer-events-auto transition-all duration-500 cursor-pointer ${className}`}
   >
     <div className="absolute inset-0 pointer-events-none overflow-visible">
       {[...Array(sparkles)].map((_, i) => <FairySparkle key={i} index={i} color="#FFD1DC" />)}
@@ -286,7 +291,17 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
               <SlimeCanvas slime={slot2Slime} size={100} animated />
             ) : (
               <div className="relative -translate-y-4">
-                <RitualInscription fontSize="6px" sparkles={4} className="scale-110">
+                <RitualInscription 
+                  fontSize="6px" 
+                  sparkles={4} 
+                  className="scale-110"
+                  onClick={(e) => {
+                    // Handle click to open gallery
+                    console.log(`🖼️ RitualInscription clicked - opening gallery for parent selection`);
+                    const event = new CustomEvent('openBreedingGallery', { detail: { slot: 2 } });
+                    window.dispatchEvent(event);
+                  }}
+                >
                   Select<br/>Parent
                 </RitualInscription>
               </div>
