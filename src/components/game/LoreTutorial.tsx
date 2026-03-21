@@ -64,7 +64,7 @@ const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
     expression: 'glim_excited',
-    text: "Oh. OH. Someone's here."
+    text: "Oh. OH. Someone's actually here."
   },
   {
     id: 'firstLaunch',
@@ -79,7 +79,7 @@ const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
     expression: 'kind',
-    text: "My name is Glim. I am — or was — guardian of Slime Forge. And you, whether you meant to or not, have just walked into the most important moment in four centuries."
+    text: "My name is Glim. I am — or was — the guardian of the Slime Forge. And you, whether you meant to or not, have just walked into the most important moment in four centuries."
   },
   {
     id: 'firstLaunch',
