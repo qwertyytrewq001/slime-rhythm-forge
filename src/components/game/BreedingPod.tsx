@@ -233,6 +233,10 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
   const handleSlotClick = (slot: 1 | 2) => {
     if (state.activeBreeding) return;
     if (onRequestGallery) onRequestGallery(slot);
+    // Also open gallery when clicking on "Select Parent" text in breeding pod
+    console.log(`🖼️ Breeding Pod Select Parent ${slot} clicked - opening gallery`);
+    const event = new CustomEvent('openBreedingGallery', { detail: { slot } });
+    window.dispatchEvent(event);
   };
 
   return (
