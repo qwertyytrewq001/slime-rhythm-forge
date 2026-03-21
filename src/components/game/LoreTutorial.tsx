@@ -63,63 +63,58 @@ const markEventSeen = (eventName: keyof typeof FIRST_TIME_EVENTS): void => {
 const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
-    expression: 'glim_excited',
+    expression: 'shocked',
     text: "Oh. OH. Someone's actually here."
   },
   {
     id: 'firstLaunch',
-    expression: 'glim_excited',
-    text: "After four HUNDRED years. Do you know how long that is? I'll tell you — it is VERY long. I had nothing to do but count the stars. There are a lot of stars."
+    expression: 'shocked', 
+    text: "After four HUNDRED years. Do you know how long that is?"
   },
   {
     id: 'firstLaunch',
-    expression: 'glim_excited',
-    text: "...Sorry. I'm being dramatic. It's a coping mechanism."
+    expression: 'shocked',
+    text: "...It is very long. I counted the stars. Twice."
   },
   {
     id: 'firstLaunch',
-    expression: 'kind',
-    text: "My name is Glim. I am — or was — the guardian of the Slime Forge. And you, whether you meant to or not, have just walked into the most important moment in four centuries."
+    expression: 'composed',
+    text: "My name is Glim. Guardian of Slime Forge."
   },
   {
     id: 'firstLaunch',
-    expression: 'kind',
-    text: "So. Welcome. No pressure."
-  },
-  {
-    id: 'firstLaunch',
-    expression: 'sad',
+    expression: 'composed',
     text: "This world — Sanctuaries, Goo, slimes — it's dying."
   },
   {
     id: 'firstLaunch',
-    expression: 'sad',
+    expression: 'composed',
     text: "Someone has been draining it. Deliberately."
   },
   {
     id: 'firstLaunch',
-    expression: 'sad',
-    text: "The Sanctuaries that once teemed with life are now silent. The Goo that once flowed like rivers is now barely a trickle."
+    expression: 'urgent',
+    text: "You're a Forger. That means you can fix this."
   },
   {
     id: 'firstLaunch',
-    expression: 'sad',
-    text: "And the slimes... they're fading. Without the Goo, they can't survive."
+    expression: 'urgent',
+    text: "Breed slimes. Build Sanctuaries. Restore the Goo."
   },
   {
     id: 'firstLaunch',
-    expression: 'sad',
-    text: "But you can change that. You can restore the Forge."
+    expression: 'urgent',
+    text: "Fight back through Battle Map and take this world back."
   },
   {
     id: 'firstLaunch',
-    expression: 'kind',
-    text: "Let's start with the basics. You'll need slimes to begin."
+    expression: 'dramatic',
+    text: "Start at the Bazaar. Buy an egg. Begin."
   },
   {
     id: 'firstLaunch',
-    expression: 'kind',
-    text: "Let's head to the Bazaar and get your first egg."
+    expression: 'dramatic',
+    text: "I'll be watching."
   }
 ];
 
@@ -180,22 +175,22 @@ const FIRST_HATCH_DIALOGUE = [
 const FIRST_HABITAT_DIALOGUE = [
   {
     id: 'firstHabitatBuilt',
-    expression: 'explaining_something',
+    expression: 'warm',
     text: "There used to be dozens of these. Full of life. All of them."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'glim_excited',
+    expression: 'warm',
     text: "Voss drained every single one."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'explaining_something',
+    expression: 'determined',
     text: "Each Sanctuary you build restores Goo to the world and pulls feral slimes back from the edge."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'glim_excited',
+    expression: 'determined',
     text: "Place your slime inside. Then feed it. It needs to grow."
   }
 ];
@@ -231,28 +226,28 @@ const FIRST_ALTAR_DIALOGUE = [
   },
   {
     id: 'firstAltarVisit',
-    expression: 'smug',
+    expression: 'reverent',
     text: "The Forger who bred me apparently screamed. I choose to believe it was excitement."
   },
   {
     id: 'firstAltarVisit',
-    expression: 'explaining_something',
+    expression: 'serious',
     text: "Breeding combines two slimes into something new — their elements, their traits, their essence."
   },
   {
     id: 'firstAltarVisit',
-    expression: 'smug',
+    expression: 'serious',
     text: "Voss extracts Goo by force. We create new life. That's the difference between us."
   },
   {
     id: 'firstAltarVisit',
-    expression: 'explaining_something',
+    expression: 'gesturing',
     text: "Select two slimes as parents. Place them on the platform."
   },
   {
     id: 'firstAltarVisit',
-    expression: 'explaining_something',
-    text: "Click the 'Select Parents' button below to open the gallery."
+    expression: 'gesturing',
+    text: "The Altar will do the rest."
   }
 ];
 
