@@ -76,6 +76,7 @@ const RitualInscription = ({
 }) => (
   <div 
     onClick={() => {
+      console.log('🔥 PEDESTAL CLICKED - LEFT');
       // Use the existing onRequestGallery system - THIS IS HOW IT WAS DESIGNED
       console.log(`🖼️ Breeding Pedestal clicked - calling onRequestGallery(1)`);
       if (onRequestGallery) {
@@ -296,6 +297,7 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
             onDragOver={handleDragOver}
             onDrop={handleDrop(2)}
             onClick={() => {
+              console.log('🔥 PEDESTAL CLICKED - RIGHT');
               // Use the existing onRequestGallery system - THIS IS HOW IT WAS DESIGNED
               console.log(`🖼️ Breeding Pedestal clicked - calling onRequestGallery(2)`);
               if (onRequestGallery) {
