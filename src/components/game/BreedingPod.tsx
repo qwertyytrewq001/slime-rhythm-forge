@@ -240,7 +240,7 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
     if (onRequestGallery) onRequestGallery(slot);
     // Also open gallery when clicking on "Select Parent" text in breeding pod
     console.log(`🖼️ Breeding Pod Select Parent ${slot} clicked - opening gallery`);
-    const event = new CustomEvent('openBreedingGallery', { detail: { slot } });
+    const event = new CustomEvent('openBreedingGallery', { detail: { slot: slot } });
     window.dispatchEvent(event);
   };
 
@@ -260,7 +260,13 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
       )}
 
       {/* Den visual container */}
-      <div className="relative w-[28rem] h-[14rem] flex items-center justify-center">
+      <div className="relative w-[28rem] h-[14rem] flex items-center justify-center"
+           onClick={() => {
+             console.log(`🖼️ Breeding Pedestal ${slot === 1 ? 'Left' : 'Right'} clicked - opening gallery`);
+             const event = new CustomEvent('openBreedingGallery', { detail: { slot } });
+             window.dispatchEvent(event);
+           }}
+      >
         <div className="relative w-full h-full z-10">
           {/* Slot 1 - Left Pedestal moved UP */}
           <div
