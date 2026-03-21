@@ -63,17 +63,17 @@ const markEventSeen = (eventName: keyof typeof FIRST_TIME_EVENTS): void => {
 const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
-    expression: 'excited',
+    expression: 'shocked',
     text: "Oh. OH. Someone's actually here."
   },
   {
     id: 'firstLaunch',
-    expression: 'explaining',
+    expression: 'explainingsomething',
     text: "After four HUNDRED years. Do you know how long that is?"
   },
   {
     id: 'firstLaunch',
-    expression: 'explaining',
+    expression: 'explainingsomething',
     text: "...It is very long. I counted the stars. Twice."
   },
   {
@@ -93,22 +93,22 @@ const FIRST_LAUNCH_DIALOGUE = [
   },
   {
     id: 'firstLaunch',
-    expression: 'urgent but warm',
+    expression: 'urgent',
     text: "You're a Forger. That means you can fix this."
   },
   {
     id: 'firstLaunch',
-    expression: 'urgent but warm',
+    expression: 'urgent',
     text: "Breed slimes. Build Sanctuaries. Restore the Goo."
   },
   {
     id: 'firstLaunch',
-    expression: 'dramatic point toward\'s Bazaar',
+    expression: 'dramatic',
     text: "Start at the Bazaar. Buy an egg. Begin."
   },
   {
     id: 'firstLaunch',
-    expression: 'dramatic point toward\'s Bazaar',
+    expression: 'dramatic',
     text: "I'll be watching."
   }
 ];
@@ -170,22 +170,22 @@ const FIRST_HATCH_DIALOGUE = [
 const FIRST_HABITAT_DIALOGUE = [
   {
     id: 'firstHabitatBuilt',
-    expression: 'excited',
+    expression: 'warm',
     text: "There used to be dozens of these. Full of life. All of them."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'excited',
+    expression: 'warm',
     text: "Voss drained every single one."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'excited',
+    expression: 'warm',
     text: "Each Sanctuary you build restores Goo to the world and pulls feral slimes back from the edge."
   },
   {
     id: 'firstHabitatBuilt',
-    expression: 'excited',
+    expression: 'warm',
     text: "Place your slime inside. Then feed it. It needs to grow."
   }
 ];
