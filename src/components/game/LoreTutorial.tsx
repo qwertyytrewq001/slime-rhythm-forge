@@ -492,6 +492,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstLaunch' && !hasSeenEvent('firstLaunch')) {
       markEventSeen('firstLaunch');
       setCurrentDialogue(FIRST_LAUNCH_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('shocked');
       setGlimPosition('bottom-left'); // Changed from 'center' to 'bottom-left'
     }
@@ -499,6 +501,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstBazaarOpen' && !hasSeenEvent('firstBazaarOpen')) {
       markEventSeen('firstBazaarOpen');
       setCurrentDialogue(FIRST_BAZAAR_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('excited');
       setGlimPosition('bottom-left');
     }
@@ -506,6 +510,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstEggBought' && !hasSeenEvent('firstEggBought')) {
       markEventSeen('firstEggBought');
       setCurrentDialogue(FIRST_EGG_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('proud');
       setGlimPosition('bottom-left');
     }
@@ -513,6 +519,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstHatch' && !hasSeenEvent('firstHatch')) {
       markEventSeen('firstHatch');
       setCurrentDialogue(FIRST_HATCH_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('frozen');
       setGlimPosition('bottom-left');
     }
@@ -520,6 +528,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstHabitatBuilt' && !hasSeenEvent('firstHabitatBuilt')) {
       markEventSeen('firstHabitatBuilt');
       setCurrentDialogue(FIRST_HABITAT_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('warm');
       setGlimPosition('bottom-left');
     }
@@ -527,6 +537,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstFeed' && !hasSeenEvent('firstFeed')) {
       markEventSeen('firstFeed');
       setCurrentDialogue(FIRST_FEED_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('watching');
       setGlimPosition('bottom-left');
     }
@@ -534,21 +546,25 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstAltarVisit' && !hasSeenEvent('firstAltarVisit')) {
       markEventSeen('firstAltarVisit');
       setCurrentDialogue(FIRST_ALTAR_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('reverent');
       setGlimPosition('bottom-left');
       
       // Auto-open gallery when dialogue says "Select two slimes as parents"
       setTimeout(() => {
-        const galleryButton = document.querySelector('[data-testid="gallery-button"]');
+        const galleryButton = document.querySelector('[data-testid="gallery-button"]') as HTMLButtonElement;
         if (galleryButton) {
-          (galleryButton as HTMLElement).click();
+          galleryButton.click();
         }
-      }, 3000);
+      }, 3000); // 3 seconds after dialogue starts
     }
 
     if (triggerId === 'firstBreedComplete' && !hasSeenEvent('firstBreedComplete')) {
       markEventSeen('firstBreedComplete');
       setCurrentDialogue(FIRST_BREED_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('delighted');
       setGlimPosition('bottom-left');
     }
@@ -556,6 +572,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstBattleMapOpen' && !hasSeenEvent('firstBattleMapOpen')) {
       markEventSeen('firstBattleMapOpen');
       setCurrentDialogue(FIRST_BATTLE_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
       setCurrentExpression('surveying');
       setGlimPosition('bottom-left');
     }
