@@ -263,14 +263,7 @@ export function BreedingPod(props: BreedingPodProps) {
       )}
 
       {/* Den visual container */}
-      <div className="relative w-[28rem] h-[14rem] flex items-center justify-center"
-           onClick={() => {
-             const slot = 1; // Left pedestal
-             console.log(`🖼️ Breeding Pedestal Left clicked - opening gallery`);
-             const event = new CustomEvent('openBreedingGallery', { detail: { slot } });
-             window.dispatchEvent(event);
-           }}
-      >
+      <div className="relative w-[28rem] h-[14rem] flex items-center justify-center">
         <div className="relative w-full h-full z-10">
           {/* Slot 1 - Left Pedestal moved UP */}
           <div
