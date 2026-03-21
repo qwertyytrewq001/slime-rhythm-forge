@@ -232,7 +232,7 @@ function GameLayout() {
 
           {/* Breeding Gallery Sheet */}
           <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
-            <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[1000]">
+            <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
               <div className="flex-1 overflow-hidden">
                 <SlimeGallery onSelect={handleGallerySelect} />
               </div>
