@@ -6,6 +6,7 @@ export type DialogueTrigger =
   | 'firstBazaarOpen'
   | 'firstEggBought'
   | 'firstHatch'
+  | 'secondHatch'
   | 'firstHabitatBuilt'
   | 'firstFeed'
   | 'firstAltarVisit'
@@ -13,9 +14,14 @@ export type DialogueTrigger =
   | 'firstBattleMapOpen'
   | 'levelUp'
   | 'vossEncounter'
-  | 'finalBattle';
-
-export { DialogueTrigger };
+  | 'finalBattle'
+  // Additional triggers from game
+  | 'breeding-intro'
+  | 'battle-start'
+  | 'shop-purchase'
+  | 'habitat-purchase'
+  | 'hatch-egg'
+  | 'breeding-complete';
 
 let globalTrigger: DialogueTrigger | null = null;
 let globalTriggerData: any = null;

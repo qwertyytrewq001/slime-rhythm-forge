@@ -16,6 +16,7 @@ type TriggerType =
   | 'firstBazaarOpen'
   | 'firstEggBought'
   | 'firstHatch'
+  | 'secondHatch'
   | 'firstHabitatBuilt'
   | 'firstFeed'
   | 'firstAltarVisit'
@@ -38,6 +39,7 @@ const FIRST_TIME_EVENTS = {
   firstBazaarOpen: false,
   firstEggBought: false,
   firstHatch: false,
+  secondHatch: false,
   firstHabitatBuilt: false,
   firstFeed: false,
   firstAltarVisit: false,
@@ -507,10 +509,10 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       setGlimPosition('bottom-left');
     }
 
-    // Handle breeding-intro trigger after feeding (for breeding tutorial)
-    if (triggerId === 'breeding-intro' && hasSeenEvent('firstEggBought') && hasSeenEvent('firstHabitatBuilt')) {
-      console.log('🚀 Executing breeding-intro trigger for firstAltarVisit');
-      markEventSeen('firstAltarVisit');
+    // Handle second slime hatch (trigger breeding tutorial)
+    if (triggerId === 'hatch-egg' && hasSeenEvent('firstHatch') && !hasSeenEvent('secondHatch')) {
+      console.log('🚀 Executing second hatch trigger for breeding tutorial');
+      markEventSeen('secondHatch');
       setCurrentDialogue(FIRST_ALTAR_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
@@ -525,6 +527,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         }
       }, 3000); // 3 seconds after dialogue starts
     }
+
 
     // Handle battle-start trigger
     if (triggerId === 'battle-start' && !hasSeenEvent('firstBattleMapOpen')) {
