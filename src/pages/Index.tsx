@@ -54,6 +54,7 @@ function GameLayout() {
   const [battleTeam, setBattleTeam] = useState<{ player: BattleSlime[], opponent: BattleSlime[] } | null>(null);
 
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const [breedingGalleryOpen, setBreedingGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
 
   const openGalleryForSlot = (slot?: 1 | 2) => {
