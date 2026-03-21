@@ -66,10 +66,17 @@ function GameLayout() {
 
   const handleGallerySelect = (id: string) => {
     if (gallerySlot) {
+      // Check if this slime is already assigned to the other pedestal
+      const otherSlot = gallerySlot === 1 ? 2 : 1;
+      const otherSlotId = otherSlot === 1 ? state.breedSlot1 : state.breedSlot2;
+      
+      if (otherSlotId === id) {
+        console.log(`❌ Slime ${id} is already assigned to pedestal ${otherSlot}`);
+        return; // Don't allow duplicate selection
+      }
+      
       dispatch({ type: 'SET_BREED_SLOT', slot: gallerySlot, id });
     }
-    // Don't change global selection when selecting for breeding
-    // dispatch({ type: 'SELECT_SLIME', id });
     // Only close gallery and clear slot if both slots are filled
     if (state.breedSlot1 && state.breedSlot2) {
       setBreedingGalleryOpen(false);
