@@ -60,7 +60,7 @@ function GameLayout() {
   const openGalleryForSlot = (slot?: 1 | 2) => {
     if (slot) setGallerySlot(slot);
     else setGallerySlot(null);
-    setGalleryOpen(true);
+    setBreedingGalleryOpen(true);
     console.log(`🖼️ Opening breeding gallery for slot ${slot}`);
   };
 
@@ -72,7 +72,7 @@ function GameLayout() {
     // dispatch({ type: 'SELECT_SLIME', id });
     // Only close gallery and clear slot if both slots are filled
     if (state.breedSlot1 && state.breedSlot2) {
-      setGalleryOpen(false);
+      setBreedingGalleryOpen(false);
       setGallerySlot(null);
     }
   };
@@ -231,7 +231,7 @@ function GameLayout() {
           </Sheet>
 
           {/* Breeding Gallery Sheet */}
-          <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
+          <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
             <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
               <div className="flex-1 overflow-hidden">
                 <SlimeGallery onSelect={handleGallerySelect} />
