@@ -75,16 +75,7 @@ const RitualInscription = ({
   blueGlow?: boolean;
 }) => (
   <div 
-    onClick={() => {
-      console.log('🔥 PEDESTAL CLICKED - LEFT');
-      // Use the existing onRequestGallery system - THIS IS HOW IT WAS DESIGNED
-      console.log(`🖼️ Breeding Pedestal clicked - calling onRequestGallery(1)`);
-      if (onRequestGallery) {
-        onRequestGallery(1); // Left slot
-      } else {
-        console.log('❌ onRequestGallery not available');
-      }
-    }}
+    onClick={onClick}
     className={`relative flex flex-col items-center group pointer-events-auto transition-all duration-500 cursor-pointer ${className}`}
   >
     <div className="absolute inset-0 pointer-events-none overflow-visible">
@@ -299,10 +290,10 @@ export function BreedingPod(props: BreedingPodProps) {
             onDrop={handleDrop(2)}
             onClick={() => {
               console.log('🔥 PEDESTAL CLICKED - RIGHT');
-              // Use the existing onRequestGallery system - THIS IS HOW IT WAS DESIGNED
-              console.log(`🖼️ Breeding Pedestal clicked - calling onRequestGallery(2)`);
-              if (onRequestGallery) {
-                onRequestGallery(2); // Right slot
+              // Direct approach - call the gallery opening function we know works
+              console.log(`🖼️ Breeding Pedestal clicked - calling openGalleryForSlot(2)`);
+              if (props.onRequestGallery) {
+                props.onRequestGallery(2); // Right slot
               } else {
                 console.log('❌ onRequestGallery not available');
               }
