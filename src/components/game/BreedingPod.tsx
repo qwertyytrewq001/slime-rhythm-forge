@@ -104,7 +104,7 @@ const RitualInscription = ({
   </div>
 );
 
-export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
+export function BreedingPod({ onRequestGallery = () => {} }: BreedingPodProps) {
   const { state, dispatch } = useGameState();
   const [mergeParticles, setMergeParticles] = useState(false);
   const [now, setNow] = useState(Date.now());
