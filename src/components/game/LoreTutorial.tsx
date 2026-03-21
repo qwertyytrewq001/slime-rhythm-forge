@@ -142,12 +142,12 @@ const FIRST_EGG_DIALOGUE = [
 const FIRST_HATCH_DIALOGUE = [
   {
     id: 'firstHatch',
-    expression: 'frozen',
+    expression: 'exicted',
     text: "..."
   },
   {
     id: 'firstHatch',
-    expression: 'frozen',
+    expression: 'exicted',
     text: "I haven't seen a hatching in four hundred years."
   },
   {
