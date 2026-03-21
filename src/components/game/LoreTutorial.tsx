@@ -236,6 +236,11 @@ const FIRST_ALTAR_DIALOGUE = [
   },
   {
     id: 'firstAltarVisit',
+    expression: 'smug',
+    text: "Remember: you need to evolve slimes to adult to breed them."
+  },
+  {
+    id: 'firstAltarVisit',
     expression: 'gesturing',
     text: "Select two slimes as parents. Place them on the platform."
   },
