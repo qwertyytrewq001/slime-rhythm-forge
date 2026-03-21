@@ -210,7 +210,7 @@ function GameLayout() {
             </button>
           </div>
 
-          <Sheet>
+          <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
             <SheetTrigger asChild>
               <div className="relative group">
                 <button data-testid="gallery-button" className={toolbarCircle}>
