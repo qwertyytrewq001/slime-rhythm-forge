@@ -262,7 +262,8 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
       {/* Den visual container */}
       <div className="relative w-[28rem] h-[14rem] flex items-center justify-center"
            onClick={() => {
-             console.log(`🖼️ Breeding Pedestal ${slot === 1 ? 'Left' : 'Right'} clicked - opening gallery`);
+             const slot = 1; // Left pedestal
+             console.log(`🖼️ Breeding Pedestal Left clicked - opening gallery`);
              const event = new CustomEvent('openBreedingGallery', { detail: { slot } });
              window.dispatchEvent(event);
            }}
@@ -291,7 +292,12 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
             className={`absolute right-[0%] top-[0%] w-32 h-32 flex items-center justify-center transition-all cursor-pointer ${breeding ? 'animate-spirit-pulse' : ''}`}
             onDragOver={handleDragOver}
             onDrop={handleDrop(2)}
-            onClick={() => handleSlotClick(2)}
+            onClick={() => {
+              const slot = 2; // Right pedestal
+              console.log(`🖼️ Breeding Pedestal Right clicked - opening gallery`);
+              const event = new CustomEvent('openBreedingGallery', { detail: { slot } });
+              window.dispatchEvent(event);
+            }}
           >
             {slot2Slime ? (
               <SlimeCanvas slime={slot2Slime} size={100} animated />
