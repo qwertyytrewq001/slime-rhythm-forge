@@ -214,21 +214,24 @@ function GameLayout() {
             </button>
           </div>
 
-          <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
-            <SheetTrigger asChild>
-              <div className="relative group">
-                <button data-testid="gallery-button" className={toolbarCircle}>
-                  <Images className={toolbarIcon} />
-                  <span className={toolbarLabel}>Gallery</span>
-                </button>
-              </div>
-            </SheetTrigger>
-            <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
-              <div className="flex-1 overflow-hidden">
-                <SlimeGallery onSelect={handleGallerySelect} />
-              </div>
-            </SheetContent>
-          </Sheet>
+          {/* Main Gallery - Hidden during breeding to avoid conflicts */}
+          {currentView !== 'breeding' && (
+            <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
+              <SheetTrigger asChild>
+                <div className="relative group">
+                  <button data-testid="gallery-button" className={toolbarCircle}>
+                    <Images className={toolbarIcon} />
+                    <span className={toolbarLabel}>Gallery</span>
+                  </button>
+                </div>
+              </SheetTrigger>
+              <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+                <div className="flex-1 overflow-hidden">
+                  <SlimeGallery onSelect={handleGallerySelect} />
+                </div>
+              </SheetContent>
+            </Sheet>
+          )}
 
           {/* Breeding Gallery Sheet */}
           <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
