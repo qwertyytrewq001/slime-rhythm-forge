@@ -856,6 +856,21 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
               {displayedText ?? ''}
               {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
             </p>
+            
+            {/* Add Select Parents button for breeding dialogue */}
+            {currentDialogue === FIRST_ALTAR_DIALOGUE && displayedText?.includes('Select two slimes as parents') && (
+              <button
+                onClick={() => {
+                  const galleryButton = document.querySelector('[data-testid="gallery-button"]') as HTMLButtonElement;
+                  if (galleryButton) {
+                    galleryButton.click();
+                  }
+                }}
+                className="mt-3 px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#ff6eb4]/80 text-white font-medium transition-all text-sm"
+              >
+                Select Parents
+              </button>
+            )}
           </div>
 
           {/* Navigation Controls */}

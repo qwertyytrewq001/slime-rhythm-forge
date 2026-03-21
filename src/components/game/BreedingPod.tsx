@@ -11,6 +11,12 @@ import { drawEnhancedEgg } from '@/utils/eggRenderer';
 import { FairySparkle } from './FairySparkle';
 import { getStage } from '@/utils/slimeRenderer';
 import { toast } from '@/hooks/use-toast';
+import { triggerDialogue } from '@/utils/dialogueTriggers';
+
+// Check if event has been seen (same as LoreTutorial)
+const hasSeenEvent = (eventName: string): boolean => {
+  return localStorage.getItem(`glim_event_${eventName}`) === 'true';
+};
 
 interface BreedingPodProps {
   onRequestGallery?: (slot: 1 | 2) => void; 
@@ -89,8 +95,6 @@ const RitualInscription = ({
   </div>
 );
 
-import { triggerDialogue } from '@/utils/dialogueTriggers';
-
 export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
   const { state, dispatch } = useGameState();
   const [mergeParticles, setMergeParticles] = useState(false);
@@ -98,8 +102,8 @@ export function BreedingPod({ onRequestGallery }: BreedingPodProps = {}) {
   const [whisperIndex, setWhisperIndex] = useState(0);
 
   useEffect(() => {
-    // Trigger breeding intro lore if chapter not finished
-    if (!state.completedTutorialChapters.includes('breeding')) {
+    // Trigger breeding intro lore if chapter not finished AND only once
+    if (!state.completedTutorialChapters.includes('breeding') && !hasSeenEvent('secondHatch')) {
       triggerDialogue('breeding-intro');
     }
     
