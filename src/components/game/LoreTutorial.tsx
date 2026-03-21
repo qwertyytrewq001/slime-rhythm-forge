@@ -821,22 +821,15 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
             {currentDialogue === FIRST_ALTAR_DIALOGUE && displayedText?.includes('Select two slimes as parents') && (
               <button
                 onClick={() => {
-                  // Try multiple approaches to open gallery
-                  const galleryButton = document.querySelector('[data-testid="gallery-button"]') as HTMLButtonElement;
-                  if (galleryButton) {
-                    console.log('🖼️ Select Parents button clicked - opening gallery');
-                    galleryButton.click();
-                  } else {
-                    // Fallback: try to find any gallery-related button
-                    const anyGalleryButton = document.querySelector('button') as HTMLButtonElement;
-                    const galleryButtons = Array.from(document.querySelectorAll('button')).filter(btn => 
-                      btn.textContent?.toLowerCase().includes('gallery')
-                    );
-                    if (galleryButtons.length > 0) {
-                      console.log('🖼️ Fallback gallery button found - opening gallery');
-                      galleryButtons[0].click();
-                    } else {
-                      console.log('❌ No gallery button found');
+                  // Open breeding gallery for parent selection
+                  console.log('🖼️ Select Parents button clicked - opening breeding gallery');
+                  // Find and call the breeding gallery function
+                  const breedingGalleryButtons = document.querySelectorAll('button');
+                  for (const button of breedingGalleryButtons) {
+                    if (button.textContent?.includes('Gallery') || button.getAttribute('data-testid') === 'gallery-button') {
+                      console.log('🖼️ Found gallery button, clicking to open breeding gallery');
+                      button.click();
+                      break;
                     }
                   }
                 }}
