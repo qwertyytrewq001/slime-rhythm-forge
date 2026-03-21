@@ -482,6 +482,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   // Listen for dialogue triggers
   useDialogueTrigger(useCallback((triggerId: TriggerType, data) => {
     console.log('🎮 Dialogue Trigger Received:', triggerId);
+    console.log('🔍 hasSeenEvent firstEggBought:', hasSeenEvent('firstEggBought'));
+    console.log('🔍 hasSeenEvent firstLaunch:', hasSeenEvent('firstLaunch'));
     
     // Re-open if closed
     if (!isOpen && onOpen) {
@@ -490,6 +492,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
     // Handle first-time events
     if (triggerId === 'firstLaunch' && !hasSeenEvent('firstLaunch')) {
+      console.log('🚀 Executing firstLaunch trigger');
       markEventSeen('firstLaunch');
       setCurrentDialogue(FIRST_LAUNCH_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
@@ -499,6 +502,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     }
 
     if (triggerId === 'firstBazaarOpen' && !hasSeenEvent('firstBazaarOpen')) {
+      console.log('🚀 Executing firstBazaarOpen trigger');
       markEventSeen('firstBazaarOpen');
       setCurrentDialogue(FIRST_BAZAAR_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
@@ -508,6 +512,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     }
 
     if (triggerId === 'firstEggBought' && !hasSeenEvent('firstEggBought')) {
+      console.log('🚀 Executing firstEggBought trigger');
       markEventSeen('firstEggBought');
       setCurrentDialogue(FIRST_EGG_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
