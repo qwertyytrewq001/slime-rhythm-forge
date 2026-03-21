@@ -540,9 +540,10 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       setGlimPosition('bottom-left');
     }
 
-    // Handle shop-purchase trigger
-    if (triggerId === 'shop-purchase') {
-      console.log('🚀 Executing shop-purchase trigger');
+    // Handle shop-purchase trigger (first time only)
+    if (triggerId === 'shop-purchase' && !hasSeenEvent('firstBazaarOpen')) {
+      console.log('🚀 Executing shop-purchase trigger for firstBazaarOpen');
+      markEventSeen('firstBazaarOpen');
       setCurrentDialogue(FIRST_BAZAAR_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
@@ -620,15 +621,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('frozen');
-      setGlimPosition('bottom-left');
-    }
-
-    if (triggerId === 'firstHabitatBuilt' && !hasSeenEvent('firstHabitatBuilt')) {
-      markEventSeen('firstHabitatBuilt');
-      setCurrentDialogue(FIRST_HABITAT_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('warm');
       setGlimPosition('bottom-left');
     }
 

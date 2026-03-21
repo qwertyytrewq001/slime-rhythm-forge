@@ -72,6 +72,10 @@ const SHOP_HABITAT_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
+const hasSeenEvent = (eventName: string): boolean => {
+  return localStorage.getItem(`glim_event_${eventName}`) === 'true';
+};
+
 export function Shop() {
   const { state, dispatch, playerLevel } = useGameState();
   const { toast } = useToast();
@@ -103,7 +107,7 @@ export function Shop() {
     dispatch({ type: 'SPEND_GOO', amount: STARTER_EGG_COST });
     audioEngine.playSfx('purchase');
     
-    if (!state.completedTutorialChapters.includes('breeding')) {
+    if (!state.completedTutorialChapters.includes('breeding') && !hasSeenEvent('firstBazaarOpen')) {
       triggerDialogue('shop-purchase');
     }
 
@@ -120,7 +124,7 @@ export function Shop() {
     dispatch({ type: 'SPEND_GOO', amount: cost });
     audioEngine.playSfx('purchase');
 
-    if (!state.completedTutorialChapters.includes('breeding')) {
+    if (!state.completedTutorialChapters.includes('breeding') && !hasSeenEvent('firstBazaarOpen')) {
       triggerDialogue('shop-purchase');
     }
 
