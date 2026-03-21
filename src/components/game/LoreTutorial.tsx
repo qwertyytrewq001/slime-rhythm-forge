@@ -694,18 +694,10 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       <div 
         className="absolute pointer-events-none z-10 transition-all duration-500"
         style={{
-          ...(glimPosition === 'center' ? {
-            top: '50%',
-            left: '50%',
-            transform: 'translate(-50%, -50%)',
-            height: '400px',
-            width: '350px',
-          } : {
-            bottom: '16px', // Same level as dialogue box
-            left: '20px', // Left side of screen, next to dialogue box
-            height: '250px',
-            width: '200px',
-          }),
+          bottom: '16px', // Same level as dialogue box
+          left: '20px', // Left side of screen, next to dialogue box
+          height: '350px',
+          width: '300px',
           background: 'none',
           border: 'none',
           boxShadow: 'none'
@@ -713,7 +705,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       >
         <GlimCharacter 
           expression={currentCard?.expression ?? 'shocked'}
-          size={glimPosition === 'center' ? 400 : 250}
+          size={glimPosition === 'center' ? 500 : 350}
         />
       </div>
 
