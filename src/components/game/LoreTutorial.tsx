@@ -7,6 +7,12 @@ import { triggerDialogue, clearDialogueTrigger, useDialogueTrigger, getDialogueT
 // Define the actual trigger types that match the triggerDialogue function
 type TriggerType = 
   | 'firstLaunch'
+  | 'breeding-intro'
+  | 'battle-start'
+  | 'shop-purchase'
+  | 'habitat-purchase'
+  | 'hatch-egg'
+  | 'breeding-complete'
   | 'firstBazaarOpen'
   | 'firstEggBought'
   | 'firstHatch'
@@ -17,8 +23,7 @@ type TriggerType =
   | 'firstBattleMapOpen'
   | 'levelUp'
   | 'vossEncounter'
-  | 'finalBattle'
-  | 'breeding-intro';
+  | 'finalBattle';
 
 interface LoreChapter {
   id: string;
@@ -499,6 +504,61 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('proud');
+      setGlimPosition('bottom-left');
+    }
+
+    // Handle battle-start trigger
+    if (triggerId === 'battle-start' && !hasSeenEvent('firstBattleMapOpen')) {
+      console.log('🚀 Executing battle-start trigger for firstBattleMapOpen');
+      markEventSeen('firstBattleMapOpen');
+      setCurrentDialogue(FIRST_BATTLE_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
+      setCurrentExpression('surveying');
+      setGlimPosition('bottom-left');
+    }
+
+    // Handle shop-purchase trigger
+    if (triggerId === 'shop-purchase' && !hasSeenEvent('firstBazaarOpen')) {
+      console.log('🚀 Executing shop-purchase trigger for firstBazaarOpen');
+      markEventSeen('firstBazaarOpen');
+      setCurrentDialogue(FIRST_BAZAAR_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
+      setCurrentExpression('excited');
+      setGlimPosition('bottom-left');
+    }
+
+    // Handle habitat-purchase trigger
+    if (triggerId === 'habitat-purchase' && !hasSeenEvent('firstHabitatBuilt')) {
+      console.log('🚀 Executing habitat-purchase trigger for firstHabitatBuilt');
+      markEventSeen('firstHabitatBuilt');
+      setCurrentDialogue(FIRST_HABITAT_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
+      setCurrentExpression('warm');
+      setGlimPosition('bottom-left');
+    }
+
+    // Handle hatch-egg trigger
+    if (triggerId === 'hatch-egg' && !hasSeenEvent('firstHatch')) {
+      console.log('🚀 Executing hatch-egg trigger for firstHatch');
+      markEventSeen('firstHatch');
+      setCurrentDialogue(FIRST_HATCH_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
+      setCurrentExpression('frozen');
+      setGlimPosition('bottom-left');
+    }
+
+    // Handle breeding-complete trigger
+    if (triggerId === 'breeding-complete' && !hasSeenEvent('firstBreedComplete')) {
+      console.log('🚀 Executing breeding-complete trigger for firstBreedComplete');
+      markEventSeen('firstBreedComplete');
+      setCurrentDialogue(FIRST_BREED_DIALOGUE);
+      setCurrentDialogueIndex(0); // Reset to start
+      setDisplayedText(''); // Clear displayed text
+      setCurrentExpression('delighted');
       setGlimPosition('bottom-left');
     }
 
