@@ -60,6 +60,7 @@ function GameLayout() {
     if (slot) setGallerySlot(slot);
     else setGallerySlot(null);
     setGalleryOpen(true);
+    console.log(`🖼️ Opening breeding gallery for slot ${slot}`);
   };
 
   const handleGallerySelect = (id: string) => {
