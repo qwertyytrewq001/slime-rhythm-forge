@@ -69,8 +69,11 @@ function GameLayout() {
       dispatch({ type: 'SET_BREED_SLOT', slot: gallerySlot, id });
     }
     dispatch({ type: 'SELECT_SLIME', id });
-    setGalleryOpen(false);
-    setGallerySlot(null);
+    // Only close gallery and clear slot if both slots are filled
+    if (state.breedSlot1 && state.breedSlot2) {
+      setGalleryOpen(false);
+      setGallerySlot(null);
+    }
   };
 
   const handleMute = () => {
