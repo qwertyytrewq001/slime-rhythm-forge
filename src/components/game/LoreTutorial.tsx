@@ -68,12 +68,47 @@ const FIRST_LAUNCH_DIALOGUE = [
   },
   {
     id: 'firstLaunch',
-    expression: 'dramatic',
+    expression: 'shocked', 
+    text: "After four HUNDRED years. Do you know how long that is?"
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'shocked',
+    text: "...It is very long. I counted the stars. Twice."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'composed',
+    text: "My name is Glim. Guardian of the Slime Forge."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'composed',
+    text: "This world — the Sanctuaries, the Goo, the slimes — it's dying."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'composed',
+    text: "Someone has been draining it. Deliberately."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'urgent but warm',
+    text: "You're a Forger. That means you can fix this."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'urgent but warm',
+    text: "Breed slimes. Build Sanctuaries. Restore the Goo."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'dramatic point toward the Bazaar',
     text: "Start at the Bazaar. Buy an egg. Begin."
   },
   {
     id: 'firstLaunch',
-    expression: 'dramatic',
+    expression: 'dramatic point toward the Bazaar',
     text: "I'll be watching."
   }
 ];
