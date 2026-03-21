@@ -106,8 +106,17 @@ function GameLayout() {
       document.removeEventListener('click', startAudio);
     };
     document.addEventListener('click', startAudio);
+    
+    // Handle custom event to open breeding gallery
+    const handleOpenBreedingGallery = (event: CustomEvent) => {
+      console.log('🖼️ Received openBreedingGallery event:', event.detail);
+      openGalleryForSlot(event.detail.slot || 1);
+    };
+    window.addEventListener('openBreedingGallery', handleOpenBreedingGallery);
+    
     return () => {
       document.removeEventListener('click', startAudio);
+      window.removeEventListener('openBreedingGallery', handleOpenBreedingGallery);
       audioEngine.stopLofi();
     };
   }, []);

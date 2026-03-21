@@ -821,17 +821,10 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
             {currentDialogue === FIRST_ALTAR_DIALOGUE && displayedText?.includes('Select two slimes as parents') && (
               <button
                 onClick={() => {
-                  // Open breeding gallery for parent selection
+                  // Create and dispatch a custom event to open breeding gallery
                   console.log('🖼️ Select Parents button clicked - opening breeding gallery');
-                  // Find and call the breeding gallery function
-                  const breedingGalleryButtons = document.querySelectorAll('button');
-                  for (const button of breedingGalleryButtons) {
-                    if (button.textContent?.includes('Gallery') || button.getAttribute('data-testid') === 'gallery-button') {
-                      console.log('🖼️ Found gallery button, clicking to open breeding gallery');
-                      button.click();
-                      break;
-                    }
-                  }
+                  const event = new CustomEvent('openBreedingGallery', { detail: { slot: 1 } });
+                  window.dispatchEvent(event);
                 }}
                 className="mt-3 px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#ff6eb4]/80 text-white font-medium transition-all text-sm"
               >
