@@ -1,6 +1,8 @@
 import { Slime, SlimeTraits, SlimeElement, RarityTier } from '@/types/slime';
 import { TRAIT_RARITY_WEIGHTS, getSizeRarity, deriveElement, deriveSecondaryElement, BREEDING_COMBOS, ELEMENT_COMBO_BONUS, getRarityTier, RARITY_TIER_STARS, ALL_ELEMENTS } from '@/data/traitData';
 import { generateSlimeName } from './nameGenerator';
+import { calculateBreedingResult, isValidBreedingResult } from './breedingCalculator';
+import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 
 function randomId(): string {
   return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
@@ -14,48 +16,80 @@ function randFloat(min: number, max: number): number {
   return Math.round((Math.random() * (max - min) + min) * 10) / 10;
 }
 
-function deriveElements(traits: SlimeTraits): SlimeElement[] {
-  const primary = deriveElement(traits.color1, traits.shape);
-  const elements: SlimeElement[] = [primary];
-
-  const secondary = deriveSecondaryElement(traits.spikes, traits.pattern, traits.aura, traits.glow);
-  if (secondary && secondary !== primary) {
-    elements.push(secondary);
+/**
+ * Create a slime from the Codex system
+ * This replaces the old procedural generation with hardcoded slimes
+ */
+export function createCodexSlime(codexId: string, parentIds?: [string, string]): Slime {
+  const codexSlime = SLIME_CODEX_MAP.get(codexId);
+  
+  if (!codexSlime) {
+    throw new Error(`Codex slime with ID "${codexId}" not found`);
   }
-
-  // Rare third element from extreme trait combos
-  if (traits.glow >= 4 && traits.aura >= 3) {
-    const third: SlimeElement = traits.model === 0 ? 'divine' : traits.model === 1 ? 'void' : 'arcane';
-    if (!elements.includes(third)) elements.push(third);
-  }
-
-  return elements.slice(0, 4);
-}
-
-function buildSlime(traits: SlimeTraits, parentIds?: [string, string], bonusScore = 0, overrideName?: string, overrideElement?: SlimeElement): Slime {
-  const elements = overrideElement ? [overrideElement] : deriveElements(traits);
-  const primary = elements[0];
-  const baseScore = calculateRarity(traits, primary);
-  const multiBonus = (elements.length - 1) * 8;
-  const finalScore = baseScore + bonusScore + multiBonus;
-  const tier = getRarityTier(finalScore);
-  const stars = Math.min(7, RARITY_TIER_STARS[tier]);
-
+  
   return {
-    id: randomId(),
-    name: overrideName || generateSlimeName(traits, stars, elements),
-    traits,
-    elements,
-    element: primary,
-    rarityScore: finalScore,
-    rarityStars: stars,
-    rarityTier: tier,
+    id: codexSlime.id,
+    name: codexSlime.name,
+    traits: {
+      // Convert spriteId back to trait system for compatibility
+      // This maintains backward compatibility with existing rendering
+      shape: 0, // Base shape for all codex slimes
+      color1: 0, // Will be overridden by sprite rendering
+      color2: 5, // Will be overridden by sprite rendering
+      eyes: 0, // Will be overridden by sprite rendering
+      mouth: 0, // Will be overridden by sprite rendering
+      spikes: 0, // Will be overridden by sprite rendering
+      pattern: 0, // Will be overridden by sprite rendering
+      glow: 0, // Will be overridden by sprite rendering
+      size: 1.0,
+      aura: 0, // Will be overridden by sprite rendering
+      rhythm: 1,
+      accessory: 0, // Will be overridden by sprite rendering
+      model: 0, // Base blob model
+    },
+    elements: codexSlime.elements,
+    element: codexSlime.elements[0], // Primary element
+    rarityScore: getRarityScoreForTier(codexSlime.rarityTier),
+    rarityStars: getRarityStarsForTier(codexSlime.rarityTier),
+    rarityTier: codexSlime.rarityTier,
     createdAt: Date.now(),
     parentIds,
     isNew: !!parentIds,
     level: 1,
     xp: 0,
   };
+}
+
+/**
+ * Get rarity score for tier (backward compatibility)
+ */
+function getRarityScoreForTier(tier: RarityTier): number {
+  const tierScores: Record<RarityTier, number> = {
+    'Common': 10,
+    'Uncommon': 25,
+    'Rare': 50,
+    'Epic': 75,
+    'Legendary': 100,
+    'Ancient': 150,
+    'Divine': 200
+  };
+  return tierScores[tier] || 10;
+}
+
+/**
+ * Get rarity stars for tier (backward compatibility)
+ */
+function getRarityStarsForTier(tier: RarityTier): number {
+  const tierStars: Record<RarityTier, number> = {
+    'Common': 1,
+    'Uncommon': 2,
+    'Rare': 3,
+    'Epic': 4,
+    'Legendary': 5,
+    'Ancient': 6,
+    'Divine': 7
+  };
+  return tierStars[tier] || 1;
 }
 
 export function createRandomSlime(basicOnly = false): Slime {
@@ -83,7 +117,7 @@ export function createRandomSlime(basicOnly = false): Slime {
     model: basicOnly ? 0 : randInt(0, 2),
   };
 
-  return buildSlime(traits);
+  return createCodexSlime(randomId(), undefined);
 }
 
 // Start with 1 Goo Slime (Common, nature element, basic stats)
@@ -93,7 +127,7 @@ export function createStarterSlimes(): Slime[] {
     spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0,
     rhythm: 1, accessory: 0, model: 0,
   };
-  return [buildSlime(gooTraits, undefined, 0, 'Goo Slime')];
+  return [createCodexSlime(randomId(), undefined)];
 }
 
 // Create a slime with a specific element (for starter eggs in shop)
@@ -138,7 +172,7 @@ export function createElementSlime(element: SlimeElement): Slime {
     model: 0,
   };
 
-  return buildSlime(traits, undefined, 0, undefined, element);
+  return createCodexSlime(randomId(), undefined);
 }
 
 export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = false): Slime {
@@ -216,7 +250,7 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
     traits.aura = Math.min(4, traits.aura + 1);
   }
 
-  return buildSlime(traits, [parent1.id, parent2.id], comboBonus);
+  return createCodexSlime(randomId(), [parent1.id, parent2.id]);
 }
 
 function biasTraitsForElement(traits: SlimeTraits, element: SlimeElement) {
