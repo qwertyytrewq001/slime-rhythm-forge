@@ -93,164 +93,48 @@ function getRarityStarsForTier(tier: RarityTier): number {
 }
 
 export function createRandomSlime(basicOnly = false): Slime {
-  const maxShape = basicOnly ? 2 : 14;
-  const maxEyes = basicOnly ? 3 : 14;
-  const maxSpikes = basicOnly ? 2 : 9;
-  const maxPattern = basicOnly ? 2 : 14;
-  const maxGlow = basicOnly ? 1 : 5;
-  const maxAura = basicOnly ? 0 : 4;
-  const maxAccessory = basicOnly ? 1 : 10;
-
-  const traits: SlimeTraits = {
-    shape: randInt(0, maxShape),
-    color1: randInt(0, 19),
-    color2: randInt(0, 19),
-    eyes: randInt(0, maxEyes),
-    mouth: randInt(0, 9),
-    spikes: randInt(0, maxSpikes),
-    pattern: randInt(0, maxPattern),
-    glow: randInt(0, maxGlow),
-    size: basicOnly ? 1.0 : randFloat(0.5, 2.0),
-    aura: randInt(0, maxAura),
-    rhythm: randInt(0, 5),
-    accessory: randInt(0, maxAccessory),
-    model: basicOnly ? 0 : randInt(0, 2),
-  };
-
-  return createCodexSlime(randomId(), undefined);
+  // Select a random slime from the Codex instead of generating procedural ID
+  const availableSlimes = basicOnly 
+    ? ALL_CODEX_SLIMES.filter(slime => slime.rarityTier === 'Common')
+    : ALL_CODEX_SLIMES;
+  
+  const randomSlime = availableSlimes[Math.floor(Math.random() * availableSlimes.length)];
+  return createCodexSlime(randomSlime.id, undefined);
 }
 
 // Start with 1 Goo Slime (Common, nature element, basic stats)
 export function createStarterSlimes(): Slime[] {
-  const gooTraits: SlimeTraits = {
-    shape: 0, color1: 0, color2: 5, eyes: 0, mouth: 0,
-    spikes: 0, pattern: 0, glow: 0, size: 1.0, aura: 0,
-    rhythm: 1, accessory: 0, model: 0,
-  };
-  return [createCodexSlime(randomId(), undefined)];
+  return [createCodexSlime('wild_primal', undefined)]; // Use nature primal as starter
 }
 
 // Create a slime with a specific element (for starter eggs in shop)
 export function createElementSlime(element: SlimeElement): Slime {
-  // Map elements to color ranges that will derive that element
-  const elementColorMap: Record<SlimeElement, { color1: number; shape: number }> = {
-    fire:     { color1: 3, shape: 2 },
-    water:    { color1: 12, shape: 1 },
-    plant:    { color1: 0, shape: 9 },
-    earth:    { color1: 3, shape: 3 },
-    ice:      { color1: 1, shape: 14 },
-    wind:     { color1: 14, shape: 10 },
-    electric: { color1: 10, shape: 0 },
-    void:     { color1: 4, shape: 13 },
-    cosmic:   { color1: 4, shape: 4 },
-    light:    { color1: 15, shape: 5 },
-    shadow:   { color1: 4, shape: 13 },
-    metal:    { color1: 19, shape: 3 },
-    toxic:    { color1: 0, shape: 8 },
-    crystal:  { color1: 16, shape: 14 },
-    lava:     { color1: 10, shape: 2 },
-    nature:   { color1: 7, shape: 0 },
-    arcane:   { color1: 8, shape: 12 },
-    divine:   { color1: 10, shape: 4 },
-  };
-
-  const mapping = elementColorMap[element] || { color1: 0, shape: 0 };
-
-  const traits: SlimeTraits = {
-    shape: mapping.shape,
-    color1: mapping.color1,
-    color2: randInt(0, 19),
-    eyes: randInt(0, 3),
-    mouth: randInt(0, 3),
-    spikes: randInt(0, 2),
-    pattern: 0,
-    glow: 0,
-    size: 1.0,
-    aura: 0,
-    rhythm: randInt(0, 2),
-    accessory: 0,
-    model: 0,
-  };
-
-  return createCodexSlime(randomId(), undefined);
+  // Find the first slime in Codex that has this element as primary
+  const matchingSlime = ALL_CODEX_SLIMES.find(slime => slime.elements[0] === element);
+  
+  if (matchingSlime) {
+    return createCodexSlime(matchingSlime.id, undefined);
+  }
+  
+  // Fallback to fire primal if no match found
+  return createCodexSlime('fire_primal', undefined);
 }
 
 export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = false): Slime {
-  const traitKeys: (keyof SlimeTraits)[] = [
-    'shape', 'color1', 'color2', 'eyes', 'mouth', 'spikes',
-    'pattern', 'glow', 'size', 'aura', 'rhythm', 'accessory',
-  ];
-
-  const mutationRate = mutationBoost ? 0.5 : 0.2;
-  const traits = {} as SlimeTraits;
-
-  for (const key of traitKeys) {
-    const roll = Math.random();
-    if (roll < 0.3) {
-      traits[key] = parent1.traits[key];
-    } else if (roll < 0.6) {
-      traits[key] = parent2.traits[key];
-    } else if (roll < 0.6 + mutationRate) {
-      const base = Math.random() < 0.5 ? parent1.traits[key] : parent2.traits[key];
-      if (key === 'size') {
-        traits[key] = Math.round((base + (Math.random() - 0.5) * 0.6) * 10) / 10;
-        traits[key] = Math.max(0.5, Math.min(2.0, traits[key]));
-      } else {
-        const max = getTraitMax(key);
-        traits[key] = Math.max(0, Math.min(max, base + randInt(-2, 2)));
-      }
-    } else {
-      if (key === 'size') {
-        traits[key] = randFloat(0.5, 2.0);
-      } else {
-        traits[key] = randInt(0, getTraitMax(key));
-      }
-    }
+  // Use the new enhanced breeding calculator instead of procedural generation
+  const breedingResult = calculateBreedingResult(
+    parent1.id, 
+    parent2.id, 
+    parent1.level || 1, 
+    parent2.level || 1
+  );
+  
+  if (!breedingResult) {
+    // Fallback to random common slime if breeding fails
+    return createRandomSlime(true);
   }
-
-  // Model inheritance: 70% from parent, 30% mutate
-  if (Math.random() < 0.7) {
-    traits.model = Math.random() < 0.5 ? parent1.traits.model : parent2.traits.model;
-  } else {
-    traits.model = randInt(0, 2);
-  }
-
-  // 5% ultra-rare: boost a random trait to max
-  if (Math.random() < 0.05) {
-    const rareKey = traitKeys[randInt(0, traitKeys.length - 1)];
-    if (rareKey === 'size') {
-      traits[rareKey] = Math.random() < 0.5 ? 0.5 : 2.0;
-    } else {
-      traits[rareKey] = getTraitMax(rareKey);
-    }
-  }
-
-  // Element combo bonus from parents
-  const p1Elems = parent1.elements || (parent1.element ? [parent1.element] : ['nature' as SlimeElement]);
-  const p2Elems = parent2.elements || (parent2.element ? [parent2.element] : ['nature' as SlimeElement]);
-  const allParentElements = [...new Set([...p1Elems, ...p2Elems])];
-  let comboBonus = 0;
-
-  for (const e1 of p1Elems) {
-    for (const e2 of p2Elems) {
-      const key1 = `${e1}+${e2}`;
-      const key2 = `${e2}+${e1}`;
-      comboBonus += ELEMENT_COMBO_BONUS[key1] || ELEMENT_COMBO_BONUS[key2] || 0;
-
-      const comboResult = BREEDING_COMBOS[key1] || BREEDING_COMBOS[key2];
-      if (comboResult && Math.random() < 0.4) {
-        const targetElem = comboResult[randInt(0, comboResult.length - 1)];
-        biasTraitsForElement(traits, targetElem);
-      }
-    }
-  }
-
-  if (allParentElements.length >= 3 && Math.random() < 0.3) {
-    traits.glow = Math.min(5, traits.glow + randInt(1, 2));
-    traits.aura = Math.min(4, traits.aura + 1);
-  }
-
-  return createCodexSlime(randomId(), [parent1.id, parent2.id]);
+  
+  return createCodexSlime(breedingResult.slimeId, [parent1.id, parent2.id]);
 }
 
 function biasTraitsForElement(traits: SlimeTraits, element: SlimeElement) {
