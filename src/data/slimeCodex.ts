@@ -524,6 +524,16 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     description: 'The "True Master."',
     family: 'mythical',
     spriteId: 'alpha_blob_divine_cosmic_void_nature'
+  },
+  {
+    id: 'crytsal_ice_slime',
+    name: 'Crytsal Ice Slime',
+    elements: ['ice', 'crystal', 'light'],
+    rarityTier: 'Legendary',
+    weight: 3,
+    description: 'A crystalline fusion of ice, crystal, and light elements.',
+    family: 'mythical',
+    spriteId: 'crytsal_ice_crystal_light'
   }
 ];
 

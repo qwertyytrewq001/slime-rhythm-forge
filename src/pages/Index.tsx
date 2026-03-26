@@ -150,140 +150,165 @@ function GameLayout() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
-      {/* 1. BATTLE MAP LAYER (Highest Priority when active) */}
-      {currentView === 'battleMap' && (
-        <div className="fixed inset-0 z-[100] pointer-events-auto">
-          <WorldMap 
-            onSelectLevel={handleSelectLevel}
-            onClose={() => setCurrentView('breeding')}
+      {/* If tutorial is showing, show video homescreen */}
+      {showTutorial ? (
+        <div className="fixed inset-0 z-[300] bg-black">
+          <video
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+          >
+            <source src="/homescreen_loop.mp4" type="video/mp4" />
+          </video>
+          
+          <LoreTutorial 
+            isOpen={showTutorial}
+            onClose={() => setShowTutorial(false)}
+            onOpen={() => setShowTutorial(true)}
           />
         </div>
-      )}
-
-      {/* 2. MAIN GAME INTERFACE */}
-      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' ? 'hidden' : ''}`}>
-        
-        {/* Background Layer */}
-        <div className="absolute inset-0 z-0 pointer-events-none">
-          {currentView === 'breeding' ? (
-            <ForestBackground 
-              fixed={false} 
-              onPortalClick={() => setCurrentView('habitats')} 
-            />
-          ) : (
-            <div 
-              className="absolute inset-0 bg-black animate-scale-in"
-              style={{
-                backgroundImage: "url('./second_screen_background.png')",
-                backgroundSize: 'cover',
-                backgroundPosition: 'center',
-                backgroundRepeat: 'no-repeat',
-              }}
-            />
-          )}
-        </div>
-
-        {/* TopBar (Navigation) */}
-        <div className="pointer-events-auto relative z-20">
-          <TopBar 
-            currentView={currentView}
-            onBackToAltar={() => setCurrentView('breeding')} 
-            onOpenHabitats={() => setCurrentView('habitats')}
-            onOpenBattle={() => setCurrentView('battleMap')}
-          />
-        </div>
-
-        {/* Central Content */}
-        <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none">
-          {currentView === 'breeding' && (
-            <div className="w-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
-              <BreedingPod onRequestGallery={openGalleryForSlot} />
-              <Hatchery />
+      ) : (
+        <>
+          {/* 1. BATTLE MAP LAYER (Highest Priority when active) */}
+          {currentView === 'battleMap' && (
+            <div className="fixed inset-0 z-[100] pointer-events-auto">
+              <WorldMap 
+                onSelectLevel={handleSelectLevel}
+                onClose={() => setCurrentView('breeding')}
+              />
             </div>
           )}
-          {currentView === 'habitats' && (
-            <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
-              <div className="w-full max-w-6xl">
-                <IslandGrid onHabitatClick={setSelectedHabitatId} />
+
+          {/* 2. MAIN GAME INTERFACE */}
+          <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' ? 'hidden' : ''}`}>
+            
+            {/* Background Layer */}
+            <div className="absolute inset-0 z-0 pointer-events-none">
+              {currentView === 'breeding' ? (
+                <ForestBackground 
+                  fixed={false} 
+                  onPortalClick={() => setCurrentView('habitats')} 
+                />
+              ) : (
+                <div className="absolute inset-0">
+                  <video
+                    className="w-full h-full object-cover"
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                  >
+                    <source src="/homescreen_loop.mp4" type="video/mp4" />
+                  </video>
+                </div>
+              )}
+            </div>
+
+            {/* TopBar (Navigation) */}
+            <div className="pointer-events-auto relative z-20">
+              <TopBar 
+                currentView={currentView}
+                onBackToAltar={() => setCurrentView('breeding')} 
+                onOpenHabitats={() => setCurrentView('habitats')}
+                onOpenBattle={() => setCurrentView('battleMap')}
+              />
+            </div>
+
+            {/* Central Content */}
+            <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none">
+              {currentView === 'breeding' && (
+                <div className="w-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
+                  <BreedingPod onRequestGallery={openGalleryForSlot} />
+                  <Hatchery />
+                </div>
+              )}
+              {currentView === 'habitats' && (
+                <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
+                  <div className="w-full max-w-6xl">
+                    <IslandGrid onHabitatClick={setSelectedHabitatId} />
+                  </div>
+                </div>
+              )}
+            </div>
+
+            {/* BOTTOM TOOLBAR */}
+            <div className="fixed bottom-4 right-4 z-[150] flex items-center gap-2 pointer-events-auto">
+              {/* Bottom Toolbar - Moved down to avoid dialogue interference */}
+              <div className="relative group">
+                <button onClick={handleMute} className={toolbarCircle}>
+                  {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
+                  <span className={toolbarLabel}>{state.muted ? 'Unmute' : 'Mute'}</span>
+                </button>
               </div>
-            </div>
-          )}
-        </div>
 
-        {/* BOTTOM TOOLBAR */}
-        <div className="fixed bottom-4 right-4 z-[150] flex items-center gap-2 pointer-events-auto">
-          {/* Bottom Toolbar - Moved down to avoid dialogue interference */}
-          <div className="relative group">
-            <button onClick={handleMute} className={toolbarCircle}>
-              {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
-              <span className={toolbarLabel}>{state.muted ? 'Unmute' : 'Mute'}</span>
-            </button>
+              {/* Main Gallery - Hidden during breeding to avoid conflicts */}
+              {currentView !== 'breeding' && (
+                <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
+                  <SheetTrigger asChild>
+                    <div className="relative group">
+                      <button data-testid="gallery-button" className={toolbarCircle}>
+                        <Images className={toolbarIcon} />
+                        <span className={toolbarLabel}>Gallery</span>
+                      </button>
+                    </div>
+                  </SheetTrigger>
+                  <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+                    <div className="flex-1 overflow-hidden">
+                      <SlimeGallery onSelect={handleGallerySelect} />
+                    </div>
+                  </SheetContent>
+                </Sheet>
+              )}
+
+              {/* Breeding Gallery Sheet */}
+              <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
+                <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
+                  <div className="flex-1 overflow-hidden">
+                    <SlimeGallery onSelect={handleGallerySelect} />
+                  </div>
+                </SheetContent>
+              </Sheet>
+
+              <Sheet>
+                <SheetTrigger asChild>
+                  <div className="relative group">
+                    <button className={toolbarCircle}>
+                      <ShoppingBag className={toolbarIcon} />
+                      <span className={toolbarLabel}>Bazaar</span>
+                    </button>
+                  </div>
+                </SheetTrigger>
+                <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+                  <Shop />
+                </SheetContent>
+              </Sheet>
+
+              <Sheet>
+                <SheetTrigger asChild>
+                  <div className="relative group">
+                    <button className={toolbarCircle}>
+                      <Info className={toolbarIcon} />
+                      <span className={toolbarLabel}>Codex</span>
+                    </button>
+                  </div>
+                </SheetTrigger>
+                <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+                  <StatsPanel onRequestGallery={() => openGalleryForSlot()} />
+                </SheetContent>
+              </Sheet>
+            </div>
+
+            {/* Habitat Viewer Modal */}
+            <div className="pointer-events-auto">
+              {selectedHabitatId && (
+                <HabitatViewer habitatId={selectedHabitatId} onClose={() => setSelectedHabitatId(null)} />
+              )}
+            </div>
           </div>
-
-          {/* Main Gallery - Hidden during breeding to avoid conflicts */}
-          {currentView !== 'breeding' && (
-            <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
-              <SheetTrigger asChild>
-                <div className="relative group">
-                  <button data-testid="gallery-button" className={toolbarCircle}>
-                    <Images className={toolbarIcon} />
-                    <span className={toolbarLabel}>Gallery</span>
-                  </button>
-                </div>
-              </SheetTrigger>
-              <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
-                <div className="flex-1 overflow-hidden">
-                  <SlimeGallery onSelect={handleGallerySelect} />
-                </div>
-              </SheetContent>
-            </Sheet>
-          )}
-
-          {/* Breeding Gallery Sheet */}
-          <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
-            <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
-              <div className="flex-1 overflow-hidden">
-                <SlimeGallery onSelect={handleGallerySelect} />
-              </div>
-            </SheetContent>
-          </Sheet>
-
-          <Sheet>
-            <SheetTrigger asChild>
-              <div className="relative group">
-                <button className={toolbarCircle}>
-                  <ShoppingBag className={toolbarIcon} />
-                  <span className={toolbarLabel}>Bazaar</span>
-                </button>
-              </div>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
-              <Shop />
-            </SheetContent>
-          </Sheet>
-
-          <Sheet>
-            <SheetTrigger asChild>
-              <div className="relative group">
-                <button className={toolbarCircle}>
-                  <Info className={toolbarIcon} />
-                  <span className={toolbarLabel}>Codex</span>
-                </button>
-              </div>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
-              <StatsPanel onRequestGallery={() => openGalleryForSlot()} />
-            </SheetContent>
-          </Sheet>
-        </div>
-
-        {/* Habitat Viewer Modal */}
-        <div className="pointer-events-auto">
-          {selectedHabitatId && (
-            <HabitatViewer habitatId={selectedHabitatId} onClose={() => setSelectedHabitatId(null)} />
-          )}
-        </div>
-      </div>
+        </>
+      )}
 
       {/* 3. GLOBAL POPUPS */}
       {showAchievements && (
@@ -314,12 +339,7 @@ function GameLayout() {
 
       <EvolutionPopup />
       
-      {/* Tutorial Modal */}
-      <LoreTutorial 
-        isOpen={showTutorial}
-        onClose={() => setShowTutorial(false)}
-        onOpen={() => setShowTutorial(true)}
-      />
+      {/* Tutorial Modal is now handled inside the conditional rendering above */}
       
       {/* Level Dialogue Modal */}
       <LevelDialogue 
