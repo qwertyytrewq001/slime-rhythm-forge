@@ -22,11 +22,6 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
     audioEngine.toggleMute();
   };
 
-  // Cleaner navigation button style
-  const navButtonStyle = "relative px-6 py-3 text-[14px] font-bold uppercase tracking-wider transition-all duration-200 border-2 rounded-lg backdrop-blur-sm";
-  const activeNavStyle = "bg-white/20 border-white text-white shadow-lg shadow-white/20";
-  const inactiveNavStyle = "bg-black/40 border-[#FF7EB6]/50 text-[#FF7EB6] hover:bg-black/60 hover:border-[#FF7EB6] hover:scale-105";
-
   return (
     <>
       <div className="flex items-center justify-between px-8 py-4 bg-transparent relative z-50 pointer-events-none">

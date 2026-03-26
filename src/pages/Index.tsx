@@ -226,7 +226,7 @@ function GameLayout() {
                   </button>
                 </div>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+              <SheetContent side="left" className="bg-black/90 backdrop-blur-md p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
                 <div className="flex-1 overflow-hidden">
                   <SlimeGallery onSelect={handleGallerySelect} />
                 </div>
@@ -235,7 +235,7 @@ function GameLayout() {
           )}
 
           <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
-            <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
+            <SheetContent side="left" className="bg-black/90 backdrop-blur-md p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
               <div className="flex-1 overflow-hidden">
                 <SlimeGallery onSelect={handleGallerySelect} />
               </div>
@@ -251,7 +251,7 @@ function GameLayout() {
                 </button>
               </div>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+            <SheetContent side="right" className="bg-black/90 backdrop-blur-md p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
               <Shop />
             </SheetContent>
           </Sheet>
@@ -265,7 +265,7 @@ function GameLayout() {
                 </button>
               </div>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+            <SheetContent side="right" className="bg-black/90 backdrop-blur-md p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
               <StatsPanel onRequestGallery={() => openGalleryForSlot()} />
             </SheetContent>
           </Sheet>
