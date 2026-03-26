@@ -1,9 +1,5 @@
 @import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 @layer base {
   :root {
     --background: 270 30% 95%;
@@ -56,61 +52,79 @@
   }
 
   body {
-    @apply bg-background text-[#FF7EB6];
+    background: hsl(var(--background));
+    color: #FF7EB6;
     font-family: 'Press Start 2P', cursive !important;
     image-rendering: pixelated;
-    /* Character shadow trick: Multi-directional black shadows for max readability */
+    /* Cleaner text shadows for better readability */
     text-shadow: 
-      1px 1px 0 #000,
-      -1px -1px 0 #000,
-      1px 1px 0 #000,
-      -1px 1px 0 #000,
-      0 0 4px #FF7EB6,
-      0 2px 4px rgba(0,0,0,0.8);
+      2px 2px 0px rgba(0,0,0,0.8),
+      0 0 8px rgba(255,126,182,0.3);
   }
 
-  h1, h2, h3, h4, h5, h6, span, p, button, input, textarea, select {
-    /* Apply to specific text elements */
+  /* Different text styles for hierarchy */
+  h1, h2, h3, h4, h5, h6 {
     font-family: 'Press Start 2P', cursive !important;
     color: #FF7EB6 !important;
     text-shadow: 
-      1px 1px 0 #000,
-      -1px -1px 0 #000,
-      1px 1px 0 #000,
-      -1px 1px 0 #000,
-      0 0 4px #FF7EB6,
-      0 2px 4px rgba(0,0,0,0.8);
+      2px 2px 0px rgba(0,0,0,0.8),
+      0 0 12px rgba(255,126,182,0.4);
+    font-weight: 900;
+  }
+
+  p, span, div {
+    font-family: 'VT323', monospace !important;
+    color: #FF7EB6 !important;
+    text-shadow: 
+      1px 1px 0px rgba(0,0,0,0.6),
+      0 0 4px rgba(255,126,182,0.2);
+  }
+
+  button {
+    font-family: 'Press Start 2P', cursive !important;
+    color: #FF7EB6 !important;
+    text-shadow: 
+      2px 2px 0px rgba(0,0,0,0.8),
+      0 0 8px rgba(255,126,182,0.3);
+    font-weight: 700;
+  }
+
+  input, textarea, select {
+    font-family: 'VT323', monospace !important;
+    color: #FF7EB6 !important;
+    text-shadow: 
+      1px 1px 0px rgba(0,0,0,0.6),
+      0 0 4px rgba(255,126,182,0.2);
   }
 
 
 
   .light-theme, .light-theme h1, .light-theme h2, .light-theme h3, .light-theme h4, .light-theme span, .light-theme p, .light-theme div {
-    /* Even in light theme, we force the pink glow aesthetic */
+    /* Even in light theme, we force the pink glow aesthetic with cleaner shadows */
     font-family: 'Press Start 2P', cursive !important;
     color: #FF7EB6 !important;
     text-shadow: 
-      1px 1px 0 #000,
-      -1px -1px 0 #000,
-      1px -1px 0 #000,
-      -1px 1px 0 #000,
-      0 0 10px #FF7EB6 !important;
+      2px 2px 0px rgba(0,0,0,0.8),
+      0 0 8px rgba(255,126,182,0.3);
   }
 }
 
 @layer utilities {
   .text-mystic {
     color: #FF7EB6;
-    text-shadow: 0 0 10px rgba(255, 126, 182, 0.8), 1px 1px 2px #000;
+    text-shadow: 0 0 8px rgba(255, 126, 182, 0.6), 2px 2px 0px rgba(0,0,0,0.8);
   }
   .bg-obsidian-glass {
-    background-color: rgba(10, 20, 10, 0.85);
-    backdrop-filter: blur(8px);
-    border: 1.5px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(10, 20, 10, 0.90);
+    backdrop-filter: blur(12px);
+    border: 2px solid rgba(255, 126, 182, 0.3);
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
   }
   .bg-rose-glass {
-    background-color: rgba(255, 245, 247, 0.92);
-    backdrop-filter: blur(12px);
-    border: 2px solid rgba(255, 126, 182, 0.2);
+    background-color: rgba(255, 245, 247, 0.95);
+    backdrop-filter: blur(16px);
+    border: 2px solid rgba(255, 126, 182, 0.4);
+    box-shadow: 0 8px 32px rgba(255,126,182,0.2);
   }
 
   .light-theme {
