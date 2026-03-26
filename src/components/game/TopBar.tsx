@@ -8,12 +8,12 @@ import { Sanctuaries } from './Sanctuaries';
 
 interface TopBarProps {
   onBackToAltar?: () => void;
-  onOpenSanctuaries?: () => void;
+  onOpenHabitats?: () => void;
   onOpenBattle?: () => void;
-  currentView?: 'breeding' | 'sanctuaries' | 'battleMap';
+  currentView?: 'breeding' | 'habitats' | 'battleMap';
 }
 
-export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, currentView }: TopBarProps) {
+export function TopBar({ onBackToAltar, onOpenHabitats, onOpenBattle, currentView }: TopBarProps) {
   const { state, dispatch, playerLevel } = useGameState();
   const [showAchievements, setShowAchievements] = useState(false);
 
@@ -22,48 +22,44 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
     audioEngine.toggleMute();
   };
 
+  const navStyle = "text-[12px] text-[#FF7EB6] font-black uppercase tracking-[0.2em] px-4 py-2 bg-transparent transition-all hover:scale-110";
+
   return (
     <>
-      <div className="flex items-center justify-between px-8 py-4 bg-transparent relative z-50 pointer-events-none">
+      <div className="flex items-center justify-between px-10 py-6 bg-transparent relative z-50 pointer-events-none">
         
-        {/* Left Section - Game Title and Level */}
-        <div className="flex items-center gap-8 pointer-events-auto">
-          <div className="flex items-center gap-4">
-            <h1 className="text-[20px] text-white tracking-tight font-black" style={{ fontFamily: "'Press Start 2P', cursive", textShadow: '2px 2px 0px rgba(0,0,0,0.8), 0 0 16px rgba(255,126,182,0.6)' }}>
-              Slime Forge
-            </h1>
-            <div className="flex items-center gap-3">
-              <Trophy className="w-5 h-5 text-yellow-400" />
-              <span className="text-[14px] text-white font-bold uppercase tracking-wider" style={{ textShadow: '1px 1px 0px rgba(0,0,0,0.8)' }}>Lv.{playerLevel}</span>
-            </div>
+        <div className="flex items-center gap-6 pointer-events-auto">
+          <h1 className="text-[14px] text-[#FF7EB6] tracking-tight font-black uppercase italic" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+            Slime Forge
+          </h1>
+          <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#FF7EB6]/30 shadow-lg">
+            <Trophy className="w-3.5 h-3.5 text-yellow-400" />
+            <span className="text-[10px] text-[#FF7EB6] font-black uppercase tracking-widest">Lv.{playerLevel}</span>
           </div>
         </div>
 
-        {/* Right Section - Navigation Buttons */}
-        <div className="flex items-center gap-4 pointer-events-auto">
+        <div className="flex items-center gap-2 pointer-events-auto">
+          {/* Navigation Buttons */}
           <button
             onClick={onBackToAltar}
-            className={`px-6 py-3 text-[14px] font-bold uppercase tracking-wider transition-all duration-200 ${currentView === 'breeding' ? 'text-white' : 'text-[#FF7EB6]'} hover:scale-105`}
-            style={{ fontFamily: "'Press Start 2P', cursive", textShadow: '2px 2px 0px rgba(0,0,0,0.8), 0 0 8px rgba(255,126,182,0.3)' }}
+            className={`${navStyle} ${currentView === 'breeding' ? 'text-white' : ''}`}
           >
             Altar
           </button>
           
           <button
-            onClick={onOpenSanctuaries}
-            className={`px-6 py-3 text-[14px] font-bold uppercase tracking-wider transition-all duration-200 ${currentView === 'sanctuaries' ? 'text-white' : 'text-[#FF7EB6]'} hover:scale-105 relative group`}
-            style={{ fontFamily: "'Press Start 2P', cursive", textShadow: '2px 2px 0px rgba(0,0,0,0.8), 0 0 8px rgba(255,126,182,0.3)' }}
+            onClick={onOpenHabitats}
+            className={`${navStyle} ${currentView === 'habitats' ? 'text-white border-b-2 border-white' : ''} relative group`}
           >
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-              {[...Array(4)].map((_, i) => <FairySparkle key={i} index={i} />)}
+              {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
             </div>
             Sanctuaries
           </button>
           
           <button
             onClick={onOpenBattle}
-            className={`px-6 py-3 text-[14px] font-bold uppercase tracking-wider transition-all duration-200 ${currentView === 'battleMap' ? 'text-white' : 'text-[#FF7EB6]'} hover:scale-105`}
-            style={{ fontFamily: "'Press Start 2P', cursive", textShadow: '2px 2px 0px rgba(0,0,0,0.8), 0 0 8px rgba(255,126,182,0.3)' }}
+            className={`${navStyle} ${currentView === 'battleMap' ? 'text-white border-b-2 border-white' : ''}`}
           >
             Battle Map
           </button>

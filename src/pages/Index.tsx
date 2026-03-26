@@ -25,7 +25,7 @@ import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
-  const [currentView, setCurrentView] = useState<'breeding' | 'sanctuaries' | 'battleMap'>('breeding');
+  const [currentView, setCurrentView] = useState<'breeding' | 'habitats' | 'battleMap'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
   
@@ -139,22 +139,22 @@ function GameLayout() {
     }
   }, [state.tutorialCompleted, state.slimes.length]);
 
-  const toolbarCircle = "relative bg-black/60 h-16 w-16 flex items-center justify-center transition-all hover:scale-110 border-2 border-[#FF7EB6]/50 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto backdrop-blur-sm";
-  const toolbarIcon = "w-9 h-9 text-[#FF7EB6] stroke-[2.5px]";
-  const toolbarLabel = "absolute bottom-[140%] left-1/2 -translate-x-1/2 px-4 py-2 bg-black/90 rounded-lg border border-[#FF7EB6]/40 text-[12px] uppercase font-bold tracking-wider opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_20px_rgba(0,0,0,0.8)] backdrop-blur-sm";
+  const toolbarCircle = "relative bg-black/40 backdrop-blur-xl h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
+  const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
+  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/80 backdrop-blur-md rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
       {/* Background Layer - Conditional: Video for Altar, Image for Sanctuaries */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-black">
-        {currentView === 'sanctuaries' ? (
+        {currentView === 'habitats' ? (
           <div 
             className="w-full h-full bg-cover bg-center animate-fade-in"
             style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
           />
         ) : (
           <video
-            className="w-full h-full object-cover brightness-110"
+            className="w-full h-full object-cover"
             autoPlay
             muted
             loop
@@ -184,7 +184,7 @@ function GameLayout() {
           <TopBar 
             currentView={currentView}
             onBackToAltar={() => setCurrentView('breeding')} 
-            onOpenSanctuaries={() => setCurrentView('sanctuaries')}
+            onOpenHabitats={() => setCurrentView('habitats')}
             onOpenBattle={() => setCurrentView('battleMap')}
           />
         </div>
@@ -198,7 +198,7 @@ function GameLayout() {
               <Hatchery />
             </div>
           )}
-          {currentView === 'sanctuaries' && (
+          {currentView === 'habitats' && (
             <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
               <div className="w-full max-w-6xl">
                 <IslandGrid onHabitatClick={setSelectedHabitatId} />
@@ -208,7 +208,7 @@ function GameLayout() {
         </div>
 
         {/* BOTTOM TOOLBAR */}
-        <div className="fixed bottom-8 right-8 z-[150] flex items-center gap-6 pointer-events-auto">
+        <div className="fixed bottom-6 right-6 z-[150] flex items-center gap-4 pointer-events-auto">
           <div className="relative group">
             <button onClick={handleMute} className={toolbarCircle}>
               {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
@@ -226,7 +226,7 @@ function GameLayout() {
                   </button>
                 </div>
               </SheetTrigger>
-              <SheetContent side="left" className="bg-black/90 backdrop-blur-md p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+              <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
                 <div className="flex-1 overflow-hidden">
                   <SlimeGallery onSelect={handleGallerySelect} />
                 </div>
@@ -235,7 +235,7 @@ function GameLayout() {
           )}
 
           <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
-            <SheetContent side="left" className="bg-black/90 backdrop-blur-md p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
+            <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
               <div className="flex-1 overflow-hidden">
                 <SlimeGallery onSelect={handleGallerySelect} />
               </div>
@@ -251,7 +251,7 @@ function GameLayout() {
                 </button>
               </div>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-black/90 backdrop-blur-md p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
               <Shop />
             </SheetContent>
           </Sheet>
@@ -265,7 +265,7 @@ function GameLayout() {
                 </button>
               </div>
             </SheetTrigger>
-            <SheetContent side="right" className="bg-black/90 backdrop-blur-md p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
+            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
               <StatsPanel onRequestGallery={() => openGalleryForSlot()} />
             </SheetContent>
           </Sheet>

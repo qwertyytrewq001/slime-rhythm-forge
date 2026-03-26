@@ -52,49 +52,30 @@
   }
 
   body {
-    background: hsl(var(--background));
-    color: #FF7EB6;
+    @apply bg-background text-[#FF7EB6];
     font-family: 'Press Start 2P', cursive !important;
     image-rendering: pixelated;
-    /* Cleaner text shadows for better readability */
+    /* Character shadow trick: Multi-directional black shadows for max readability */
     text-shadow: 
-      2px 2px 0px rgba(0,0,0,0.8),
-      0 0 8px rgba(255,126,182,0.3);
+      1px 1px 0 #000,
+      -1px -1px 0 #000,
+      1px 1px 0 #000,
+      -1px 1px 0 #000,
+      0 0 4px #FF7EB6,
+      0 2px 4px rgba(0,0,0,0.8);
   }
 
-  /* Different text styles for hierarchy */
-  h1, h2, h3, h4, h5, h6 {
+  h1, h2, h3, h4, h5, h6, span, p, div, button, input, textarea, select {
+    /* Apply to specific text elements */
     font-family: 'Press Start 2P', cursive !important;
     color: #FF7EB6 !important;
     text-shadow: 
-      2px 2px 0px rgba(0,0,0,0.8),
-      0 0 12px rgba(255,126,182,0.4);
-    font-weight: 900;
-  }
-
-  p, span, div {
-    font-family: 'VT323', monospace !important;
-    color: #FF7EB6 !important;
-    text-shadow: 
-      1px 1px 0px rgba(0,0,0,0.6),
-      0 0 4px rgba(255,126,182,0.2);
-  }
-
-  button {
-    font-family: 'Press Start 2P', cursive !important;
-    color: #FF7EB6 !important;
-    text-shadow: 
-      2px 2px 0px rgba(0,0,0,0.8),
-      0 0 8px rgba(255,126,182,0.3);
-    font-weight: 700;
-  }
-
-  input, textarea, select {
-    font-family: 'VT323', monospace !important;
-    color: #FF7EB6 !important;
-    text-shadow: 
-      1px 1px 0px rgba(0,0,0,0.6),
-      0 0 4px rgba(255,126,182,0.2);
+      1px 1px 0 #000,
+      -1px -1px 0 #000,
+      1px 1px 0 #000,
+      -1px 1px 0 #000,
+      0 0 4px #FF7EB6,
+      0 2px 4px rgba(0,0,0,0.8);
   }
 
 
