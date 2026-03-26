@@ -113,7 +113,7 @@ function createInitialState(): GameState {
   }
   return {
     slimes: createStarterSlimes(),
-    goo: 500,
+    goo: 10,
     selectedSlimeId: null,
     breedSlot1: null,
     breedSlot2: null,

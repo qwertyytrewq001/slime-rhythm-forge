@@ -28,7 +28,13 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
     dispatch({ type: 'FEED_SLIME_XP', slimeId: slime.id, foodType });
   };
 
-  const xpToNext = slime ? 5 + (slime.level ?? 1) * 3 : 0;
+  const calculateXpToNext = (level: number) => {
+    if (level < 15) return 8 + level * 4;
+    if (level < 30) return 60 + (level - 15) * 12;
+    return 240 + (level - 30) * 25;
+  };
+
+  const xpToNext = slime ? calculateXpToNext(slime.level ?? 1) : 0;
   const xpProgress = slime ? Math.min(100, ((slime.xp ?? 0) / xpToNext) * 100) : 0;
   const stage = slime ? getStage(slime.level ?? 1) : 'baby';
   const lastLevelUpRef = useRef<number>(0);

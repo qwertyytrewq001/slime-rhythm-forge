@@ -14,6 +14,8 @@ import { audioEngine } from '@/utils/audioEngine';
 import { ShoppingBag, Images, Info, Trophy, Volume2, VolumeX, Sword } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
+import { LevelUpPopup } from '@/components/game/LevelUpPopup';
+import { PlayerLevelUpPopup } from '@/components/game/PlayerLevelUpPopup';
 import { WorldMap } from '@/components/game/WorldMap';
 import { BattlePreview } from '@/components/game/BattlePreview';
 import { BattleArena } from '@/components/game/BattleArena';
@@ -307,6 +309,8 @@ function GameLayout() {
       )}
 
       <EvolutionPopup />
+      <LevelUpPopup />
+      <PlayerLevelUpPopup />
       
       {/* Tutorial Overlay - Stays at highest Z-index */}
       <LoreTutorial 
