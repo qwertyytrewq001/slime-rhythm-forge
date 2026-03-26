@@ -182,7 +182,7 @@ function GameLayout() {
       <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' ? 'hidden' : ''}`}>
         
         {/* TopBar (Navigation) */}
-        <div className="pointer-events-auto relative z-20">
+        <div className="pointer-events-auto relative z-[60]">
           <TopBar 
             currentView={currentView}
             onBackToAltar={() => setCurrentView('breeding')} 

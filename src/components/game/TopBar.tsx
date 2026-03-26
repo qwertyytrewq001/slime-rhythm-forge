@@ -23,17 +23,26 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
   };
 
   // Aggressively clean style to ensure no "boxes" appear
-  const navStyle = "text-[12px] text-[#FF7EB6] font-black uppercase tracking-[0.2em] transition-all hover:scale-110 bg-transparent border-none shadow-none backdrop-blur-none p-0 m-0 outline-none";
+  const navStyle = "text-[12px] text-[#FF7EB6] font-black uppercase tracking-[0.2em] transition-all hover:scale-110 p-0 m-0 outline-none";
+  const manualReset = {
+    background: 'none',
+    backgroundColor: 'transparent',
+    border: 'none',
+    boxShadow: 'none',
+    backdropFilter: 'none',
+    WebkitBackdropFilter: 'none',
+    filter: 'none'
+  };
 
   return (
     <>
-      <div className="flex items-center justify-between px-10 py-6 bg-transparent relative z-50 pointer-events-none">
+      <div className="flex items-center justify-between px-10 py-6 bg-transparent relative z-[60] pointer-events-none">
         
         <div className="flex items-center gap-6 pointer-events-auto">
-          <h1 className="text-[14px] text-[#FF7EB6] tracking-tight font-black uppercase italic" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+          <h1 className="text-[14px] text-[#FF7EB6] tracking-tight font-black uppercase italic" style={{ fontFamily: "'Press Start 2P', cursive", ...manualReset }}>
             Slime Forge
           </h1>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2" style={manualReset}>
             <Trophy className="w-3.5 h-3.5 text-yellow-400" />
             <span className="text-[10px] text-[#FF7EB6] font-black uppercase tracking-widest">Lv.{playerLevel}</span>
           </div>
@@ -44,6 +53,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           <button
             onClick={onBackToAltar}
             className={`${navStyle} ${currentView === 'breeding' ? 'text-white' : ''}`}
+            style={manualReset}
           >
             Altar
           </button>
@@ -51,6 +61,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           <button
             onClick={onOpenSanctuaries}
             className={`${navStyle} ${currentView === 'sanctuaries' ? 'text-white border-b-2 border-white pb-1' : ''} relative group`}
+            style={manualReset}
           >
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
               {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
@@ -61,6 +72,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           <button
             onClick={onOpenBattle}
             className={`${navStyle} ${currentView === 'battleMap' ? 'text-white border-b-2 border-white pb-1' : ''}`}
+            style={manualReset}
           >
             Battle Map
           </button>
