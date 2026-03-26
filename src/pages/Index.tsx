@@ -138,9 +138,9 @@ function GameLayout() {
     }
   }, [state.tutorialCompleted, state.slimes.length]);
 
-  const toolbarCircle = "relative bg-black/40 backdrop-blur-xl h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
+  const toolbarCircle = "relative bg-black/40 h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
   const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
-  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/80 backdrop-blur-md rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
+  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/80 rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
@@ -153,7 +153,7 @@ function GameLayout() {
           />
         ) : (
           <video
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover brightness-110"
             autoPlay
             muted
             loop
@@ -192,7 +192,6 @@ function GameLayout() {
         <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none relative">
           {currentView === 'breeding' && (
             <div className="w-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
-              {/* Added a subtle glow behind the altar to make it pop on the video */}
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF7EB6]/5 rounded-full blur-[100px] pointer-events-none" />
               <BreedingPod onRequestGallery={openGalleryForSlot} />
               <Hatchery />
