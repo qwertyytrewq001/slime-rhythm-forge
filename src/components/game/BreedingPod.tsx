@@ -264,6 +264,17 @@ export function BreedingPod(props: BreedingPodProps) {
 
       {/* Den visual container */}
       <div className="relative w-[28rem] h-[14rem] flex items-center justify-center">
+        {/* Video Background */}
+        <video
+          className="absolute inset-0 w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src="/homescreen_loop.mp4" type="video/mp4" />
+        </video>
+        
         <div className="relative w-full h-full z-10">
           {/* Slot 1 - Left Pedestal moved UP */}
           <div
