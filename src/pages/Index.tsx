@@ -163,12 +163,6 @@ function GameLayout() {
             <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
           </video>
         )}
-        
-        {/* Subtle gradient overlay to help UI readability */}
-        <div className="absolute inset-0 bg-black/30" />
-        {currentView === 'breeding' && (
-          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/50" />
-        )}
       </div>
 
       {/* 1. BATTLE MAP LAYER (Highest Priority when active) */}
