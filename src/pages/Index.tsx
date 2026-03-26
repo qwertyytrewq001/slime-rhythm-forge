@@ -25,7 +25,7 @@ import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
-  const [currentView, setCurrentView] = useState<'breeding' | 'habitats' | 'battleMap'>('breeding');
+  const [currentView, setCurrentView] = useState<'breeding' | 'sanctuaries' | 'battleMap'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
   
@@ -139,22 +139,22 @@ function GameLayout() {
     }
   }, [state.tutorialCompleted, state.slimes.length]);
 
-  const toolbarCircle = "relative bg-black/40 backdrop-blur-xl h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
+  const toolbarCircle = "relative bg-black/40 h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
   const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
-  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/80 backdrop-blur-md rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
+  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/80 rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
       {/* Background Layer - Conditional: Video for Altar, Image for Sanctuaries */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-black">
-        {currentView === 'habitats' ? (
+        {currentView === 'sanctuaries' ? (
           <div 
             className="w-full h-full bg-cover bg-center animate-fade-in"
             style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
           />
         ) : (
           <video
-            className="w-full h-full object-cover"
+            className="w-full h-full object-cover brightness-110"
             autoPlay
             muted
             loop
@@ -184,7 +184,7 @@ function GameLayout() {
           <TopBar 
             currentView={currentView}
             onBackToAltar={() => setCurrentView('breeding')} 
-            onOpenHabitats={() => setCurrentView('habitats')}
+            onOpenSanctuaries={() => setCurrentView('sanctuaries')}
             onOpenBattle={() => setCurrentView('battleMap')}
           />
         </div>
@@ -198,7 +198,7 @@ function GameLayout() {
               <Hatchery />
             </div>
           )}
-          {currentView === 'habitats' && (
+          {currentView === 'sanctuaries' && (
             <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
               <div className="w-full max-w-6xl">
                 <IslandGrid onHabitatClick={setSelectedHabitatId} />

@@ -8,12 +8,12 @@ import { Sanctuaries } from './Sanctuaries';
 
 interface TopBarProps {
   onBackToAltar?: () => void;
-  onOpenHabitats?: () => void;
+  onOpenSanctuaries?: () => void;
   onOpenBattle?: () => void;
-  currentView?: 'breeding' | 'habitats' | 'battleMap';
+  currentView?: 'breeding' | 'sanctuaries' | 'battleMap';
 }
 
-export function TopBar({ onBackToAltar, onOpenHabitats, onOpenBattle, currentView }: TopBarProps) {
+export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, currentView }: TopBarProps) {
   const { state, dispatch, playerLevel } = useGameState();
   const [showAchievements, setShowAchievements] = useState(false);
 
@@ -48,8 +48,8 @@ export function TopBar({ onBackToAltar, onOpenHabitats, onOpenBattle, currentVie
           </button>
           
           <button
-            onClick={onOpenHabitats}
-            className={`${navStyle} ${currentView === 'habitats' ? 'text-white border-b-2 border-white' : ''} relative group`}
+            onClick={onOpenSanctuaries}
+            className={`${navStyle} ${currentView === 'sanctuaries' ? 'text-white border-b-2 border-white' : ''} relative group`}
           >
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
               {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
