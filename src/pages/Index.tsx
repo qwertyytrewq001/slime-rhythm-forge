@@ -8,7 +8,6 @@ import { StatsPanel } from '@/components/game/StatsPanel';
 import { HabitatViewer } from '@/components/game/HabitatViewer';
 import { Shop } from '@/components/game/Shop';
 import { Hatchery } from '@/components/game/Hatchery';
-import { ForestBackground } from '@/components/game/ForestBackground';
 import { IslandGrid } from '@/components/game/IslandGrid';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
@@ -164,10 +163,10 @@ function GameLayout() {
       {/* 2. MAIN GAME INTERFACE */}
       <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' ? 'hidden' : ''}`}>
         
-        {/* Background Layer - Uniform Video Background */}
+        {/* Background Layer - ALWAYS THE VIDEO, NO STATIC IMAGES */}
         <div className="absolute inset-0 z-0 pointer-events-none bg-black">
           <video
-            className="w-full h-full object-cover opacity-60"
+            className="w-full h-full object-cover"
             autoPlay
             muted
             loop
@@ -175,9 +174,10 @@ function GameLayout() {
           >
             <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
           </video>
-          {/* Overlay for breeding view to blend better */}
+          {/* Subtle gradient overlay to help UI readability */}
+          <div className="absolute inset-0 bg-black/30" />
           {currentView === 'breeding' && (
-            <div className="absolute inset-0 bg-gradient-to-b from-black/40 via-transparent to-black/60" />
+            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
           )}
         </div>
 
@@ -210,7 +210,6 @@ function GameLayout() {
 
         {/* BOTTOM TOOLBAR */}
         <div className="fixed bottom-4 right-4 z-[150] flex items-center gap-2 pointer-events-auto">
-          {/* Bottom Toolbar - Moved down to avoid dialogue interference */}
           <div className="relative group">
             <button onClick={handleMute} className={toolbarCircle}>
               {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
@@ -218,7 +217,6 @@ function GameLayout() {
             </button>
           </div>
 
-          {/* Main Gallery - Hidden during breeding to avoid conflicts */}
           {currentView !== 'breeding' && (
             <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
               <SheetTrigger asChild>
@@ -237,7 +235,6 @@ function GameLayout() {
             </Sheet>
           )}
 
-          {/* Breeding Gallery Sheet */}
           <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
             <SheetContent side="left" className="bg-rose-glass p-0 border-r-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme z-[120]">
               <div className="flex-1 overflow-hidden">
@@ -312,7 +309,7 @@ function GameLayout() {
 
       <EvolutionPopup />
       
-      {/* Tutorial Modal Overlay - Now sits on top of game components */}
+      {/* Tutorial Overlay */}
       <LoreTutorial 
         isOpen={showTutorial}
         onClose={() => setShowTutorial(false)}
