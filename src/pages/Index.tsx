@@ -160,9 +160,8 @@ function GameLayout() {
             loop
             playsInline
           >
-            <source src="/homescreen_loop.mp4" type="video/mp4" />
+            <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
           </video>
-          
           <LoreTutorial 
             isOpen={showTutorial}
             onClose={() => setShowTutorial(false)}
@@ -200,7 +199,7 @@ function GameLayout() {
                     loop
                     playsInline
                   >
-                    <source src="/homescreen_loop.mp4" type="video/mp4" />
+                    <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
                   </video>
                 </div>
               )}
