@@ -25,7 +25,7 @@ import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
-  const [currentView, setCurrentView] = useState<'breeding' | 'habitats' | 'battleMap' | 'sanctuaries'>('breeding');
+  const [currentView, setCurrentView] = useState<'breeding' | 'sanctuaries' | 'battleMap'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
   
@@ -152,11 +152,6 @@ function GameLayout() {
             className="w-full h-full bg-cover bg-center animate-fade-in"
             style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
           />
-        ) : currentView === 'habitats' ? (
-          <div 
-            className="w-full h-full bg-cover bg-center animate-fade-in"
-            style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
-          />
         ) : (
           <video
             className="w-full h-full object-cover brightness-110"
@@ -189,7 +184,6 @@ function GameLayout() {
           <TopBar 
             currentView={currentView}
             onBackToAltar={() => setCurrentView('breeding')} 
-            onOpenHabitats={() => setCurrentView('habitats')}
             onOpenSanctuaries={() => setCurrentView('sanctuaries')}
             onOpenBattle={() => setCurrentView('battleMap')}
           />
@@ -202,13 +196,6 @@ function GameLayout() {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF7EB6]/5 rounded-full blur-[100px] pointer-events-none" />
               <BreedingPod onRequestGallery={openGalleryForSlot} />
               <Hatchery />
-            </div>
-          )}
-          {currentView === 'habitats' && (
-            <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
-              <div className="w-full max-w-6xl">
-                <IslandGrid onHabitatClick={setSelectedHabitatId} />
-              </div>
             </div>
           )}
           {currentView === 'sanctuaries' && (
