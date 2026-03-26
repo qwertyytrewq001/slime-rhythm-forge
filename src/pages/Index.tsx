@@ -144,19 +144,28 @@ function GameLayout() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
-      {/* Background Layer - ALWAYS THE VIDEO, NO STATIC IMAGES */}
+      {/* Background Layer - Conditional: Video for Altar, Image for Sanctuaries */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-black">
-        <video
-          className="w-full h-full object-cover"
-          autoPlay
-          muted
-          loop
-          playsInline
-        >
-          <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
-        </video>
+        {currentView === 'habitats' ? (
+          <div 
+            className="w-full h-full bg-cover bg-center animate-fade-in"
+            style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
+          />
+        ) : (
+          <video
+            className="w-full h-full object-cover"
+            autoPlay
+            muted
+            loop
+            playsInline
+            key="altar-video"
+          >
+            <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
+          </video>
+        )}
+        
         {/* Subtle gradient overlay to help UI readability */}
-        <div className="absolute inset-0 bg-black/40" />
+        <div className="absolute inset-0 bg-black/30" />
         {currentView === 'breeding' && (
           <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/50" />
         )}

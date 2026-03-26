@@ -25,7 +25,7 @@ export function TopBar({ onBackToAltar, onOpenHabitats, onOpenBattle, currentVie
 
   return (
     <>
-      <div className="flex items-center justify-between px-10 py-6 bg-black/20 backdrop-blur-md border-b border-white/5 relative z-50 pointer-events-none shadow-[0_4px_30px_rgba(0,0,0,0.1)]">
+      <div className="flex items-center justify-between px-10 py-6 bg-transparent relative z-50 pointer-events-none">
         
         <div className="flex items-center gap-6 pointer-events-auto">
           <h1 className="text-[14px] text-[#FF7EB6] tracking-tight font-black uppercase italic" style={{ fontFamily: "'Press Start 2P', cursive" }}>
