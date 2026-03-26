@@ -29,22 +29,6 @@ function GameLayout() {
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
   const [showTutorial, setShowTutorial] = useState(false);
-
-  // Check for first launch and trigger tutorial
-  useEffect(() => {
-    const hasLaunchedBefore = localStorage.getItem('glim_first_launch_completed');
-    console.log('🔍 First launch check:', hasLaunchedBefore);
-    
-    // Temporarily force tutorial to open for testing
-    if (!hasLaunchedBefore || true) { // Added || true for testing
-      // Mark as launched
-      localStorage.setItem('glim_first_launch_completed', 'true');
-      // Trigger first launch tutorial and open it
-      console.log('🚀 Triggering first launch tutorial');
-      triggerDialogue('firstLaunch');
-      setShowTutorial(true);
-    }
-  }, []);
   const [showLevelDialogue, setShowLevelDialogue] = useState(false);
   const [dialogueLevel, setDialogueLevel] = useState(1);
   
@@ -56,6 +40,21 @@ function GameLayout() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [breedingGalleryOpen, setBreedingGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
+
+  // Check for first launch and trigger tutorial
+  useEffect(() => {
+    const hasLaunchedBefore = localStorage.getItem('glim_first_launch_completed');
+    console.log('🔍 First launch check:', hasLaunchedBefore);
+    
+    if (!hasLaunchedBefore) {
+      // Mark as launched
+      localStorage.setItem('glim_first_launch_completed', 'true');
+      // Trigger first launch tutorial and open it
+      console.log('🚀 Triggering first launch tutorial');
+      triggerDialogue('firstLaunch');
+      setShowTutorial(true);
+    }
+  }, []);
 
   const openGalleryForSlot = (slot?: 1 | 2) => {
     if (slot) setGallerySlot(slot);
