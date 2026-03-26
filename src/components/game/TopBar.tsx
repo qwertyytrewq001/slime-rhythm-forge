@@ -4,15 +4,17 @@ import { audioEngine } from '@/utils/audioEngine';
 import { Volume2, VolumeX, Trophy, ChevronLeft, Castle, Sword, Home, Ghost } from 'lucide-react';
 import { FairySparkle } from './FairySparkle';
 import { Achievements } from './Achievements';
+import { Sanctuaries } from './Sanctuaries';
 
 interface TopBarProps {
   onBackToAltar?: () => void;
   onOpenHabitats?: () => void;
   onOpenBattle?: () => void;
-  currentView?: 'breeding' | 'habitats' | 'battleMap';
+  onOpenSanctuaries?: () => void;
+  currentView?: 'breeding' | 'habitats' | 'battleMap' | 'sanctuaries';
 }
 
-export function TopBar({ onBackToAltar, onOpenHabitats, onOpenBattle, currentView }: TopBarProps) {
+export function TopBar({ onBackToAltar, onOpenHabitats, onOpenBattle, onOpenSanctuaries, currentView }: TopBarProps) {
   const { state, dispatch, playerLevel } = useGameState();
   const [showAchievements, setShowAchievements] = useState(false);
 
@@ -53,9 +55,19 @@ export function TopBar({ onBackToAltar, onOpenHabitats, onOpenBattle, currentVie
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
               {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
             </div>
+            Habitats
+          </button>
+          
+          <button
+            onClick={onOpenSanctuaries}
+            className={`${navStyle} ${currentView === 'sanctuaries' ? 'text-white border-b-2 border-white' : ''} relative group`}
+          >
+            <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+              {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
+            </div>
             Sanctuaries
           </button>
-
+          
           <button
             onClick={onOpenBattle}
             className={`${navStyle} ${currentView === 'battleMap' ? 'text-white border-b-2 border-white' : ''}`}

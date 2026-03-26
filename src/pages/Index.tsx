@@ -20,11 +20,12 @@ import { BattleArena } from '@/components/game/BattleArena';
 import { BattleSlime } from '@/types/slime';
 import { LoreTutorial } from '@/components/game/LoreTutorial';
 import { LevelDialogue } from '@/components/game/LevelDialogue';
+import { Sanctuaries } from '@/components/game/Sanctuaries';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
-  const [currentView, setCurrentView] = useState<'breeding' | 'habitats' | 'battleMap'>('breeding');
+  const [currentView, setCurrentView] = useState<'breeding' | 'habitats' | 'battleMap' | 'sanctuaries'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
   
@@ -146,7 +147,12 @@ function GameLayout() {
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
       {/* Background Layer - Conditional: Video for Altar, Image for Sanctuaries */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-black">
-        {currentView === 'habitats' ? (
+        {currentView === 'sanctuaries' ? (
+          <div 
+            className="w-full h-full bg-cover bg-center animate-fade-in"
+            style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
+          />
+        ) : currentView === 'habitats' ? (
           <div 
             className="w-full h-full bg-cover bg-center animate-fade-in"
             style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
@@ -184,6 +190,7 @@ function GameLayout() {
             currentView={currentView}
             onBackToAltar={() => setCurrentView('breeding')} 
             onOpenHabitats={() => setCurrentView('habitats')}
+            onOpenSanctuaries={() => setCurrentView('sanctuaries')}
             onOpenBattle={() => setCurrentView('battleMap')}
           />
         </div>
@@ -198,6 +205,13 @@ function GameLayout() {
             </div>
           )}
           {currentView === 'habitats' && (
+            <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
+              <div className="w-full max-w-6xl">
+                <IslandGrid onHabitatClick={setSelectedHabitatId} />
+              </div>
+            </div>
+          )}
+          {currentView === 'sanctuaries' && (
             <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
               <div className="w-full max-w-6xl">
                 <IslandGrid onHabitatClick={setSelectedHabitatId} />
