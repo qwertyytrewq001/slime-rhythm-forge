@@ -65,18 +65,16 @@ function GameLayout() {
 
   const handleGallerySelect = (id: string) => {
     if (gallerySlot) {
-      // Check if this slime is already assigned to the other pedestal
       const otherSlot = gallerySlot === 1 ? 2 : 1;
       const otherSlotId = otherSlot === 1 ? state.breedSlot1 : state.breedSlot2;
       
       if (otherSlotId === id) {
         console.log(`❌ Slime ${id} is already assigned to pedestal ${otherSlot}`);
-        return; // Don't allow duplicate selection
+        return; 
       }
       
       dispatch({ type: 'SET_BREED_SLOT', slot: gallerySlot, id });
     }
-    // Only close gallery and clear slot if both slots are filled
     if (state.breedSlot1 && state.breedSlot2) {
       setBreedingGalleryOpen(false);
       setGallerySlot(null);
@@ -100,8 +98,6 @@ function GameLayout() {
 
   const handleBattleComplete = (result: { winner: 'player' | 'opponent'; level: number }) => {
     setBattleTeam(null);
-    
-    // Show level dialogue for specific levels after player wins
     if (result.winner === 'player') {
       const dialogueLevels = [1, 5, 10, 14, 15, 16];
       if (dialogueLevels.includes(result.level)) {
@@ -119,7 +115,6 @@ function GameLayout() {
     };
     document.addEventListener('click', startAudio);
     
-    // Handle custom event to open breeding gallery
     const handleOpenBreedingGallery = (event: any) => {
       console.log('🖼️ Received openBreedingGallery event:', event.detail);
       openGalleryForSlot(event.detail?.slot || 1);
@@ -136,7 +131,6 @@ function GameLayout() {
   // Show tutorial for first-time players
   useEffect(() => {
     if (!state.tutorialCompleted && state.slimes.length > 0) {
-      // Small delay to let the game load first
       const timer = setTimeout(() => {
         setShowTutorial(true);
       }, 1000);
@@ -144,12 +138,30 @@ function GameLayout() {
     }
   }, [state.tutorialCompleted, state.slimes.length]);
 
-  const toolbarCircle = "relative bg-black/30 backdrop-blur-md h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/20 rounded-full hover:border-[#FF7EB6]/50 shadow-lg group pointer-events-auto";
+  const toolbarCircle = "relative bg-black/40 backdrop-blur-xl h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
   const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
-  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/60 backdrop-blur-md rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
+  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/80 backdrop-blur-md rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
+      {/* Background Layer - ALWAYS THE VIDEO, NO STATIC IMAGES */}
+      <div className="fixed inset-0 z-0 pointer-events-none bg-black">
+        <video
+          className="w-full h-full object-cover"
+          autoPlay
+          muted
+          loop
+          playsInline
+        >
+          <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
+        </video>
+        {/* Subtle gradient overlay to help UI readability */}
+        <div className="absolute inset-0 bg-black/40" />
+        {currentView === 'breeding' && (
+          <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/50" />
+        )}
+      </div>
+
       {/* 1. BATTLE MAP LAYER (Highest Priority when active) */}
       {currentView === 'battleMap' && (
         <div className="fixed inset-0 z-[100] pointer-events-auto">
@@ -163,24 +175,6 @@ function GameLayout() {
       {/* 2. MAIN GAME INTERFACE */}
       <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' ? 'hidden' : ''}`}>
         
-        {/* Background Layer - ALWAYS THE VIDEO, NO STATIC IMAGES */}
-        <div className="absolute inset-0 z-0 pointer-events-none bg-black">
-          <video
-            className="w-full h-full object-cover"
-            autoPlay
-            muted
-            loop
-            playsInline
-          >
-            <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
-          </video>
-          {/* Subtle gradient overlay to help UI readability */}
-          <div className="absolute inset-0 bg-black/30" />
-          {currentView === 'breeding' && (
-            <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />
-          )}
-        </div>
-
         {/* TopBar (Navigation) */}
         <div className="pointer-events-auto relative z-20">
           <TopBar 
@@ -192,9 +186,11 @@ function GameLayout() {
         </div>
 
         {/* Central Content */}
-        <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none">
+        <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none relative">
           {currentView === 'breeding' && (
             <div className="w-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
+              {/* Added a subtle glow behind the altar to make it pop on the video */}
+              <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF7EB6]/5 rounded-full blur-[100px] pointer-events-none" />
               <BreedingPod onRequestGallery={openGalleryForSlot} />
               <Hatchery />
             </div>
@@ -209,7 +205,7 @@ function GameLayout() {
         </div>
 
         {/* BOTTOM TOOLBAR */}
-        <div className="fixed bottom-4 right-4 z-[150] flex items-center gap-2 pointer-events-auto">
+        <div className="fixed bottom-6 right-6 z-[150] flex items-center gap-4 pointer-events-auto">
           <div className="relative group">
             <button onClick={handleMute} className={toolbarCircle}>
               {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
@@ -309,7 +305,7 @@ function GameLayout() {
 
       <EvolutionPopup />
       
-      {/* Tutorial Overlay */}
+      {/* Tutorial Overlay - Stays at highest Z-index */}
       <LoreTutorial 
         isOpen={showTutorial}
         onClose={() => setShowTutorial(false)}

@@ -86,6 +86,7 @@ const RitualInscription = ({
       style={{ 
         fontFamily: "'Press Start 2P', cursive", 
         fontSize,
+        textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 15px rgba(0,0,0,0.8)'
       }}
     >
       {children}
@@ -264,14 +265,20 @@ export function BreedingPod(props: BreedingPodProps) {
 
       {/* Den visual container */}
       <div className="relative w-[28rem] h-[14rem] flex items-center justify-center">
+        {/* Glow behind the altar */}
+        <div className="absolute inset-0 bg-gradient-to-r from-[#40E0D0]/5 via-transparent to-[#40E0D0]/5 rounded-full blur-3xl pointer-events-none" />
+        
         <div className="relative w-full h-full z-10">
-          {/* Slot 1 - Left Pedestal moved UP */}
+          {/* Slot 1 - Left Pedestal */}
           <div
             className={`absolute left-[0%] top-[0%] w-32 h-32 flex items-center justify-center transition-all cursor-pointer ${breeding ? 'animate-spirit-pulse' : ''}`}
             onDragOver={handleDragOver}
             onDrop={handleDrop(1)}
             onClick={() => handleSlotClick(1)}
           >
+            {/* Grounding shadow/base for the slime */}
+            <div className="absolute bottom-4 w-16 h-4 bg-black/40 rounded-full blur-md" />
+            
             {slot1Slime ? (
               <SlimeCanvas slime={slot1Slime} size={100} animated />
             ) : (
@@ -283,22 +290,21 @@ export function BreedingPod(props: BreedingPodProps) {
             )}
           </div>
 
-          {/* Slot 2 - Right Pedestal moved UP */}
+          {/* Slot 2 - Right Pedestal */}
           <div
             className={`absolute right-[0%] top-[0%] w-32 h-32 flex items-center justify-center transition-all cursor-pointer ${breeding ? 'animate-spirit-pulse' : ''}`}
             onDragOver={handleDragOver}
             onDrop={handleDrop(2)}
             onClick={() => {
               console.log('🔥 PEDESTAL CLICKED - RIGHT');
-              // Direct approach - call the gallery opening function we know works
-              console.log(`🖼️ Breeding Pedestal clicked - calling openGalleryForSlot(2)`);
               if (props.onRequestGallery) {
-                props.onRequestGallery(2); // Right slot
-              } else {
-                console.log('❌ onRequestGallery not available');
+                props.onRequestGallery(2);
               }
             }}
           >
+            {/* Grounding shadow/base for the slime */}
+            <div className="absolute bottom-4 w-16 h-4 bg-black/40 rounded-full blur-md" />
+
             {slot2Slime ? (
               <SlimeCanvas slime={slot2Slime} size={100} animated />
             ) : (
@@ -308,8 +314,7 @@ export function BreedingPod(props: BreedingPodProps) {
                   sparkles={4} 
                   className="scale-110"
                   onClick={(e) => {
-                    // Handle click to open gallery
-                    console.log(`🖼️ RitualInscription clicked - opening gallery for parent selection`);
+                    console.log(`🖼️ RitualInscription clicked - opening gallery`);
                     const event = new CustomEvent('openBreedingGallery', { detail: { slot: 2 } });
                     window.dispatchEvent(event);
                   }}

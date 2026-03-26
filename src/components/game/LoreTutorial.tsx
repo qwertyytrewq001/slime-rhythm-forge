@@ -488,6 +488,18 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   // Debug logging
   console.log('🔍 LoreTutorial state:', { isOpen, currentDialogueLength: currentDialogue.length, currentExpression, glimPosition });
 
+  // Fallback to trigger first launch if open but empty
+  useEffect(() => {
+    if (isOpen && currentDialogue.length === 0) {
+      console.log('🚀 LoreTutorial fallback: Setting firstLaunch dialogue');
+      setCurrentDialogue(FIRST_LAUNCH_DIALOGUE);
+      setCurrentDialogueIndex(0);
+      setDisplayedText('');
+      setCurrentExpression('exicted');
+      setGlimPosition('bottom-left');
+    }
+  }, [isOpen, currentDialogue.length]);
+
   // Listen for dialogue triggers
   useDialogueTrigger(useCallback((triggerId: TriggerType, data) => {
     console.log('🎮 Dialogue Trigger Received:', triggerId);
