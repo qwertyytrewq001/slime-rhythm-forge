@@ -91,8 +91,6 @@ const RitualInscription = ({
     >
       {children}
     </h3>
-    {/* Explicit hover glow layer */}
-    <div className="absolute inset-0 bg-white/0 group-hover:bg-white/5 blur-2xl transition-all duration-500 pointer-events-none rounded-full" />
   </div>
 );
 
@@ -258,7 +256,7 @@ export function BreedingPod(props: BreedingPodProps) {
       </div>
 
       {state.mutationJuiceActive && (
-        <div className="text-[9px] text-[#FF7EB6] bg-[#FF7EB6]/5 px-2 py-0.5 rounded animate-pulse mt-0 shadow-[0_0_10px_#40E0D0]/20 backdrop-blur-sm border border-[#FF7EB6]/20">
+        <div className="text-[9px] text-[#FF7EB6] font-black uppercase animate-pulse mt-0 drop-shadow-[0_0_8px_#FF7EB6] tracking-widest">
           Mutation Juice Active
         </div>
       )}

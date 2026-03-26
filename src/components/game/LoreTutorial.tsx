@@ -799,34 +799,35 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
       {/* Dialogue Box */}
       <div 
-        className="absolute shadow-lg relative pointer-events-auto"
+        className="absolute shadow-2xl relative pointer-events-auto transition-all duration-500"
         style={{
           position: 'fixed',
-          bottom: '20px',
+          bottom: '32px',
           left: '50%',
           transform: 'translateX(-50%)',
-          width: '600px',
-          maxWidth: '70vw',
-          background: 'rgba(20, 10, 40, 0.92)',
-          borderRadius: '16px',
-          border: '2px solid #ff6eb4',
-          padding: '20px 24px',
-          zIndex: 9999
+          width: '640px',
+          maxWidth: '85vw',
+          background: 'rgba(255, 255, 255, 0.95)',
+          borderRadius: '24px',
+          border: '4px solid #FF7EB6',
+          padding: '24px 32px',
+          zIndex: 9999,
+          boxShadow: '0 20px 50px rgba(255, 126, 182, 0.2)'
         }}
       >
         {/* Using a separate inner div for content padding */}
         <div className="h-full flex flex-col">
           {/* Character Name */}
-          <div className="mb-2">
-            <h3 className="text-[#FF7EB6] font-bold text-xl">Glim</h3>
+          <div className="mb-3">
+            <h3 className="text-[#FF7EB6] font-black text-xl uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>Glim</h3>
           </div>
 
           {/* Dialogue Text */}
-          <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '60px'}}>
-            <p className="text-white text-lg leading-relaxed font-medium">
+          <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '80px'}}>
+            <p className="text-slate-800 text-xl leading-relaxed font-bold italic" style={{ fontFamily: "'VT323', monospace" }}>
               {/* Ensure displayedText is always a string */}
-              {displayedText ?? ''}
-              {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
+              "{displayedText ?? ''}"
+              {isTyping && <span className="animate-pulse ml-1" style={{color: '#FF7EB6'}}>|</span>}
             </p>
             
             {/* Add Select Parents button for breeding dialogue */}

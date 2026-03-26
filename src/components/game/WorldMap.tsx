@@ -99,7 +99,6 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
                         </div>
                       ) : (
                         <div className="flex flex-col items-center">
-                          <div className="w-3 h-3 bg-white/40 rounded-full blur-[1px] mb-1 group-hover:bg-white/80 transition-colors" />
                           <span 
                             className="text-[10px] font-black text-white/80 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)] uppercase"
                             style={{ fontFamily: "'Press Start 2P', cursive" }}
@@ -129,7 +128,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
       {/* Subtle Close Button (Top Right) */}
       <button 
         onClick={onClose}
-        className="absolute top-8 right-8 w-12 h-12 flex items-center justify-center bg-black/40 backdrop-blur-md rounded-full border border-white/20 text-white/60 hover:text-white hover:bg-black/60 transition-all pointer-events-auto"
+        className="absolute top-8 right-8 w-12 h-12 flex items-center justify-center bg-black/40 rounded-full border border-white/20 text-white/60 hover:text-white hover:bg-black/60 transition-all pointer-events-auto"
       >
         <span className="text-xl font-bold">×</span>
       </button>

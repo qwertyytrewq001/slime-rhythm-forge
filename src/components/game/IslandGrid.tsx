@@ -100,8 +100,8 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
                 style={{ background: `radial-gradient(circle, ${theme.accent}60, transparent)` }}
               />
 
-              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full bg-black/60 border-2 border-white/10 backdrop-blur-md z-10">
-                <span className="text-[12px] font-black uppercase tracking-[0.2em] relative z-10" style={{ color: theme.accent }}>
+              <div className="absolute top-4 left-1/2 -translate-x-1/2 px-4 py-1 z-10">
+                <span className="text-[12px] font-black uppercase tracking-[0.2em] relative z-10 drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]" style={{ color: theme.accent }}>
                   {ELEMENT_DISPLAY_NAMES[habitat.element]}
                 </span>
               </div>
@@ -113,15 +113,15 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
                   </div>
                 ))}
                 {assignedSlimes.length < habitat.capacity && (
-                  <div className="w-20 h-20 rounded-2xl border-4 border-dashed flex items-center justify-center bg-black/50 backdrop-blur-sm transition-colors group-hover:border-[#FF7EB6]/60" style={{ borderColor: theme.accent + '40' }}>
+                  <div className="w-20 h-20 rounded-2xl border-4 border-dashed flex items-center justify-center transition-colors group-hover:border-[#FF7EB6]/60" style={{ borderColor: theme.accent + '40' }}>
                     <span className="text-3xl font-black text-white/20 group-hover:text-[#FF7EB6] animate-pulse">+</span>
                   </div>
                 )}
               </div>
 
               {assignedSlimes.some(s => s && s.elements.includes(habitat.element)) && (
-                <div className="absolute bottom-4 px-3 py-1 rounded-lg bg-green-500/30 border-2 border-green-500/40 backdrop-blur-md z-10 animate-bounce">
-                  <span className="text-[10px] text-green-300 font-black uppercase tracking-[0.15em]">Goo Mastery x2</span>
+                <div className="absolute bottom-4 px-3 py-1 z-10 animate-bounce">
+                  <span className="text-[10px] text-green-300 font-black uppercase tracking-[0.15em] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Goo Mastery x2</span>
                 </div>
               )}
 

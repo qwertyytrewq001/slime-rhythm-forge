@@ -124,11 +124,7 @@ export function Hatchery() {
       <div className="relative w-56 h-56 flex items-center justify-center cursor-pointer group pointer-events-auto" onClick={handleTap}>
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {[...Array(20)].map((_, i) => <FairySparkle key={i} index={i} />)}
-          {!activeHatching && (
-            <div className={`absolute left-[65%] top-[60%] -translate-x-1/2 -translate-y-1/2 rounded-full bg-[#FF7EB6]/50 blur-2xl animate-soft-pulse shadow-[0_0_40px_#FF7EB6] border-2 border-[#FF7EB6]/30 transition-all duration-500 ${isHovered ? 'w-24 h-28 opacity-100' : 'w-16 h-20 opacity-70'}`} />
-          )}
         </div>
-        <div className={`absolute bottom-8 w-32 h-8 rounded-[100%] blur-2xl transition-all duration-1000 ${activeHatching ? 'bg-[#FF7EB6]/30 opacity-100 shadow-[0_0_25px_#FF7EB6]' : 'bg-primary/10 opacity-40'}`} />
         {!activeHatching ? (
           <div className="flex flex-col items-center gap-2 translate-y-6"><div className="w-1 h-1" /></div>
         ) : (
@@ -143,23 +139,25 @@ export function Hatchery() {
               <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 text-center pointer-events-none">
                 {isFinished ? (
                   <div className={`flex flex-col items-center ${isHatching ? 'animate-pulse' : 'animate-bounce'}`}>
-                    <div className="text-[12px] text-[#FF7EB6] animate-inscription-glow font-black uppercase whitespace-nowrap drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)] tracking-wider">
+                    <div className="text-[12px] text-[#FF7EB6] animate-inscription-glow font-black uppercase whitespace-nowrap tracking-wider drop-shadow-[0_2px_8px_rgba(255,126,182,0.4)]">
                       {isHatching ? 'LIFE AWAKENS...' : crackProgress > 0 ? 'TAP TO BREAK!' : 'READY TO HATCH!'}
                     </div>
                     {!isHatching && crackProgress === 0 && (
-                      <div className="flex items-center gap-1 mt-1 text-[10px] text-white/60 uppercase font-bold animate-pulse"><MousePointer2 className="w-3 h-3" /> Click to Crack</div>
+                      <div className="flex items-center gap-1 mt-1 text-[10px] text-white/60 uppercase font-bold animate-pulse">
+                        <MousePointer2 className="w-3 h-3" /> Click to Crack
+                      </div>
                     )}
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-1">
-                    <div className="text-[14px] text-[#FF7EB6] font-black tracking-[0.2em] animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">{formatTime(activeHatching.endTime - now)}</div>
+                    <div className="text-[14px] text-[#FF7EB6] font-black tracking-[0.2em] animate-pulse drop-shadow-[0_2px_8px_rgba(255,126,182,0.4)]">{formatTime(activeHatching.endTime - now)}</div>
                   </div>
                 )}
               </div>
             </div>
             {!isFinished && (
               <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap translate-x-12">
-                <p className="text-[11px] text-[#FF7EB6] animate-inscription-glow font-black uppercase tracking-widest drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">{ELEMENT_DISPLAY_NAMES[activeHatching.slime.element]} Slime</p>
+                <p className="text-[11px] text-[#FF7EB6] animate-inscription-glow font-black uppercase tracking-widest drop-shadow-[0_2px_8px_rgba(255,126,182,0.4)]">{ELEMENT_DISPLAY_NAMES[activeHatching.slime.element]} Slime</p>
               </div>
             )}
           </div>

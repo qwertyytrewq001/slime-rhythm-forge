@@ -33,7 +33,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           <h1 className="text-[14px] text-[#FF7EB6] tracking-tight font-black uppercase italic" style={{ fontFamily: "'Press Start 2P', cursive" }}>
             Slime Forge
           </h1>
-          <div className="flex items-center gap-2 bg-transparent px-3 py-1.5 border-none shadow-none backdrop-blur-none">
+          <div className="flex items-center gap-2">
             <Trophy className="w-3.5 h-3.5 text-yellow-400" />
             <span className="text-[10px] text-[#FF7EB6] font-black uppercase tracking-widest">Lv.{playerLevel}</span>
           </div>
