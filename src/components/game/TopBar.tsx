@@ -22,7 +22,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
     audioEngine.toggleMute();
   };
 
-  const navStyle = "text-[12px] text-[#FF7EB6] font-black uppercase tracking-[0.2em] px-4 py-2 bg-transparent transition-all hover:scale-110";
+  const navStyle = "text-[12px] text-[#FF7EB6] font-black uppercase tracking-[0.2em] transition-all hover:scale-110";
 
   return (
     <>
@@ -32,13 +32,13 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           <h1 className="text-[14px] text-[#FF7EB6] tracking-tight font-black uppercase italic" style={{ fontFamily: "'Press Start 2P', cursive" }}>
             Slime Forge
           </h1>
-          <div className="flex items-center gap-2 bg-black/40 backdrop-blur-md px-3 py-1.5 rounded-full border border-[#FF7EB6]/30 shadow-lg">
+          <div className="flex items-center gap-2 bg-transparent px-3 py-1.5">
             <Trophy className="w-3.5 h-3.5 text-yellow-400" />
             <span className="text-[10px] text-[#FF7EB6] font-black uppercase tracking-widest">Lv.{playerLevel}</span>
           </div>
         </div>
 
-        <div className="flex items-center gap-2 pointer-events-auto">
+        <div className="flex items-center gap-6 pointer-events-auto">
           {/* Navigation Buttons */}
           <button
             onClick={onBackToAltar}
