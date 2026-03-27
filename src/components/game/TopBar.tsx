@@ -51,14 +51,14 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           </div>
         </div>
 
-        <div className="flex items-center gap-12 pointer-events-auto">
+        <div className="flex items-center gap-8 pointer-events-auto">
           {/* Navigation Buttons */}
           <button
             onClick={onBackToAltar}
             className={`${navStyle} ${getGlowStyle('altar')} ${currentView === 'breeding' ? 'text-white' : ''}`}
           >
-            <span className="text-[14px] mr-1.5">🔮</span>
-            Altar
+            <span className="text-[16px] mr-1.5">🔮</span>
+            <span className="text-[18px]">Altar</span>
           </button>
           
           <button
@@ -68,16 +68,16 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
               {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
             </div>
-            <span className="text-[14px] mr-1.5">💎</span>
-            Sanctuaries
+            <span className="text-[16px] mr-1.5">💎</span>
+            <span className="text-[18px]">Sanctuaries</span>
           </button>
           
           <button
             onClick={onOpenBattle}
             className={`${navStyle} ${getGlowStyle('battleMap')} ${currentView === 'battleMap' ? 'text-white' : ''}`}
           >
-            <span className="text-[14px] mr-1.5">⚔️</span>
-            Battle Map
+            <span className="text-[16px] mr-1.5">⚔️</span>
+            <span className="text-[18px]">Battle Map</span>
           </button>
         </div>
       </div>
