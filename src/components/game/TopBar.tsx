@@ -49,7 +49,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
 
   return (
     <>
-      <div className="flex items-start justify-between px-12 pt-0 pb-[70px] bg-transparent relative z-[60] pointer-events-none">
+      <div className="flex items-start justify-between px-12 pt-[10px] pb-[130px] bg-transparent relative z-[60] pointer-events-none">
         
         <div className="flex items-start gap-8 pointer-events-auto">
           <h1 className="text-[24px] text-[#FF7EB6] tracking-tight font-black uppercase italic topbar-text" style={textStyle}>
