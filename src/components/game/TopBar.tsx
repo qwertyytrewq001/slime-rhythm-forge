@@ -49,7 +49,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
 
   return (
     <>
-      <div className="flex items-start justify-between px-12 pt-[10px] pb-[130px] bg-transparent relative z-[60] pointer-events-none">
+      <div className="flex items-start justify-between px-12 pt-[25px] pb-[115px] bg-transparent relative z-[60] pointer-events-none">
         
         <div className="flex items-start gap-8 pointer-events-auto">
           <h1 className="text-[24px] text-[#FF7EB6] tracking-tight font-black uppercase italic topbar-text" style={textStyle}>
@@ -66,30 +66,42 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           <button
             onClick={onBackToAltar}
             className={`${navStyle} ${getGlowStyle('altar')} ${currentView === 'breeding' ? 'text-white' : ''}`}
-            style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-            <span className="text-[16px]" style={textStyle}>🔮</span>
+            <img 
+              src={`${import.meta.env.BASE_URL}altar_icon.png`} 
+              alt="Altar" 
+              style={{ width: 'auto', height: '48px', objectFit: 'contain' }}
+            />
             <span className="topbar-text" style={textStyle}>Altar</span>
           </button>
           
           <button
             onClick={onOpenSanctuaries}
             className={`${navStyle} ${getGlowStyle('sanctuaries')} ${currentView === 'sanctuaries' ? 'text-white' : ''} relative group`}
-            style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
               {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
             </div>
-            <span className="text-[16px]" style={textStyle}>💎</span>
+            <img 
+              src={`${import.meta.env.BASE_URL}habitats_icon.png`} 
+              alt="Sanctuaries" 
+              style={{ width: 'auto', height: '48px', objectFit: 'contain' }}
+            />
             <span className="topbar-text" style={textStyle}>Sanctuaries</span>
           </button>
           
           <button
             onClick={onOpenBattle}
             className={`${navStyle} ${getGlowStyle('battleMap')} ${currentView === 'battleMap' ? 'text-white' : ''}`}
-            style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}
+            style={{ display: 'flex', alignItems: 'center', gap: '8px' }}
           >
-            <span className="text-[16px]" style={textStyle}>⚔️</span>
+            <img 
+              src={`${import.meta.env.BASE_URL}battlemap_icon (1).png`} 
+              alt="Battle Map" 
+              style={{ width: 'auto', height: '48px', objectFit: 'contain' }}
+            />
             <span className="topbar-text" style={textStyle}>Battle Map</span>
           </button>
         </div>
