@@ -810,7 +810,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
           background: 'rgba(255, 255, 255, 0.95)',
           borderRadius: '24px',
           border: '4px solid #FF7EB6',
-          padding: '24px 32px',
+          padding: '16px 24px',
           zIndex: 9999,
           boxShadow: '0 20px 50px rgba(255, 126, 182, 0.2)'
         }}
@@ -823,7 +823,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
           </div>
 
           {/* Dialogue Text */}
-          <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '80px'}}>
+          <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '50px'}}>
             <p className="text-slate-800 text-xl leading-relaxed font-bold italic" style={{ fontFamily: "'VT323', monospace" }}>
               {/* Ensure displayedText is always a string */}
               "{displayedText ?? ''}"

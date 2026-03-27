@@ -155,7 +155,7 @@ export function LevelDialogue({ isOpen, onClose, level, onVossEncounter }: Level
           style={{
             width: 'calc(100vw - 48px)', // Full width minus more margin
             maxWidth: '1200px', // Much wider maximum
-            height: '180px',
+            height: '120px',
             background: 'rgba(255, 255, 255, 0.9)', // White transparent
             border: '2px solid #ff6eb4', // Keep pink borders
             margin: '0 auto' // Center the wider box
