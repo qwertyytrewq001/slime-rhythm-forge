@@ -56,27 +56,30 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           <button
             onClick={onBackToAltar}
             className={`${navStyle} ${getGlowStyle('altar')} ${currentView === 'breeding' ? 'text-white' : ''}`}
+            style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}
           >
-            <span className="text-[16px] mr-1.5">🔮</span>
+            <span className="text-[16px]">🔮</span>
             <span className="text-[18px]">Altar</span>
           </button>
           
           <button
             onClick={onOpenSanctuaries}
             className={`${navStyle} ${getGlowStyle('sanctuaries')} ${currentView === 'sanctuaries' ? 'text-white' : ''} relative group`}
+            style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}
           >
             <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
               {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
             </div>
-            <span className="text-[16px] mr-1.5">💎</span>
+            <span className="text-[16px]">💎</span>
             <span className="text-[18px]">Sanctuaries</span>
           </button>
           
           <button
             onClick={onOpenBattle}
             className={`${navStyle} ${getGlowStyle('battleMap')} ${currentView === 'battleMap' ? 'text-white' : ''}`}
+            style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}
           >
-            <span className="text-[16px] mr-1.5">⚔️</span>
+            <span className="text-[16px]">⚔️</span>
             <span className="text-[18px]">Battle Map</span>
           </button>
         </div>
