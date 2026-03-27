@@ -86,7 +86,7 @@ function createInitialState(): GameState {
     const migratedSlimes = saved.slimes.map(migrateSlime);
     return {
       slimes: migratedSlimes,
-      goo: saved.goo ?? 0,
+      goo: saved.goo ?? 500,
       selectedSlimeId: null,
       breedSlot1: null,
       breedSlot2: null,
