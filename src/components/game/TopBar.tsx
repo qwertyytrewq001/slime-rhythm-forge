@@ -39,9 +39,9 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
 
   return (
     <>
-      <div className="flex items-center justify-between px-12 py-[70px] bg-transparent relative z-[60] pointer-events-none">
+      <div className="flex items-start justify-between px-12 py-[70px] bg-transparent relative z-[60] pointer-events-none">
         
-        <div className="flex items-center gap-8 pointer-events-auto">
+        <div className="flex items-start gap-8 pointer-events-auto">
           <h1 className="text-[24px] text-[#FF7EB6] tracking-tight font-black uppercase italic" style={{ fontFamily: "'Press Start 2P', cursive" }}>
             SLIME FORGE
           </h1>
@@ -51,7 +51,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           </div>
         </div>
 
-        <div className="flex items-center gap-8 pointer-events-auto">
+        <div className="flex items-start gap-8 pointer-events-auto">
           {/* Navigation Buttons */}
           <button
             onClick={onBackToAltar}
