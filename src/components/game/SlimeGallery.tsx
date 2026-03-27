@@ -45,6 +45,21 @@ export function SlimeGallery({ onSelect, filterElement }: SlimeGalleryProps = {}
   const currentPage = Math.min(page, totalPages - 1);
   const pageSlimes = filtered.slice(currentPage * PER_PAGE, (currentPage + 1) * PER_PAGE);
 
+  const handleSlimeSelect = (slimeId: string) => {
+    // Set the selected slime
+    dispatch({ type: 'SELECT_SLIME', id: slimeId });
+    
+    // Also place it on the first available breeding slot
+    if (!state.breedSlot1) {
+      dispatch({ type: 'SET_BREED_SLOT', slot: 1, id: slimeId });
+    } else if (!state.breedSlot2) {
+      dispatch({ type: 'SET_BREED_SLOT', slot: 2, id: slimeId });
+    }
+    
+    // Call the original onSelect prop if provided
+    if (onSelect) onSelect(slimeId);
+  };
+
   return (
     <div className="flex flex-col h-full bg-rose-50/90 backdrop-blur-xl border-r-4 border-[#FF7EB6]/20 p-8"
       style={{ fontFamily: "'VT323', monospace" }}>
@@ -95,10 +110,7 @@ export function SlimeGallery({ onSelect, filterElement }: SlimeGalleryProps = {}
                 state.selectedSlimeId === slime.id ? 'border-[#FF7EB6] bg-white shadow-lg' :
                 'border-[#FF7EB6]/10 bg-white/60 hover:border-[#FF7EB6]/30 hover:bg-white hover:scale-105'
               } cursor-pointer`}
-              onClick={() => {
-                if (onSelect) onSelect(slime.id);
-                else dispatch({ type: 'SELECT_SLIME', id: slime.id });
-              }}
+              onClick={() => handleSlimeSelect(slime.id)}
             >
               <div className="relative">
                 <div className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-20 transition-opacity" 

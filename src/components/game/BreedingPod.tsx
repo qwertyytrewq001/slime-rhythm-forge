@@ -278,9 +278,11 @@ export function BreedingPod(props: BreedingPodProps) {
             <div className="absolute bottom-4 w-16 h-4 bg-black/40 rounded-full blur-md" />
             
             {slot1Slime ? (
-              <SlimeCanvas slime={slot1Slime} size={100} animated />
+              <div className="relative -translate-y-14">
+                <SlimeCanvas slime={slot1Slime} size={100} animated />
+              </div>
             ) : (
-              <div className="relative -translate-y-16">
+              <div className="relative -translate-y-14">
                 <RitualInscription fontSize="6px" sparkles={4} className="scale-110">
                   Select<br/>Parent
                 </RitualInscription>
@@ -304,9 +306,11 @@ export function BreedingPod(props: BreedingPodProps) {
             <div className="absolute bottom-4 w-16 h-4 bg-black/40 rounded-full blur-md" />
 
             {slot2Slime ? (
-              <SlimeCanvas slime={slot2Slime} size={100} animated />
+              <div className="relative -translate-y-14">
+                <SlimeCanvas slime={slot2Slime} size={100} animated />
+              </div>
             ) : (
-              <div className="relative -translate-y-16">
+              <div className="relative -translate-y-14">
                 <RitualInscription 
                   fontSize="6px" 
                   sparkles={4} 
