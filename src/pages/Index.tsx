@@ -143,7 +143,7 @@ function GameLayout() {
 
   const toolbarCircle = "relative bg-black/40 h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
   const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
-  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-black/80 rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-black tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
+  const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-[#FFB3D1] rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-white tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
@@ -210,7 +210,7 @@ function GameLayout() {
         </div>
 
         {/* BOTTOM TOOLBAR */}
-        <div className="fixed bottom-6 right-6 z-[150] flex items-center gap-4 pointer-events-auto">
+        <div className="fixed bottom-6 left-6 z-[150] flex items-center gap-4 pointer-events-auto">
           <div className="relative group">
             <button onClick={handleMute} className={toolbarCircle}>
               {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}

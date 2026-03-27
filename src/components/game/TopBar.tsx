@@ -16,12 +16,11 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
   const [showAchievements, setShowAchievements] = useState(false);
 
   // Simple clean styling with hover effects and explicit font control
-  const navStyle = "text-[14px] text-[#FF7EB6] font-black uppercase tracking-[0.2em] transition-all duration-200 hover:text-white hover:scale-105 p-0 m-0 outline-none bg-transparent border-none flex items-start gap-1.5";
+  const navStyle = "text-[14px] font-black uppercase tracking-[0.2em] transition-all duration-200 hover:text-white hover:scale-105 p-0 m-0 outline-none bg-transparent border-none flex items-start gap-1.5";
   
   // Explicit font control to prevent conflicts
   const textStyle: React.CSSProperties = {
     fontFamily: "'Press Start 2P', cursive",
-    color: '#FF7EB6',
     fontSize: '14px',
     fontWeight: 'black' as const,
     textTransform: 'uppercase' as const
