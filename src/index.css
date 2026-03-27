@@ -63,8 +63,12 @@
   }
 
   h1, h2, h3, h4, h5, h6 {
-    font-family: 'Press Start 2P', cursive;
+    font-family: 'Press Start 2P', cursive !important;
     color: var(--primary);
+  }
+
+  .topbar-text {
+    font-family: 'Press Start 2P', cursive !important;
   }
 
   .text-pink-glow {
@@ -77,6 +81,19 @@
   .text-mystic {
     color: #FF7EB6;
     text-shadow: 0 0 10px rgba(255, 126, 182, 0.8), 1px 1px 2px #000;
+  }
+  .text-game-ui {
+    font-family: 'Fredoka', 'Comic Sans MS', cursive, sans-serif;
+    font-weight: 700;
+    text-transform: uppercase;
+    /* 4-way dark outline */
+    text-shadow: 
+      -3px -3px 0 #1a2e1a,
+      3px -3px 0 #1a2e1a,
+      -3px 3px 0 #1a2e1a,
+      3px 3px 0 #1a2e1a,
+      /* soft bottom drop shadow */
+      0 4px 8px rgba(0, 0, 0, 0.3);
   }
   .bg-obsidian-glass {
     background-color: rgba(10, 20, 10, 0.85);
