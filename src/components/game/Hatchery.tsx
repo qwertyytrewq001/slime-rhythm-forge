@@ -22,7 +22,7 @@ function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackPro
     if (!ctx) return;
 
     drawEnhancedEgg(ctx, {
-      size: 140,
+      size: 120,
       slime,
       crackProgress,
       isShaking: shaking
@@ -32,9 +32,9 @@ function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackPro
   return (
     <canvas 
       ref={canvasRef} 
-      width={140} 
-      height={140} 
-      className={`w-32 h-32 pixel-art transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`}
+      width={120} 
+      height={120} 
+      className={`w-28 h-28 pixel-art transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`}
     />
   );
 }
@@ -121,15 +121,15 @@ export function Hatchery() {
     <div ref={containerRef} className="fixed top-[78%] left-[68%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 group/hatchery">
       {discoveredSlime && <DiscoveryPopup slime={discoveredSlime} reason="Hatched from an Ancient Egg" onClose={finalizeHatch} />}
 
-      <div className="relative w-56 h-56 flex items-center justify-center cursor-pointer group pointer-events-auto" onClick={handleTap}>
+      <div className="relative w-56 h-56 cursor-pointer group pointer-events-auto" onClick={handleTap}>
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {[...Array(20)].map((_, i) => <FairySparkle key={i} index={i} />)}
         </div>
         {!activeHatching ? (
           <div className="flex flex-col items-center gap-2 translate-y-6"><div className="w-1 h-1" /></div>
         ) : (
-          <div className="relative flex flex-col items-center">
-            <div className="relative z-10 translate-x-4 translate-y-45">
+          <div className="relative flex flex-col">
+            <div className="absolute z-10 -right-36 -top-4">
               <HatchingEgg slime={activeHatching.slime} crackProgress={crackProgress} shaking={isRecentlyTapped || isHatching} />
               {isFinished && !isHatching && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
