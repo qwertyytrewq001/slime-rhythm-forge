@@ -129,7 +129,7 @@ export function Hatchery() {
           <div className="flex flex-col items-center gap-2 translate-y-6"><div className="w-1 h-1" /></div>
         ) : (
           <div className="relative flex flex-col items-center">
-            <div className="relative z-10 translate-x-8 translate-y-8">
+            <div className="relative z-10 translate-x-4 translate-y-45">
               <HatchingEgg slime={activeHatching.slime} crackProgress={crackProgress} shaking={isRecentlyTapped || isHatching} />
               {isFinished && !isHatching && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
