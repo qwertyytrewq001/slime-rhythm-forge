@@ -52,7 +52,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
       <div className="flex items-start justify-between px-12 py-[70px] bg-transparent relative z-[60] pointer-events-none">
         
         <div className="flex items-start gap-8 pointer-events-auto">
-          <h1 className="text-[24px] text-[#FF7EB6] tracking-tight font-black uppercase italic" style={textStyle}>
+          <h1 className="text-[24px] text-[#FF7EB6] tracking-tight font-black uppercase italic topbar-text" style={textStyle}>
             SLIME FORGE
           </h1>
           
@@ -69,7 +69,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
             style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}
           >
             <span className="text-[16px]" style={textStyle}>🔮</span>
-            <span style={textStyle}>Altar</span>
+            <span className="topbar-text" style={textStyle}>Altar</span>
           </button>
           
           <button
@@ -81,7 +81,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
               {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
             </div>
             <span className="text-[16px]" style={textStyle}>💎</span>
-            <span style={textStyle}>Sanctuaries</span>
+            <span className="topbar-text" style={textStyle}>Sanctuaries</span>
           </button>
           
           <button
@@ -90,7 +90,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
             style={{ display: 'flex', alignItems: 'flex-start', gap: '6px' }}
           >
             <span className="text-[16px]" style={textStyle}>⚔️</span>
-            <span style={textStyle}>Battle Map</span>
+            <span className="topbar-text" style={textStyle}>Battle Map</span>
           </button>
         </div>
       </div>
