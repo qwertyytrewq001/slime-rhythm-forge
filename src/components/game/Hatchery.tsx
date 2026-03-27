@@ -129,14 +129,14 @@ export function Hatchery() {
           <div className="flex flex-col items-center gap-2 translate-y-6"><div className="w-1 h-1" /></div>
         ) : (
           <div className="relative flex flex-col">
-            <div className="absolute z-10 -right-36 -top-4">
+            <div className="absolute z-10" style={{ right: '-140px', top: '8px' }}>
               <HatchingEgg slime={activeHatching.slime} crackProgress={crackProgress} shaking={isRecentlyTapped || isHatching} />
               {isFinished && !isHatching && (
                 <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                   <Zap className={`w-20 h-20 text-[#FF7EB6] ${crackProgress > 0 ? 'animate-ping' : ''} opacity-70`} />
                 </div>
               )}
-              <div className="absolute -top-16 left-1/2 -translate-x-1/2 w-48 text-center pointer-events-none">
+              <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 text-center pointer-events-none">
                 {isFinished ? (
                   <div className={`flex flex-col items-center ${isHatching ? 'animate-pulse' : 'animate-bounce'}`}>
                     <div className="text-[12px] text-[#FF7EB6] animate-inscription-glow font-black uppercase whitespace-nowrap tracking-wider drop-shadow-[0_2px_8px_rgba(255,126,182,0.4)]">
