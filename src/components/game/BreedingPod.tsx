@@ -82,7 +82,7 @@ const RitualInscription = ({
       {[...Array(sparkles)].map((_, i) => <FairySparkle key={i} index={i} color="#FFD1DC" />)}
     </div>
     <h3 
-      className={`text-[#FFD1DC] uppercase tracking-[0.3em] font-black transition-all duration-500 ${blueGlow ? 'animate-intense-blue-inscription-glow' : 'animate-intense-inscription-glow'} group-hover:scale-[1.35] group-hover:-translate-y-3 group-hover:brightness-125 group-hover:drop-shadow-[0_0_20px_#FFD1DC]`} 
+      className={`text-[#FFD1DC] uppercase tracking-[0.3em] font-black transition-all duration-500 ${blueGlow ? 'animate-intense-blue-inscription-glow' : 'animate-intense-inscription-glow'} group-hover:scale-[1.35] group-hover:brightness-125 group-hover:drop-shadow-[0_0_20px_#FFD1DC]`} 
       style={{ 
         fontFamily: "'Press Start 2P', cursive", 
         fontSize,
@@ -280,7 +280,7 @@ export function BreedingPod(props: BreedingPodProps) {
             {slot1Slime ? (
               <SlimeCanvas slime={slot1Slime} size={100} animated />
             ) : (
-              <div className="relative -translate-y-4">
+              <div className="relative -translate-y-16">
                 <RitualInscription fontSize="6px" sparkles={4} className="scale-110">
                   Select<br/>Parent
                 </RitualInscription>
@@ -306,7 +306,7 @@ export function BreedingPod(props: BreedingPodProps) {
             {slot2Slime ? (
               <SlimeCanvas slime={slot2Slime} size={100} animated />
             ) : (
-              <div className="relative -translate-y-4">
+              <div className="relative -translate-y-16">
                 <RitualInscription 
                   fontSize="6px" 
                   sparkles={4} 
