@@ -29,7 +29,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
   const textStyle: React.CSSProperties = {
     fontFamily: "'Press Start 2P', cursive",
     color: '#FF7EB6',
-    fontSize: '18px',
+    fontSize: '14px',  // Reduced from 18px to 14px
     fontWeight: 'black' as const,
     textTransform: 'uppercase' as const
   };
@@ -61,7 +61,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
           </div>
         </div>
 
-        <div className="flex items-start gap-8 pointer-events-auto">
+        <div className="flex items-start gap-4 pointer-events-auto">
           {/* Navigation Buttons */}
           <button
             onClick={onBackToAltar}
