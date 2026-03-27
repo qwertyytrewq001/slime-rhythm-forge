@@ -173,7 +173,7 @@ export function LevelDialogue({ isOpen, onClose, level, onVossEncounter }: Level
 
             {/* Dialogue Text - Much larger display area */}
             <div className="flex-1 overflow-y-auto pr-2" style={{maxWidth: '100%', minHeight: '100px'}}>
-              <p className="text-gray-800 text-lg leading-relaxed font-medium" style={{wordWrap: 'break-word', overflowWrap: 'break-word', textShadow: '1px 1px 2px rgba(255,255,255,0.8)', color: '#1a1a1a'}}>
+              <p className="text-gray-800 text-2xl leading-relaxed font-medium" style={{wordWrap: 'break-word', overflowWrap: 'break-word', textShadow: '1px 1px 2px rgba(255,255,255,0.8)', color: '#1a1a1a'}}>
                 {displayedText}
                 {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
               </p>

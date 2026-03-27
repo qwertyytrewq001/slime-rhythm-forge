@@ -824,7 +824,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
           {/* Dialogue Text */}
           <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '50px'}}>
-            <p className="text-slate-800 text-xl leading-relaxed font-bold italic" style={{ fontFamily: "'VT323', monospace" }}>
+            <p className="text-slate-800 text-2xl leading-relaxed font-bold italic" style={{ fontFamily: "'VT323', monospace" }}>
               {/* Ensure displayedText is always a string */}
               "{displayedText ?? ''}"
               {isTyping && <span className="animate-pulse ml-1" style={{color: '#FF7EB6'}}>|</span>}
