@@ -23,7 +23,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
   };
 
   // Simple clean styling with hover effects
-  const navStyle = "text-[14px] text-[#FF7EB6] font-black uppercase tracking-[0.2em] transition-all duration-200 hover:text-white hover:scale-105 p-0 m-0 outline-none bg-transparent border-none";
+  const navStyle = "text-[14px] text-[#FF7EB6] font-black uppercase tracking-[0.2em] transition-all duration-200 hover:text-white hover:scale-105 p-0 m-0 outline-none bg-transparent border-none flex items-start gap-1.5";
   const getGlowStyle = (viewType: 'altar' | 'sanctuaries' | 'battleMap') => {
     switch (viewType) {
       case 'altar':
