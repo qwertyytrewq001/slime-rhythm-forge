@@ -8,10 +8,11 @@ interface TopBarProps {
   onOpenHabitats?: () => void;
   onOpenBattle?: () => void;
   onOpenSanctuaries?: () => void;
-  currentView?: 'breeding' | 'habitats' | 'battleMap' | 'sanctuaries';
+  onOpenBreedingDen?: () => void;
+  currentView?: 'breeding' | 'breedingDen' | 'habitats' | 'battleMap' | 'sanctuaries';
 }
 
-export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, currentView }: TopBarProps) {
+export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenBreedingDen, currentView }: TopBarProps) {
   const { playerLevel } = useGameState();
   const [showAchievements, setShowAchievements] = useState(false);
 
@@ -108,6 +109,44 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, current
 
         {/* Far top right navigation */}
         <div className="flex items-start gap-1 pointer-events-auto">
+          {currentView === 'breeding' && (
+            <button
+              onClick={onOpenBreedingDen}
+              className={`${navStyle} ${getGlowStyle('altar')}`}
+              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
+            >
+              <img 
+                src={`${import.meta.env.BASE_URL}altar_icon.png`} 
+                alt="Breeding Den" 
+                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
+              />
+              <span className="text-game-ui" style={{ 
+                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
+                fontSize: '16px',
+                color: '#b2ebff'
+              }}>BREEDING DEN</span>
+            </button>
+          )}
+          
+          {currentView === 'breedingDen' && (
+            <button
+              onClick={onBackToAltar}
+              className={`${navStyle} ${getGlowStyle('altar')}`}
+              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
+            >
+              <img 
+                src={`${import.meta.env.BASE_URL}altar_icon.png`} 
+                alt="Back to Altar" 
+                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
+              />
+              <span className="text-game-ui" style={{ 
+                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
+                fontSize: '16px',
+                color: '#b2ebff'
+              }}>ALTAR</span>
+            </button>
+          )}
+          
           {currentView === 'breeding' && (
             <button
               onClick={onOpenBattle}

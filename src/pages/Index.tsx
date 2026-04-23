@@ -1,9 +1,10 @@
 import type React from 'react';
 import { useEffect, useState } from 'react';
-import { GameProvider, useGameState } from '@/hooks/useGameState';
+import { GameProvider, useGameState, getStage } from '@/hooks/useGameState';
 import { TopBar } from '@/components/game/TopBar';
 import { SlimeGallery } from '@/components/game/SlimeGallery';
 import { BreedingPod } from '@/components/game/BreedingPod';
+import { BreedingDen } from '@/components/game/BreedingDen';
 import { StatsPanel } from '@/components/game/StatsPanel';
 import { HabitatViewer } from '@/components/game/HabitatViewer';
 import { Shop } from '@/components/game/Shop';
@@ -11,6 +12,7 @@ import { Hatchery } from '@/components/game/Hatchery';
 import { IslandGrid } from '@/components/game/IslandGrid';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
+import { preloadEssentialSprites } from '@/utils/spriteLoader';
 import { ShoppingBag, Images, Info, Trophy, Volume2, VolumeX, Sword } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
@@ -27,9 +29,32 @@ import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
-  const [currentView, setCurrentView] = useState<'breeding' | 'sanctuaries' | 'battleMap'>('breeding');
+  const [currentView, setCurrentView] = useState<'breeding' | 'breedingDen' | 'sanctuaries' | 'battleMap' | 'habitats'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
+  
+  // Preload sprites on app startup
+  useEffect(() => {
+    preloadEssentialSprites().then(() => {
+      console.log('✅ Essential sprites preloaded successfully!');
+      
+      // Quick test of sprite mapping
+      import('@/utils/spriteTest').then(({ testSpriteMapping }) => {
+        testSpriteMapping();
+      }).catch(err => {
+        console.warn('Sprite test failed:', err);
+      });
+      
+      // Comprehensive slime system verification
+      import('@/utils/slimeVerification').then(({ verifyAllSlimeSystems }) => {
+        verifyAllSlimeSystems();
+      }).catch(err => {
+        console.warn('Slime verification failed:', err);
+      });
+    }).catch(err => {
+      console.warn('Failed to preload sprites:', err);
+    });
+  }, []);
   
   // Synchronously check if we should show the tutorial to prevent flickering
   const [showTutorial, setShowTutorial] = useState(() => {
@@ -48,6 +73,8 @@ function GameLayout() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [breedingGalleryOpen, setBreedingGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
+
+  const [ageMessage, setAgeMessage] = useState<string | null>(null);
 
   // Check for first launch and trigger tutorial
   useEffect(() => {
@@ -76,6 +103,17 @@ function GameLayout() {
         return; 
       }
       
+      // Check slime age for breeding
+      const selectedSlime = state.slimes.find(s => s.id === id);
+      if (selectedSlime) {
+        const stage = getStage(selectedSlime.level);
+        if (stage !== 'adult') {
+          setAgeMessage(`Level up your slime to adult before breeding! ${selectedSlime.name} is currently a ${stage} (level ${selectedSlime.level}).`);
+          setTimeout(() => setAgeMessage(null), 3000);
+          return;
+        }
+      }
+      
       dispatch({ type: 'SET_BREED_SLOT', slot: gallerySlot, id });
     }
     if (state.breedSlot1 && state.breedSlot2) {
@@ -98,6 +136,13 @@ function GameLayout() {
     setBattleTeam({ player, opponent });
     setShowBattlePreview(false);
   };
+
+  // Close habitat viewer when navigating away from sanctuaries
+  useEffect(() => {
+    if (currentView !== 'sanctuaries') {
+      setSelectedHabitatId(null);
+    }
+  }, [currentView]);
 
   const handleBattleComplete = (result: { winner: 'player' | 'opponent'; level: number }) => {
     setBattleTeam(null);
@@ -178,8 +223,19 @@ function GameLayout() {
         </div>
       )}
 
+      {/* 1.5. BREEDING DEN LAYER (Separate from main interface) */}
+      {currentView === 'breedingDen' && (
+        <div className="fixed inset-0 z-[95] pointer-events-auto">
+          <BreedingDen 
+            onRequestGallery={openGalleryForSlot} 
+            onBackToAltar={() => setCurrentView('breeding')} 
+            onNavigateToHatchery={() => setCurrentView('breeding')}
+          />
+        </div>
+      )}
+
       {/* 2. MAIN GAME INTERFACE */}
-      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' ? 'hidden' : ''}`}>
+      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' || currentView === 'breedingDen' ? 'hidden' : ''}`}>
         
         {/* TopBar (Navigation) */}
         <div className="pointer-events-auto relative z-[60]">
@@ -188,15 +244,16 @@ function GameLayout() {
             onBackToAltar={() => setCurrentView('breeding')} 
             onOpenSanctuaries={() => setCurrentView('sanctuaries')}
             onOpenBattle={() => setCurrentView('battleMap')}
+            onOpenBreedingDen={() => setCurrentView('breedingDen')}
           />
         </div>
 
         {/* Central Content */}
         <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none relative">
           {currentView === 'breeding' && (
-            <div className="w-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF7EB6]/5 rounded-full blur-[100px] pointer-events-none" />
-              <BreedingPod onRequestGallery={openGalleryForSlot} />
+              <BreedingPod onRequestGallery={openGalleryForSlot} onNavigateToBreedingDen={() => setCurrentView('breedingDen')} />
               <Hatchery />
             </div>
           )}
@@ -284,6 +341,15 @@ function GameLayout() {
       {/* 3. GLOBAL POPUPS */}
       {showAchievements && (
         <Achievements onClose={() => setShowAchievements(false)} />
+      )}
+
+      {/* Age restriction message */}
+      {ageMessage && (
+        <div className="fixed top-32 left-1/2 -translate-x-1/2 z-[200]">
+          <div className="bg-red-500/90 text-white px-6 py-3 rounded-xl border-2 border-red-300 shadow-lg backdrop-blur-sm">
+            <p className="font-bold text-center">{ageMessage}</p>
+          </div>
+        </div>
       )}
 
       {showBattlePreview && selectedLevel !== null && (

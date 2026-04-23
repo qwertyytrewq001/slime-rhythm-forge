@@ -54,6 +54,14 @@ export function Hatchery() {
   const activeHatching = state.activeHatching;
   const isFinished = activeHatching && now >= activeHatching.endTime;
 
+  console.log('🔍 Hatchery: activeHatching =', activeHatching);
+  console.log('🔍 Hatchery: isFinished =', isFinished);
+  console.log('🔍 Hatchery: now =', now);
+  if (activeHatching) {
+    console.log('🔍 Hatchery: activeHatching.endTime =', activeHatching.endTime);
+    console.log('🔍 Hatchery: time remaining =', activeHatching.endTime - now);
+  }
+
   useEffect(() => {
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);

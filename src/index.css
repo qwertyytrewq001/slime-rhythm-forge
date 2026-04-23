@@ -28,6 +28,31 @@
     --radius: 1rem;
   }
 
+  /* Custom animations for discovery popup */
+  @keyframes float {
+    0%, 100% {
+      transform: translateY(0px) translateX(0px);
+    }
+    25% {
+      transform: translateY(-20px) translateX(10px);
+    }
+    50% {
+      transform: translateY(0px) translateX(-10px);
+    }
+    75% {
+      transform: translateY(-10px) translateX(5px);
+    }
+  }
+
+  @keyframes spin-slow {
+    from {
+      transform: rotate(0deg);
+    }
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
   .dark {
     --background: 110 15% 10%;
     --foreground: 45 15% 90%;

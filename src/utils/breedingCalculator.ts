@@ -17,20 +17,11 @@ export interface BreedingResult {
  * The Enhanced 4-Step Breeding Pipeline with Level Bonuses and Rarity Heritage
  * Gene Extraction → Pool Filtering → Level Bonus → Rarity Heritage → Dynamic Weighting → Result Selection
  */
-export function calculateBreedingResult(parent1Id: string, parent2Id: string, parent1Level: number = 1, parent2Level: number = 1): BreedingResult | null {
-  console.log(`🧬 Enhanced Breeding Calculator: Parent 1 = ${parent1Id} (Lv${parent1Level}), Parent 2 = ${parent2Id} (Lv${parent2Level})`);
+export function calculateBreedingResult(parent1Element: SlimeElement, parent2Element: SlimeElement, parent1Level: number = 1, parent2Level: number = 1): BreedingResult | null {
+  console.log(`🧬 Enhanced Breeding Calculator: Parent 1 = ${parent1Element} (Lv${parent1Level}), Parent 2 = ${parent2Element} (Lv${parent2Level})`);
   
   // Step 1: Gene Extraction - Get combined element list from parents
-  const parent1 = SLIME_CODEX_MAP.get(parent1Id);
-  const parent2 = SLIME_CODEX_MAP.get(parent2Id);
-  
-  if (!parent1 || !parent2) {
-    console.error('❌ Invalid parent IDs provided to breeding calculator');
-    return null;
-  }
-  
-  // Collect all unique elements from both parents
-  const combinedElements = [...new Set([...parent1.elements, ...parent2.elements])];
+  const combinedElements = [parent1Element, parent2Element];
   console.log(`🧬 Combined Elements: [${combinedElements.join(', ')}]`);
   
   // Step 2: Pool Filtering - Scan codex for matching element subsets
@@ -51,11 +42,9 @@ export function calculateBreedingResult(parent1Id: string, parent2Id: string, pa
   const luckBonus = Math.floor(totalParentLevel * 0.5); // Level Luck = (Parent1Level + Parent2Level) * 0.5%
   console.log(`🧬 Level Luck Bonus: +${luckBonus}% (from parents Lv${parent1Level} + Lv${parent2Level})`);
   
-  // Step 4: Rarity Heritage - Gene Strength from parent tiers
-  const parent1Tier = parent1.rarityTier;
-  const parent2Tier = parent2.rarityTier;
-  const geneStrength = calculateGeneStrength(parent1Tier, parent2Tier);
-  console.log(`🧬 Gene Strength Bonus: ${geneStrength}% (from ${parent1Tier} + ${parent2Tier} parents)`);
+  // Step 4: Rarity Heritage - Gene Strength from parent tiers (use Common as default for user slimes)
+  const geneStrength = calculateGeneStrength('Common', 'Common');
+  console.log(`🧬 Gene Strength Bonus: ${geneStrength}% (from Common + Common parents)`);
   
   // Step 5: Dynamic Weighting - Apply level bonus and gene strength to pool
   const { finalWeights, adjustedPool } = applyDynamicWeighting(filteredPool, luckBonus, geneStrength);
@@ -232,8 +221,8 @@ export function getRarityChances(pool: BreedingPool): Record<string, number> {
 /**
  * Get final breeding chances for display (Luck Meter)
  */
-export function getBreedingChances(parent1Id: string, parent2Id: string, parent1Level: number = 1, parent2Level: number = 1): Record<string, number> {
-  const result = calculateBreedingResult(parent1Id, parent2Id, parent1Level, parent2Level);
+export function getBreedingChances(parent1Element: SlimeElement, parent2Element: SlimeElement, parent1Level: number = 1, parent2Level: number = 1): Record<string, number> {
+  const result = calculateBreedingResult(parent1Element, parent2Element, parent1Level, parent2Level);
   if (!result) return {};
   
   return result.finalWeights;

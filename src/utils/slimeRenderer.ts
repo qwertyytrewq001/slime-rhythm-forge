@@ -1,17 +1,137 @@
 import { Slime, SlimeElement, SlimeEvolutionStage } from '@/types/slime';
 import { COLOR_PALETTE, ELEMENT_COLORS } from '@/data/traitData';
+import { loadSlimeSprite, getSpriteIdForSlime } from './spriteLoader';
 
-const INTERNAL_SIZE = 64;
+const INTERNAL_SIZE = 128; // Increased from 64 for better quality
 
 interface SlimeRenderOptions {
   // Strictly opt-in: preserve existing look by default.
   enhanced3D?: boolean;
+  useSprites?: boolean; // New option to use sprite rendering
 }
 
 export function getStage(level: number): SlimeEvolutionStage {
   if (level < 5) return 'baby';
   if (level < 10) return 'teen';
   return 'adult';
+}
+
+/**
+ * Enhanced slime renderer with sprite support
+ */
+export async function drawSlimeWithSprite(
+  ctx: CanvasRenderingContext2D,
+  slime: Slime,
+  canvasSize: number,
+  frame: number = 0,
+  animated: boolean = true,
+  isHurt: boolean = false,
+  options: SlimeRenderOptions = {}
+): Promise<void> {
+  const s = INTERNAL_SIZE;
+  ctx.canvas.width = s;
+  ctx.canvas.height = s;
+  ctx.imageSmoothingEnabled = true; // Enable smoothing for better quality
+  ctx.imageSmoothingQuality = 'high'; // Use high quality smoothing
+  ctx.clearRect(0, 0, s, s);
+
+  const level = slime.level ?? 1;
+  const stage = getStage(level);
+
+  // Stage-based scaling
+  let stageScale = 1.0;
+  if (stage === 'baby') {
+    stageScale = 0.6;
+  } else if (stage === 'teen') {
+    stageScale = 0.85;
+  }
+
+  // Calculate size with stage scaling applied properly
+  const adjustedSize = canvasSize * stageScale;
+
+  // Try to load and draw sprite
+  try {
+    const spriteId = getSpriteIdForSlime(slime);
+    const sprite = await loadSlimeSprite(spriteId);
+    
+    // Calculate sprite positioning and scaling with proper stage scaling
+    const spriteSize = Math.min(adjustedSize * 0.8, sprite.width, sprite.height);
+    const x = (s - spriteSize) / 2;
+    const y = (s - spriteSize) / 2;
+    
+    // Apply animation transforms
+    ctx.save();
+    ctx.translate(s/2, s/2);
+    
+    if (animated) {
+      const phase = frame * 0.02; // Slowed down from 0.06 to 0.02
+      const bounce = Math.abs(Math.sin(phase * 1.3)) * 1; // Reduced bounce from 2 to 1
+      const sway = Math.sin(phase * 0.8) * 0.5; // Reduced sway from 1 to 0.5
+      ctx.translate(sway, -bounce);
+    }
+    
+    if (isHurt) {
+      const shake = Math.sin(frame * 0.8) * 2;
+      ctx.translate(shake, 0);
+    }
+    
+    ctx.translate(-s/2, -s/2);
+    
+    // Draw the sprite
+    ctx.drawImage(sprite, x, y, spriteSize, spriteSize);
+    ctx.restore();
+    
+    // Draw rarity stars overlay
+    drawRarityStars(ctx, slime, s);
+    
+  } catch (error) {
+    console.warn(`Failed to render sprite for ${slime.name}, falling back to procedural:`, error);
+    // Fallback to procedural rendering
+    drawSlime(ctx, slime, canvasSize, frame, animated, isHurt, options);
+  }
+}
+
+/**
+ * Draw rarity stars overlay
+ */
+function drawRarityStars(ctx: CanvasRenderingContext2D, slime: Slime, canvasSize: number): void {
+  const stars = slime.rarityStars ?? 1;
+  if (stars <= 1) return; // No stars for common slimes
+  
+  ctx.save();
+  ctx.fillStyle = '#FFD700';
+  ctx.strokeStyle = '#FFA500';
+  ctx.lineWidth = 1;
+  
+  const starSize = 4;
+  const spacing = 8;
+  const totalWidth = stars * spacing - (spacing - starSize);
+  const startX = (canvasSize - totalWidth) / 2;
+  const y = canvasSize - 8;
+  
+  for (let i = 0; i < stars; i++) {
+    const x = startX + i * spacing;
+    drawStar(ctx, x, y, starSize);
+  }
+  
+  ctx.restore();
+}
+
+/**
+ * Draw a simple star shape
+ */
+function drawStar(ctx: CanvasRenderingContext2D, x: number, y: number, size: number): void {
+  ctx.beginPath();
+  for (let i = 0; i < 5; i++) {
+    const angle = (i * 4 * Math.PI) / 5 - Math.PI / 2;
+    const px = x + Math.cos(angle) * size;
+    const py = y + Math.sin(angle) * size;
+    if (i === 0) ctx.moveTo(px, py);
+    else ctx.lineTo(px, py);
+  }
+  ctx.closePath();
+  ctx.fill();
+  ctx.stroke();
 }
 
 export function drawSlime(
@@ -26,7 +146,8 @@ export function drawSlime(
   const s = INTERNAL_SIZE;
   ctx.canvas.width = s;
   ctx.canvas.height = s;
-  ctx.imageSmoothingEnabled = false;
+  ctx.imageSmoothingEnabled = true; // Enable smoothing for better quality
+  ctx.imageSmoothingQuality = 'high'; // Use high quality smoothing
   ctx.clearRect(0, 0, s, s);
 
   const t = slime.traits;
@@ -106,13 +227,18 @@ export function drawSlime(
     }
   }
 
-  // Mythic dynamic size scaling (1.2-1.5x)
+  // Calculate size with stage scaling applied properly
   let sizeMultiplier = t.size * 0.42 * stageScale;
+  
+  // Apply mythic dynamic size scaling (1.2-1.5x)
   if (stars >= 5) {
     sizeMultiplier *= animated ? 1.3 + Math.sin(frame * 0.025) * 0.1 : 1.3;
   } else if (stars >= 4) {
     sizeMultiplier *= 1.1;
   }
+  
+  // Final size calculation
+  const finalSize = canvasSize * sizeMultiplier;
 
   ctx.save();
   ctx.translate(s / 2 + sway, s / 2 + bounce);

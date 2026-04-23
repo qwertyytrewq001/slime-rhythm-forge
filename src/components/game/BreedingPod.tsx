@@ -20,6 +20,7 @@ const hasSeenEvent = (eventName: string): boolean => {
 
 interface BreedingPodProps {
   onRequestGallery?: (slot: 1 | 2) => void; 
+  onNavigateToBreedingDen?: () => void;
 }
 
 function ResultEgg({ slime }: { slime: Slime }) {
@@ -96,7 +97,7 @@ const RitualInscription = ({
 
 export function BreedingPod(props: BreedingPodProps) {
   const { state, dispatch } = useGameState();
-  const { onRequestGallery } = props;
+  const { onRequestGallery, onNavigateToBreedingDen } = props;
   const [mergeParticles, setMergeParticles] = useState(false);
   const [now, setNow] = useState(Date.now());
   const [whisperIndex, setWhisperIndex] = useState(0);
@@ -232,18 +233,12 @@ export function BreedingPod(props: BreedingPodProps) {
 
   const handleSlotClick = (slot: 1 | 2) => {
     if (state.activeBreeding) return;
-    console.log(`🖼️ handleSlotClick called with slot ${slot}`);
-    console.log(`🖼️ onRequestGallery available: ${!!onRequestGallery}`);
-    if (onRequestGallery) {
-      console.log(`🖼️ Calling onRequestGallery(${slot})`);
-      onRequestGallery(slot);
-    } else {
-      console.log('❌ onRequestGallery not available');
+    console.log(`Navigating to BreedingDen for slot ${slot}`);
+    
+    // Only navigate to BreedingDen, don't open gallery
+    if (onNavigateToBreedingDen) {
+      onNavigateToBreedingDen();
     }
-    // Also open gallery when clicking on "Select Parent" text in breeding pod
-    console.log(`🖼️ Breeding Pod Select Parent ${slot} clicked - opening gallery`);
-    const event = new CustomEvent('openBreedingGallery', { detail: { slot: slot } });
-    window.dispatchEvent(event);
   };
 
   return (
@@ -279,7 +274,7 @@ export function BreedingPod(props: BreedingPodProps) {
             
             {slot1Slime ? (
               <div className="relative -translate-y-14">
-                <SlimeCanvas slime={slot1Slime} size={100} animated />
+                <SlimeCanvas slime={slot1Slime} size={100} animated sizeMultiplier={2.0} animationStyle="playful" />
               </div>
             ) : (
               <div className="relative -translate-y-14">
@@ -295,19 +290,14 @@ export function BreedingPod(props: BreedingPodProps) {
             className={`absolute right-[0%] top-[0%] w-32 h-32 flex items-center justify-center transition-all cursor-pointer ${breeding ? 'animate-spirit-pulse' : ''}`}
             onDragOver={handleDragOver}
             onDrop={handleDrop(2)}
-            onClick={() => {
-              console.log('🔥 PEDESTAL CLICKED - RIGHT');
-              if (props.onRequestGallery) {
-                props.onRequestGallery(2);
-              }
-            }}
+            onClick={() => handleSlotClick(2)}
           >
             {/* Grounding shadow/base for the slime */}
             <div className="absolute bottom-4 w-16 h-4 bg-black/40 rounded-full blur-md" />
 
             {slot2Slime ? (
               <div className="relative -translate-y-14">
-                <SlimeCanvas slime={slot2Slime} size={100} animated />
+                <SlimeCanvas slime={slot2Slime} size={100} animated sizeMultiplier={2.0} animationStyle="playful" />
               </div>
             ) : (
               <div className="relative -translate-y-14">

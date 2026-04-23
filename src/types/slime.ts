@@ -14,12 +14,10 @@ export interface SlimeTraits {
   model: number;      // 0=Blob, 1=Spiky, 2=Jelly
 }
 
-// 18 Dragon Mania Legends-inspired elements
+// 10 Core Elements
 export type SlimeElement =
   | 'fire' | 'water' | 'plant' | 'earth' | 'wind'
-  | 'ice' | 'electric' | 'metal' | 'light' | 'shadow'
-  | 'cosmic' | 'void' | 'toxic' | 'crystal' | 'lava'
-  | 'nature' | 'arcane' | 'divine';
+  | 'ice' | 'electric' | 'metal' | 'light' | 'shadow';
 
 // Rarity tiers (DML-inspired scaling)
 export type RarityTier = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Divine' | 'Ancient';

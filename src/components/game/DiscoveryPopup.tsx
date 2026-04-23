@@ -37,131 +37,167 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
     onClose();
   };
 
+  // Get habitat display name from ELEMENT_DISPLAY_NAMES
+  const getHabitatDisplayName = (habitat: any) => {
+    const elementKey = habitat.element as keyof typeof ELEMENT_DISPLAY_NAMES;
+    return ELEMENT_DISPLAY_NAMES[elementKey] || 'Unknown Habitat';
+  };
+
   const content = (
-    <div className={`fixed inset-0 z-[1000] flex items-center justify-center p-6 sm:p-12 transition-all duration-700 ${animate ? 'opacity-100' : 'opacity-0'}`}>
-      {/* 1. SOLID DARK OVERLAY (Blocks everything out) */}
-      <div className="absolute inset-0 bg-black/90 backdrop-blur-md" onClick={onClose} />
+    <div className={`fixed inset-0 z-[1000] flex items-center justify-center p-4 transition-all duration-700 ${animate ? 'opacity-100' : 'opacity-0'}`}>
+      {/* 1. BEAUTIFUL GRADIENT OVERLAY (Like Dragon Mania Legends) */}
+      <div className="absolute inset-0 bg-gradient-to-br from-purple-900/80 via-blue-900/80 to-pink-900/80 backdrop-blur-sm" onClick={onClose} />
       
-      {/* 2. BACKGROUND EFFECTS */}
+      {/* 2. MAGICAL BACKGROUND EFFECTS */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {[...Array(30)].map((_, i) => (
-          <div key={i} className="absolute animate-fairy-sparkle w-1.5 h-1.5 rounded-full"
+        {/* Magical sparkles */}
+        {[...Array(15)].map((_, i) => (
+          <div key={i} className="absolute w-2 h-2 rounded-full animate-pulse"
                style={{
                  left: `${Math.random() * 100}%`,
                  top: `${Math.random() * 100}%`,
-                 backgroundColor: i % 2 === 0 ? '#FF7EB6' : '#40E0D0',
-                 animationDelay: `${Math.random() * 2}s`,
-                 '--tx': `${(Math.random() - 0.5) * 300}px`,
-                 '--ty': `${(Math.random() - 0.5) * 300}px`,
-               } as any} />
+                 backgroundColor: i % 3 === 0 ? '#FFD700' : i % 3 === 1 ? '#FF69B4' : '#00CED1',
+                 animationDelay: `${Math.random() * 3}s`,
+                 opacity: 0.6
+               }} />
+        ))}
+        
+        {/* Floating particles */}
+        {[...Array(8)].map((_, i) => (
+          <div key={i} className="absolute w-1 h-1 bg-white/40 rounded-full"
+               style={{
+                 left: `${Math.random() * 100}%`,
+                 top: `${Math.random() * 100}%`,
+                 animation: `float ${5 + Math.random() * 3}s ease-in-out infinite`,
+                 animationDelay: `${Math.random() * 2}s`
+               }} />
         ))}
       </div>
 
-      {/* 3. THE MAIN MASTER CARD (Scaled down for better screen fit) */}
+      {/* 3. BEAUTIFUL MAIN CARD (Properly sized for screen) */}
       <div 
-        className={`relative w-full max-w-4xl bg-[#0a140a] border-[6px] border-[#FF7EB6] rounded-[3rem] shadow-[0_0_100px_rgba(255,126,182,0.3),inset_0_0_40px_rgba(0,0,0,1)] flex flex-col md:flex-row overflow-hidden transition-all duration-1000 transform ${animate ? 'scale-100 translate-y-0' : 'scale-90 translate-y-10'}`}
+        className={`relative w-full max-w-2xl lg:max-w-3xl bg-gradient-to-br from-indigo-600 via-purple-600 to-pink-600 border-4 border-yellow-400/50 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-1000 transform ${animate ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}
         onClick={(e) => e.stopPropagation()} 
       >
+        {/* Decorative border glow */}
+        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-yellow-400/20 via-transparent to-pink-400/20 animate-pulse" />
         
-        {/* TACTILE CLOSE BUTTON */}
+        {/* Close button */}
         <button 
           onClick={onClose}
-          className="absolute top-6 right-6 w-12 h-12 bg-[#FF7EB6] text-black rounded-full flex items-center justify-center shadow-[0_0_20px_#FF7EB6] hover:scale-110 active:scale-90 transition-all z-[1010] border-4 border-black"
+          className="absolute top-3 right-3 w-8 h-8 bg-gradient-to-br from-yellow-400 to-orange-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-90 transition-all z-[1010] border-2 border-white/50"
         >
-          <X className="w-7 h-7 stroke-[4px]" />
+          <X className="w-4 h-4" />
         </button>
 
-        {/* LEFT PANEL: SHOWCASE */}
-        <div className="w-full md:w-[40%] bg-black/60 p-8 flex flex-col items-center justify-center relative border-b-6 md:border-b-0 md:border-r-6 border-[#FF7EB6]/20">
-          <div className="absolute inset-0 rounded-full blur-[80px] opacity-30 animate-pulse pointer-events-none" 
-               style={{ backgroundColor: RARITY_TIER_COLORS[slime.rarityTier] }} />
-          
-          <div className="relative group">
-             <div className="absolute -inset-12 bg-primary/20 rounded-full blur-3xl animate-spirit-pulse" />
-             <SlimeCanvas slime={slime} size={240} animated />
-          </div>
-
-          <div className="mt-8 px-6 py-2 bg-primary rounded-xl border-2 border-white/20 shadow-xl animate-bounce">
-            <span className="text-[9px] font-black text-primary-foreground uppercase tracking-[0.2em]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-              NEW SPIRIT!
+        {/* TOP DECORATIVE BANNER */}
+        <div className="bg-gradient-to-r from-yellow-400/30 to-pink-400/30 p-3 border-b-2 border-yellow-400/50">
+          <div className="text-center">
+            <span className="text-lg font-bold text-white uppercase tracking-wider drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+              ✨ NEW DISCOVERY ✨
             </span>
           </div>
         </div>
 
-        {/* RIGHT PANEL: DETAILS & HABITATS */}
-        <div className="w-full md:w-[60%] p-8 md:p-10 flex flex-col">
-          <p className="text-[11px] text-[#FF7EB6] font-black uppercase tracking-[0.4em] mb-4 text-center sm:text-left" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-            NEW SPECIES UNLOCKED!
-          </p>
-          
-          <h2 className="text-4xl text-white font-black uppercase tracking-tight mb-6 drop-shadow-[0_4px_0_rgba(0,0,0,1)] text-center sm:text-left">
-            {slime.name}
-          </h2>
-          
-          <div className="flex flex-wrap items-center justify-center md:justify-start gap-4 mb-6">
-            <div className="flex items-center gap-2 px-4 py-1.5 rounded-xl border-2 bg-black shadow-xl"
-                  style={{ color: RARITY_TIER_COLORS[slime.rarityTier], borderColor: RARITY_TIER_COLORS[slime.rarityTier] }}>
-              <Star className="w-4 h-4 fill-current" />
-              <span className="text-[12px] font-black uppercase tracking-widest">{slime.rarityTier}</span>
+        {/* CONTENT AREA */}
+        <div className="flex flex-col lg:flex-row">
+          {/* LEFT PANEL: SLIME SHOWCASE */}
+          <div className="w-full lg:w-1/2 bg-gradient-to-br from-blue-800/50 to-purple-800/50 p-6 flex flex-col items-center justify-center relative">
+            {/* Magical glow background */}
+            <div className="absolute inset-0 rounded-full bg-gradient-to-r from-yellow-400/20 to-pink-400/20 blur-xl animate-pulse" />
+            
+            {/* Slime display */}
+            <div className="relative z-10">
+              <div className="absolute -inset-8 bg-gradient-to-br from-yellow-400/30 to-transparent rounded-full blur-lg animate-spin-slow" />
+              <SlimeCanvas slime={slime} size={180} animated sizeMultiplier={2.0} animationStyle="excited" />
             </div>
-            <div className="h-6 w-1 bg-white/10 rounded-full" />
-            <span className="text-[16px] text-primary font-black uppercase tracking-widest">{ELEMENT_DISPLAY_NAMES[slime.element]}</span>
+
+            {/* Discovery badge */}
+            <div className="mt-6 px-4 py-2 bg-gradient-to-r from-yellow-400 to-orange-500 rounded-xl border-2 border-white/50 shadow-lg animate-bounce">
+              <span className="text-sm font-bold text-white uppercase tracking-wider" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+                NEW SPIRIT!
+              </span>
+            </div>
           </div>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Lore Box */}
-            <div className="bg-black/80 rounded-[1.5rem] p-6 border-2 border-white/5 shadow-inner">
-              <p className="text-[10px] text-[#FF7EB6] font-black uppercase tracking-widest mb-2">Lore</p>
-              <ScrollArea className="h-24 w-full pr-4">
-                <p className="text-[14px] text-white/95 italic leading-relaxed font-bold tracking-wide" style={{ fontFamily: "'VT323', monospace" }}>
-                  "{generateSlimeLore(slime)}"
-                </p>
-              </ScrollArea>
+          {/* RIGHT PANEL: DETAILS */}
+          <div className="w-full lg:w-1/2 p-6 bg-gradient-to-br from-purple-800/50 to-pink-800/50">
+            <div className="text-center mb-4">
+              <p className="text-sm font-bold text-yellow-400 uppercase tracking-wider mb-2" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+                SPECIES UNLOCKED!
+              </p>
+              
+              <h2 className="text-2xl font-bold text-white mb-4 drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
+                {slime.name}
+              </h2>
             </div>
 
-            {/* Habitat Selection */}
-            <div className="bg-black/80 rounded-[1.5rem] p-6 border-2 border-white/5 shadow-inner flex flex-col">
-              <div className="flex items-center justify-between mb-4">
-                <p className="text-[10px] text-[#FF7EB6] font-black uppercase tracking-widest">Assign Sanctum</p>
-                <Home className="w-4 h-4 text-[#FF7EB6]" />
+            {/* Slime details */}
+            <div className="bg-black/30 rounded-xl p-4 mb-4 border border-yellow-400/30">
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-yellow-400">Rarity:</span>
+                <span className="text-sm font-bold text-white capitalize" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
+                  {slime.rarityTier}
+                </span>
               </div>
               
-              <ScrollArea className="h-24">
-                {compatibleHabitats.length > 0 ? (
-                  <div className="space-y-2 pr-2">
-                    {compatibleHabitats.map(h => (
-                      <button
-                        key={h.id}
-                        onClick={() => handleAssignToHabitat(h.id)}
-                        className="w-full group flex items-center justify-between p-2 rounded-lg bg-white/5 border border-white/10 hover:border-[#FF7EB6] transition-all"
-                      >
-                        <div className="flex items-center gap-2">
-                          <div className="w-4 h-4 rounded-full" style={{ backgroundColor: HABITAT_THEMES[h.element].accent }} />
-                          <span className="text-[12px] text-white font-bold">{ELEMENT_DISPLAY_NAMES[h.element]} Sanctum</span>
-                        </div>
-                        <span className="text-[10px] text-white/40 font-black">{h.assignedSlimeIds.length}/{h.capacity}</span>
-                      </button>
-                    ))}
-                  </div>
-                ) : (
-                  <div className="h-full flex flex-col items-center justify-center opacity-40">
-                    <p className="text-[10px] text-white font-bold text-center">No compatible sanctums available</p>
-                    <p className="text-[8px] text-white/60 mt-1">Buy one in the bazaar!</p>
-                  </div>
-                )}
-              </ScrollArea>
+              <div className="flex items-center justify-between mb-2">
+                <span className="text-sm font-semibold text-yellow-400">Element:</span>
+                <span className="text-sm font-bold text-white capitalize">
+                  {ELEMENT_DISPLAY_NAMES[slime.element]}
+                </span>
+              </div>
+              
+              <div className="flex items-center justify-between">
+                <span className="text-sm font-semibold text-yellow-400">Stars:</span>
+                <div className="flex gap-1">
+                  {[...Array(slime.rarityStars || 1)].map((_, i) => (
+                    <Star key={i} className="w-4 h-4 text-yellow-400 fill-current" />
+                  ))}
+                </div>
+              </div>
             </div>
-          </div>
 
-          {/* CTA Button */}
-          <Button 
-            onClick={onClose}
-            disabled={compatibleHabitats.length === 0}
-            className="mt-8 w-full bg-[#FF7EB6] hover:bg-[#FF7EB6]/90 text-black font-black py-8 rounded-[1.5rem] border-b-6 border-black/40 shadow-2xl transition-all uppercase tracking-[0.2em] hover:translate-y-1 hover:border-b-4 active:translate-y-2 active:border-b-0 disabled:opacity-50 disabled:cursor-not-allowed"
-            style={{ fontFamily: "'Press Start 2P', cursive", fontSize: '12px' }}
-          >
-            {compatibleHabitats.length > 0 ? "Assign to Sanctum" : "Build Sanctum First"}
-          </Button>
+            {/* Lore */}
+            <div className="bg-black/30 rounded-xl p-4 mb-4 border border-yellow-400/30">
+              <p className="text-sm font-medium text-white/90 italic leading-relaxed" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.3)' }}>
+                "{generateSlimeLore(slime)}"
+              </p>
+            </div>
+
+            {/* Habitat assignment */}
+            {compatibleHabitats.length > 0 && (
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-yellow-400 text-center" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+                  ASSIGN TO HABITAT:
+                </p>
+                <div className="grid grid-cols-1 gap-2">
+                  {compatibleHabitats.map(habitat => (
+                    <button
+                      key={habitat.id}
+                      onClick={() => handleAssignToHabitat(habitat.id)}
+                      className="p-3 bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-500 hover:to-purple-500 rounded-lg border border-yellow-400/30 transition-all hover:scale-105 hover:shadow-lg"
+                    >
+                      <div className="text-center">
+                        <p className="text-xs font-bold text-white uppercase mb-1">{getHabitatDisplayName(habitat)}</p>
+                        <p className="text-xs text-white/70">
+                          {habitat.assignedSlimeIds.length}/{habitat.capacity} Slimes
+                        </p>
+                      </div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Close button */}
+            <button
+              onClick={onClose}
+              className="w-full p-3 bg-gradient-to-r from-yellow-400 to-orange-500 hover:from-yellow-300 hover:to-orange-400 text-white font-bold rounded-xl border-2 border-white/50 transition-all hover:scale-105 hover:shadow-lg"
+            >
+              CONTINUE ADVENTURE
+            </button>
+          </div>
         </div>
       </div>
     </div>

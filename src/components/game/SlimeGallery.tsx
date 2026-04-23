@@ -1,8 +1,7 @@
 import { useState, useMemo, useEffect } from 'react';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState, getStage } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
-import { getStage } from '@/utils/slimeRenderer';
 import { Search, ChevronLeft, ChevronRight, ShoppingCart, Sparkles } from 'lucide-react';
 
 import { SlimeElement } from '@/types/slime';
@@ -49,7 +48,19 @@ export function SlimeGallery({ onSelect, filterElement }: SlimeGalleryProps = {}
     // Set the selected slime
     dispatch({ type: 'SELECT_SLIME', id: slimeId });
     
-    // Also place it on the first available breeding slot
+    // Check slime age before placing in breeding slot
+    const selectedSlime = state.slimes.find(s => s.id === slimeId);
+    if (selectedSlime) {
+      const stage = getStage(selectedSlime.level);
+      if (stage !== 'adult') {
+        // Don't place baby/teen slimes in breeding slots
+        // Just call onSelect without placing
+        if (onSelect) onSelect(slimeId);
+        return;
+      }
+    }
+    
+    // Also place it on the first available breeding slot (only for adult slimes)
     if (!state.breedSlot1) {
       dispatch({ type: 'SET_BREED_SLOT', slot: 1, id: slimeId });
     } else if (!state.breedSlot2) {
@@ -115,7 +126,7 @@ export function SlimeGallery({ onSelect, filterElement }: SlimeGalleryProps = {}
               <div className="relative">
                 <div className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-20 transition-opacity" 
                      style={{ backgroundColor: RARITY_TIER_COLORS[slime.rarityTier] }} />
-                <SlimeCanvas slime={slime} size={100} animated />
+                <SlimeCanvas slime={slime} size={100} animated sizeMultiplier={2.0} animationStyle="calm" />
               </div>
               <div className="mt-4 w-full text-center">
                 <p className="text-base font-black text-slate-700 uppercase leading-none mb-1 break-words px-1">{slime.name}</p>

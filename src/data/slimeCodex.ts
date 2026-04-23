@@ -696,7 +696,8 @@ export const ALL_CODEX_SLIMES: CodexSlime[] = [
   ...PRIMAL_SLIMES,
   ...CONFECTIONARY_SLIMES,
   ...DISASTER_SLIMES,
-  ...BIOME_SLIMES
+  ...BIOME_SLIMES,
+  ...MYTHICAL_SLIMES
 ];
 
 // Create lookup map for quick access

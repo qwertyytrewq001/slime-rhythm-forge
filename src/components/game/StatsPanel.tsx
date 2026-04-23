@@ -71,7 +71,7 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
             <div className="absolute inset-0 rounded-full blur-3xl opacity-20 group-hover:opacity-40 transition-opacity animate-soft-pulse"
                 style={{ backgroundColor: RARITY_TIER_COLORS[slime.rarityTier] }} />
             <div className="relative z-10 bg-white rounded-3xl p-8 border-4 border-[#FF7EB6]/10 shadow-xl">
-              <SlimeCanvas slime={slime} size={180} animated />
+              <SlimeCanvas slime={slime} size={180} animated sizeMultiplier={2.5} />
             </div>
           </div>
 

@@ -27,8 +27,11 @@ export function createCodexSlime(codexId: string, parentIds?: [string, string]):
     throw new Error(`Codex slime with ID "${codexId}" not found`);
   }
   
+  // Generate unique ID for bred slimes, use codex ID for purchased slimes
+  const uniqueId = parentIds ? `slime_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` : codexSlime.id;
+  
   return {
-    id: codexSlime.id,
+    id: uniqueId,
     name: codexSlime.name,
     traits: {
       // Convert spriteId back to trait system for compatibility

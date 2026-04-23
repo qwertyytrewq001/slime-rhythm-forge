@@ -44,37 +44,29 @@ export const ACCESSORY_NAMES = [
   'Wings', 'Horns', 'Halo', 'Scarf', 'Flower', 'Monocle',
 ];
 
-// ===== 18 ELEMENTS (Dragon Mania Legends inspired) =====
+// ===== 10 CORE ELEMENTS =====
 
 export const ALL_ELEMENTS: SlimeElement[] = [
   'fire', 'water', 'plant', 'earth', 'wind',
-  'ice', 'electric', 'metal', 'light', 'shadow',
-  'cosmic', 'void', 'toxic', 'crystal', 'lava',
-  'nature', 'arcane', 'divine',
+  'ice', 'electric', 'light', 'shadow', 'metal',
 ];
 
 export const ELEMENT_NAMES: Record<SlimeElement, string> = {
   fire: '🔥 Fire',      water: '💧 Water',    plant: '🌱 Plant',
   earth: '🪨 Earth',     wind: '🌪️ Wind',     ice: '❄️ Ice',
-  electric: '⚡ Electric', metal: '⚙️ Metal',   light: '✨ Light',
-  shadow: '🌑 Shadow',   cosmic: '🌌 Cosmic',  void: '🕳️ Void',
-  toxic: '☠️ Toxic',     crystal: '💎 Crystal', lava: '🌋 Lava',
-  nature: '🌿 Nature',   arcane: '📜 Ancient',  divine: '👼 Divine',
+  electric: '⚡ Electric', light: '✨ Light',   shadow: '🌑 Shadow',
+  metal: '⚙️ Metal',
 };
 
 // Clean display names without emojis
 export const ELEMENT_DISPLAY_NAMES: Record<SlimeElement, string> = {
   fire: 'Fire', water: 'Water', plant: 'Plant', earth: 'Earth', wind: 'Wind',
-  ice: 'Ice', electric: 'Electric', metal: 'Metal', light: 'Light', shadow: 'Shadow',
-  cosmic: 'Cosmic', void: 'Void', toxic: 'Toxic', crystal: 'Crystal', lava: 'Lava',
-  nature: 'Nature', arcane: 'Ancient', divine: 'Divine',
+  ice: 'Ice', electric: 'Electric', light: 'Light', shadow: 'Shadow', metal: 'Metal',
 };
 
 export const ELEMENT_ICONS: Record<SlimeElement, string> = {
   fire: '🔥', water: '💧', plant: '🌱', earth: '🪨', wind: '🌪️',
-  ice: '❄️', electric: '⚡', metal: '⚙️', light: '✨', shadow: '🌑',
-  cosmic: '🌌', void: '🕳️', toxic: '☠️', crystal: '💎', lava: '🌋',
-  nature: '🌿', arcane: '🔮', divine: '👼',
+  ice: '❄️', electric: '⚡', light: '✨', shadow: '🌑', metal: '⚙️',
 };
 
 // Element colors for particles and rendering
@@ -89,22 +81,12 @@ export const ELEMENT_COLORS: Record<SlimeElement, string[]> = {
   metal:    ['#C0C0C0', '#A9A9A9', '#808080', '#D3D3D3'],
   light:    ['#FFFACD', '#FAFAD2', '#FFD700', '#FFF8DC'],
   shadow:   ['#2F2F4F', '#483D8B', '#4B0082', '#191970'],
-  cosmic:   ['#9B59B6', '#8E44AD', '#FFD700', '#E8DAEF'],
-  void:     ['#0D0D0D', '#1C1C2E', '#2D1B69', '#4A0E4E'],
-  toxic:    ['#00FF00', '#7FFF00', '#ADFF2F', '#9ACD32'],
-  crystal:  ['#E0B0FF', '#DA70D6', '#DDA0DD', '#FF69B4'],
-  lava:     ['#FF0000', '#FF4500', '#FF6600', '#CC3300'],
-  nature:   ['#3CB371', '#2E8B57', '#66CDAA', '#20B2AA'],
-  arcane:   ['#8A2BE2', '#9370DB', '#BA55D3', '#9400D3'],
-  divine:   ['#FFD700', '#FFFFF0', '#FFF8DC', '#FAEBD7'],
 };
 
 // Element hue for background tinting
 export const ELEMENT_HUE: Record<SlimeElement, number> = {
   fire: 15, water: 210, plant: 120, earth: 35, wind: 200,
   ice: 195, electric: 50, metal: 0, light: 55, shadow: 260,
-  cosmic: 270, void: 280, toxic: 100, crystal: 300, lava: 10,
-  nature: 140, arcane: 275, divine: 45,
 };
 
 // Element-specific model visual descriptors
@@ -119,62 +101,39 @@ export const ELEMENT_MODEL_FEATURES: Record<SlimeElement, { blob: string; spiky:
   metal:    { blob: 'iron-plated', spiky: 'blade spines', jelly: 'mercury flow' },
   light:    { blob: 'sun-blessed', spiky: 'prism spikes', jelly: 'halo shimmer' },
   shadow:   { blob: 'shade-cloaked', spiky: 'dark thorns', jelly: 'smoke wisp' },
-  cosmic:   { blob: 'star-dusted', spiky: 'meteor spikes', jelly: 'nebula body' },
-  void:     { blob: 'void-touched', spiky: 'rift spines', jelly: 'warp gel' },
-  toxic:    { blob: 'ooze-dripping', spiky: 'venom barbs', jelly: 'acid body' },
-  crystal:  { blob: 'gem-encrusted', spiky: 'crystal horns', jelly: 'prism gel' },
-  lava:     { blob: 'magma-core', spiky: 'obsidian spikes', jelly: 'molten flow' },
-  nature:   { blob: 'flower-crowned', spiky: 'branch antlers', jelly: 'dew body' },
-  arcane:   { blob: 'rune-marked', spiky: 'sigil spines', jelly: 'mana flow' },
-  divine:   { blob: 'halo-born', spiky: 'seraph wings', jelly: 'grace body' },
 };
 
-// Breeding combo results
-export const BREEDING_COMBOS: Record<string, SlimeElement[]> = {
-  'fire+water': ['lava'],
-  'fire+ice': ['crystal'],
-  'fire+plant': ['lava', 'nature'],
-  'fire+shadow': ['void'],
-  'fire+void': ['shadow'],
-  'fire+earth': ['lava', 'metal'],
+// Breeding combo results - Using 10 core elements + composites
+export const BREEDING_COMBOS: Record<string, string[]> = {
+  // Core element combinations that create composites
+  'fire+earth': ['lava'],        // Lava = Fire + Earth
+  'plant+earth': ['nature'],      // Nature = Plant + Earth  
+  'plant+water': ['wild'],        // Wild = Plant + Water
+  'fire+ice': ['crystal'],        // Crystal = Fire + Ice
+  'light+shadow': ['cosmic', 'void', 'arcane', 'divine'], // Light + Shadow creates multiple possibilities
+  
+  // Core element combinations
+  'fire+water': ['steam'],
   'fire+wind': ['electric'],
-  'fire+cosmic': ['divine'],
-  'water+plant': ['nature'],
-  'water+ice': ['ice', 'crystal'],
-  'water+electric': ['electric'],
-  'water+earth': ['nature', 'plant'],
-  'water+toxic': ['toxic'],
-  'ice+wind': ['ice'],
-  'ice+cosmic': ['crystal', 'arcane'],
-  'ice+shadow': ['void'],
-  'earth+plant': ['nature'],
-  'earth+metal': ['metal', 'crystal'],
-  'earth+fire': ['lava'],
-  'wind+electric': ['electric'],
-  'wind+light': ['divine'],
-  'light+shadow': ['arcane', 'void'],
-  'light+cosmic': ['divine'],
-  'light+arcane': ['divine'],
-  'shadow+void': ['void'],
-  'shadow+cosmic': ['void', 'arcane'],
-  'cosmic+arcane': ['divine'],
-  'toxic+nature': ['toxic', 'plant'],
-  'toxic+water': ['toxic'],
-  'metal+electric': ['electric', 'metal'],
-  'metal+crystal': ['crystal'],
-  'arcane+void': ['divine', 'void'],
+  'water+earth': ['mud'],
+  'water+ice': ['snow'],
+  'water+wind': ['mist'],
+  'earth+wind': ['sand'],
+  'fire+plant': ['ash'],
+  'ice+wind': ['blizzard'],
+  'electric+water': ['storm'],
+  'metal+fire': ['molten'],
+  'light+plant': ['bloom'],
+  'shadow+earth': ['darkness'],
 };
 
-// Element combo rarity bonuses
+// Element combo rarity bonuses - Updated for 10-element system
 export const ELEMENT_COMBO_BONUS: Record<string, number> = {
-  'fire+void': 25,      'shadow+cosmic': 25,
-  'fire+cosmic': 20,    'light+shadow': 20,
-  'ice+fire': 15,       'cosmic+arcane': 20,
-  'light+cosmic': 18,   'arcane+void': 22,
-  'fire+ice': 15,       'water+electric': 12,
-  'earth+crystal': 15,  'toxic+nature': 10,
-  'lava+ice': 25,       'divine+void': 30,
-  'metal+crystal': 12,  'wind+electric': 10,
+  'fire+water': 10,      'water+earth': 10,
+  'fire+plant': 12,       'plant+water': 12,
+  'light+shadow': 25,     'fire+ice': 15,
+  'electric+water': 12,   'metal+fire': 15,
+  'ice+wind': 15,         'earth+wind': 10,
 };
 
 // Rarity tier thresholds — renamed Mythic→Divine, Supreme→Ancient
@@ -210,8 +169,8 @@ export const RARITY_TIER_STARS: Record<string, number> = {
 
 export const ELEMENT_TIERS: Record<number, SlimeElement[]> = {
   1: ['fire', 'water', 'wind', 'earth'],
-  2: ['plant', 'light', 'shadow', 'nature'],
-  3: ['void', 'cosmic', 'divine', 'arcane', 'ice', 'electric', 'metal', 'toxic', 'crystal', 'lava'],
+  2: ['plant', 'light', 'shadow', 'ice', 'electric', 'metal'],
+  3: [], // All 10 core elements unlocked by tier 2
 };
 
 export function getPlayerLevel(totalBreeds: number, slimeCount: number): number {
@@ -219,43 +178,33 @@ export function getPlayerLevel(totalBreeds: number, slimeCount: number): number 
 }
 
 export function getUnlockedElements(level: number): SlimeElement[] {
-  return [...ELEMENT_TIERS[1], ...ELEMENT_TIERS[2], ...ELEMENT_TIERS[3]];
+  return [...ELEMENT_TIERS[1], ...ELEMENT_TIERS[2]];
 }
 
 export function getElementTierForLevel(level: number): number {
-  return 3;
+  return level >= 10 ? 2 : 1;
 }
 
-// Habitat costs per element
+// Habitat costs per element - Updated for 10 core elements
 export const HABITAT_COSTS: Record<SlimeElement, number> = {
   fire: 100, water: 100, plant: 100, earth: 100,
-  ice: 200, wind: 200, electric: 200,
-  void: 400, cosmic: 400, light: 400, shadow: 400,
-  metal: 250, toxic: 250, crystal: 300, lava: 300,
-  nature: 150, arcane: 350, divine: 500,
+  wind: 150, ice: 200, electric: 200,
+  light: 300, shadow: 300, metal: 250,
 };
 
-// Habitat visual themes
+// Habitat visual themes - Updated for 10 core elements
 const base = import.meta.env.BASE_URL;
 export const HABITAT_THEMES: Record<SlimeElement, { bg: string; accent: string; desc: string; bgImage?: string }> = {
   fire:     { bg: '#3D1408', accent: '#FF4500', desc: 'Volcanic nest with lava cracks', bgImage: `${base}fire_habitat.png` },
   water:    { bg: '#082038', accent: '#4169E1', desc: 'Crystal blue pool with ripples', bgImage: `${base}Water_habitat.png` },
   plant:    { bg: '#0A2810', accent: '#32CD32', desc: 'Vine-covered floral dome', bgImage: `${base}plant_habitat.png` },
   earth:    { bg: '#2A1A08', accent: '#A0522D', desc: 'Rocky cavern with crystals', bgImage: `${base}earth_habitat.png` },
-  ice:      { bg: '#102838', accent: '#87CEEB', desc: 'Shimmering ice cave', bgImage: `${base}ice glacial habitat.png` },
   wind:     { bg: '#1A2838', accent: '#B0C4DE', desc: 'Floating cloud platform', bgImage: `${base}Wind habitat.png` },
+  ice:      { bg: '#102838', accent: '#87CEEB', desc: 'Shimmering ice cave', bgImage: `${base}ice glacial habitat.png` },
   electric: { bg: '#282008', accent: '#FFD700', desc: 'Tesla coil chamber', bgImage: `${base}electric habitat.png` },
   metal:    { bg: '#1A1A1A', accent: '#C0C0C0', desc: 'Forge and anvil pit', bgImage: `${base}metal habitat.png` },
   light:    { bg: '#2A2810', accent: '#FFFACD', desc: 'Sunlit crystal garden', bgImage: `${base}light_habitat.png` },
   shadow:   { bg: '#0A0A1A', accent: '#483D8B', desc: 'Dark mist hollow', bgImage: `${base}shadow_habitat_2.png` },
-  cosmic:   { bg: '#100A28', accent: '#9B59B6', desc: 'Starfield observatory', bgImage: `${base}Cosmic Habitat.png` },
-  void:     { bg: '#050508', accent: '#2D1B69', desc: 'Reality rift chamber', bgImage: `${base}Void Habitat.png` },
-  toxic:    { bg: '#0A1A08', accent: '#7FFF00', desc: 'Bubbling acid swamp', bgImage: `${base}toxic habitats.png` },
-  crystal:  { bg: '#1A0A28', accent: '#DA70D6', desc: 'Prism geode cavern', bgImage: `${base}Crystal Habitat.png` },
-  lava:     { bg: '#280808', accent: '#FF0000', desc: 'Molten core pit', bgImage: `${base}lava habitat.png` },
-  nature:   { bg: '#0A2018', accent: '#3CB371', desc: 'Enchanted grove', bgImage: `${base}Forest Habitats.png` },
-  arcane:   { bg: '#140A28', accent: '#8A2BE2', desc: 'Rune circle sanctum', bgImage: `${base}Ancient Habitat.png` },
-  divine:   { bg: '#28280A', accent: '#FFD700', desc: 'Celestial shrine', bgImage: `${base}Divine Habitat.png` },
 };
 
 // Rarity weights
@@ -278,33 +227,26 @@ export function getSizeRarity(size: number): number {
   return Math.round(Math.abs(size - 1.0) * 10);
 }
 
-// Derive primary element from color + shape
+// Derive primary element from color + shape - Updated for 10 core elements
 export function deriveElement(color1: number, shape: number): SlimeElement {
   if ([0, 7, 14].includes(color1) || shape === 9) return 'plant';
   if ([3, 6, 11, 10].includes(color1) || shape === 2) return 'fire';
   if ([1, 5, 13].includes(color1) || shape === 14) return 'ice';
-  if ([4, 9, 19, 18].includes(color1) || shape === 4) return 'cosmic';
-  if ([8, 16].includes(color1) || shape === 12) return 'arcane';
   if ([12, 17].includes(color1)) return 'water';
   if ([15].includes(color1) || shape === 5) return 'light';
   if (shape === 3 || shape === 7) return 'earth';
   if (shape === 13) return 'shadow';
   if (shape === 10) return 'wind';
-  return 'nature';
+  return 'fire'; // Default fallback
 }
 
-// Derive secondary element from additional traits
+// Derive secondary element from additional traits - Updated for 10 core elements
 export function deriveSecondaryElement(spikes: number, pattern: number, aura: number, glow: number): SlimeElement | null {
-  if (aura === 4) return 'void';
   if (aura === 3) return 'ice';
   if (aura === 2) return 'fire';
   if (glow >= 4) return 'light';
-  if (pattern === 10) return 'void';
-  if (pattern === 9) return 'cosmic';
   if (pattern === 11) return 'electric';
   if (spikes >= 7) return 'shadow';
-  if (spikes >= 5) return 'toxic';
-  if (pattern === 8) return 'nature';
   return null;
 }
 
@@ -332,7 +274,7 @@ export const MODEL_NAME_PREFIX: Record<number, string[]> = {
   2: ['Jelli', 'Ripple', 'Wobble', 'Oozy', 'Drippy'],
 };
 
-// Element-specific name fragments
+// Element-specific name fragments - Updated for 10 core elements
 export const ELEMENT_NAME_FRAGMENTS: Record<SlimeElement, string[]> = {
   fire: ['Blaze', 'Ember', 'Scorch', 'Inferno', 'Cinder'],
   water: ['Tide', 'Splash', 'Torrent', 'Marina', 'Aqua'],
@@ -344,14 +286,6 @@ export const ELEMENT_NAME_FRAGMENTS: Record<SlimeElement, string[]> = {
   metal: ['Steel', 'Chrome', 'Iron', 'Forge', 'Anvil'],
   light: ['Lumen', 'Ray', 'Prism', 'Dawn', 'Beacon'],
   shadow: ['Shade', 'Dusk', 'Umbra', 'Gloom', 'Eclipse'],
-  cosmic: ['Nova', 'Nebula', 'Pulsar', 'Quasar', 'Astral'],
-  void: ['Rift', 'Abyss', 'Null', 'Warp', 'Entropy'],
-  toxic: ['Venom', 'Blight', 'Plague', 'Sludge', 'Miasma'],
-  crystal: ['Prism', 'Facet', 'Geode', 'Jewel', 'Opal'],
-  lava: ['Magma', 'Pumice', 'Obsidian', 'Caldera', 'Basalt'],
-  nature: ['Gaia', 'Sylvan', 'Grove', 'Thicket', 'Verdant'],
-  arcane: ['Rune', 'Sigil', 'Mystic', 'Arcanus', 'Ether'],
-  divine: ['Seraph', 'Halo', 'Sanctus', 'Celeste', 'Exaltus'],
 };
 
 export const RARITY_PREFIXES: Record<number, string[]> = {
