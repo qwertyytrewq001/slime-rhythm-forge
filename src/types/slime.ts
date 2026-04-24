@@ -14,10 +14,12 @@ export interface SlimeTraits {
   model: number;      // 0=Blob, 1=Spiky, 2=Jelly
 }
 
-// 10 Core Elements
+// All Elements Used in Actual Sprites
 export type SlimeElement =
   | 'fire' | 'water' | 'plant' | 'earth' | 'wind'
-  | 'ice' | 'electric' | 'metal' | 'light' | 'shadow';
+  | 'ice' | 'electric' | 'metal' | 'light' | 'shadow'
+  | 'cosmic' | 'void' | 'toxic' | 'crystal' | 'lava'
+  | 'nature' | 'arcane' | 'divine';
 
 // Rarity tiers (DML-inspired scaling)
 export type RarityTier = 'Common' | 'Uncommon' | 'Rare' | 'Epic' | 'Legendary' | 'Divine' | 'Ancient';
