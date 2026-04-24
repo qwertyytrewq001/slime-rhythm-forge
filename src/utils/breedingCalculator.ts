@@ -51,10 +51,14 @@ export function calculateBreedingResult(
   const parentUnion = [...new Set([...parent1Elements, ...parent2Elements])];
   console.log(`🧬 Parent Union: [${parentUnion.join(', ')}]`);
   
-  // Database Filtration: Only slimes that have ALL parent elements
+  // Database Filtration: Only slimes with EXACTLY the parent elements
   const validOutcomes = ALL_CODEX_SLIMES.filter(slime => {
-    // Union Rule: Slime must have all elements from the parent union (can have more too)
-    return parentUnion.every(element => slime.elements.includes(element));
+    // Exact Match Rule: Slime must have exactly the same elements as the parent union
+    const slimeElements = [...slime.elements].sort();
+    const parentElementsSorted = [...parentUnion].sort();
+    
+    return slimeElements.length === parentElementsSorted.length &&
+           slimeElements.every((element, index) => element === parentElementsSorted[index]);
   });
   
   console.log(`🧬 Valid Outcomes Found: ${validOutcomes.length} slimes`);
@@ -137,10 +141,14 @@ export function getPossibleOutcomes(
   const parentUnion = [...new Set([...parent1Elements, ...parent2Elements])];
   console.log(`🧬 GetPossibleOutcomes - Parent Union: [${parentUnion.join(', ')}]`);
   
-  // Database Filtration: Only slimes that have ALL parent elements
+  // Database Filtration: Only slimes with EXACTLY the parent elements
   const validOutcomes = ALL_CODEX_SLIMES.filter(slime => {
-    // Union Rule: Slime must have all elements from the parent union (can have more too)
-    return parentUnion.every(element => slime.elements.includes(element));
+    // Exact Match Rule: Slime must have exactly the same elements as the parent union
+    const slimeElements = [...slime.elements].sort();
+    const parentElementsSorted = [...parentUnion].sort();
+    
+    return slimeElements.length === parentElementsSorted.length &&
+           slimeElements.every((element, index) => element === parentElementsSorted[index]);
   });
   
   console.log(`🧬 GetPossibleOutcomes - Valid Outcomes Found: ${validOutcomes.length} slimes`);
