@@ -2,10 +2,11 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { Slime } from '@/types/slime';
+import { CodexSlime } from '@/data/slimeCodex';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
-import { ALL_CODEX_SLIMES } from '@/data/slimeCodex';
-import { X, Heart, Sparkles, Plus, ChevronLeft } from 'lucide-react';
-import { calculateBreedingResult } from '@/utils/breedingCalculator';
+import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
+import { X, Heart, Sparkles, Plus, ChevronLeft, HelpCircle } from 'lucide-react';
+import { calculateBreedingResult, getPossibleOutcomes } from '@/utils/breedingCalculator';
 import { createCodexSlime } from '@/utils/slimeGenerator';
 
 interface BreedingDenProps {
@@ -16,7 +17,8 @@ interface BreedingDenProps {
 
 export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatchery }: BreedingDenProps) {
   const { state, dispatch } = useGameState();
-  const [possibleOutcomes, setPossibleOutcomes] = useState<Slime[]>([]);
+  const [possibleOutcomes, setPossibleOutcomes] = useState<CodexSlime[]>([]);
+  const [showPossibleModal, setShowPossibleModal] = useState(false);
 
   // Precise positioning coordinates for incubators (can be fine-tuned)
   const leftIncubatorPosition = {
@@ -47,19 +49,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       return;
     }
     
-    const outcomes = [];
-    const breedingResult = calculateBreedingResult(slot1Slime.id, slot2Slime.id, slot1Slime.level || 1, slot2Slime.level || 1);
-    
-    if (breedingResult) {
-      // Get all slimes that have the same elements as the breeding result
-      const combinedElements = [...new Set([...slot1Slime.elements, ...slot2Slime.elements])];
-      
-      ALL_CODEX_SLIMES.forEach(slime => {
-        if (slime.elements.every(element => combinedElements.includes(element))) {
-          outcomes.push(slime);
-        }
-      });
-    }
+    // Use new Parent Union system - Element Subset Rule
+    const outcomes = getPossibleOutcomes(slot1Slime.elements, slot2Slime.elements);
     
     setPossibleOutcomes(outcomes);
   }, [slot1Slime, slot2Slime]);
@@ -101,7 +92,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
   const breedFinished = !!state.activeBreeding && Date.now() >= state.activeBreeding.endTime;
 
   return (
-    <div className="relative w-full h-full min-h-screen bg-black">
+    <>
+      <div className="relative w-full h-full min-h-screen bg-black">
       {/* Main breeding den background image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
@@ -177,39 +169,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         )}
       </div>
 
-      {/* Possible outcomes section */}
-      {slot1Slime && slot2Slime && possibleOutcomes.length > 0 && (
-        <div className="absolute bottom-8 left-1/2 -translate-x-1/2 w-full max-w-4xl mx-auto px-8">
-          <div className="bg-black/80 rounded-2xl border-2 border-yellow-400/50 p-6">
-            <h2 className="text-xl font-bold text-yellow-400 uppercase tracking-wider mb-4 text-center">
-              Possible Offspring
-            </h2>
-            <div className="grid grid-cols-4 sm:grid-cols-6 md:grid-cols-8 lg:grid-cols-10 gap-3 max-h-32 overflow-y-auto">
-              {possibleOutcomes.map(slime => (
-                <div key={slime.id} className="relative group">
-                  <div className="bg-gradient-to-br from-gray-800/50 to-gray-900/50 rounded-xl border border-gray-600/50 p-2 hover:border-yellow-400/50 transition-all">
-                    <div className="w-full h-12 flex items-center justify-center">
-                      <SlimeCanvas slime={slime} size={30} animated={false} sizeMultiplier={1.2} />
-                    </div>
-                    <div className="text-center mt-1">
-                      <p className="text-xs text-white font-bold truncate">{slime.name}</p>
-                      <div className="flex items-center justify-center gap-1">
-                        <span 
-                          className="text-xs font-bold"
-                          style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}
-                        >
-                          {slime.rarityTier}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
+      
       {/* Breeding controls */}
       <div className="absolute top-8 left-8 flex items-center gap-4">
         {onBackToAltar && (
@@ -235,17 +195,33 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         </div>
       </div>
 
-      {/* Start breeding button - centered between incubators */}
+      {/* Question mark egg - centered between incubators when both parents selected */}
       {slot1Slime && slot2Slime && !state.activeBreeding && (
         <div className="absolute" style={{ top: '380px', left: '50%', transform: 'translateX(-41.5%)' }}>
-          <button
-            onClick={handleStartBreeding}
-            className="px-8 py-4 bg-gradient-to-r from-pink-200/80 to-purple-200/80 hover:from-pink-100/80 hover:to-purple-100/80 text-purple-900 font-bold rounded-xl border-2 border-purple-300/60 transition-all hover:scale-105 shadow-lg backdrop-blur-sm"
-            style={{ textShadow: '1px 1px 2px rgba(255,255,255,0.8)' }}
-          >
-            <Heart className="w-5 h-5 inline mr-2" />
-            Begin Breeding
-          </button>
+          <div className="flex flex-col items-center gap-3">
+            {/* Question mark egg */}
+            <button
+              onClick={() => setShowPossibleModal(true)}
+              className="relative group cursor-pointer transition-all hover:scale-110"
+            >
+              <div className="w-16 h-20 bg-gradient-to-br from-yellow-200/80 to-amber-300/80 rounded-full border-2 border-yellow-400/60 shadow-lg backdrop-blur-sm flex items-center justify-center">
+                <HelpCircle className="w-8 h-8 text-yellow-700" />
+              </div>
+              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-purple-900/90 text-white text-xs font-bold px-2 py-1 rounded-full border border-purple-400/60">
+                Possible Slimes
+              </div>
+            </button>
+            
+            {/* Start breeding button */}
+            <button
+              onClick={handleStartBreeding}
+              className="px-8 py-4 bg-gradient-to-r from-pink-200/80 to-purple-200/80 hover:from-pink-100/80 hover:to-purple-100/80 text-purple-900 font-bold rounded-xl border-2 border-purple-300/60 transition-all hover:scale-105 shadow-lg backdrop-blur-sm"
+              style={{ textShadow: '1px 1px 2px rgba(255,255,255,0.8)' }}
+            >
+              <Heart className="w-5 h-5 inline mr-2" />
+              Begin Breeding
+            </button>
+          </div>
         </div>
       )}
 
@@ -279,19 +255,26 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 
                 // Calculate breeding result and create egg in hatchery
                 if (state.activeBreeding && slot1Slime && slot2Slime) {
-                  // Pass the actual slime elements to breeding calculator
+                  // Use new Parent Union breeding system
                   const breedingResult = calculateBreedingResult(
-                    slot1Slime.elements[0] as any, // Cast to any to handle type issues
-                    slot2Slime.elements[0] as any, // Cast to any to handle type issues
+                    slot1Slime.elements,
+                    slot2Slime.elements,
                     slot1Slime.level || 1,
-                    slot2Slime.level || 1
+                    slot2Slime.level || 1,
+                    slot1Slime.rarityTier || 'Common',
+                    slot2Slime.rarityTier || 'Common'
                   );
                   
-                  console.log('🔍 BreedingDen: breedingResult =', breedingResult);
-                  
+                  let selectedSlime = null;
                   if (breedingResult) {
-                    // Create the baby slime using the same function as bazaar
-                    const babySlime = createCodexSlime(breedingResult.slimeId, [
+                    selectedSlime = SLIME_CODEX_MAP.get(breedingResult.slimeId);
+                  }
+                  
+                  console.log('🔍 BreedingDen: selected slime =', selectedSlime?.name);
+                  
+                  if (selectedSlime) {
+                    // Create the baby slime using the selected slime
+                    const babySlime = createCodexSlime(selectedSlime.id, [
                       slot1Slime.id, 
                       slot2Slime.id
                     ]);
@@ -333,5 +316,118 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         </div>
       )}
     </div>
+
+    {/* Possible Slimes Modal - Outside main container */}
+    {showPossibleModal && (
+      <div 
+        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+        onClick={() => setShowPossibleModal(false)}
+      >
+        <div 
+          className="bg-gradient-to-br from-purple-900/90 to-pink-900/90 rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] border-2 border-purple-400/40 shadow-2xl backdrop-blur-md"
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Modal Header */}
+          <div className="flex items-center justify-between mb-6">
+            <h2 className="text-2xl font-bold text-yellow-400 uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+              Possible Breeding Outcomes
+            </h2>
+            <button
+              onClick={() => setShowPossibleModal(false)}
+              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors border border-white/20"
+            >
+              <X className="w-5 h-5 text-white" />
+            </button>
+          </div>
+
+          {/* Parent Info */}
+          <div className="flex justify-center gap-8 mb-6">
+            <div className="text-center">
+              <p className="text-yellow-300 text-sm font-bold uppercase mb-2">Parent 1</p>
+              <div className="w-20 h-20 bg-black/30 rounded-lg p-2">
+                {slot1Slime && (
+                  <SlimeCanvas
+                    slime={slot1Slime}
+                    size={60}
+                    animated={false}
+                    sizeMultiplier={1.5}
+                  />
+                )}
+              </div>
+              <p className="text-white text-xs mt-2 font-bold">{slot1Slime?.name}</p>
+            </div>
+            
+            <div className="flex items-center">
+              <Heart className="w-8 h-8 text-pink-400 animate-pulse" />
+            </div>
+            
+            <div className="text-center">
+              <p className="text-yellow-300 text-sm font-bold uppercase mb-2">Parent 2</p>
+              <div className="w-20 h-20 bg-black/30 rounded-lg p-2">
+                {slot2Slime && (
+                  <SlimeCanvas
+                    slime={slot2Slime}
+                    size={60}
+                    animated={false}
+                    sizeMultiplier={1.5}
+                  />
+                )}
+              </div>
+              <p className="text-white text-xs mt-2 font-bold">{slot2Slime?.name}</p>
+            </div>
+          </div>
+
+          {/* Possible Outcomes Grid */}
+          <div className="max-h-[50vh] overflow-y-auto">
+            {possibleOutcomes.length > 0 ? (
+              <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
+                {possibleOutcomes.map((slime) => (
+                  <div
+                    key={slime.id}
+                    className="bg-black/30 rounded-lg p-3 border border-purple-400/30 hover:border-purple-400/60 transition-all hover:scale-105"
+                  >
+                    <div className="w-full h-16 flex items-center justify-center mb-2">
+                      <SlimeCanvas
+                        slime={createCodexSlime(slime.id)}
+                        size={50}
+                        animated={false}
+                        sizeMultiplier={1.2}
+                      />
+                    </div>
+                    <p className="text-white text-xs font-bold text-center leading-tight">
+                      {slime.name}
+                    </p>
+                    <div className="flex justify-center mt-1">
+                      <span 
+                        className="text-xs font-bold px-1 py-0.5 rounded"
+                        style={{ 
+                          backgroundColor: RARITY_TIER_COLORS[slime.rarityTier as keyof typeof RARITY_TIER_COLORS] + '40',
+                          color: RARITY_TIER_COLORS[slime.rarityTier as keyof typeof RARITY_TIER_COLORS]
+                        }}
+                      >
+                        {slime.rarityTier}
+                      </span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-yellow-300 text-lg font-bold">No possible breeding outcomes found</p>
+                <p className="text-white/70 text-sm mt-2">This combination may not produce any valid slimes</p>
+              </div>
+            )}
+          </div>
+
+          {/* Footer */}
+          <div className="mt-6 text-center">
+            <p className="text-yellow-300 text-sm font-bold">
+              {possibleOutcomes.length} Possible {possibleOutcomes.length === 1 ? 'Slime' : 'Slimes'}
+            </p>
+          </div>
+        </div>
+      </div>
+    )}
+    </>
   );
 }

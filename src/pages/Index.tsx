@@ -10,10 +10,11 @@ import { HabitatViewer } from '@/components/game/HabitatViewer';
 import { Shop } from '@/components/game/Shop';
 import { Hatchery } from '@/components/game/Hatchery';
 import { IslandGrid } from '@/components/game/IslandGrid';
+import { CodexGallery } from '@/components/game/CodexGallery';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
 import { preloadEssentialSprites } from '@/utils/spriteLoader';
-import { ShoppingBag, Images, Info, Trophy, Volume2, VolumeX, Sword } from 'lucide-react';
+import { ShoppingBag, Images, Info, Trophy, Volume2, VolumeX, Sword, BookOpen } from 'lucide-react';
 import { Achievements } from '@/components/game/Achievements';
 import { EvolutionPopup } from '@/components/game/EvolutionPopup';
 import { LevelUpPopup } from '@/components/game/LevelUpPopup';
@@ -73,6 +74,7 @@ function GameLayout() {
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [breedingGalleryOpen, setBreedingGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
+  const [codexGalleryOpen, setCodexGalleryOpen] = useState(false);
 
   const [ageMessage, setAgeMessage] = useState<string | null>(null);
 
@@ -315,19 +317,10 @@ function GameLayout() {
             </SheetContent>
           </Sheet>
 
-          <Sheet>
-            <SheetTrigger asChild>
-              <div className="relative group">
-                <button className={toolbarCircle}>
-                  <Info className={toolbarIcon} />
-                  <span className={toolbarLabel}>Codex</span>
-                </button>
-              </div>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
-              <StatsPanel onRequestGallery={() => openGalleryForSlot()} />
-            </SheetContent>
-          </Sheet>
+          <button onClick={() => setCodexGalleryOpen(true)} className={toolbarCircle}>
+              <BookOpen className={toolbarIcon} />
+              <span className={toolbarLabel}>Codex</span>
+            </button>
         </div>
 
         {/* Habitat Viewer Modal */}
@@ -341,6 +334,13 @@ function GameLayout() {
       {/* 3. GLOBAL POPUPS */}
       {showAchievements && (
         <Achievements onClose={() => setShowAchievements(false)} />
+      )}
+
+      {/* Codex Gallery Modal */}
+      {codexGalleryOpen && (
+        <div className="fixed inset-0 z-[250] pointer-events-auto">
+          <CodexGallery onClose={() => setCodexGalleryOpen(false)} />
+        </div>
       )}
 
       {/* Age restriction message */}

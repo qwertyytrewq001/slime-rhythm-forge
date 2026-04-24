@@ -16,6 +16,7 @@ interface SlimeCanvasProps {
   isHurt?: boolean;
   sizeMultiplier?: number; // New prop to make slimes bigger
   animationStyle?: 'gentle' | 'playful' | 'calm' | 'excited'; // Animation presets
+  isSilhouette?: boolean; // New prop for shadow silhouettes
 }
 
 export function SlimeCanvas({
@@ -31,6 +32,7 @@ export function SlimeCanvas({
   isHurt = false,
   sizeMultiplier = 2.5, // Default 2.5x bigger
   animationStyle = 'gentle', // Default gentle animation
+  isSilhouette = false, // Default to not silhouette
 }: SlimeCanvasProps) {
   const [spriteError, setSpriteError] = useState(false);
   const [floatOffset, setFloatOffset] = useState(0);
@@ -140,9 +142,14 @@ export function SlimeCanvas({
           alt={`${slime.name} - ${slime.element}`}
           className="w-full h-full object-contain"
           style={{
-            filter: isHurt ? 'drop-shadow(0 0 20px rgba(255, 0, 0, 0.5))' : 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.3))',
+            filter: isSilhouette 
+              ? 'brightness(0) contrast(1.2) saturate(0) drop-shadow(0 0 10px rgba(0, 0, 0, 0.5))'
+              : isHurt 
+                ? 'drop-shadow(0 0 20px rgba(255, 0, 0, 0.5))' 
+                : 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.3))',
             background: 'transparent',
-            backgroundColor: 'transparent'
+            backgroundColor: 'transparent',
+            opacity: isSilhouette ? 0.8 : 1
           }}
           onError={() => {
             console.warn(`Failed to load sprite: ${spritePath}`);
@@ -181,6 +188,7 @@ export function SlimeCanvas({
         // Pass the actual size, not multiplied by sizeMultiplier
         drawSlime(ctx, slime, size, animated ? frameRef.current : 0, animated, isHurt, {
           enhanced3D: renderEnhancement === 'enhanced3d',
+          isSilhouette: isSilhouette,
         });
       } catch (error) {
         console.warn('Procedural rendering failed:', error);

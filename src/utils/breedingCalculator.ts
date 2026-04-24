@@ -1,56 +1,112 @@
-import { SlimeElement } from '@/types/slime';
-import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
-
-export interface BreedingPool {
-  slimes: string[];
-  totalWeight: number;
-}
+import { SlimeElement, RarityTier } from '@/types/slime';
+import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP, CodexSlime } from '@/data/slimeCodex';
 
 export interface BreedingResult {
   slimeId: string;
-  luckBonus: number;
-  geneStrength: number;
+  parentUnion: string[];
+  validOutcomes: string[];
   finalWeights: Record<string, number>;
+  breedingPower: number;
 }
 
+// Base rarity weights (higher = more common)
+const BASE_RARITY_WEIGHTS: Record<RarityTier, number> = {
+  'Common': 100,
+  'Uncommon': 50,
+  'Rare': 20,
+  'Epic': 5,
+  'Legendary': 1,
+  'Divine': 0.5,
+  'Ancient': 0.2
+};
+
+// Rarity values for BreedingPower calculation
+const RARITY_VALUES: Record<RarityTier, number> = {
+  'Common': 1,
+  'Uncommon': 2,
+  'Rare': 3,
+  'Epic': 4,
+  'Legendary': 5,
+  'Divine': 6,
+  'Ancient': 7
+};
+
 /**
- * The Enhanced 4-Step Breeding Pipeline with Level Bonuses and Rarity Heritage
- * Gene Extraction → Pool Filtering → Level Bonus → Rarity Heritage → Dynamic Weighting → Result Selection
+ * Strict Elemental Pool Breeding System
+ * Phase One: Elemental Pool (Union of parent elements)
+ * Phase Two: BreedingPower calculation 
+ * Phase Three: Weighted random selection
  */
-export function calculateBreedingResult(parent1Element: SlimeElement, parent2Element: SlimeElement, parent1Level: number = 1, parent2Level: number = 1): BreedingResult | null {
-  console.log(`🧬 Enhanced Breeding Calculator: Parent 1 = ${parent1Element} (Lv${parent1Level}), Parent 2 = ${parent2Element} (Lv${parent2Level})`);
+export function calculateBreedingResult(
+  parent1Elements: SlimeElement[], 
+  parent2Elements: SlimeElement[], 
+  parent1Level: number = 1, 
+  parent2Level: number = 1,
+  parent1Rarity: RarityTier = 'Common',
+  parent2Rarity: RarityTier = 'Common'
+): BreedingResult | null {
   
-  // Step 1: Gene Extraction - Get combined element list from parents
-  const combinedElements = [parent1Element, parent2Element];
-  console.log(`🧬 Combined Elements: [${combinedElements.join(', ')}]`);
+  // ===== PHASE ONE: ELEMENTAL POOL =====
+  // Parent Union (PU): Combine all unique elements from both parents
+  const parentUnion = [...new Set([...parent1Elements, ...parent2Elements])];
+  console.log(`🧬 Parent Union: [${parentUnion.join(', ')}]`);
   
-  // Step 2: Pool Filtering - Scan codex for matching element subsets
-  const filteredPool = ALL_CODEX_SLIMES.filter(slime => {
-    // Law 1: The Element Gate - A slime can only be a result if parents provide all of its required elements
-    return slime.elements.every(element => combinedElements.includes(element));
+  // Database Filtration: Only slimes that have ALL parent elements
+  const validOutcomes = ALL_CODEX_SLIMES.filter(slime => {
+    // Union Rule: Slime must have all elements from the parent union (can have more too)
+    return parentUnion.every(element => slime.elements.includes(element));
   });
   
-  console.log(`🧬 Filtered Pool Size: ${filteredPool.length} slimes`);
+  console.log(`🧬 Valid Outcomes Found: ${validOutcomes.length} slimes`);
   
-  if (filteredPool.length === 0) {
-    console.log('🧬 No matching slimes found in codex');
+  if (validOutcomes.length === 0) {
+    console.log('🧬 No valid breeding outcomes found');
     return null;
   }
   
-  // Step 3: Level Bonus Calculation
-  const totalParentLevel = parent1Level + parent2Level;
-  const luckBonus = Math.floor(totalParentLevel * 0.5); // Level Luck = (Parent1Level + Parent2Level) * 0.5%
-  console.log(`🧬 Level Luck Bonus: +${luckBonus}% (from parents Lv${parent1Level} + Lv${parent2Level})`);
+  // ===== PHASE TWO: BREEDINGPOWER CALCULATION =====
+  const breedingPower = ((parent1Level + parent2Level) * 0.5) + 
+                        (RARITY_VALUES[parent1Rarity] + RARITY_VALUES[parent2Rarity]);
+  console.log(`🧬 BreedingPower: ${breedingPower} (Levels: ${parent1Level + parent2Level}, Rarities: ${parent1Rarity} + ${parent2Rarity})`);
   
-  // Step 4: Rarity Heritage - Gene Strength from parent tiers (use Common as default for user slimes)
-  const geneStrength = calculateGeneStrength('Common', 'Common');
-  console.log(`🧬 Gene Strength Bonus: ${geneStrength}% (from Common + Common parents)`);
+  // ===== PHASE THREE: DYNAMIC WEIGHTED SELECTION =====
+  const finalWeights: Record<string, number> = {};
   
-  // Step 5: Dynamic Weighting - Apply level bonus and gene strength to pool
-  const { finalWeights, adjustedPool } = applyDynamicWeighting(filteredPool, luckBonus, geneStrength);
+  validOutcomes.forEach(slime => {
+    const baseWeight = BASE_RARITY_WEIGHTS[slime.rarityTier];
+    let finalWeight = baseWeight;
+    
+    // Apply BreedingPower multiplier for higher tiers
+    if (slime.rarityTier === 'Rare') {
+      finalWeight = baseWeight * (1 + (breedingPower * 0.02));
+    } else if (slime.rarityTier === 'Epic') {
+      finalWeight = baseWeight * (1 + (breedingPower * 0.05));
+    } else if (slime.rarityTier === 'Legendary') {
+      finalWeight = baseWeight * (1 + (breedingPower * 0.08));
+    } else if (['Divine', 'Ancient'].includes(slime.rarityTier)) {
+      finalWeight = baseWeight * (1 + (breedingPower * 0.1));
+    }
+    
+    finalWeights[slime.id] = finalWeight;
+  });
   
-  // Step 6: Result Selection - Choose single slime ID based on weighted probability
-  const selectedSlimeId = selectWeightedRandomEnhanced(adjustedPool, finalWeights);
+  // Calculate odds for debug logging
+  const totalWeight = Object.values(finalWeights).reduce((sum, weight) => sum + weight, 0);
+  const oddsByRarity: Record<string, number> = {};
+  
+  validOutcomes.forEach(slime => {
+    if (!oddsByRarity[slime.rarityTier]) {
+      oddsByRarity[slime.rarityTier] = 0;
+    }
+    oddsByRarity[slime.rarityTier] += (finalWeights[slime.id] / totalWeight) * 100;
+  });
+  
+  console.log(`🧬 Current Odds for Epic: ${oddsByRarity['Epic']?.toFixed(2) || 0}%`);
+  console.log(`🧬 Current Odds for Rare: ${oddsByRarity['Rare']?.toFixed(2) || 0}%`);
+  console.log(`🧬 Current Odds for Legendary: ${oddsByRarity['Legendary']?.toFixed(2) || 0}%`);
+  
+  // Weighted random selection
+  const selectedSlimeId = selectWeightedRandom(validOutcomes, finalWeights);
   
   if (!selectedSlimeId) {
     console.error('❌ Failed to select slime from breeding pool');
@@ -58,81 +114,44 @@ export function calculateBreedingResult(parent1Element: SlimeElement, parent2Ele
   }
   
   const selectedSlime = SLIME_CODEX_MAP.get(selectedSlimeId)!;
-  console.log(`🧬 Selected Slime: ${selectedSlime.name} (${selectedSlime.rarityTier}) - Final Chance: ${finalWeights[selectedSlimeId]}%`);
+  console.log(`🧬 Selected Slime: ${selectedSlime.name} (${selectedSlime.rarityTier})`);
   
   return {
     slimeId: selectedSlimeId,
-    luckBonus,
-    geneStrength,
-    finalWeights
+    parentUnion,
+    validOutcomes: validOutcomes.map(s => s.id),
+    finalWeights,
+    breedingPower
   };
 }
 
 /**
- * Calculate Gene Strength from parent rarity tiers
- * Rarity Heritage: If parents are already high-tier, they should have "Stronger Genes."
+ * Get all possible breeding outcomes for display (without selection)
  */
-function calculateGeneStrength(parent1Tier: string, parent2Tier: string): number {
-  const tierStrength: Record<string, number> = {
-    'Common': 0,
-    'Uncommon': 5,
-    'Rare': 10,
-    'Epic': 15,
-    'Legendary': 25,
-    'Ancient': 35,
-    'Divine': 40
-  };
+export function getPossibleOutcomes(
+  parent1Elements: SlimeElement[], 
+  parent2Elements: SlimeElement[]
+): CodexSlime[] {
   
-  const strength1 = tierStrength[parent1Tier] || 0;
-  const strength2 = tierStrength[parent2Tier] || 0;
-  const averageStrength = (strength1 + strength2) / 2;
+  // Parent Union (PU): Combine all unique elements from both parents
+  const parentUnion = [...new Set([...parent1Elements, ...parent2Elements])];
+  console.log(`🧬 GetPossibleOutcomes - Parent Union: [${parentUnion.join(', ')}]`);
   
-  // Epic Parents: +15% chance to hit the top-tier of the available pool
-  // Legendary Parents: +25% chance
-  return Math.floor(averageStrength);
-}
-
-/**
- * Apply Dynamic Weighting with Level Bonus and Gene Strength
- * This "Luck" reduces the weight of Commons and increases the weight of Epics/Legendaries
- */
-function applyDynamicWeighting(pool: any[], luckBonus: number, geneStrength: number): { finalWeights: Record<string, number>; adjustedPool: any[] } {
-  const finalWeights: Record<string, number> = {};
-  const adjustedPool = pool.map(slime => {
-    const baseWeight = slime.weight;
-    let adjustedWeight = baseWeight;
-    
-    // Apply Level Luck Bonus - reduces weight of Commons, increases weight of higher tiers
-    if (slime.rarityTier === 'Common') {
-      adjustedWeight = Math.max(1, baseWeight - luckBonus);
-    } else if (slime.rarityTier === 'Uncommon') {
-      adjustedWeight = Math.max(1, baseWeight - Math.floor(luckBonus * 0.5));
-    } else if (['Epic', 'Legendary', 'Ancient', 'Divine'].includes(slime.rarityTier)) {
-      adjustedWeight = baseWeight + Math.floor(luckBonus * 0.3);
-    }
-    
-    // Apply Gene Strength Bonus
-    if (geneStrength >= 15) { // Epic Parents
-      adjustedWeight = Math.floor(adjustedWeight * 1.15); // +15% chance to hit top-tier
-    } else if (geneStrength >= 25) { // Legendary Parents
-      adjustedWeight = Math.floor(adjustedWeight * 1.25); // +25% chance
-    }
-    
-    finalWeights[slime.id] = adjustedWeight;
-    
-    return {
-      ...slime,
-      adjustedWeight
-    };
+  // Database Filtration: Only slimes that have ALL parent elements
+  const validOutcomes = ALL_CODEX_SLIMES.filter(slime => {
+    // Union Rule: Slime must have all elements from the parent union (can have more too)
+    return parentUnion.every(element => slime.elements.includes(element));
   });
   
-  return { finalWeights, adjustedPool };
+  console.log(`🧬 GetPossibleOutcomes - Valid Outcomes Found: ${validOutcomes.length} slimes`);
+  
+  return validOutcomes;
 }
 
 /**
- * Enhanced weighted random selection from breeding pool
+ * Weighted random selection from pool
  */
-function selectWeightedRandomEnhanced(pool: any[], weights: Record<string, number>): string | null {
+function selectWeightedRandom(pool: CodexSlime[], weights: Record<string, number>): string | null {
   const totalWeight = Object.values(weights).reduce((sum, weight) => sum + weight, 0);
   const random = Math.random() * totalWeight;
   
@@ -141,89 +160,11 @@ function selectWeightedRandomEnhanced(pool: any[], weights: Record<string, numbe
     currentWeight += weights[slime.id];
     
     if (random < currentWeight) {
-      console.log(`🧬 Selected ${slime.name} with adjusted weight ${weights[slime.id]}`);
+      console.log(`🧬 Selected ${slime.name} with weight ${weights[slime.id]}`);
       return slime.id;
     }
   }
   
   console.error('❌ Weighted selection failed - this should not happen');
   return null;
-}
-
-/**
- * Weighted random selection from breeding pool
- * Implements the "Tiered Odds" system
- */
-function selectWeightedRandom(pool: BreedingPool): string | null {
-  const totalWeight = pool.totalWeight;
-  const random = Math.random() * totalWeight;
-  
-  let currentWeight = 0;
-  for (const slimeId of pool.slimes) {
-    const slime = SLIME_CODEX_MAP.get(slimeId)!;
-    currentWeight += slime.weight;
-    
-    if (random < currentWeight) {
-      console.log(`🧬 Selected ${slime.name} with weight ${slime.weight}`);
-      return slimeId;
-    }
-  }
-  
-  console.error('❌ Weighted selection failed - this should not happen');
-  return null;
-}
-
-/**
- * Check if breeding result is valid according to the breeding laws
- */
-export function isValidBreedingResult(parent1Id: string, parent2Id: string, resultId: string): boolean {
-  const parent1 = SLIME_CODEX_MAP.get(parent1Id);
-  const parent2 = SLIME_CODEX_MAP.get(parent2Id);
-  const result = SLIME_CODEX_MAP.get(resultId);
-  
-  if (!parent1 || !parent2 || !result) {
-    return false;
-  }
-  
-  const parentElements = [...new Set([...parent1!.elements, ...parent2!.elements])];
-  const resultElements = result.elements;
-  
-  // Law 1: Element Gate - Result can only have elements present in parents
-  const isValidElements = resultElements.every(element => parentElements.includes(element));
-  
-  // Law 2: Complexity Cap - Can't get 3-element slime from two 1-element slimes
-  const parentElementCount = parentElements.length;
-  const resultElementCount = resultElements.length;
-  const isValidComplexity = !(resultElementCount >= 3 && parentElementCount < 3);
-  
-  const isValid = isValidElements && isValidComplexity;
-  console.log(`🧬 Breeding Validation: ${isValid ? '✅ Valid' : '❌ Invalid'} - ${result.name}`);
-  
-  return isValid;
-}
-
-/**
- * Get rarity tier chances for display purposes
- */
-export function getRarityChances(pool: BreedingPool): Record<string, number> {
-  const chances: Record<string, number> = {};
-  const totalWeight = pool.totalWeight;
-  
-  for (const slimeId of pool.slimes) {
-    const slime = SLIME_CODEX_MAP.get(slimeId)!;
-    const chance = (slime.weight / totalWeight) * 100;
-    chances[slimeId] = Math.round(chance * 10) / 10; // Round to 1 decimal place
-  }
-  
-  return chances;
-}
-
-/**
- * Get final breeding chances for display (Luck Meter)
- */
-export function getBreedingChances(parent1Element: SlimeElement, parent2Element: SlimeElement, parent1Level: number = 1, parent2Level: number = 1): Record<string, number> {
-  const result = calculateBreedingResult(parent1Element, parent2Element, parent1Level, parent2Level);
-  if (!result) return {};
-  
-  return result.finalWeights;
 }

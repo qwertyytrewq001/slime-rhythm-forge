@@ -8,6 +8,7 @@ interface SlimeRenderOptions {
   // Strictly opt-in: preserve existing look by default.
   enhanced3D?: boolean;
   useSprites?: boolean; // New option to use sprite rendering
+  isSilhouette?: boolean; // New option for shadow silhouettes
 }
 
 export function getStage(level: number): SlimeEvolutionStage {
@@ -152,12 +153,18 @@ export function drawSlime(
 
   const t = slime.traits;
   const model = t.model || 0;
-  const c1 = COLOR_PALETTE[t.color1] || '#7FFF7F';
-  const c2 = COLOR_PALETTE[t.color2] || '#7FBFFF';
+  let c1 = COLOR_PALETTE[t.color1] || '#7FFF7F';
+  let c2 = COLOR_PALETTE[t.color2] || '#7FBFFF';
   const element = slime.element || 'nature';
   const stars = slime.rarityStars ?? 1;
   const level = slime.level ?? 1;
   const stage = getStage(level);
+
+  // Apply silhouette effect
+  if (options.isSilhouette) {
+    c1 = '#2a2a2a'; // Dark gray for silhouette
+    c2 = '#1a1a1a'; // Darker gray for secondary color
+  }
 
   // Stage multipliers
   let stageScale = 1.0;

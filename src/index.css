@@ -4,6 +4,127 @@
 @tailwind components;
 @tailwind utilities;
 
+/* Custom scrollbar for game feel */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, #FF7EB6 0%, #d63384 100%);
+  border-radius: 4px;
+  border: 2px solid transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(180deg, #ff99c2 0%, #ff6b9d 100%);
+}
+
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #FF7EB6 transparent;
+}
+
+/* Remove ALL scrollbars from select dropdowns */
+select::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+select::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+select::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+select {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Remove scrollbars from all elements in the codex */
+.custom-scrollbar *::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+.custom-scrollbar *::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+.custom-scrollbar *::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+.custom-scrollbar * {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* Global scrollbar removal for codex - eliminate ALL scrollbars */
+.custom-scrollbar,
+.custom-scrollbar *,
+.custom-scrollbar *::before,
+.custom-scrollbar *::after,
+.custom-scrollbar ::-webkit-scrollbar,
+.custom-scrollbar *::-webkit-scrollbar,
+.custom-scrollbar *::-webkit-scrollbar-track,
+.custom-scrollbar *::-webkit-scrollbar-thumb {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+  -webkit-appearance: none !important;
+  appearance: none !important;
+}
+
+/* Remove scrollbars from select dropdowns only */
+select::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+
+select::-webkit-scrollbar-track {
+  display: none !important;
+}
+
+select::-webkit-scrollbar-thumb {
+  display: none !important;
+}
+
+select {
+  scrollbar-width: none !important;
+  -ms-overflow-style: none !important;
+}
+
+/* FORCE SELECT TEXT TO BE VISIBLE - OVERRIDE ALL GLOBAL STYLES */
+select {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+}
+
+select option {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  background: linear-gradient(to bottom, #1a1a2e, #16213e) !important;
+}
+
+/* Force white text for all select elements and their children */
+.custom-scrollbar select,
+.custom-scrollbar select *,
+.custom-scrollbar select option,
+.custom-scrollbar select option:checked {
+  color: white !important;
+  -webkit-text-fill-color: white !important;
+  background-color: #1a1a2e !important;
+}
+
 @layer base {
   :root {
     --background: 45 30% 96%; /* #F8F5F2 approximate */

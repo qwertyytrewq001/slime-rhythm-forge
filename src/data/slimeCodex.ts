@@ -7,7 +7,7 @@ export interface CodexSlime {
   rarityTier: RarityTier;
   weight: number;
   description: string;
-  family: 'primal' | 'confectionary' | 'disaster' | 'biome' | 'lab' | 'mystics' | 'material' | 'legendaries' | 'high-hybrid' | 'mythical';
+  family: 'elemental-slimes' | 'sweet-collection' | 'storm-collection' | 'nature-collection' | 'lab-slimes' | 'mystic-slimes' | 'crystal-collection' | 'legendary-slimes' | 'hybrid-collection' | 'lost-slimes';
   spriteId: string;
 }
 
@@ -20,7 +20,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The basic flame spirit. Parent of all fire-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'fire_base'
   },
   {
@@ -30,7 +30,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The fluid essence spirit. Master of water-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'water_base'
   },
   {
@@ -40,7 +40,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The nature spirit. Guardian of plant-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'plant_base'
   },
   {
@@ -50,7 +50,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The earth spirit. Foundation of earth-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'earth_base'
   },
   {
@@ -60,7 +60,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The air spirit. Controller of wind-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'wind_base'
   },
   {
@@ -70,7 +70,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The frozen spirit. Master of ice-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'ice_base'
   },
   {
@@ -80,7 +80,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The storm spirit. Wielder of electric-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'electric_base'
   },
   {
@@ -90,7 +90,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The metal spirit. Creator of metal-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'metal_base'
   },
   {
@@ -100,7 +100,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The radiant spirit. Beacon of light-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'light_base'
   },
   {
@@ -110,7 +110,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The shadow spirit. Keeper of shadow-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'shadow_base'
   },
   {
@@ -120,7 +120,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The cosmic spirit. Guardian of cosmic-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'cosmic_base'
   },
   {
@@ -130,7 +130,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The void spirit. Master of void-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'void_base'
   },
   {
@@ -140,7 +140,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The toxic spirit. Creator of toxic-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'toxic_base'
   },
   {
@@ -150,7 +150,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The crystal spirit. Keeper of crystal-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'crystal_base'
   },
   {
@@ -160,7 +160,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The lava spirit. Master of lava-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'lava_base'
   },
   {
@@ -170,7 +170,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The nature spirit. Guardian of nature-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'nature_base'
   },
   {
@@ -180,7 +180,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The arcane spirit. Wielder of arcane-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'arcane_base'
   },
   {
@@ -190,7 +190,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: 'The divine spirit. Keeper of divine-based slimes.',
-    family: 'primal',
+    family: 'elemental-slimes',
     spriteId: 'divine_base'
   }
 ];
@@ -204,7 +204,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A sweet fusion of plant and fire elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'candy_plant_fire'
   },
   {
@@ -214,7 +214,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A soft blend of water and earth elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'pudding_water_earth'
   },
   {
@@ -224,7 +224,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A chewy mix of plant and water elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'gummy_plant_water'
   },
   {
@@ -234,7 +234,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A golden blend of plant and light elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'honey_plant_light'
   },
   {
@@ -244,7 +244,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A rich fusion of earth and fire elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'choco_earth_fire'
   },
   {
@@ -254,7 +254,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A fruity blend of plant and nature elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'berry_plant_nature'
   },
   {
@@ -264,7 +264,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A cool fusion of plant and ice elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'mint_plant_ice'
   },
   {
@@ -274,7 +274,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A warm blend of lava and water elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'caramel_lava_water'
   },
   {
@@ -284,7 +284,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A fluffy fusion of wind and plant elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'cotton_wind_plant'
   },
   {
@@ -294,7 +294,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A round fusion of earth and nature elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'donut_earth_nature'
   },
   {
@@ -304,8 +304,88 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A fizzy fusion of water and electric elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'soda_water_electric'
+  },
+  {
+    id: 'steam_slime',
+    name: 'Steam Slime',
+    elements: ['fire', 'water'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'A hot fusion of fire and water elements.',
+    family: 'sweet-collection',
+    spriteId: 'steam_fire_water'
+  },
+  {
+    id: 'mud_slime',
+    name: 'Mud Slime',
+    elements: ['water', 'earth'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'A soft fusion of water and earth elements.',
+    family: 'sweet-collection',
+    spriteId: 'mud_water_earth'
+  },
+  {
+    id: 'mist_slime',
+    name: 'Mist Slime',
+    elements: ['water', 'wind'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'A light fusion of water and wind elements.',
+    family: 'sweet-collection',
+    spriteId: 'mist_water_wind'
+  },
+  {
+    id: 'ash_slime',
+    name: 'Ash Slime',
+    elements: ['fire', 'plant'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'A dry fusion of fire and plant elements.',
+    family: 'sweet-collection',
+    spriteId: 'ash_fire_plant'
+  },
+  {
+    id: 'storm_slime',
+    name: 'Storm Slime',
+    elements: ['electric', 'water'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'A powerful fusion of electric and water elements.',
+    family: 'sweet-collection',
+    spriteId: 'storm_electric_water'
+  },
+  {
+    id: 'molten_slime',
+    name: 'Molten Slime',
+    elements: ['metal', 'fire'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'A hot fusion of metal and fire elements.',
+    family: 'sweet-collection',
+    spriteId: 'molten_metal_fire'
+  },
+  {
+    id: 'bloom_slime',
+    name: 'Bloom Slime',
+    elements: ['light', 'plant'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'A bright fusion of light and plant elements.',
+    family: 'sweet-collection',
+    spriteId: 'bloom_light_plant'
+  },
+  {
+    id: 'darkness_slime',
+    name: 'Darkness Slime',
+    elements: ['shadow', 'earth'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'A dark fusion of shadow and earth elements.',
+    family: 'sweet-collection',
+    spriteId: 'darkness_shadow_earth'
   },
   {
     id: 'toffee_slime',
@@ -314,7 +394,7 @@ export const CONFECTIONARY_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A hard fusion of metal and fire elements.',
-    family: 'confectionary',
+    family: 'sweet-collection',
     spriteId: 'toffee_metal_fire'
   }
 ];
@@ -328,7 +408,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'An explosive fusion of lava and fire elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'volcano_lava_fire'
   },
   {
@@ -338,7 +418,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'A violent fusion of wind and electric elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'tornado_wind_electric'
   },
   {
@@ -348,7 +428,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'A massive fusion of water and wind elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'tsunami_water_wind'
   },
   {
@@ -358,7 +438,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'A devastating fusion of earth and metal elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'earthquake_earth_metal'
   },
   {
@@ -368,7 +448,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'A burning fusion of fire and plant elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'wildfire_fire_plant'
   },
   {
@@ -378,7 +458,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'A freezing fusion of ice and wind elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'blizzard_ice_wind'
   },
   {
@@ -388,7 +468,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'A abrasive fusion of earth and wind elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'sandstorm_earth_wind'
   },
   {
@@ -398,7 +478,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'A corrosive fusion of toxic and water elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'acid_rain_toxic_water'
   },
   {
@@ -408,7 +488,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'An impact fusion of cosmic and earth elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'meteor_cosmic_earth'
   },
   {
@@ -418,7 +498,7 @@ export const DISASTER_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: 'A brilliant fusion of cosmic and fire elements.',
-    family: 'disaster',
+    family: 'storm-collection',
     spriteId: 'solar_flare_cosmic_fire'
   }
 ];
@@ -432,7 +512,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'The slime that seeded the first forests.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'genesis_divine_nature_earth_water'
   },
   {
@@ -442,7 +522,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Born from the heat of a dying world.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'apocalypse_void_fire_lava_shadow'
   },
   {
@@ -452,7 +532,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'So large it was once mistaken for a floating island.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'galaxy_whale_cosmic_water_wind_arcane'
   },
   {
@@ -462,7 +542,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'A slime that replaced its body with perfect machinery.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'mecha_god_metal_electric_light_crystal'
   },
   {
@@ -472,7 +552,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Even other slimes are afraid to look at it.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'eldritch_horror_void_toxic_shadow_arcane'
   },
   {
@@ -482,7 +562,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'It grows a miniature world on its back.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'yggdrasil_plant_nature_earth_divine'
   },
   {
@@ -492,7 +572,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Its core is a black hole held together by gravity.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'star_eater_cosmic_void_fire_metal'
   },
   {
@@ -502,7 +582,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Its presence stops all nearby battles instantly.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'harmony_light_nature_wind_water'
   },
   {
@@ -512,7 +592,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: 'A slime that contains all of the world\'s curiosities.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'pandora_void_arcane_toxic_fire'
   },
   {
@@ -522,7 +602,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Ancient',
     weight: 0.5,
     description: 'The "True Master."',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'alpha_blob_divine_cosmic_void_nature'
   },
   {
@@ -532,7 +612,7 @@ export const MYTHICAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 3,
     description: 'A crystalline fusion of ice, crystal, and light elements.',
-    family: 'mythical',
+    family: 'lost-slimes',
     spriteId: 'crytsal_ice_crystal_light'
   }
 ];
@@ -546,7 +626,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A murky fusion of toxic and water elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'swamp_toxic_water'
   },
   {
@@ -556,7 +636,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A dry fusion of earth and wind elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'savanna_earth_wind'
   },
   {
@@ -566,7 +646,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A scorching fusion of earth and fire elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'desert_earth_fire'
   },
   {
@@ -576,7 +656,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A lush fusion of plant and water elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'rainforest_plant_water'
   },
   {
@@ -586,7 +666,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A refreshing fusion of water and nature elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'oasis_water_nature'
   },
   {
@@ -596,7 +676,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A cold fusion of ice and earth elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'tundra_ice_earth'
   },
   {
@@ -606,7 +686,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A dark fusion of earth and shadow elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'cave_earth_shadow'
   },
   {
@@ -616,7 +696,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A vibrant fusion of water and crystal elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'coral_water_crystal'
   },
   {
@@ -626,7 +706,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A dense fusion of plant and nature elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'jungle_plant_nature'
   },
   {
@@ -636,7 +716,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A high fusion of wind and ice elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'alpine_wind_ice'
   },
   {
@@ -646,7 +726,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A deep fusion of earth and lava elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'canyon_earth_lava'
   },
   {
@@ -656,7 +736,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A coastal fusion of plant and toxic elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'mangrove_plant_toxic'
   },
   {
@@ -666,7 +746,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A peaceful fusion of nature and light elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'meadow_nature_light'
   },
   {
@@ -676,7 +756,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A isolated fusion of water and earth elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'island_water_earth'
   },
   {
@@ -686,7 +766,7 @@ export const BIOME_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A strong fusion of plant and metal elements.',
-    family: 'biome',
+    family: 'nature-collection',
     spriteId: 'bamboo_plant_metal'
   }
 ];

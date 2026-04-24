@@ -4,6 +4,7 @@ import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
+import { CodexManager } from '@/utils/codexManager';
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'first_fusion', name: 'First Fusion', description: 'Breed your first slime', reward: '50 goo', rewardAmount: 50, unlocked: false, claimed: false },
@@ -195,6 +196,11 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, currentLevel: action.level };
     case 'ADD_SLIME': {
       const slime = action.slime;
+      
+      // Discover slime in codex
+      codexManager.discoverSlime(slime.id);
+      codexManager.saveState();
+      
       // Find available habitat
       const availableHabitat = state.habitats.find(h => 
         slime.elements.includes(h.element) && h.assignedSlimeIds.length < h.capacity
@@ -427,14 +433,28 @@ interface GameContextType {
   state: GameState;
   dispatch: React.Dispatch<GameAction>;
   playerLevel: number;
+  codexManager: CodexManager;
 }
 
 const GameContext = createContext<GameContextType | null>(null);
+
+// Create global codex manager instance
+const codexManager = new CodexManager();
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState);
   const saveTimer = useRef<ReturnType<typeof setTimeout>>();
   const lastKnownLevel = useRef<number>(0);
+
+  // Initialize codex manager
+  useEffect(() => {
+    codexManager.initialize();
+    
+    // Discover existing slimes in the player's collection
+    state.slimes.forEach(slime => {
+      codexManager.discoverSlime(slime.id);
+    });
+  }, [state.slimes.length]); // Only run when slime count changes
 
   const playerLevel = useMemo(() =>
     getPlayerLevel(state.totalBreeds, state.slimes.length),
@@ -508,7 +528,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
   }, [state.muted]);
 
   return (
-    <GameContext.Provider value={{ state, dispatch, playerLevel }}>
+    <GameContext.Provider value={{ state, dispatch, playerLevel, codexManager }}>
       {children}
     </GameContext.Provider>
   );
