@@ -400,6 +400,16 @@ export const STORM_SLIMES: CodexSlime[] = [
     description: 'A brilliant fusion of cosmic and fire elements.',
     family: 'storm-collection',
     spriteId: 'solarflare_slime'
+  },
+  {
+    id: 'meteor_slime',
+    name: 'Meteor Slime',
+    elements: ['earth', 'fire'],
+    rarityTier: 'Rare',
+    weight: 25,
+    description: 'A burning fusion of earth and fire elements from space.',
+    family: 'storm-collection',
+    spriteId: 'meteor_slime'
   }
 ];
 

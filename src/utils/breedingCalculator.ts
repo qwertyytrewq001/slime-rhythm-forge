@@ -1,6 +1,16 @@
 import { SlimeElement, RarityTier } from '@/types/slime';
 import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP, CodexSlime } from '@/data/slimeCodex';
 
+// Debug logging flag - set to false for production
+const DEBUG_LOGGING = true;
+
+// Helper function for debug logging
+function debugLog(message: string) {
+  if (DEBUG_LOGGING) {
+    console.log(message);
+  }
+}
+
 export interface BreedingResult {
   slimeId: string;
   parentUnion: string[];
@@ -31,6 +41,53 @@ const RARITY_VALUES: Record<RarityTier, number> = {
   'Ancient': 7
 };
 
+// Helper function to validate slime elements
+function validateSlimeElements(elements: SlimeElement[]): string | null {
+  if (!Array.isArray(elements)) {
+    return 'Elements must be an array';
+  }
+  if (elements.length === 0) {
+    return 'Elements array cannot be empty';
+  }
+  if (elements.length > 4) {
+    return 'Slimes cannot have more than 4 elements';
+  }
+  
+  const validElements: SlimeElement[] = [
+    'fire', 'water', 'plant', 'earth', 'wind',
+    'ice', 'electric', 'metal', 'light', 'shadow',
+    'cosmic', 'void', 'toxic', 'crystal', 'lava',
+    'nature', 'arcane', 'divine'
+  ];
+  
+  for (const element of elements) {
+    if (!validElements.includes(element)) {
+      return `Invalid element: ${element}`;
+    }
+  }
+  
+  return null;
+}
+
+// Helper function to filter slimes by exact element match
+function filterSlimesByExactElements(parentUnion: SlimeElement[]): CodexSlime[] {
+  // Sort once for comparison
+  const parentElementsSorted = [...parentUnion].sort();
+  
+  return ALL_CODEX_SLIMES.filter(slime => {
+    // Quick length check first for performance
+    if (slime.elements.length !== parentElementsSorted.length) {
+      return false;
+    }
+    
+    // Sort slime elements for comparison
+    const slimeElements = [...slime.elements].sort();
+    
+    // Compare element by element
+    return slimeElements.every((element, index) => element === parentElementsSorted[index]);
+  });
+}
+
 /**
  * Strict Elemental Pool Breeding System
  * Phase One: Elemental Pool (Union of parent elements)
@@ -45,33 +102,39 @@ export function calculateBreedingResult(
   parent1Rarity: RarityTier = 'Common',
   parent2Rarity: RarityTier = 'Common'
 ): BreedingResult | null {
+  // Input validation
+  const parent1Validation = validateSlimeElements(parent1Elements);
+  const parent2Validation = validateSlimeElements(parent2Elements);
+  
+  if (parent1Validation) {
+    console.error(`❌ Invalid parent1 elements: ${parent1Validation}`);
+    return null;
+  }
+  
+  if (parent2Validation) {
+    console.error(`❌ Invalid parent2 elements: ${parent2Validation}`);
+    return null;
+  }
   
   // ===== PHASE ONE: ELEMENTAL POOL =====
   // Parent Union (PU): Combine all unique elements from both parents
   const parentUnion = [...new Set([...parent1Elements, ...parent2Elements])];
-  console.log(`🧬 Parent Union: [${parentUnion.join(', ')}]`);
+  debugLog(`🧬 Parent Union: [${parentUnion.join(', ')}]`);
   
   // Database Filtration: Only slimes with EXACTLY the parent elements
-  const validOutcomes = ALL_CODEX_SLIMES.filter(slime => {
-    // Exact Match Rule: Slime must have exactly the same elements as the parent union
-    const slimeElements = [...slime.elements].sort();
-    const parentElementsSorted = [...parentUnion].sort();
-    
-    return slimeElements.length === parentElementsSorted.length &&
-           slimeElements.every((element, index) => element === parentElementsSorted[index]);
-  });
+  const validOutcomes = filterSlimesByExactElements(parentUnion);
   
-  console.log(`🧬 Valid Outcomes Found: ${validOutcomes.length} slimes`);
+  debugLog(`🧬 Valid Outcomes Found: ${validOutcomes.length} slimes`);
   
   if (validOutcomes.length === 0) {
-    console.log('🧬 No valid breeding outcomes found');
+    debugLog('🧬 No valid breeding outcomes found');
     return null;
   }
   
   // ===== PHASE TWO: BREEDINGPOWER CALCULATION =====
   const breedingPower = ((parent1Level + parent2Level) * 0.5) + 
                         (RARITY_VALUES[parent1Rarity] + RARITY_VALUES[parent2Rarity]);
-  console.log(`🧬 BreedingPower: ${breedingPower} (Levels: ${parent1Level + parent2Level}, Rarities: ${parent1Rarity} + ${parent2Rarity})`);
+  debugLog(`🧬 BreedingPower: ${breedingPower} (Levels: ${parent1Level + parent2Level}, Rarities: ${parent1Rarity} + ${parent2Rarity})`);
   
   // ===== PHASE THREE: DYNAMIC WEIGHTED SELECTION =====
   const finalWeights: Record<string, number> = {};
@@ -105,9 +168,9 @@ export function calculateBreedingResult(
     oddsByRarity[slime.rarityTier] += (finalWeights[slime.id] / totalWeight) * 100;
   });
   
-  console.log(`🧬 Current Odds for Epic: ${oddsByRarity['Epic']?.toFixed(2) || 0}%`);
-  console.log(`🧬 Current Odds for Rare: ${oddsByRarity['Rare']?.toFixed(2) || 0}%`);
-  console.log(`🧬 Current Odds for Legendary: ${oddsByRarity['Legendary']?.toFixed(2) || 0}%`);
+  debugLog(`🧬 Current Odds for Epic: ${oddsByRarity['Epic']?.toFixed(2) || 0}%`);
+  debugLog(`🧬 Current Odds for Rare: ${oddsByRarity['Rare']?.toFixed(2) || 0}%`);
+  debugLog(`🧬 Current Odds for Legendary: ${oddsByRarity['Legendary']?.toFixed(2) || 0}%`);
   
   // Weighted random selection
   const selectedSlimeId = selectWeightedRandom(validOutcomes, finalWeights);
@@ -117,8 +180,12 @@ export function calculateBreedingResult(
     return null;
   }
   
-  const selectedSlime = SLIME_CODEX_MAP.get(selectedSlimeId)!;
-  console.log(`🧬 Selected Slime: ${selectedSlime.name} (${selectedSlime.rarityTier})`);
+  const selectedSlime = SLIME_CODEX_MAP.get(selectedSlimeId);
+  if (!selectedSlime) {
+    console.error('❌ Selected slime not found in codex map');
+    return null;
+  }
+  debugLog(`🧬 Selected Slime: ${selectedSlime.name} (${selectedSlime.rarityTier})`);
   
   return {
     slimeId: selectedSlimeId,
@@ -136,22 +203,28 @@ export function getPossibleOutcomes(
   parent1Elements: SlimeElement[], 
   parent2Elements: SlimeElement[]
 ): CodexSlime[] {
+  // Input validation
+  const parent1Validation = validateSlimeElements(parent1Elements);
+  const parent2Validation = validateSlimeElements(parent2Elements);
+  
+  if (parent1Validation) {
+    console.error(`❌ Invalid parent1 elements in getPossibleOutcomes: ${parent1Validation}`);
+    return [];
+  }
+  
+  if (parent2Validation) {
+    console.error(`❌ Invalid parent2 elements in getPossibleOutcomes: ${parent2Validation}`);
+    return [];
+  }
   
   // Parent Union (PU): Combine all unique elements from both parents
   const parentUnion = [...new Set([...parent1Elements, ...parent2Elements])];
-  console.log(`🧬 GetPossibleOutcomes - Parent Union: [${parentUnion.join(', ')}]`);
+  debugLog(`🧬 GetPossibleOutcomes - Parent Union: [${parentUnion.join(', ')}]`);
   
   // Database Filtration: Only slimes with EXACTLY the parent elements
-  const validOutcomes = ALL_CODEX_SLIMES.filter(slime => {
-    // Exact Match Rule: Slime must have exactly the same elements as the parent union
-    const slimeElements = [...slime.elements].sort();
-    const parentElementsSorted = [...parentUnion].sort();
-    
-    return slimeElements.length === parentElementsSorted.length &&
-           slimeElements.every((element, index) => element === parentElementsSorted[index]);
-  });
+  const validOutcomes = filterSlimesByExactElements(parentUnion);
   
-  console.log(`🧬 GetPossibleOutcomes - Valid Outcomes Found: ${validOutcomes.length} slimes`);
+  debugLog(`🧬 GetPossibleOutcomes - Valid Outcomes Found: ${validOutcomes.length} slimes`);
   
   return validOutcomes;
 }
@@ -168,7 +241,7 @@ function selectWeightedRandom(pool: CodexSlime[], weights: Record<string, number
     currentWeight += weights[slime.id];
     
     if (random < currentWeight) {
-      console.log(`🧬 Selected ${slime.name} with weight ${weights[slime.id]}`);
+      debugLog(`🧬 Selected ${slime.name} with weight ${weights[slime.id]}`);
       return slime.id;
     }
   }
