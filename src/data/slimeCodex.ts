@@ -7,7 +7,7 @@ export interface CodexSlime {
   rarityTier: RarityTier;
   weight: number;
   description: string;
-  family: 'elemental-slimes' | 'sweet-collection' | 'storm-collection' | 'nature-collection' | 'lab-slimes' | 'mystic-slimes' | 'crystal-collection' | 'legendary-slimes' | 'hybrid-collection' | 'lost-slimes';
+  family?: 'elemental-slimes' | 'sweet-collection' | 'storm-collection' | 'nature-collection' | 'lab-slimes' | 'mystic-slimes' | 'crystal-collection' | 'legendary-slimes' | 'hybrid-collection' | 'lost-slimes';
   spriteId: string;
 }
 
@@ -274,7 +274,6 @@ export const SWEET_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A hot fusion of fire and water elements.',
-    family: 'sweet-collection',
     spriteId: 'steam_slime'
   },
   {
@@ -423,7 +422,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     weight: 1,
     description: 'The slime that seeded the first forests.',
     family: 'lost-slimes',
-    spriteId: 'genesis_slime'
+    spriteId: 'yggdrasil_slime'
   },
   {
     id: 'apocalypse_slime',
@@ -473,7 +472,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     weight: 1,
     description: 'It grows a miniature world on its back.',
     family: 'lost-slimes',
-    spriteId: 'yggdrasil_slime'
+    spriteId: 'genesis_slime'
   },
   {
     id: 'star_eater_slime',
@@ -700,7 +699,6 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A floating fusion of wind and light elements.',
-    family: 'sweet-collection',
     spriteId: 'balloon_slime'
   },
   {
@@ -710,7 +708,6 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: 'A colorful fusion of earth and crystal elements.',
-    family: 'sweet-collection',
     spriteId: 'crayon_slime'
   },
   {

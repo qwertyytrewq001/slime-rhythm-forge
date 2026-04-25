@@ -37,7 +37,7 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
   }, []);
 
   const familyOptions = useMemo(() => {
-    const families = [...new Set(ALL_CODEX_SLIMES.map(s => s.family))];
+    const families = [...new Set(ALL_CODEX_SLIMES.map(s => s.family).filter(Boolean))];
     return ['all', ...families];
   }, []);
 
@@ -292,7 +292,7 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
             >
               {familyOptions.map(family => (
                 <option key={family} value={family} className="bg-gradient-to-br from-green-900 to-emerald-900 text-white font-black">
-                  {family === 'all' ? '🎯 ALL FAMILIES' : family.replace('-', ' ').toUpperCase()}
+                  {family === 'all' ? '🎯 ALL FAMILIES' : (family || '').replace('-', ' ').toUpperCase()}
                 </option>
               ))}
             </select>

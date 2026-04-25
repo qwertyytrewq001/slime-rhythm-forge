@@ -106,7 +106,7 @@ export const ELEMENT_MODEL_FEATURES: Record<SlimeElement, { blob: string; spiky:
 // Breeding combo results - Using 10 core elements + composites
 export const BREEDING_COMBOS: Record<string, string[]> = {
   // Core element combinations that create composites
-  'fire+earth': ['lava'],        // Lava = Fire + Earth
+  'water+fire': ['lava'],        // Lava = Water + Fire
   'plant+earth': ['nature'],      // Nature = Plant + Earth  
   'plant+water': ['wild'],        // Wild = Plant + Water
   'fire+ice': ['crystal'],        // Crystal = Fire + Ice

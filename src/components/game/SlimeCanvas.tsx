@@ -2,6 +2,7 @@ import { useRef, useEffect, useState } from 'react';
 import { Slime } from '@/types/slime';
 import { getSpriteIdForSlime } from '@/utils/spriteLoader';
 import { getStage } from '@/utils/slimeRenderer';
+import { SilhouetteCanvas } from './SilhouetteCanvas';
 
 interface SlimeCanvasProps {
   slime: Slime;
@@ -116,7 +117,46 @@ export function SlimeCanvas({
 
   const spritePath = getSpritePath();
 
-  // If we have a sprite path, render it like Glim
+  // If we have a sprite path and it's a silhouette, use canvas for proper silhouette rendering
+  if (spritePath && useSprites && !spriteError && isSilhouette) {
+    const actualSize = size * finalSizeMultiplier;
+    
+    return (
+      <div 
+        className={`relative ${className} cursor-pointer`}
+        style={{
+          width: `${actualSize}px`,
+          height: `${actualSize}px`,
+          transform: `translateY(${floatOffset}px) scale(${breathScale}) rotate(${idleRotation}deg)`,
+          transition: 'transform 0.2s ease-out',
+          background: 'none !important',
+          backgroundColor: 'transparent !important',
+          border: 'none',
+          boxShadow: 'none'
+        }}
+        onClick={onClick}
+        draggable={draggable}
+        onDragStart={onDragStart}
+      >
+        <SilhouetteCanvas 
+          spritePath={spritePath}
+          size={actualSize}
+          slimeName={slime.name}
+        />
+        
+        {/* Rarity stars overlay */}
+        {slime.rarityStars && slime.rarityStars > 1 && (
+          <div className="absolute bottom-0 left-0 right-0 flex justify-center gap-1">
+            {[...Array(slime.rarityStars)].map((_, i) => (
+              <span key={i} className="text-yellow-400 text-xs" style={{ fontSize: `${10 * finalSizeMultiplier}px` }}>⭐</span>
+            ))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  // If we have a sprite path and it's NOT a silhouette, render normally
   if (spritePath && useSprites && !spriteError) {
     const actualSize = size * finalSizeMultiplier;
     
@@ -142,14 +182,12 @@ export function SlimeCanvas({
           alt={`${slime.name} - ${slime.element}`}
           className="w-full h-full object-contain"
           style={{
-            filter: isSilhouette 
-              ? 'brightness(0) contrast(1.2) saturate(0) drop-shadow(0 0 10px rgba(0, 0, 0, 0.5))'
-              : isHurt 
-                ? 'drop-shadow(0 0 20px rgba(255, 0, 0, 0.5))' 
-                : 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.3))',
+            filter: isHurt 
+              ? 'drop-shadow(0 0 20px rgba(255, 0, 0, 0.5))' 
+              : 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.3))',
             background: 'transparent',
             backgroundColor: 'transparent',
-            opacity: isSilhouette ? 0.8 : 1
+            opacity: 1
           }}
           onError={() => {
             console.warn(`Failed to load sprite: ${spritePath}`);

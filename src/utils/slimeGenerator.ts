@@ -1,7 +1,7 @@
 import { Slime, SlimeTraits, SlimeElement, RarityTier } from '@/types/slime';
 import { TRAIT_RARITY_WEIGHTS, getSizeRarity, deriveElement, deriveSecondaryElement, BREEDING_COMBOS, ELEMENT_COMBO_BONUS, getRarityTier, RARITY_TIER_STARS, ALL_ELEMENTS } from '@/data/traitData';
 import { generateSlimeName } from './nameGenerator';
-import { calculateBreedingResult, isValidBreedingResult } from './breedingCalculator';
+import { calculateBreedingResult } from './breedingCalculator';
 import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 
 function randomId(): string {
@@ -107,7 +107,7 @@ export function createRandomSlime(basicOnly = false): Slime {
 
 // Start with 1 Goo Slime (Common, nature element, basic stats)
 export function createStarterSlimes(): Slime[] {
-  return [createCodexSlime('wild_primal', undefined)]; // Use nature primal as starter
+  return [createCodexSlime('leaf_slime', undefined)]; // Use nature primal as starter
 }
 
 // Create a slime with a specific element (for starter eggs in shop)
@@ -119,15 +119,15 @@ export function createElementSlime(element: SlimeElement): Slime {
     return createCodexSlime(matchingSlime.id, undefined);
   }
   
-  // Fallback to fire primal if no match found
-  return createCodexSlime('fire_primal', undefined);
+  // Fallback to fire slime if no match found
+  return createCodexSlime('fire_slime', undefined);
 }
 
 export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = false): Slime {
   // Use the new enhanced breeding calculator instead of procedural generation
   const breedingResult = calculateBreedingResult(
-    parent1.id, 
-    parent2.id, 
+    parent1.elements, 
+    parent2.elements, 
     parent1.level || 1, 
     parent2.level || 1
   );
