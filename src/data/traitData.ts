@@ -103,28 +103,13 @@ export const ELEMENT_MODEL_FEATURES: Record<SlimeElement, { blob: string; spiky:
   shadow:   { blob: 'shade-cloaked', spiky: 'dark thorns', jelly: 'smoke wisp' },
 };
 
-// Breeding combo results - Using 10 core elements + composites
+// Breeding combo results - Only keep working transformations
 export const BREEDING_COMBOS: Record<string, string[]> = {
-  // Core element combinations that create composites
-  'water+fire': ['lava'],        // Lava = Water + Fire
-  'plant+earth': ['nature'],      // Nature = Plant + Earth  
-  'plant+water': ['wild'],        // Wild = Plant + Water
-  'fire+ice': ['crystal'],        // Crystal = Fire + Ice
-  'light+shadow': ['cosmic', 'void', 'arcane', 'divine'], // Light + Shadow creates multiple possibilities
-  
-  // Core element combinations
-  'fire+water': ['steam'],
-  'fire+wind': ['electric'],
-  'water+earth': ['mud'],
-  'water+ice': ['snow'],
-  'water+wind': ['mist'],
-  'earth+wind': ['sand'],
-  'fire+plant': ['ash'],
-  'ice+wind': ['blizzard'],
-  'electric+water': ['storm'],
-  'metal+fire': ['molten'],
-  'light+plant': ['bloom'],
-  'shadow+earth': ['darkness'],
+  // Core element combinations that create composites (ONLY WORKING ONES)
+  'plant+earth': ['nature'],      // Nature = Plant + Earth ✓
+  'fire+ice': ['crystal'],        // Crystal = Fire + Ice ✓
+  'fire+wind': ['electric'],      // Electric = Fire + Wind ✓
+  // Note: light+shadow partially works (cosmic, arcane, divine exist, void missing)
 };
 
 // Element combo rarity bonuses - Updated for 10-element system

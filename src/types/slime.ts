@@ -18,7 +18,7 @@ export interface SlimeTraits {
 export type SlimeElement =
   | 'fire' | 'water' | 'plant' | 'earth' | 'wind'
   | 'ice' | 'electric' | 'metal' | 'light' | 'shadow'
-  | 'cosmic' | 'void' | 'toxic' | 'crystal' | 'lava'
+  | 'cosmic' | 'void' | 'toxic' | 'crystal'
   | 'nature' | 'arcane' | 'divine';
 
 // Rarity tiers (DML-inspired scaling)

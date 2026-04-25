@@ -5,24 +5,23 @@ import { createRandomSlime } from './slimeGenerator';
 // Element Type Effectiveness Chart (18 elements)
 // super: 1.5x, weak: 0.6x, neutral: 1.0x
 export const ELEMENT_EFFECTIVENESS: Record<SlimeElement, { strong: SlimeElement[]; weak: SlimeElement[] }> = {
-  fire: { strong: ['plant', 'ice', 'nature'], weak: ['water', 'lava', 'earth'] },
-  water: { strong: ['fire', 'lava', 'earth'], weak: ['plant', 'electric', 'toxic'] },
+  fire: { strong: ['plant', 'ice', 'nature'], weak: ['water', 'earth'] },
+  water: { strong: ['fire', 'earth'], weak: ['plant', 'electric', 'toxic'] },
   plant: { strong: ['water', 'earth', 'nature'], weak: ['fire', 'ice', 'toxic'] },
   earth: { strong: ['electric', 'metal', 'toxic'], weak: ['water', 'plant', 'ice'] },
   wind: { strong: ['plant', 'toxic', 'nature'], weak: ['ice', 'metal', 'arcane'] },
-  ice: { strong: ['plant', 'earth', 'wind'], weak: ['fire', 'metal', 'lava'] },
+  ice: { strong: ['plant', 'earth', 'wind'], weak: ['fire', 'metal'] },
   electric: { strong: ['water', 'metal', 'cosmic'], weak: ['earth', 'plant', 'void'] },
-  metal: { strong: ['ice', 'crystal', 'wind'], weak: ['fire', 'electric', 'lava'] },
+  metal: { strong: ['ice', 'crystal', 'wind'], weak: ['fire', 'electric'] },
   light: { strong: ['shadow', 'void', 'toxic'], weak: ['arcane', 'divine', 'cosmic'] },
   shadow: { strong: ['light', 'cosmic', 'arcane'], weak: ['divine', 'void', 'light'] },
   toxic: { strong: ['plant', 'nature', 'water'], weak: ['earth', 'metal', 'light'] },
   cosmic: { strong: ['light', 'arcane', 'void'], weak: ['shadow', 'divine', 'electric'] },
   void: { strong: ['shadow', 'electric', 'divine'], weak: ['light', 'cosmic', 'arcane'] },
   crystal: { strong: ['fire', 'ice', 'light'], weak: ['metal', 'earth', 'void'] },
-  lava: { strong: ['ice', 'metal', 'plant'], weak: ['water', 'fire', 'crystal'] },
   nature: { strong: ['earth', 'water', 'wind'], weak: ['fire', 'toxic', 'shadow'] },
   arcane: { strong: ['light', 'void', 'wind'], weak: ['shadow', 'cosmic', 'divine'] },
-  divine: { strong: ['shadow', 'cosmic', 'arcane'], weak: ['void', 'light', 'void'] },
+  divine: { strong: ['shadow', 'cosmic', 'arcane'], weak: ['void', 'light'] },
 };
 
 export function getEffectiveness(attacker: SlimeElement, defender: SlimeElement): 'super' | 'weak' | 'neutral' {

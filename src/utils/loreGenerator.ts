@@ -88,12 +88,6 @@ const ELEMENT_LORE: Record<SlimeElement, string[]> = {
     "Grows a new facet every time it hears a really good joke.",
     "Its heart is a perfect diamond, which is why it's so hard to break.",
   ],
-  lava: [
-    "Is constantly boiling, which makes it a terrible choice for a pillow.",
-    "Once tried to swim in the ocean. It created a small island and a lot of steam.",
-    "Claims to be the 'hottest' spirit in the bazaar. Literally.",
-    "Its sneeze is technically a volcanic eruption.",
-  ],
   nature: [
     "Is friends with every squirrel in the forest. They have a secret handshake.",
     "Can make flowers bloom just by thinking about gardening.",

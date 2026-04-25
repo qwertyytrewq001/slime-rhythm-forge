@@ -170,7 +170,7 @@ export function drawEnhancedEgg(ctx: CanvasRenderingContext2D, options: EggRende
     ctx.strokeStyle = '#226622';
     ctx.lineWidth = 2;
     ctx.beginPath(); ctx.moveTo(sx, sy); ctx.lineTo(sx, sy - 8); ctx.stroke();
-  } else if (element === 'fire' || element === 'lava') {
+  } else if (element === 'fire') {
     // Ember particles
     ctx.fillStyle = '#FFDD00';
     for(let i=0; i<5; i++) {

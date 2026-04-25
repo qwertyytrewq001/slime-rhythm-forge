@@ -659,7 +659,7 @@ function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string
     
     // ★ ELEMENT-SPECIFIC DITHER
     let dotColor = isLight ? '#fff' : darkenColor(c2, 0.6);
-    if (element === 'fire' || element === 'lava') {
+    if (element === 'fire') {
       dotColor = isLight ? '#FFCC33' : '#FF4400';
     } else if (element === 'ice' || element === 'crystal') {
       dotColor = isLight ? '#E0FFFF' : '#4682B4';
@@ -1174,8 +1174,7 @@ function drawElementFeatures(
       }
       break;
     }
-    case 'fire':
-    case 'lava': {
+    case 'fire': {
       // Flickering flame wisps
       for (let i = 0; i < 3; i++) {
         const fx = -15 + i * 15 + Math.sin(frame * 0.1 + i) * 3;
@@ -2142,18 +2141,7 @@ function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeEleme
         ctx.restore();
         break;
       }
-      case 'lava': {
-        const lavaY = y - (frame * 0.55 + i * 10) % 22;
-        const lavaLife = 1 - ((frame * 0.55 + i * 10) % 22) / 22;
-        ctx.globalAlpha = lavaLife * 0.7;
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.shadowColor = '#FF4500';
-        ctx.shadowBlur = 4;
-        ctx.beginPath(); ctx.arc(x, lavaY, 2.5, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0; ctx.shadowColor = 'transparent';
-        break;
-      }
-      case 'arcane': {
+            case 'arcane': {
         ctx.globalAlpha = 0.4 + Math.sin(frame * 0.05 + i * 2) * 0.25;
         ctx.strokeStyle = colors[i % colors.length];
         ctx.lineWidth = 1;

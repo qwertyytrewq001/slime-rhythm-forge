@@ -19,8 +19,7 @@ const ELEMENT_SPECIES: Record<SlimeElement, string[]> = {
   void: ['Rift', 'Abyss', 'Null', 'Warp', 'Vortex'],
   toxic: ['Venom', 'Sludge', 'Blight', 'Ooze', 'Acid'],
   crystal: ['Geode', 'Jewel', 'Opal', 'Facet', 'Gem'],
-  lava: ['Magma', 'Basalt', 'Pumice', 'Caldera', 'Obsidian'],
-  nature: ['Grove', 'Moss', 'Thicket', 'Dew', 'Meadow'],
+    nature: ['Grove', 'Moss', 'Thicket', 'Dew', 'Meadow'],
   arcane: ['Rune', 'Sigil', 'Mystic', 'Ether', 'Mana'],
   divine: ['Halo', 'Seraph', 'Celeste', 'Grace', 'Sanctus'],
 };

@@ -56,7 +56,7 @@ function validateSlimeElements(elements: SlimeElement[]): string | null {
   const validElements: SlimeElement[] = [
     'fire', 'water', 'plant', 'earth', 'wind',
     'ice', 'electric', 'metal', 'light', 'shadow',
-    'cosmic', 'void', 'toxic', 'crystal', 'lava',
+    'cosmic', 'void', 'toxic', 'crystal',
     'nature', 'arcane', 'divine'
   ];
   
@@ -69,11 +69,12 @@ function validateSlimeElements(elements: SlimeElement[]): string | null {
   return null;
 }
 
-// Helper function to filter slimes by exact element match
+// Helper function to filter slimes by exact element match only
 function filterSlimesByExactElements(parentUnion: SlimeElement[]): CodexSlime[] {
   // Sort once for comparison
   const parentElementsSorted = [...parentUnion].sort();
   
+  // Look for exact element matches only
   return ALL_CODEX_SLIMES.filter(slime => {
     // Quick length check first for performance
     if (slime.elements.length !== parentElementsSorted.length) {

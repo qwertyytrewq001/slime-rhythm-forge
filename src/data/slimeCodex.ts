@@ -146,7 +146,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'lava_slime',
     name: 'Lava Slime',
-    elements: ['lava'],
+    elements: ['water', 'fire'],
     rarityTier: 'Common',
     weight: 100,
     description: 'The lava spirit. Master of lava-based slimes.',
@@ -156,7 +156,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'nature_slime',
     name: 'Nature Slime',
-    elements: ['nature'],
+    elements: ['plant', 'earth'],
     rarityTier: 'Common',
     weight: 100,
     description: 'The nature spirit. Guardian of nature-based slimes.',
@@ -210,11 +210,11 @@ export const SWEET_SLIMES: CodexSlime[] = [
   {
     id: 'berry_slime',
     name: 'Berry Slime',
-    elements: ['plant', 'nature'],
+    elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A fruity blend of plant and nature elements.',
-    family: 'sweet-collection',
+    description: 'A fruity blend of plant and water elements.',
+    family: 'nature-collection',
     spriteId: 'berry_slime'
   },
   {
@@ -230,10 +230,10 @@ export const SWEET_SLIMES: CodexSlime[] = [
   {
     id: 'caramel_slime',
     name: 'Caramel Slime',
-    elements: ['lava', 'water'],
+    elements: ['water', 'fire'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A warm blend of lava and water elements.',
+    description: 'A warm blend of water and fire elements.',
     family: 'sweet-collection',
     spriteId: 'caramel_slime'
   },
@@ -250,10 +250,10 @@ export const SWEET_SLIMES: CodexSlime[] = [
   {
     id: 'donut_slime',
     name: 'Donut Slime',
-    elements: ['earth', 'nature'],
+    elements: ['earth', 'plant'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A round fusion of earth and nature elements.',
+    description: 'A sweet fusion of earth and plant elements.',
     family: 'sweet-collection',
     spriteId: 'donut_slime'
   },
@@ -323,10 +323,10 @@ export const STORM_SLIMES: CodexSlime[] = [
   {
     id: 'volcano_slime',
     name: 'Volcano Slime',
-    elements: ['lava', 'fire'],
+    elements: ['water', 'fire'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'An explosive fusion of lava and fire elements.',
+    description: 'An explosive fusion of water and fire elements.',
     family: 'storm-collection',
     spriteId: 'volcano_slime'
   },
@@ -417,7 +417,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'genesis_slime',
     name: 'Genesis Slime',
-    elements: ['divine', 'nature', 'earth', 'water'],
+    elements: ['divine', 'plant', 'earth', 'water'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'The slime that seeded the first forests.',
@@ -427,7 +427,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'apocalypse_slime',
     name: 'Apocalypse Slime',
-    elements: ['void', 'fire', 'lava', 'shadow'],
+    elements: ['void', 'water', 'fire', 'shadow'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Born from the heat of a dying world.',
@@ -467,7 +467,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'yggdrasil_slime',
     name: 'Yggdrasil Slime',
-    elements: ['plant', 'nature', 'earth', 'divine'],
+    elements: ['plant', 'earth', 'water', 'divine'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'It grows a miniature world on its back.',
@@ -487,7 +487,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'harmoney_slime',
     name: 'Harmony Slime',
-    elements: ['light', 'nature', 'wind', 'water'],
+    elements: ['light', 'plant', 'wind', 'water'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Its presence stops all nearby battles instantly.',
@@ -551,20 +551,20 @@ export const NATURE_SLIMES: CodexSlime[] = [
   {
     id: 'berry_slime',
     name: 'Berry Slime',
-    elements: ['plant', 'nature'],
+    elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A fruity blend of plant and nature elements.',
+    description: 'A fruity blend of plant and water elements.',
     family: 'nature-collection',
     spriteId: 'berry_slime'
   },
   {
     id: 'canyon_slime',
     name: 'Canyon Slime',
-    elements: ['earth', 'lava'],
+    elements: ['earth', 'water', 'fire'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A deep fusion of earth and lava elements.',
+    description: 'A deep fusion of earth, water, and fire elements.',
     family: 'nature-collection',
     spriteId: 'canyon_slime'
   },
@@ -611,40 +611,40 @@ export const NATURE_SLIMES: CodexSlime[] = [
   {
     id: 'jungle_slime',
     name: 'Jungle Slime',
-    elements: ['plant', 'nature'],
+    elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A dense fusion of plant and nature elements.',
+    description: 'A dense fusion of plant and water elements.',
     family: 'nature-collection',
     spriteId: 'jungle_slime'
   },
   {
     id: 'mangrove_slime',
     name: 'Mangrove Slime',
-    elements: ['plant', 'toxic'],
+    elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A coastal fusion of plant and toxic elements.',
+    description: 'A coastal fusion of plant and water elements.',
     family: 'nature-collection',
     spriteId: 'mangrove_slime'
   },
   {
     id: 'meadow_slime',
     name: 'Meadow Slime',
-    elements: ['nature', 'light'],
+    elements: ['plant', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A peaceful fusion of nature and light elements.',
+    description: 'A peaceful fusion of plant and light elements.',
     family: 'nature-collection',
     spriteId: 'meadow_slime'
   },
   {
     id: 'oasis_slime',
     name: 'Oasis Slime',
-    elements: ['water', 'nature'],
+    elements: ['water', 'plant'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A refreshing fusion of water and nature elements.',
+    description: 'A refreshing fusion of water and plant elements.',
     family: 'nature-collection',
     spriteId: 'oasis_slime'
   },
