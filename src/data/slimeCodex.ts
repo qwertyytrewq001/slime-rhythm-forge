@@ -116,7 +116,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'star_slime',
     name: 'Star Slime',
-    elements: ['cosmic'],
+    elements: ['light', 'fire'],
     rarityTier: 'Common',
     weight: 100,
     description: 'The cosmic spirit. Guardian of cosmic-based slimes.',
@@ -126,7 +126,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'ooze_slime',
     name: 'Ooze Slime',
-    elements: ['toxic'],
+    elements: ['water', 'earth'],
     rarityTier: 'Common',
     weight: 100,
     description: 'The toxic spirit. Creator of toxic-based slimes.',
@@ -136,7 +136,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'gem_slime',
     name: 'Gem Slime',
-    elements: ['crystal'],
+    elements: ['ice', 'earth'],
     rarityTier: 'Common',
     weight: 100,
     description: 'The crystal spirit. Keeper of crystal-based slimes.',
@@ -166,7 +166,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'rune_slime',
     name: 'Rune Slime',
-    elements: ['arcane'],
+    elements: ['electric', 'wind'],
     rarityTier: 'Common',
     weight: 100,
     description: 'The arcane spirit. Wielder of arcane-based slimes.',
@@ -176,7 +176,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'angel_slime',
     name: 'Angel Slime',
-    elements: ['divine'],
+    elements: ['light', 'water'],
     rarityTier: 'Common',
     weight: 100,
     description: 'The divine spirit. Keeper of divine-based slimes.',
@@ -393,10 +393,10 @@ export const STORM_SLIMES: CodexSlime[] = [
   {
     id: 'solarflare_slime',
     name: 'Solar Flare Slime',
-    elements: ['cosmic', 'fire'],
+    elements: ['light', 'fire'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'A brilliant fusion of cosmic and fire elements.',
+    description: 'A brilliant fusion of light and fire elements.',
     family: 'storm-collection',
     spriteId: 'solarflare_slime'
   },
@@ -417,7 +417,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'genesis_slime',
     name: 'Genesis Slime',
-    elements: ['divine', 'plant', 'earth', 'water'],
+    elements: ['light', 'plant', 'earth', 'water'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'The slime that seeded the first forests.',
@@ -427,7 +427,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'apocalypse_slime',
     name: 'Apocalypse Slime',
-    elements: ['void', 'water', 'fire', 'shadow'],
+    elements: ['shadow', 'water', 'fire'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Born from the heat of a dying world.',
@@ -437,7 +437,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'galaxy_whale_slime',
     name: 'Galaxy Whale Slime',
-    elements: ['cosmic', 'water', 'wind', 'arcane'],
+    elements: ['light', 'water', 'wind'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'So large it was once mistaken for a floating island.',
@@ -447,7 +447,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'mechagod_slime',
     name: 'Mecha God Slime',
-    elements: ['metal', 'electric', 'light', 'crystal'],
+    elements: ['metal', 'electric', 'light'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'A slime that replaced its body with perfect machinery.',
@@ -457,7 +457,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'eldritch_slime',
     name: 'Eldritch Slime',
-    elements: ['void', 'toxic', 'shadow', 'arcane'],
+    elements: ['shadow', 'electric', 'wind'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Even other slimes are afraid to look at it.',
@@ -467,7 +467,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'yggdrasil_slime',
     name: 'Yggdrasil Slime',
-    elements: ['plant', 'earth', 'water', 'divine'],
+    elements: ['plant', 'earth', 'water'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'It grows a miniature world on its back.',
@@ -477,7 +477,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'star_eater_slime',
     name: 'Star Eater Slime',
-    elements: ['cosmic', 'void', 'fire', 'metal'],
+    elements: ['light', 'shadow', 'fire', 'metal'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'Its core is a black hole held together by gravity.',
@@ -497,7 +497,7 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'pandora_slime',
     name: 'Pandora Slime',
-    elements: ['void', 'arcane', 'toxic', 'fire'],
+    elements: ['shadow', 'electric', 'fire'],
     rarityTier: 'Legendary',
     weight: 1,
     description: 'A slime that contains all of the world\'s curiosities.',
@@ -507,10 +507,10 @@ export const LOST_SLIMES: CodexSlime[] = [
   {
     id: 'ice_crystal_slime',
     name: 'Ice Crystal Slime',
-    elements: ['ice', 'crystal', 'light'],
+    elements: ['ice', 'earth', 'light'],
     rarityTier: 'Legendary',
     weight: 3,
-    description: 'A crystalline fusion of ice, crystal, and light elements.',
+    description: 'A crystalline fusion of ice, earth, and light elements.',
     family: 'lost-slimes',
     spriteId: 'ice_crystal_slime'
   }
@@ -521,10 +521,10 @@ export const NATURE_SLIMES: CodexSlime[] = [
   {
     id: 'acidrain_slime',
     name: 'Acid Rain Slime',
-    elements: ['toxic', 'water'],
+    elements: ['water', 'earth'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'A corrosive fusion of toxic and water elements.',
+    description: 'A corrosive fusion of water and earth elements.',
     family: 'nature-collection',
     spriteId: 'acidrain_slime'
   },
@@ -581,10 +581,10 @@ export const NATURE_SLIMES: CodexSlime[] = [
   {
     id: 'coral_slime',
     name: 'Coral Slime',
-    elements: ['water', 'crystal'],
+    elements: ['water', 'earth'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A vibrant fusion of water and crystal elements.',
+    description: 'A vibrant fusion of water and earth elements.',
     family: 'nature-collection',
     spriteId: 'coral_slime'
   },
@@ -671,10 +671,10 @@ export const NATURE_SLIMES: CodexSlime[] = [
   {
     id: 'swamp_slime',
     name: 'Swamp Slime',
-    elements: ['toxic', 'water'],
+    elements: ['water', 'earth'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A murky fusion of toxic and water elements.',
+    description: 'A murky fusion of water and earth elements.',
     family: 'nature-collection',
     spriteId: 'swamp_slime'
   },
@@ -704,19 +704,19 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
   {
     id: 'crayon_slime',
     name: 'Crayon Slime',
-    elements: ['earth', 'crystal'],
+    elements: ['earth', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A colorful fusion of earth and crystal elements.',
+    description: 'A colorful fusion of earth and light elements.',
     spriteId: 'crayon_slime'
   },
   {
     id: 'glitched_slime',
     name: 'Glitched Slime',
-    elements: ['void', 'electric'],
+    elements: ['shadow', 'electric'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'A digital fusion of void and electric elements.',
+    description: 'A digital fusion of shadow and electric elements.',
     family: 'lost-slimes',
     spriteId: 'glitched_slime'
   }

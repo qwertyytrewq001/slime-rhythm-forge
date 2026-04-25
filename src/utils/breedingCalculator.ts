@@ -55,9 +55,7 @@ function validateSlimeElements(elements: SlimeElement[]): string | null {
   
   const validElements: SlimeElement[] = [
     'fire', 'water', 'plant', 'earth', 'wind',
-    'ice', 'electric', 'metal', 'light', 'shadow',
-    'cosmic', 'void', 'toxic', 'crystal',
-    'nature', 'arcane', 'divine'
+    'ice', 'electric', 'metal', 'light', 'shadow'
   ];
   
   for (const element of elements) {
