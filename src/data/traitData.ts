@@ -96,7 +96,7 @@ export const ELEMENT_MODEL_FEATURES: Record<SlimeElement, { blob: string; spiky:
   plant:    { blob: 'vine-wrapped', spiky: 'thorn crown', jelly: 'moss gel' },
   earth:    { blob: 'mud-crusted', spiky: 'rock spines', jelly: 'sand flow' },
   wind:     { blob: 'breeze-puffed', spiky: 'feather spikes', jelly: 'mist form' },
-  ice:      { blob: 'frost-kissed', spiky: 'crystal spikes', jelly: 'frozen gel' },
+  ice:      { blob: 'frost-kissed', spiky: 'ice spikes', jelly: 'frozen gel' },
   electric: { blob: 'spark-charged', spiky: 'lightning rods', jelly: 'plasma body' },
   metal:    { blob: 'iron-plated', spiky: 'blade spines', jelly: 'mercury flow' },
   light:    { blob: 'sun-blessed', spiky: 'prism spikes', jelly: 'halo shimmer' },
@@ -106,9 +106,7 @@ export const ELEMENT_MODEL_FEATURES: Record<SlimeElement, { blob: string; spiky:
 // Breeding combo results - Only keep working transformations
 export const BREEDING_COMBOS: Record<string, string[]> = {
   // Core element combinations that create composites (ONLY WORKING ONES)
-  'plant+earth': ['nature'],      // Nature = Plant + Earth ✓
-  'fire+ice': ['crystal'],        // Crystal = Fire + Ice ✓
-  'fire+wind': ['electric'],      // Electric = Fire + Wind ✓
+  // Note: No transformations needed - using exact element matching only
   // Note: light+shadow partially works (cosmic, arcane, divine exist, void missing)
 };
 

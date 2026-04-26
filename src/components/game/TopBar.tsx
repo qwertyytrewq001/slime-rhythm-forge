@@ -9,7 +9,7 @@ interface TopBarProps {
   onOpenBattle?: () => void;
   onOpenSanctuaries?: () => void;
   onOpenBreedingDen?: () => void;
-  currentView?: 'breeding' | 'breedingDen' | 'habitats' | 'battleMap' | 'sanctuaries';
+  currentView?: 'breeding' | 'breedingDen' | 'habitats' | 'battleMap' | 'sanctuaries' | 'hatchery';
 }
 
 export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenBreedingDen, currentView }: TopBarProps) {

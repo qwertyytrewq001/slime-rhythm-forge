@@ -64,49 +64,7 @@ const ELEMENT_LORE: Record<SlimeElement, string[]> = {
     "Born from the shadow of a shadow.",
     "Secretly afraid of the dark, which is quite an identity crisis.",
   ],
-  cosmic: [
-    "Knows the secret to the universe, but can only communicate it through rhythmic wiggling.",
-    "Its body contains actual star-stuff. Don't ask where it gets it from.",
-    "Once visited Pluto and said it was 'okay, but a bit chilly'.",
-    "Is technically an alien, but it doesn't want to make a big deal out of it.",
-  ],
-  void: [
-    "If you stare into its eyes long enough, you'll see a 404 Error message.",
-    "Doesn't exist in three dimensions. It's just visiting from the 5th.",
-    "Once ate a black hole and complained it was 'a bit salty'.",
-    "Is the physical manifestation of the silence between heartbeats.",
-  ],
-  toxic: [
-    "Smells faintly of old gym socks and radioactive waste.",
-    "Its slime can dissolve anything except for plastic tupperware.",
-    "Born in a swamp where a wizard accidentally dumped his failed potions.",
-    "Is actually a very clean spirit, it just has a 'messy' aura.",
-  ],
-  crystal: [
-    "Is 100% genuine quartz, or so it tells its insurance agent.",
-    "Refracts light into rainbows that can accidentally cause minor hallucinations.",
-    "Grows a new facet every time it hears a really good joke.",
-    "Its heart is a perfect diamond, which is why it's so hard to break.",
-  ],
-  nature: [
-    "Is friends with every squirrel in the forest. They have a secret handshake.",
-    "Can make flowers bloom just by thinking about gardening.",
-    "A spirit of the woods that got lost and found its way into a slime shape.",
-    "Believes that 'nature is the best medicine', unless you have a cold, then it's soup.",
-  ],
-  arcane: [
-    "Once turned a prince into a frog, then forgot how to turn him back.",
-    "Its body is made of condensed mana and pure confusion.",
-    "Claims to know the 'True Name' of every rock it meets.",
-    "Is technically a walking spellbook that has become sentient.",
-  ],
-  divine: [
-    "Has an IQ of 5000, but still can't figure out how to use a door handle.",
-    "Born from the laughter of a celestial being.",
-    "Is technically an angel, but it lost its wings in a poker game.",
-    "Everything it touches smells faintly of lavender and old books.",
-  ],
-};
+  };
 
 const TRIVIA_FRAGMENTS = [
   "Can eat its own weight in pixels every hour.",
@@ -126,7 +84,7 @@ export function generateSlimeLore(slime: Slime): string {
   const seed = slime.id.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   
   const element = slime.elements[0];
-  const elementLoreList = ELEMENT_LORE[element] || ELEMENT_LORE['nature'];
+  const elementLoreList = ELEMENT_LORE[element] || ELEMENT_LORE['plant'];
   
   const loreIdx = seed % elementLoreList.length;
   const triviaIdx = (seed * 7) % TRIVIA_FRAGMENTS.length;

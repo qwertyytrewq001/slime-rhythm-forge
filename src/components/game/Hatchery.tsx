@@ -11,6 +11,7 @@ import { generateSlimeLore } from '@/utils/loreGenerator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DiscoveryPopup } from './DiscoveryPopup';
 import { FairySparkle } from './FairySparkle';
+import { HatcheryScreen } from './HatcheryScreen';
 
 function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackProgress: number; shaking?: boolean }) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -41,7 +42,11 @@ function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackPro
 
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
-export function Hatchery() {
+interface HatcheryProps {
+  onNavigateToHatchery?: () => void;
+}
+
+export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
   const { state, dispatch } = useGameState();
   const [now, setNow] = useState(Date.now());
   const [isHovered, setIsHovered] = useState(false);
@@ -49,6 +54,7 @@ export function Hatchery() {
   const [discoveredSlime, setDiscoveredSlime] = useState<Slime | null>(null);
   const [crackProgress, setCrackProgress] = useState(0);
   const [lastTapTime, setLastTapTap] = useState(0);
+  const [showHatcheryScreen, setShowHatcheryScreen] = useState(false);
   const containerRef = useRef<HTMLDivElement>(null);
 
   const activeHatching = state.activeHatching;
@@ -81,11 +87,11 @@ export function Hatchery() {
   }, [activeHatching]);
 
   const handleTap = () => {
-    if (!isFinished || !activeHatching || isHatching || discoveredSlime) return;
-    setCrackProgress(prev => Math.min(prev + 0.15, 1));
-    setLastTapTap(Date.now());
+    // Navigate to hatchery view
+    if (onNavigateToHatchery) {
+      onNavigateToHatchery();
+    }
     audioEngine.playSfx('tap');
-    if (crackProgress >= 0.85) handleReveal();
   };
 
   const handleReveal = () => {
@@ -128,6 +134,9 @@ export function Hatchery() {
   return (
     <div ref={containerRef} className="fixed top-[78%] left-[68%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 group/hatchery">
       {discoveredSlime && <DiscoveryPopup slime={discoveredSlime} reason="Hatched from an Ancient Egg" onClose={finalizeHatch} />}
+      {showHatcheryScreen && (
+        <HatcheryScreen onClose={() => setShowHatcheryScreen(false)} />
+      )}
 
       <div className="relative w-56 h-56 cursor-pointer group pointer-events-auto" onClick={handleTap}>
         <div className="absolute inset-0 pointer-events-none overflow-visible">

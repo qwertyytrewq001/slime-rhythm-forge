@@ -9,6 +9,7 @@ import { StatsPanel } from '@/components/game/StatsPanel';
 import { HabitatViewer } from '@/components/game/HabitatViewer';
 import { Shop } from '@/components/game/Shop';
 import { Hatchery } from '@/components/game/Hatchery';
+import { HatcheryScreen } from '@/components/game/HatcheryScreen';
 import { IslandGrid } from '@/components/game/IslandGrid';
 import { CodexGallery } from '@/components/game/CodexGallery';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
@@ -30,7 +31,7 @@ import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
-  const [currentView, setCurrentView] = useState<'breeding' | 'breedingDen' | 'sanctuaries' | 'battleMap' | 'habitats'>('breeding');
+  const [currentView, setCurrentView] = useState<'breeding' | 'breedingDen' | 'sanctuaries' | 'battleMap' | 'habitats' | 'hatchery'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
   
@@ -231,16 +232,23 @@ function GameLayout() {
           <BreedingDen 
             onRequestGallery={openGalleryForSlot} 
             onBackToAltar={() => setCurrentView('breeding')} 
-            onNavigateToHatchery={() => setCurrentView('breeding')}
+            onNavigateToHatchery={() => setCurrentView('hatchery')}
           />
         </div>
       )}
 
+      {/* 1.6. HATCHERY LAYER */}
+      {currentView === 'hatchery' && (
+        <div className="fixed inset-0 z-[95] pointer-events-auto">
+          <HatcheryScreen onClose={() => setCurrentView('breeding')} />
+        </div>
+      )}
+
       {/* 2. MAIN GAME INTERFACE */}
-      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' || currentView === 'breedingDen' ? 'hidden' : ''}`}>
+      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' || currentView === 'breedingDen' || currentView === 'hatchery' ? 'hidden' : ''}`}>
         
         {/* TopBar (Navigation) */}
-        <div className="pointer-events-auto relative z-[60]">
+        <div className={`pointer-events-auto relative z-[60] ${currentView === 'hatchery' ? 'hidden' : ''}`}>
           <TopBar 
             currentView={currentView}
             onBackToAltar={() => setCurrentView('breeding')} 
@@ -256,7 +264,7 @@ function GameLayout() {
             <div className="w-full h-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF7EB6]/5 rounded-full blur-[100px] pointer-events-none" />
               <BreedingPod onRequestGallery={openGalleryForSlot} onNavigateToBreedingDen={() => setCurrentView('breedingDen')} />
-              <Hatchery />
+              <Hatchery onNavigateToHatchery={() => setCurrentView('hatchery')} />
             </div>
           )}
           {currentView === 'sanctuaries' && (

@@ -193,7 +193,7 @@ function BouncingSlime({ slime, habitatId, onSelect }: { slime: Slime; habitatId
             newVelY += 0.12;
         }
 
-        if (!['water', 'wind', 'cosmic', 'void'].includes(element)) {
+        if (!['water', 'wind'].includes(element)) {
           newVelY += 0.15;
         }
 

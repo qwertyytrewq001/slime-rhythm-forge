@@ -155,7 +155,7 @@ export function drawSlime(
   const model = t.model || 0;
   let c1 = COLOR_PALETTE[t.color1] || '#7FFF7F';
   let c2 = COLOR_PALETTE[t.color2] || '#7FBFFF';
-  const element = slime.element || 'nature';
+  const element = slime.element || 'plant';
   const stars = slime.rarityStars ?? 1;
   const level = slime.level ?? 1;
   const stage = getStage(level);
@@ -374,8 +374,8 @@ export function drawSlime(
     drawConfetti(ctx, frame, stars);
   }
 
-  // ★ Quantum phase cycling (aura 4 / void element)
-  if (animated && (t.aura === 4 || element === 'void') && stage === 'adult') {
+  // ★ Quantum phase cycling (aura 4)
+  if (animated && t.aura === 4 && stage === 'adult') {
     drawQuantumPhase(ctx, frame, stars);
   }
 
@@ -648,7 +648,7 @@ function defineBodyPath(ctx: CanvasRenderingContext2D, shape: number, model: num
   }
 }
 
-function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string, frame: number, animated: boolean, element: SlimeElement = 'nature') {
+function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string, frame: number, animated: boolean, element: SlimeElement = 'plant') {
   ctx.globalAlpha = 0.07;
   const offset = animated ? frame * 0.005 : 0;
   
@@ -661,7 +661,7 @@ function drawDitherTexture(ctx: CanvasRenderingContext2D, c1: string, c2: string
     let dotColor = isLight ? '#fff' : darkenColor(c2, 0.6);
     if (element === 'fire') {
       dotColor = isLight ? '#FFCC33' : '#FF4400';
-    } else if (element === 'ice' || element === 'crystal') {
+    } else if (element === 'ice') {
       dotColor = isLight ? '#E0FFFF' : '#4682B4';
     } else if (element === 'metal') {
       // Horizontal scan lines for metal
@@ -1157,24 +1157,7 @@ function drawElementFeatures(
       });
       break;
     }
-    case 'crystal': {
-      // Faceted gem shards
-      for (let i = 0; i < 3; i++) {
-        ctx.save();
-        ctx.rotate(i * 2 + frame * 0.005);
-        ctx.translate(25, 0);
-        const hue = (frame + i * 60) % 360;
-        ctx.fillStyle = `hsla(${hue}, 70%, 70%, 0.8)`;
-        ctx.beginPath();
-        ctx.moveTo(0, -8); ctx.lineTo(5, 0); ctx.lineTo(0, 8); ctx.lineTo(-5, 0);
-        ctx.fill();
-        ctx.fillStyle = '#fff'; ctx.globalAlpha = 0.4;
-        ctx.beginPath(); ctx.moveTo(0, -8); ctx.lineTo(2, 0); ctx.lineTo(0, 8); ctx.fill();
-        ctx.restore();
-      }
-      break;
-    }
-    case 'fire': {
+        case 'fire': {
       // Flickering flame wisps
       for (let i = 0; i < 3; i++) {
         const fx = -15 + i * 15 + Math.sin(frame * 0.1 + i) * 3;
@@ -1191,8 +1174,7 @@ function drawElementFeatures(
       }
       break;
     }
-    case 'plant':
-    case 'nature': {
+    case 'plant': {
       // Pronounced leaf crown + side vines for stronger 3D silhouette.
       const wind = animated ? Math.sin(frame * 0.08) * 2.2 : 0;
       const leafGreen = element === 'plant' ? '#5BCB5B' : '#4CAF6A';
@@ -1262,48 +1244,47 @@ function drawElementFeatures(
       break;
     }
     case 'ice': {
-      // Jagged crystal crown on forehead + translucent body with ice cracks
+      // Jagged ice crown on forehead + translucent body with ice cracks
       ctx.save();
       ctx.translate(0, -30);
       
-      // Crystal crown
-      const crystalGrad = ctx.createLinearGradient(-8, -10, 8, 0);
-      crystalGrad.addColorStop(0, '#E0FFFF');
-      crystalGrad.addColorStop(0.5, '#87CEEB');
-      crystalGrad.addColorStop(1, '#B0E0E6');
+      // Ice crown
+      const iceGrad = ctx.createLinearGradient(-8, -10, 8, 0);
+      iceGrad.addColorStop(0, '#E0FFFF');
+      iceGrad.addColorStop(0.5, '#87CEEB');
+      iceGrad.addColorStop(1, '#B0E0E6');
       
-      ctx.fillStyle = crystalGrad;
+      ctx.fillStyle = iceGrad;
       ctx.strokeStyle = '#4682B4';
       ctx.lineWidth = 1;
       
-      // Jagged crown points
+      // Draw ice crown
       ctx.beginPath();
       ctx.moveTo(-8, 0);
-      ctx.lineTo(-6, -12);
-      ctx.lineTo(-3, -8);
-      ctx.lineTo(0, -15);
-      ctx.lineTo(3, -8);
-      ctx.lineTo(6, -12);
+      ctx.lineTo(-4, -8);
+      ctx.lineTo(0, -10);
+      ctx.lineTo(4, -8);
       ctx.lineTo(8, 0);
       ctx.closePath();
+      
       ctx.fill();
       ctx.stroke();
       
-      // Inner crystal detail
+      // Inner ice detail
       ctx.fillStyle = '#FFFFFF';
       ctx.globalAlpha = 0.6;
       ctx.beginPath();
-      ctx.moveTo(-3, -5);
-      ctx.lineTo(0, -10);
-      ctx.lineTo(3, -5);
+      ctx.moveTo(-2, -2);
+      ctx.lineTo(0, -4);
+      ctx.lineTo(2, -2);
       ctx.closePath();
       ctx.fill();
       
       ctx.restore();
       
-      // Ice cracks on body (translucent effect)
-      ctx.globalAlpha = 0.3;
-      ctx.strokeStyle = '#B0E0E6';
+      // Ice cracks on body
+      ctx.globalAlpha = 0.4;
+      ctx.strokeStyle = '#4682B4';
       ctx.lineWidth = 1;
       
       const cracks = [
@@ -1547,103 +1528,6 @@ function drawElementFeatures(
       }
       break;
     }
-    case 'cosmic': {
-      // Orbiting dots
-      for (let i = 0; i < 3; i++) {
-        const ang = frame * 0.05 + i * (Math.PI * 2 / 3);
-        const ox = Math.cos(ang) * 35;
-        const oy = Math.sin(ang) * 10 - 5;
-        ctx.fillStyle = i === 0 ? '#FFD700' : i === 1 ? '#87CEEB' : '#FF69B4';
-        ctx.beginPath(); ctx.arc(ox, oy, 2, 0, Math.PI * 2); ctx.fill();
-      }
-      break;
-    }
-    case 'void': {
-      // Cracks with starfield
-      ctx.save();
-      ctx.clip(); // Use body path if possible, but here we just draw over
-      ctx.strokeStyle = '#000'; ctx.lineWidth = 1;
-      ctx.beginPath();
-      ctx.moveTo(-20, -10); ctx.lineTo(0, 5); ctx.lineTo(20, -15);
-      ctx.stroke();
-      // Tiny stars in crack
-      ctx.fillStyle = '#fff';
-      for (let i = 0; i < 5; i++) {
-        ctx.fillRect(Math.sin(i) * 10, Math.cos(i) * 5, 1, 1);
-      }
-      ctx.restore();
-      break;
-    }
-    case 'toxic': {
-      // Bubbling dripping exhaust pipe + neon green radioactive core
-      ctx.save();
-      ctx.translate(0, -25);
-      
-      // Melted-looking exhaust pipe horn
-      const pipeGrad = ctx.createLinearGradient(-4, 0, 4, -15);
-      pipeGrad.addColorStop(0, '#2F4F2F');
-      pipeGrad.addColorStop(0.3, '#696969');
-      pipeGrad.addColorStop(0.7, '#556B2F');
-      pipeGrad.addColorStop(1, '#8B4513');
-      
-      ctx.fillStyle = pipeGrad;
-      ctx.strokeStyle = '#1C1C1C';
-      ctx.lineWidth = 1;
-      
-      // Melted drippy pipe shape
-      ctx.beginPath();
-      ctx.moveTo(-3, 0);
-      ctx.quadraticCurveTo(-4, -5, -2, -10);
-      ctx.quadraticCurveTo(-1, -12, 1, -13);
-      ctx.quadraticCurveTo(3, -12, 4, -8);
-      ctx.quadraticCurveTo(3, -3, 2, 0);
-      ctx.closePath();
-      ctx.fill();
-      ctx.stroke();
-      
-      // Dripping toxic drops from pipe
-      ctx.fillStyle = '#7FFF00';
-      ctx.globalAlpha = 0.8;
-      for (let i = 0; i < 3; i++) {
-        const dripY = -15 + ((frame * 0.4 + i * 8) % 20);
-        const dripX = (Math.sin(frame * 0.1 + i) * 2);
-        const dripSize = 2 + Math.sin(frame * 0.2 + i) * 1;
-        
-        ctx.beginPath();
-        ctx.arc(dripX, dripY, dripSize, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      
-      ctx.restore();
-      
-      // Neon green radioactive core inside body
-      const radioactiveGrad = ctx.createRadialGradient(0, 0, 3, 0, 0, 20);
-      radioactiveGrad.addColorStop(0, 'rgba(127, 255, 0, 0.8)');
-      radioactiveGrad.addColorStop(0.3, 'rgba(50, 205, 50, 0.6)');
-      radioactiveGrad.addColorStop(0.6, 'rgba(0, 128, 0, 0.4)');
-      radioactiveGrad.addColorStop(1, 'rgba(0, 100, 0, 0.1)');
-      
-      ctx.fillStyle = radioactiveGrad;
-      ctx.beginPath();
-      ctx.arc(0, 0, 20, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Rising bubbles from radioactive core
-      ctx.fillStyle = '#7FFF00';
-      for (let i = 0; i < 6; i++) {
-        const bubbleY = -10 + ((frame * 0.3 + i * 12) % 30);
-        const bubbleX = (Math.sin(frame * 0.05 + i) * 15);
-        const bubbleSize = 1 + Math.sin(frame * 0.15 + i) * 0.5;
-        
-        ctx.globalAlpha = 0.6 - (bubbleY + 10) / 50; // Fade as they rise
-        ctx.beginPath();
-        ctx.arc(bubbleX, bubbleY, bubbleSize, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      
-      ctx.globalAlpha = 1.0;
-      break;
-    }
     case 'wind': {
       // Rotating mini-cyclone + blurred edges for high-speed vibration
       ctx.save();
@@ -1701,138 +1585,6 @@ function drawElementFeatures(
         ctx.lineTo(Math.cos(blurAngle) * 45, Math.sin(blurAngle) * 45);
         ctx.stroke();
       }
-      break;
-    }
-    case 'arcane': {
-      // Three floating runic stones + galaxy/nebula texture inside body
-      ctx.save();
-      
-      // Orbiting runic stones around head
-      const runeAngle = frame * 0.03;
-      for (let i = 0; i < 3; i++) {
-        const stoneAngle = runeAngle + i * (Math.PI * 2 / 3);
-        const stoneX = Math.cos(stoneAngle) * 20;
-        const stoneY = Math.sin(stoneAngle) * 8 - 25;
-        
-        // Runic stone
-        const stoneGrad = ctx.createRadialGradient(stoneX, stoneY, 0, stoneX, stoneY, 6);
-        stoneGrad.addColorStop(0, '#9400D3');
-        stoneGrad.addColorStop(0.5, '#4B0082');
-        stoneGrad.addColorStop(1, '#1A0033');
-        
-        ctx.fillStyle = stoneGrad;
-        ctx.beginPath();
-        ctx.arc(stoneX, stoneY, 6, 0, Math.PI * 2);
-        ctx.fill();
-        
-        // Runic symbol on stone
-        ctx.strokeStyle = '#FFD700';
-        ctx.lineWidth = 1;
-        ctx.globalAlpha = 0.8;
-        ctx.beginPath();
-        // Simple rune pattern
-        ctx.moveTo(stoneX - 3, stoneY - 2);
-        ctx.lineTo(stoneX + 3, stoneY - 2);
-        ctx.moveTo(stoneX, stoneY - 4);
-        ctx.lineTo(stoneX, stoneY + 2);
-        ctx.stroke();
-        ctx.globalAlpha = 1.0;
-      }
-      
-      ctx.restore();
-      
-      // Galaxy/nebula texture inside body
-      const galaxyGrad = ctx.createRadialGradient(0, 0, 5, 0, 0, 25);
-      galaxyGrad.addColorStop(0, 'rgba(138, 43, 226, 0.6)');
-      galaxyGrad.addColorStop(0.3, 'rgba(75, 0, 130, 0.4)');
-      galaxyGrad.addColorStop(0.6, 'rgba(148, 0, 211, 0.3)');
-      galaxyGrad.addColorStop(1, 'rgba(26, 0, 51, 0.2)');
-      
-      ctx.fillStyle = galaxyGrad;
-      ctx.beginPath();
-      ctx.arc(0, 0, 25, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // White star sparks
-      ctx.fillStyle = '#FFFFFF';
-      for (let i = 0; i < 8; i++) {
-        const sparkAngle = (i / 8) * Math.PI * 2 + frame * 0.02;
-        const sparkRadius = 15 + Math.sin(frame * 0.1 + i) * 5;
-        const sparkX = Math.cos(sparkAngle) * sparkRadius;
-        const sparkY = Math.sin(sparkAngle) * sparkRadius;
-        const sparkSize = 1 + Math.sin(frame * 0.15 + i) * 0.5;
-        
-        ctx.globalAlpha = 0.6 + Math.sin(frame * 0.2 + i) * 0.4;
-        ctx.beginPath();
-        ctx.arc(sparkX, sparkY, sparkSize, 0, Math.PI * 2);
-        ctx.fill();
-      }
-      ctx.globalAlpha = 1.0;
-      break;
-    }
-    case 'divine': {
-      // Floating third eye + translucent glass-like body with spirit world reflections
-      ctx.save();
-      ctx.translate(0, -28);
-      
-      // Floating third eye
-      const eyeGrad = ctx.createRadialGradient(0, 0, 0, 0, 0, 8);
-      eyeGrad.addColorStop(0, '#FFD700');
-      eyeGrad.addColorStop(0.3, '#FFA500');
-      eyeGrad.addColorStop(0.7, '#FF6347');
-      eyeGrad.addColorStop(1, '#8B0000');
-      
-      ctx.fillStyle = eyeGrad;
-      ctx.beginPath();
-      ctx.arc(0, 0, 8, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Eye detail - mystical pupil
-      ctx.fillStyle = '#FFFFFF';
-      ctx.beginPath();
-      ctx.arc(0, 0, 3, 0, Math.PI * 2);
-      ctx.fill();
-      
-      ctx.fillStyle = '#4B0082';
-      ctx.beginPath();
-      ctx.arc(0, 0, 1.5, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Divine glow around eye
-      const divineGlow = ctx.createRadialGradient(0, 0, 8, 0, 0, 15);
-      divineGlow.addColorStop(0, 'rgba(255, 215, 0, 0.4)');
-      divineGlow.addColorStop(0.5, 'rgba(255, 215, 0, 0.2)');
-      divineGlow.addColorStop(1, 'rgba(255, 215, 0, 0)');
-      
-      ctx.fillStyle = divineGlow;
-      ctx.beginPath();
-      ctx.arc(0, 0, 15, 0, Math.PI * 2);
-      ctx.fill();
-      
-      ctx.restore();
-      
-      // Translucent glass-like body with shifting spirit colors
-      const spiritGrad = ctx.createRadialGradient(0, 0, 10, 0, 0, 30);
-      const spiritHue = (frame * 2) % 360;
-      spiritGrad.addColorStop(0, `hsla(${spiritHue}, 70%, 80%, 0.3)`);
-      spiritGrad.addColorStop(0.3, `hsla(${(spiritHue + 60) % 360}, 70%, 70%, 0.2)`);
-      spiritGrad.addColorStop(0.6, `hsla(${(spiritHue + 120) % 360}, 70%, 60%, 0.15)`);
-      spiritGrad.addColorStop(1, 'rgba(255, 255, 255, 0.1)');
-      
-      ctx.fillStyle = spiritGrad;
-      ctx.beginPath();
-      ctx.arc(0, 0, 30, 0, Math.PI * 2);
-      ctx.fill();
-      
-      // Glass reflection effect
-      ctx.fillStyle = 'rgba(255, 255, 255, 0.4)';
-      ctx.beginPath();
-      ctx.ellipse(-8, -10, 6, 8, -0.3, 0, Math.PI * 2);
-      ctx.fill();
-      
-      ctx.beginPath();
-      ctx.ellipse(5, -5, 4, 6, 0.2, 0, Math.PI * 2);
-      ctx.fill();
       break;
     }
   }
@@ -1916,7 +1668,7 @@ function drawAccessory(ctx: CanvasRenderingContext2D, type: number, color: strin
 }
 
 function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeElement, frame: number, stars: number, model: number) {
-  const colors = ELEMENT_COLORS[element] || ELEMENT_COLORS['nature'];
+  const colors = ELEMENT_COLORS[element] || ELEMENT_COLORS['plant'];
   if (!colors || colors.length === 0) return;
   // ★ HIGHER particle density
   const count = Math.min(5 + stars * 3, 20);
@@ -1974,37 +1726,6 @@ function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeEleme
           ctx.beginPath(); ctx.arc(0, -2, 1, 0, Math.PI * 2); ctx.fill();
         }
         ctx.restore();
-        break;
-      }
-      case 'cosmic': {
-        const twinkle = Math.sin(frame * 0.08 + i * 3);
-        ctx.globalAlpha = 0.45 + twinkle * 0.45;
-        if (twinkle > 0) {
-          drawStarShape(ctx, x, y, 0.5, 3.5 + twinkle * 2.5, 4);
-          ctx.fill();
-        }
-        if (i % 3 === 0) {
-          ctx.globalAlpha = 0.1;
-          ctx.fillStyle = '#9966FF';
-          ctx.beginPath(); ctx.arc(x, y, 10, 0, Math.PI * 2); ctx.fill();
-        }
-        break;
-      }
-      case 'nature': {
-        ctx.globalAlpha = 0.5;
-        const drift = Math.sin(frame * 0.015 + i) * 7;
-        ctx.beginPath();
-        ctx.arc(x + drift, y, 2.5, 0, Math.PI * 2);
-        ctx.fill();
-        if (i % 3 === 0) {
-          ctx.globalAlpha = 0.18;
-          ctx.beginPath();
-          ctx.moveTo(x + drift, y);
-          ctx.lineTo(x + drift - 3, y + 8);
-          ctx.strokeStyle = colors[0];
-          ctx.lineWidth = 0.5;
-          ctx.stroke();
-        }
         break;
       }
       case 'water': {
@@ -2090,81 +1811,6 @@ function drawElementParticles(ctx: CanvasRenderingContext2D, element: SlimeEleme
           ctx.moveTo(x, y);
           ctx.quadraticCurveTo(x + Math.sin(frame * 0.03 + i) * 8, y + 5, x + Math.sin(frame * 0.02 + i) * 12, y + 15);
           ctx.stroke();
-        }
-        break;
-      }
-      case 'void': {
-        // ★ Enhanced glitch fragments
-        if (frame % 8 < 4) {
-          ctx.globalAlpha = 0.5;
-          ctx.fillStyle = colors[i % colors.length];
-          ctx.fillRect(x - 3, y - 0.5, 6, 1);
-          // Chromatic aberration
-          if (i % 2 === 0) {
-            ctx.globalAlpha = 0.2;
-            ctx.fillStyle = '#ff00ff';
-            ctx.fillRect(x - 3 + 1, y - 0.5 - 1, 6, 1);
-            ctx.fillStyle = '#00ffff';
-            ctx.fillRect(x - 3 - 1, y - 0.5 + 1, 6, 1);
-          }
-        }
-        break;
-      }
-      case 'toxic': {
-        ctx.globalAlpha = 0.55;
-        ctx.fillStyle = colors[i % colors.length];
-        const dripY = y + (frame * 0.35 + i * 10) % 22;
-        ctx.beginPath(); ctx.arc(x, dripY, 2, 0, Math.PI * 2); ctx.fill();
-        // Toxic fumes
-        if (i % 3 === 0) {
-          ctx.globalAlpha = 0.1;
-          ctx.fillStyle = '#7FFF00';
-          ctx.beginPath(); ctx.arc(x, dripY - 5, 5, 0, Math.PI * 2); ctx.fill();
-        }
-        break;
-      }
-      case 'crystal': {
-        ctx.globalAlpha = 0.55;
-        ctx.save();
-        ctx.translate(x, y);
-        ctx.rotate(frame * 0.018 + i);
-        ctx.fillStyle = colors[i % colors.length];
-        ctx.beginPath();
-        ctx.moveTo(0, -4); ctx.lineTo(2.5, 0); ctx.lineTo(0, 4); ctx.lineTo(-2.5, 0);
-        ctx.fill();
-        // Prismatic refraction
-        if (i % 2 === 0) {
-          ctx.globalAlpha = 0.3;
-          ctx.fillStyle = `hsl(${(frame * 3 + i * 50) % 360}, 70%, 70%)`;
-          ctx.beginPath(); ctx.arc(0, -2, 1, 0, Math.PI * 2); ctx.fill();
-        }
-        ctx.restore();
-        break;
-      }
-            case 'arcane': {
-        ctx.globalAlpha = 0.4 + Math.sin(frame * 0.05 + i * 2) * 0.25;
-        ctx.strokeStyle = colors[i % colors.length];
-        ctx.lineWidth = 1;
-        ctx.beginPath(); ctx.arc(x, y, 3.5, 0, Math.PI * 1.5); ctx.stroke();
-        // Rune symbol
-        if (i % 4 === 0) {
-          ctx.globalAlpha = 0.15;
-          ctx.fillStyle = '#BA55D3';
-          ctx.font = '5px monospace';
-          ctx.fillText('✧', x - 2, y + 2);
-        }
-        break;
-      }
-      case 'divine': {
-        ctx.globalAlpha = 0.55;
-        ctx.fillStyle = colors[i % colors.length];
-        drawStarShape(ctx, x, y, 1.2, 3.5, 6);
-        ctx.fill();
-        // Holy glow
-        if (i % 3 === 0) {
-          ctx.globalAlpha = 0.08;
-          ctx.fillStyle = '#FFD700';
-          ctx.beginPath(); ctx.arc(x, y, 8, 0, Math.PI * 2); ctx.fill();
         }
         break;
       }
@@ -2261,7 +1907,7 @@ function drawTraitFlair(ctx: CanvasRenderingContext2D, t: any, frame: number, el
     for (let i = 0; i < 5; i++) {
       const a = Math.random() * Math.PI * 2;
       const d = 15 + Math.random() * 12;
-      ctx.fillStyle = element === 'cosmic' ? '#FFD700' : '#98FB98';
+      ctx.fillStyle = element === 'light' ? '#FFD700' : '#98FB98';
       ctx.beginPath(); ctx.arc(Math.cos(a) * d, 8 + Math.sin(a) * d * 0.5, 2, 0, Math.PI * 2); ctx.fill();
     }
     ctx.globalAlpha = 1;

@@ -76,10 +76,10 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'bolt_slime',
     name: 'Bolt Slime',
-    elements: ['electric'],
+    elements: ['fire', 'wind'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'The storm spirit. Wielder of electric-based slimes.',
+    description: 'The storm spirit. Wielder of fire and wind elements.',
     family: 'elemental-slimes',
     spriteId: 'bolt_slime'
   },
@@ -126,7 +126,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
   {
     id: 'ooze_slime',
     name: 'Ooze Slime',
-    elements: ['water', 'earth'],
+    elements: ['shadow', 'water'],
     rarityTier: 'Common',
     weight: 100,
     description: 'The toxic spirit. Creator of toxic-based slimes.',
@@ -250,10 +250,10 @@ export const SWEET_SLIMES: CodexSlime[] = [
   {
     id: 'donut_slime',
     name: 'Donut Slime',
-    elements: ['earth', 'plant'],
+    elements: ['earth', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A sweet fusion of earth and plant elements.',
+    description: 'A sweet fusion of earth and light elements.',
     family: 'sweet-collection',
     spriteId: 'donut_slime'
   },
@@ -521,10 +521,10 @@ export const NATURE_SLIMES: CodexSlime[] = [
   {
     id: 'acidrain_slime',
     name: 'Acid Rain Slime',
-    elements: ['water', 'earth'],
+    elements: ['shadow', 'water', 'earth'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'A corrosive fusion of water and earth elements.',
+    description: 'A corrosive fusion of shadow, water and earth elements.',
     family: 'nature-collection',
     spriteId: 'acidrain_slime'
   },
@@ -681,10 +681,10 @@ export const NATURE_SLIMES: CodexSlime[] = [
   {
     id: 'tundra_slime',
     name: 'Tundra Slime',
-    elements: ['ice', 'earth'],
+    elements: ['ice', 'wind'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A cold fusion of ice and earth elements.',
+    description: 'A cold fusion of ice and wind elements.',
     family: 'nature-collection',
     spriteId: 'tundra_slime'
   }

@@ -324,107 +324,70 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         onClick={() => setShowPossibleModal(false)}
       >
         <div 
-          className="bg-gradient-to-br from-purple-900/90 to-pink-900/90 rounded-2xl p-6 max-w-4xl w-full max-h-[80vh] border-2 border-purple-400/40 shadow-2xl backdrop-blur-md"
+          className="bg-gradient-to-br from-pink-100 via-white to-amber-100 rounded-3xl p-8 max-w-5xl w-full border-4 border-pink-300/50 shadow-2xl backdrop-blur-sm relative overflow-hidden"
           onClick={(e) => e.stopPropagation()}
         >
+          {/* Decorative corner elements */}
+          <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-pink-300/30 to-transparent rounded-full blur-xl" />
+          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-300/30 to-transparent rounded-full blur-xl" />
+          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-pink-300/30 to-transparent rounded-full blur-xl" />
+          <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-amber-300/30 to-transparent rounded-full blur-xl" />
           {/* Modal Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-yellow-400 uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+            <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive", textShadow: '2px 2px 4px rgba(255,126,182,0.5)' }}>
               Possible Breeding Outcomes
             </h2>
             <button
-              onClick={() => setShowPossibleModal(false)}
-              className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors border border-white/20"
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowPossibleModal(false);
+              }}
+              className="p-2 rounded-lg bg-gradient-to-br from-pink-400 to-amber-500 hover:from-pink-300 hover:to-amber-400 transition-colors border-2 border-white/50 relative z-10"
             >
               <X className="w-5 h-5 text-white" />
             </button>
           </div>
 
-          {/* Parent Info */}
-          <div className="flex justify-center gap-8 mb-6">
-            <div className="text-center">
-              <p className="text-yellow-300 text-sm font-bold uppercase mb-2">Parent 1</p>
-              <div className="w-20 h-20 bg-black/30 rounded-lg p-2">
-                {slot1Slime && (
-                  <SlimeCanvas
-                    slime={slot1Slime}
-                    size={60}
-                    animated={false}
-                    sizeMultiplier={1.5}
-                  />
-                )}
-              </div>
-              <p className="text-white text-xs mt-2 font-bold">{slot1Slime?.name}</p>
-            </div>
-            
-            <div className="flex items-center">
-              <Heart className="w-8 h-8 text-pink-400 animate-pulse" />
-            </div>
-            
-            <div className="text-center">
-              <p className="text-yellow-300 text-sm font-bold uppercase mb-2">Parent 2</p>
-              <div className="w-20 h-20 bg-black/30 rounded-lg p-2">
-                {slot2Slime && (
-                  <SlimeCanvas
-                    slime={slot2Slime}
-                    size={60}
-                    animated={false}
-                    sizeMultiplier={1.5}
-                  />
-                )}
-              </div>
-              <p className="text-white text-xs mt-2 font-bold">{slot2Slime?.name}</p>
-            </div>
-          </div>
-
+          
           {/* Possible Outcomes Grid */}
-          <div className="max-h-[50vh] overflow-y-auto">
-            {possibleOutcomes.length > 0 ? (
-              <div className="grid grid-cols-4 md:grid-cols-6 gap-4">
-                {possibleOutcomes.map((slime) => (
-                  <div
-                    key={slime.id}
-                    className="bg-black/30 rounded-lg p-3 border border-purple-400/30 hover:border-purple-400/60 transition-all hover:scale-105"
-                  >
-                    <div className="w-full h-16 flex items-center justify-center mb-2">
-                      <SlimeCanvas
-                        slime={createCodexSlime(slime.id)}
-                        size={50}
-                        animated={false}
-                        sizeMultiplier={1.2}
-                      />
-                    </div>
-                    <p className="text-white text-xs font-bold text-center leading-tight">
-                      {slime.name}
-                    </p>
-                    <div className="flex justify-center mt-1">
-                      <span 
-                        className="text-xs font-bold px-1 py-0.5 rounded"
-                        style={{ 
-                          backgroundColor: RARITY_TIER_COLORS[slime.rarityTier as keyof typeof RARITY_TIER_COLORS] + '40',
-                          color: RARITY_TIER_COLORS[slime.rarityTier as keyof typeof RARITY_TIER_COLORS]
-                        }}
-                      >
-                        {slime.rarityTier}
-                      </span>
-                    </div>
+          {possibleOutcomes.length > 0 ? (
+            <div className="grid grid-cols-3 md:grid-cols-4 gap-6">
+              {possibleOutcomes.map((slime) => (
+                <div
+                  key={slime.id}
+                  className="p-3 transition-all hover:scale-105 bg-white/30 rounded-2xl border-2 border-pink-300/30"
+                >
+                  <div className="w-full h-24 flex items-center justify-center mb-3">
+                    <SlimeCanvas
+                      slime={createCodexSlime(slime.id)}
+                      size={80}
+                      animated={false}
+                      sizeMultiplier={1.8}
+                    />
                   </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8">
-                <p className="text-yellow-300 text-lg font-bold">No possible breeding outcomes found</p>
-                <p className="text-white/70 text-sm mt-2">This combination may not produce any valid slimes</p>
-              </div>
-            )}
-          </div>
-
-          {/* Footer */}
-          <div className="mt-6 text-center">
-            <p className="text-yellow-300 text-sm font-bold">
-              {possibleOutcomes.length} Possible {possibleOutcomes.length === 1 ? 'Slime' : 'Slimes'}
-            </p>
-          </div>
+                  <p className="text-gray-800 text-sm font-bold text-center leading-tight">
+                    {slime.name}
+                  </p>
+                  <div className="flex justify-center mt-2">
+                    <span 
+                      className="text-xs font-bold px-2 py-1 rounded-full"
+                      style={{ 
+                        backgroundColor: '#FFB3D1',
+                        color: '#FF7EB6'
+                      }}
+                    >
+                      {slime.rarityTier}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="text-center py-12">
+              <p className="text-gray-800 text-lg font-bold">No possible breeding outcomes found</p>
+              <p className="text-gray-600 text-sm mt-2">This combination may not produce any valid slimes</p>
+            </div>
+          )}
         </div>
       </div>
     )}

@@ -23,7 +23,7 @@ export function drawEnhancedEgg(ctx: CanvasRenderingContext2D, options: EggRende
   // Use the slime's actual traits to pick colors, not just the element.
   const baseColor = COLOR_PALETTE[traits.color1 % COLOR_PALETTE.length];
   const accentColor = COLOR_PALETTE[traits.color2 % COLOR_PALETTE.length];
-  const elementColors = ELEMENT_COLORS[element] || ELEMENT_COLORS['nature'];
+  const elementColors = ELEMENT_COLORS[element] || ELEMENT_COLORS['plant'];
   
   const centerX = size / 2;
   const centerY = size / 2 + (size * 0.05);
@@ -156,7 +156,7 @@ export function drawEnhancedEgg(ctx: CanvasRenderingContext2D, options: EggRende
 
   // ★ NEW: Element-Specific Pixel Details (Sprouts, etc.)
   ctx.globalAlpha = 1.0;
-  if (element === 'plant' || element === 'nature') {
+  if (element === 'plant') {
     // Little plant sprout on top
     ctx.fillStyle = '#44AA44';
     const sx = centerX + (getRand(seed + 'sprout') - 0.5) * 10;
@@ -186,21 +186,21 @@ export function drawEnhancedEgg(ctx: CanvasRenderingContext2D, options: EggRende
       const dy = centerY + (getRand(seed+'dropY'+i)-0.5) * height * 0.8;
       ctx.beginPath(); ctx.arc(dx, dy, 2, 0, Math.PI*2); ctx.fill();
     }
-  } else if (element === 'void') {
+  } else if (element === 'shadow') {
     // Dark cracks
     ctx.strokeStyle = '#000';
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.moveTo(centerX - 10, centerY); ctx.lineTo(centerX + 10, centerY + 5);
     ctx.stroke();
-  } else if (element === 'divine' || element === 'light') {
+  } else if (element === 'light') {
     // Halo ring
     ctx.strokeStyle = 'rgba(255, 215, 0, 0.6)';
     ctx.lineWidth = 2;
     ctx.beginPath();
     ctx.ellipse(centerX, centerY - height * 0.4, 15, 4, 0, 0, Math.PI*2);
     ctx.stroke();
-  } else if (element === 'arcane') {
+  } else if (element === 'electric') {
     // Rune mark
     ctx.fillStyle = '#D8BFD8';
     ctx.font = '10px monospace';
