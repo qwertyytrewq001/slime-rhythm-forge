@@ -129,7 +129,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
         {/* Background Image */}
         <div 
           className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-          style={{ backgroundImage: 'url(/hatchery.png)' }}
+          style={{ backgroundImage: 'url(./hatchery.png)' }}
         />
         
         {/* Dark overlay for better visibility */}

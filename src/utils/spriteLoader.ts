@@ -23,7 +23,7 @@ export async function loadSlimeSprite(spriteId: string): Promise<HTMLImageElemen
       console.warn(`Failed to load sprite: ${spriteId}.png`);
       reject(new Error(`Sprite not found: ${spriteId}.png`));
     };
-    img.src = `/${spriteId}.png`;
+    img.src = `./${spriteId}.png`;
   });
 }
 
