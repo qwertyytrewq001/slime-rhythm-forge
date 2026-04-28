@@ -1,7 +1,7 @@
 import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { createCodexSlime } from './slimeGenerator';
 import { getSpriteIdForSlime } from './spriteLoader';
-import { generateSlimeLore } from './loreGenerator';
+// import { generateSlimeLore } from './loreGenerator'; // Replaced with actual descriptions
 
 /**
  * Comprehensive verification of all slime systems
@@ -57,7 +57,7 @@ export function verifyAllSlimeSystems(): void {
   // 3. Test slime creation and sprite mapping
   console.log('\n🎨 SLIME CREATION & SPRITE MAPPING:');
   const testSlimes = [
-    'fire_primal', 'water_primal', 'leaf_primal', 'rock_primal',
+    'fire_slime', 'water_slime', 'leaf_slime', 'rock_slime',
     'candy_slime', 'volcano_slime', 'genesis_slime'
   ];
   
@@ -65,7 +65,7 @@ export function verifyAllSlimeSystems(): void {
     try {
       const slime = createCodexSlime(slimeId);
       const spriteId = getSpriteIdForSlime(slime);
-      const lore = generateSlimeLore(slime);
+      const lore = SLIME_CODEX_MAP.get(slimeId)?.description || 'No description available';
       
       console.log(`✅ ${slime.name}:`);
       console.log(`   ID: ${slime.id}`);
@@ -107,8 +107,8 @@ export function verifyAllSlimeSystems(): void {
   // 5. Test breeding combinations
   console.log('\n🧬 BREEDING SYSTEM VERIFICATION:');
   try {
-    const parent1 = createCodexSlime('fire_primal');
-    const parent2 = createCodexSlime('water_primal');
+    const parent1 = createCodexSlime('fire_slime');
+    const parent2 = createCodexSlime('water_slime');
     
     console.log(`✅ Can create parent slimes for breeding`);
     console.log(`   Parent 1: ${parent1.name} (${parent1.elements.join('+')})`);

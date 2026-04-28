@@ -7,6 +7,7 @@ import { ChevronLeft, Plus, Utensils, X } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SlimeGallery } from './SlimeGallery';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { SLIME_CODEX_MAP } from '@/data/slimeCodex';
 
 interface HabitatViewerProps {
   habitatId: string;
@@ -279,7 +280,7 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
   }, []);
 
   return (
-    <div className="fixed inset-0 z-50 flex flex-col bg-black/80" style={{ pointerEvents: 'auto' }}>
+    <div className="fixed inset-0 z-[10000] flex flex-col bg-black/80" style={{ pointerEvents: 'auto' }}>
       <div className="sticky top-0 z-40 flex-shrink-0 bg-gradient-to-b from-black/95 via-black/90 to-black/70 pt-4 pb-8 px-6 backdrop-blur-md border-b border-white/10">
         <button onClick={onClose} className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-lg transition-all">
           <ChevronLeft className="w-6 h-6 text-[#FF7EB6]" />
@@ -309,27 +310,36 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
           )}
         </div>
 
-        {activeSlime && (
-          <div className="absolute right-0 top-0 bottom-0 w-80 bg-black/60 backdrop-blur-xl border-l border-white/10 p-6 z-50 animate-in slide-in-from-right duration-300 overflow-y-auto">
-            <button onClick={() => setSelectedSlime(null)} className="absolute top-4 right-4 p-2 hover:bg-white/10 rounded-full">
-              <X className="w-5 h-5 text-white/60" />
+        {selectedSlime && (
+          <div 
+            className="absolute right-0 top-0 bottom-0 w-80 bg-gradient-to-b from-[#FFB3D1] via-[#FFE4E1] to-[#FFD1DC] border-l-4 border-[#FF7EB6] p-6 z-50 animate-in slide-in-from-right duration-300 overflow-y-auto"
+          >
+            <button 
+              onClick={() => setSelectedSlime(null)}
+              className="absolute top-4 right-4 p-2 hover:bg-[#FF7EB6] rounded-full transition-all cursor-pointer border-2 border-white"
+            >
+              <X className="w-5 h-5 text-white" />
             </button>
-            <div className="flex flex-col items-center gap-2">
-              <div className="bg-white/5 p-4 rounded-3xl border border-white/10">
-                <SlimeCanvas slime={activeSlime} size={100} animated />
-              </div>
+            <div className="flex flex-col gap-4">
               <div className="text-center">
-                <h3 className="text-lg font-black text-white uppercase tracking-wider">{activeSlime.name}</h3>
-                <p className="text-[10px] text-[#FF7EB6] font-bold">LEVEL {activeSlime.level}</p>
+                <h3 className="text-xl font-black text-[#FF1493] uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive" }}>{selectedSlime.name}</h3>
+                <p className="text-sm font-bold text-[#FF69B4] mt-1">LEVEL {selectedSlime.level}</p>
+              </div>
+              <div className="bg-white p-4 rounded-2xl border-2 border-[#FF7EB6] shadow-lg">
+                <ScrollArea className="h-24">
+                  <p className="text-sm font-medium text-gray-700 leading-relaxed">
+                    {SLIME_CODEX_MAP.get(selectedSlime.id)?.description || 'A mysterious slime with unknown origins.'}
+                  </p>
+                </ScrollArea>
               </div>
               <div className="w-full space-y-4">
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-white/60 shrink-0">
-                    <Utensils className="w-4 h-4" />
-                    <span className="text-[10px] font-black uppercase tracking-widest">Nourishment</span>
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2 text-[#FF1493] shrink-0">
+                    <Utensils className="w-5 h-5" />
+                    <span className="text-sm font-bold uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive" }}>Nourishment</span>
                   </div>
 
-                  <div className="max-h-80 overflow-y-auto space-y-2 pb-4">
+                  <div className="max-h-80 overflow-y-auto space-y-3 pb-4">
                     {(Object.keys(SLIME_FOODS) as SlimeFoodType[]).map(foodId => {
                       const food = SLIME_FOODS[foodId];
                       const canAfford = state.goo >= food.cost;
@@ -337,21 +347,23 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
                         <button
                           key={foodId}
                           onClick={() => handleFeed(foodId)}
-                          disabled={!canAfford || activeSlime.level >= 50}
-                          className={`w-full flex items-center justify-between p-3 rounded-2xl border-2 transition-all active:scale-95 ${
-                            canAfford ? 'bg-white/5 border-white/10 hover:border-[#FF7EB6] hover:bg-white/10' : 'opacity-30 grayscale'
+                          disabled={!canAfford || selectedSlime.level >= 50}
+                          className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all active:scale-95 shadow-md ${
+                            canAfford 
+                              ? 'bg-white border-[#FF7EB6] hover:border-[#FF1493] hover:bg-[#FFE4E1] shadow-[#FF7EB6]/30' 
+                              : 'opacity-40 grayscale bg-gray-200 border-gray-400'
                           }`}
                         >
                           <div className="flex items-center gap-3">
-                            <span className="text-xl">{food.icon}</span>
+                            <span className="text-2xl">{food.icon}</span>
                             <div className="text-left">
-                              <p className="text-[11px] font-black text-white uppercase leading-none">{food.name}</p>
-                              <p className="text-[8px] text-white/40 font-bold">+{food.xpValue} XP</p>
+                              <p className="text-sm font-black text-[#FF1493] uppercase leading-none" style={{ fontFamily: "'VT323', monospace" }}>{food.name}</p>
+                              <p className="text-xs font-bold text-[#FF69B4]">+{food.xpValue} XP</p>
                             </div>
                           </div>
-                          <div className="flex items-center gap-1">
-                            <span className="text-xs font-black text-[#FF7EB6]">{food.cost}</span>
-                            <span className="text-[10px]">💧</span>
+                          <div className="flex items-center gap-1 bg-[#FF7EB6] px-2 py-1 rounded-full">
+                            <span className="text-sm font-black text-white">{food.cost}</span>
+                            <span className="text-sm">💧</span>
                           </div>
                         </button>
                       );

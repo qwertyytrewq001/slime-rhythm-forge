@@ -1,6 +1,5 @@
 import { Slime, SlimeTraits, SlimeElement, RarityTier } from '@/types/slime';
 import { TRAIT_RARITY_WEIGHTS, getSizeRarity, deriveElement, deriveSecondaryElement, BREEDING_COMBOS, ELEMENT_COMBO_BONUS, getRarityTier, RARITY_TIER_STARS, ALL_ELEMENTS } from '@/data/traitData';
-import { generateSlimeName } from './nameGenerator';
 import { calculateBreedingResult } from './breedingCalculator';
 import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 

@@ -3,7 +3,7 @@ import { Slime } from '@/types/slime';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { X, Sparkles } from 'lucide-react';
-import { generateSlimeLore } from '@/utils/loreGenerator';
+import { SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface HatchPopupProps {
@@ -137,7 +137,7 @@ export function HatchPopup({ slime, onClose }: HatchPopupProps) {
                 <p className="text-[10px] text-slate-400 uppercase font-bold mb-2">Lore</p>
                 <ScrollArea className="h-24">
                   <p className="text-sm text-slate-200 leading-relaxed italic font-medium pr-4">
-                    "{generateSlimeLore(slime)}"
+                    "{SLIME_CODEX_MAP.get(slime.id)?.description || 'A mysterious slime with unknown origins.'}"
                   </p>
                 </ScrollArea>
               </div>

@@ -35,10 +35,14 @@ export function SlimeCanvas({
   animationStyle = 'gentle', // Default gentle animation
   isSilhouette = false, // Default to not silhouette
 }: SlimeCanvasProps) {
+  // All hooks must be called at the top
   const [spriteError, setSpriteError] = useState(false);
   const [floatOffset, setFloatOffset] = useState(0);
   const [breathScale, setBreathScale] = useState(1);
   const [idleRotation, setIdleRotation] = useState(0);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameRef = useRef(0);
+  const rafRef = useRef<number>();
 
   // Calculate stage-based size multiplier
   const stage = getStage(slime.level || 1);
@@ -117,9 +121,18 @@ export function SlimeCanvas({
 
   const spritePath = getSpritePath();
 
-  // If we have a sprite path and it's a silhouette, use canvas for proper silhouette rendering
+  // If we have a sprite path and it's a silhouette, check if sprite exists first
   if (spritePath && useSprites && !spriteError && isSilhouette) {
     const actualSize = size * finalSizeMultiplier;
+    
+    // Pre-check if sprite exists by trying to load it
+    const img = new Image();
+    img.src = spritePath;
+    
+    // If sprite doesn't exist, fall back to procedural silhouette
+    img.onerror = () => {
+      setSpriteError(true);
+    };
     
     return (
       <div 
@@ -142,6 +155,7 @@ export function SlimeCanvas({
           spritePath={spritePath}
           size={actualSize}
           slimeName={slime.name}
+          onSpriteError={() => setSpriteError(true)}
         />
         
         {/* Rarity stars overlay */}
@@ -208,9 +222,6 @@ export function SlimeCanvas({
   }
 
   // Fallback to canvas rendering
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
-  const rafRef = useRef<number>();
 
   useEffect(() => {
     const canvas = canvasRef.current;

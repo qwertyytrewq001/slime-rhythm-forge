@@ -7,7 +7,6 @@ import { Sparkles, Zap, Wand2, MousePointer2, Trophy, X, ShoppingCart } from 'lu
 import { audioEngine } from '@/utils/audioEngine';
 import { drawEnhancedEgg } from '@/utils/eggRenderer';
 import { SlimeCanvas } from './SlimeCanvas';
-import { generateSlimeLore } from '@/utils/loreGenerator';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DiscoveryPopup } from './DiscoveryPopup';
 import { FairySparkle } from './FairySparkle';

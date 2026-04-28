@@ -1,7 +1,7 @@
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS, MODEL_NAMES } from '@/data/traitData';
-import { generateSlimeLore } from '@/utils/loreGenerator';
+import { SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { getStage } from '@/utils/slimeRenderer';
 import { SLIME_FOODS, SlimeFoodType } from '@/types/slime';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -166,7 +166,7 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
                 <span className="text-[11px] uppercase font-black tracking-widest">Spirit Origins</span>
               </div>
               <p className="text-[15px] leading-relaxed text-slate-600 italic font-bold">
-                "{generateSlimeLore(slime)}"
+                "{SLIME_CODEX_MAP.get(slime.id)?.description || 'A mysterious slime with unknown origins.'}"
               </p>
             </div>
 

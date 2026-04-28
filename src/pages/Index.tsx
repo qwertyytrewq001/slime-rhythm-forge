@@ -259,7 +259,7 @@ function GameLayout() {
         </div>
 
         {/* Central Content */}
-        <div className="flex-1 overflow-hidden flex flex-col items-center justify-center pointer-events-none relative">
+        <div className={`flex-1 overflow-hidden flex flex-col items-center justify-center ${currentView === 'sanctuaries' ? 'pointer-events-auto' : 'pointer-events-none'} relative`}>
           {currentView === 'breeding' && (
             <div className="w-full h-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF7EB6]/5 rounded-full blur-[100px] pointer-events-none" />

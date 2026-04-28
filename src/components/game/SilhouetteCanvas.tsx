@@ -4,9 +4,10 @@ interface SilhouetteCanvasProps {
   spritePath: string;
   size: number;
   slimeName: string;
+  onSpriteError?: () => void;
 }
 
-export function SilhouetteCanvas({ spritePath, size, slimeName }: SilhouetteCanvasProps) {
+export function SilhouetteCanvas({ spritePath, size, slimeName, onSpriteError }: SilhouetteCanvasProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
 
   useEffect(() => {
@@ -66,6 +67,10 @@ export function SilhouetteCanvas({ spritePath, size, slimeName }: SilhouetteCanv
     
     img.onerror = () => {
       console.warn(`Failed to load sprite for silhouette: ${spritePath}`);
+      // Call error callback if provided
+      if (onSpriteError) {
+        onSpriteError();
+      }
       // Draw fallback silhouette
       ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
       ctx.fillRect(size * 0.2, size * 0.2, size * 0.6, size * 0.6);

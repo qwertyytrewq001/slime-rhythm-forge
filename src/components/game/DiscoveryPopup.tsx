@@ -4,7 +4,7 @@ import { Slime } from '@/types/slime';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS, HABITAT_THEMES } from '@/data/traitData';
 import { X, Sparkles, Trophy, Star, Home } from 'lucide-react';
-import { generateSlimeLore } from '@/utils/loreGenerator';
+import { SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Button } from '@/components/ui/button';
 import { useGameState } from '@/hooks/useGameState';
@@ -161,7 +161,7 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
             {/* Lore */}
             <div className="bg-white/30 rounded-xl p-4 mb-4 border border-pink-300/30">
               <p className="text-sm font-medium text-gray-700 italic leading-relaxed" style={{ textShadow: '1px 1px 2px rgba(255,126,182,0.3)' }}>
-                "{generateSlimeLore(slime)}"
+                "{SLIME_CODEX_MAP.get(slime.id)?.description || 'A mysterious slime with unknown origins.'}"
               </p>
             </div>
 

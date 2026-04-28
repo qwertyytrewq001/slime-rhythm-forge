@@ -8,13 +8,13 @@ export function testSpriteMapping(): void {
   console.log('🧪 Testing sprite mapping...');
   
   // Test primal slimes
-  const fireSlime = createCodexSlime('fire_primal');
-  const waterSlime = createCodexSlime('water_primal');
-  const plantSlime = createCodexSlime('plant_primal');
+  const fireSlime = createCodexSlime('fire_slime');
+  const waterSlime = createCodexSlime('water_slime');
+  const leafSlime = createCodexSlime('leaf_slime');
   
   console.log(`🔥 Fire Slime -> ${getSpriteIdForSlime(fireSlime)}`);
   console.log(`💧 Water Slime -> ${getSpriteIdForSlime(waterSlime)}`);
-  console.log(`🌱 Plant Slime -> ${getSpriteIdForSlime(plantSlime)}`);
+  console.log(`🌱 Leaf Slime -> ${getSpriteIdForSlime(leafSlime)}`);
   
   // Test confectionary slimes
   const candySlime = createCodexSlime('candy_slime');

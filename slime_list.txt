@@ -1,0 +1,89 @@
+=== ALL 68 SLIMES AND THEIR ELEMENTS ===
+
+PRIMAL SLIMES (17):
+1. Fire Slime - Elements: fire
+2. Water Slime - Elements: water
+3. Leaf Slime - Elements: plant
+4. Rock Slime - Elements: earth
+5. Wind Slime - Elements: wind
+6. Snow Slime - Elements: ice
+7. Bolt Slime - Elements: fire, wind
+8. Iron Slime - Elements: metal
+9. Glow Slime - Elements: light
+10. Dark Slime - Elements: shadow
+11. Star Slime - Elements: light, fire
+12. Ooze Slime - Elements: shadow, water
+13. Gem Slime - Elements: ice, earth
+14. Lava Slime - Elements: water, fire
+15. Nature Slime - Elements: plant, earth
+16. Rune Slime - Elements: electric, wind
+17. Angel Slime - Elements: light, water
+
+SWEET SLIMES (13):
+18. Candy Slime - Elements: plant, fire
+19. Pudding Slime - Elements: water, earth
+20. Berry Slime - Elements: plant, water
+21. Mint Slime - Elements: plant, ice
+22. Caramel Slime - Elements: water, fire
+23. Cotton Candy Slime - Elements: wind, plant
+24. Donut Slime - Elements: earth, light
+25. Soda Slime - Elements: water, electric
+26. Steam Slime - Elements: fire, water
+27. Toffee Slime - Elements: metal, fire
+28. Honey Slime - Elements: plant, light
+29. Chocolate Slime - Elements: earth, fire
+30. Gummy Bear Slime - Elements: plant, water
+
+STORM SLIMES (9):
+31. Volcano Slime - Elements: water, fire
+32. Tornado Slime - Elements: wind, electric
+33. Tsunami Slime - Elements: water, wind
+34. Earthquake Slime - Elements: earth, metal
+35. Wildfire Slime - Elements: fire, plant
+36. Blizzard Slime - Elements: ice, wind
+37. Sandstorm Slime - Elements: earth, wind
+38. Solar Flare Slime - Elements: light, fire
+39. Meteor Slime - Elements: earth, fire
+
+NATURE SLIMES (16):
+40. Acid Rain Slime - Elements: shadow, water, earth
+41. Alpine Slime - Elements: wind, ice
+42. Bamboo Slime - Elements: plant, metal
+43. Canyon Slime - Elements: earth, water, fire
+44. Cave Slime - Elements: earth, shadow
+45. Coral Slime - Elements: water, earth
+46. Desert Slime - Elements: earth, fire
+47. Island Slime - Elements: water, earth
+48. Jungle Slime - Elements: plant, water
+49. Mangrove Slime - Elements: plant, water
+50. Meadow Slime - Elements: plant, light
+51. Oasis Slime - Elements: water, plant
+52. Rainforest Slime - Elements: plant, water
+53. Savanna Slime - Elements: earth, wind
+54. Swamp Slime - Elements: water, earth
+55. Tundra Slime - Elements: ice, wind
+
+LOST SLIMES (10):
+56. Genesis Slime - Elements: light, plant, earth, water
+57. Apocalypse Slime - Elements: shadow, water, fire
+58. Galaxy Whale Slime - Elements: light, water, wind
+59. Mecha God Slime - Elements: metal, electric, light
+60. Eldritch Slime - Elements: shadow, electric, wind
+61. Yggdrasil Slime - Elements: plant, earth, water
+62. Star Eater Slime - Elements: shadow, light
+63. Harmony Slime - Elements: light, plant, wind, water
+64. Pandora Slime - Elements: shadow, electric, fire
+65. Ice Crystal Slime - Elements: ice, earth, light
+
+SPECIAL SLIMES (3):
+66. Balloon Slime - Elements: wind, light
+67. Crayon Slime - Elements: earth, light
+68. Glitched Slime - Elements: shadow, electric
+
+=== ELEMENT BREAKDOWN ===
+Single Element Slimes: 9
+Dual Element Slimes: 50
+Triple Element Slimes: 7
+Quad Element Slimes: 2
+
+=== TOTAL SLIMES: 68 ===
