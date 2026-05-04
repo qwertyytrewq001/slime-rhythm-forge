@@ -8,6 +8,7 @@ import { BreedingDen } from '@/components/game/BreedingDen';
 import { StatsPanel } from '@/components/game/StatsPanel';
 import { HabitatViewer } from '@/components/game/HabitatViewer';
 import { Shop } from '@/components/game/Shop';
+import { BazaarModal } from '@/components/game/BazaarModal';
 import { Hatchery } from '@/components/game/Hatchery';
 import { HatcheryScreen } from '@/components/game/HatcheryScreen';
 import { IslandGrid } from '@/components/game/IslandGrid';
@@ -76,6 +77,7 @@ function GameLayout() {
   const [breedingGalleryOpen, setBreedingGalleryOpen] = useState(false);
   const [gallerySlot, setGallerySlot] = useState<1 | 2 | null>(null);
   const [codexGalleryOpen, setCodexGalleryOpen] = useState(false);
+  const [bazaarModalOpen, setBazaarModalOpen] = useState(false);
 
   const [ageMessage, setAgeMessage] = useState<string | null>(null);
 
@@ -146,6 +148,13 @@ function GameLayout() {
       setSelectedHabitatId(null);
     }
   }, [currentView]);
+
+  // Auto-navigate to sanctuaries when habitat placement is pending
+  useEffect(() => {
+    if (state.pendingHabitatPlacement && currentView !== 'sanctuaries') {
+      setCurrentView('sanctuaries');
+    }
+  }, [state.pendingHabitatPlacement, currentView]);
 
   const handleBattleComplete = (result: { winner: 'player' | 'opponent'; level: number }) => {
     setBattleTeam(null);
@@ -311,19 +320,15 @@ function GameLayout() {
             </SheetContent>
           </Sheet>
 
-          <Sheet>
-            <SheetTrigger asChild>
-              <div className="relative group">
-                <button className={toolbarCircle}>
-                  <ShoppingBag className={toolbarIcon} />
-                  <span className={toolbarLabel}>Bazaar</span>
-                </button>
-              </div>
-            </SheetTrigger>
-            <SheetContent side="right" className="bg-rose-glass p-0 border-l-4 border-[#FF7EB6]/50 flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto light-theme">
-              <Shop />
-            </SheetContent>
-          </Sheet>
+          <div className="relative group">
+            <button 
+              onClick={() => setBazaarModalOpen(true)}
+              className={toolbarCircle}
+            >
+              <ShoppingBag className={toolbarIcon} />
+              <span className={toolbarLabel}>Bazaar</span>
+            </button>
+          </div>
 
           <button onClick={() => setCodexGalleryOpen(true)} className={toolbarCircle}>
               <BookOpen className={toolbarIcon} />
@@ -349,6 +354,11 @@ function GameLayout() {
         <div className="fixed inset-0 z-[250] pointer-events-auto">
           <CodexGallery onClose={() => setCodexGalleryOpen(false)} />
         </div>
+      )}
+
+      {/* Bazaar Modal */}
+      {bazaarModalOpen && (
+        <BazaarModal onClose={() => setBazaarModalOpen(false)} />
       )}
 
       {/* Age restriction message */}

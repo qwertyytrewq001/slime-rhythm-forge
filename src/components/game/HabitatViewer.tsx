@@ -3,11 +3,12 @@ import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { HABITAT_THEMES, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
 import { Habitat, SLIME_FOODS, SlimeFoodType, Slime } from '@/types/slime';
-import { ChevronLeft, Plus, Utensils, X } from 'lucide-react';
+import { ChevronLeft, Plus, Utensils, X, Backpack } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SlimeGallery } from './SlimeGallery';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SLIME_CODEX_MAP } from '@/data/slimeCodex';
+import { FoodBag } from './FoodBag';
 
 interface HabitatViewerProps {
   habitatId: string;
@@ -227,27 +228,40 @@ function BouncingSlime({ slime, habitatId, onSelect }: { slime: Slime; habitatId
   return (
     <div
       className="absolute transition-none cursor-pointer group"
-      onClick={() => onSelect(slime)}
+      onClick={(e) => {
+        console.log('🎯 Slime clicked!', { slimeId: slime.id, slimeName: slime.name });
+        onSelect(slime);
+      }}
+      onMouseEnter={() => console.log('👆 Slime hover:', { slimeId: slime.id, slimeName: slime.name })}
+      data-slime-id={slime.id}
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
         transform: `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`,
         zIndex: 20,
-        filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.3))'
+        filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.3))',
+        pointerEvents: 'auto'
       }}
     >
-      <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 backdrop-blur-md border border-white/20 px-2 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap">
+      <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 backdrop-blur-md border border-white/20 px-2 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap z-30">
         {slime.name}
       </div>
-      <SlimeCanvas slime={slime} size={120} animated={true} />
+      <div style={{ pointerEvents: 'none' }}>
+        <SlimeCanvas slime={slime} size={120} animated={true} />
+      </div>
     </div>
   );
+}
+
+function randomId(): string {
+  return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
 }
 
 export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
   const { state, dispatch } = useGameState();
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedSlime, setSelectedSlime] = useState<Slime | null>(null);
+  const [foodBagOpen, setFoodBagOpen] = useState(false);
   const habitat = state.habitats.find(h => h.id === habitatId);
 
   if (!habitat) return null;
@@ -295,12 +309,90 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
         <div className="absolute inset-0" style={{ background: theme.bgImage ? `url("${theme.bgImage}")` : layers.backdrop, backgroundSize: 'cover', backgroundPosition: 'center' }} />
         {!theme.bgImage && <div className="absolute inset-0" style={{ background: layers.midground }} />}
         {!theme.bgImage && <div className="absolute bottom-0 left-0 right-0 h-1/2" style={{ background: layers.ground }} />}
-        {!theme.bgImage && <div className="absolute inset-0 pointer-events-none">{layers.details}</div>}
 
-        <div className="absolute inset-0">
+        {/* Drag and drop zone for food */}
+        <div 
+          className="absolute inset-0"
+          style={{ pointerEvents: 'auto' }}
+          onDragOver={(e) => e.preventDefault()}
+          onDrop={(e) => {
+            e.preventDefault();
+            const data = e.dataTransfer.getData('text/plain');
+            if (data) {
+              try {
+                const { foodId, fromBag } = JSON.parse(data);
+                if (fromBag) {
+                  // Get the habitat container element
+                  const habitatElement = e.currentTarget as HTMLElement;
+                  const rect = habitatElement.getBoundingClientRect();
+                  
+                  // Calculate relative position within the habitat
+                  const relativeX = e.clientX - rect.left;
+                  const relativeY = e.clientY - rect.top;
+                  
+                  // Add food from bag to habitat floor
+                  dispatch({ 
+                    type: 'ADD_FLOOR_FOOD', 
+                    id: randomId(),
+                    x: relativeX, 
+                    y: relativeY, 
+                    foodId 
+                  });
+                }
+              } catch (error) {
+                console.error('Failed to parse drop data:', error);
+              }
+            }
+          }}
+        >
           {assignedSlimes.map((slime) => slime && (
             <BouncingSlime key={slime.id} slime={slime} habitatId={habitatId} onSelect={setSelectedSlime} />
           ))}
+          
+          {/* Render floor food */}
+          {state.floorFood.map((food) => {
+            const foodData = SLIME_FOODS[food.foodId];
+            return (
+              <div
+                key={food.id}
+                className="absolute w-12 h-12 cursor-pointer hover:scale-110 transition-transform z-10"
+                style={{
+                  left: `${food.x}px`,
+                  top: `${food.y}px`,
+                  transform: 'translate(-50%, -50%)'
+                }}
+                onClick={() => {
+                  // Check if any slime is close enough to eat this food
+                  const nearbySlime = assignedSlimes.find(slime => {
+                    if (!slime) return false;
+                    const slimeElement = document.querySelector(`[data-slime-id="${slime.id}"]`);
+                    if (!slimeElement) return false;
+                    const slimeRect = slimeElement.getBoundingClientRect();
+                    const foodRect = { left: food.x, top: food.y, right: food.x + 48, bottom: food.y + 48 };
+                    const distance = Math.sqrt(
+                      Math.pow(slimeRect.left - foodRect.left, 2) + 
+                      Math.pow(slimeRect.top - foodRect.top, 2)
+                    );
+                    return distance < 100; // Within 100px
+                  });
+                  
+                  if (nearbySlime) {
+                    dispatch({ 
+                      type: 'SLIME_EAT_FOOD', 
+                      slimeId: nearbySlime.id, 
+                      foodId: food.id 
+                    });
+                  }
+                }}
+              >
+                <div className="relative">
+                  <span className="text-2xl filter drop-shadow-md animate-bounce">{foodData.icon}</span>
+                  <div className="absolute inset-0 bg-white/20 rounded-full animate-ping" />
+                </div>
+              </div>
+            );
+          })}
+          
           {assignedSlimes.length < habitat.capacity && (
             <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30">
               <button onClick={() => setGalleryOpen(true)} className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#FF7EB6] hover:scale-110 transition-all flex items-center justify-center group">
@@ -309,6 +401,25 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
             </div>
           )}
         </div>
+
+        {/* Food Bag Modal */}
+        <Sheet open={foodBagOpen} onOpenChange={setFoodBagOpen}>
+          <SheetContent className="bg-obsidian-glass p-0 border-t-4 border-[#FF7EB6]/50 shadow-2xl">
+            <SheetHeader className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <Backpack className="w-6 h-6 text-[#FF7EB6]" />
+                <h2 className="text-xl font-black text-[#FF1493]" style={{ fontFamily: "'Press Start 2P', cursive" }}>Food Bag</h2>
+              </div>
+              <button 
+                onClick={() => setFoodBagOpen(false)}
+                className="p-2 hover:bg-[#FFE4E1] rounded-full transition-colors"
+              >
+                <X className="w-5 h-5 text-[#FF69B4]" />
+              </button>
+            </SheetHeader>
+            <FoodBag isOpen={foodBagOpen} onClose={() => setFoodBagOpen(false)} />
+          </SheetContent>
+        </Sheet>
 
         {selectedSlime && (
           <div 
@@ -336,42 +447,83 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
                 <div className="space-y-3">
                   <div className="flex items-center gap-2 text-[#FF1493] shrink-0">
                     <Utensils className="w-5 h-5" />
-                    <span className="text-sm font-bold uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive" }}>Nourishment</span>
+                    <span className="text-sm font-bold uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive" }}>Feeding Station</span>
                   </div>
+                  <button
+                    onClick={() => setFoodBagOpen(true)}
+                    className="ml-auto p-2 bg-[#FF7EB6] hover:bg-[#FF1493] rounded-full transition-colors flex items-center gap-2"
+                  >
+                    <Backpack className="w-4 h-4 text-white" />
+                    <span className="text-sm font-bold text-white">Food Bag</span>
+                  </button>
+                </div>
 
-                  <div className="max-h-80 overflow-y-auto space-y-3 pb-4">
-                    {(Object.keys(SLIME_FOODS) as SlimeFoodType[]).map(foodId => {
-                      const food = SLIME_FOODS[foodId];
-                      const canAfford = state.goo >= food.cost;
-                      return (
-                        <button
-                          key={foodId}
-                          onClick={() => handleFeed(foodId)}
-                          disabled={!canAfford || selectedSlime.level >= 50}
-                          className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all active:scale-95 shadow-md ${
-                            canAfford 
-                              ? 'bg-white border-[#FF7EB6] hover:border-[#FF1493] hover:bg-[#FFE4E1] shadow-[#FF7EB6]/30' 
-                              : 'opacity-40 grayscale bg-gray-200 border-gray-400'
-                          }`}
-                        >
-                          <div className="flex items-center gap-3">
-                            <span className="text-2xl">{food.icon}</span>
-                            <div className="text-left">
-                              <p className="text-sm font-black text-[#FF1493] uppercase leading-none" style={{ fontFamily: "'VT323', monospace" }}>{food.name}</p>
-                              <p className="text-xs font-bold text-[#FF69B4]">+{food.xpValue} XP</p>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-1 bg-[#FF7EB6] px-2 py-1 rounded-full">
-                            <span className="text-sm font-black text-white">{food.cost}</span>
-                            <span className="text-sm">💧</span>
-                          </div>
-                        </button>
-                      );
-                    })}
+                <div className="bg-white/60 backdrop-blur-sm p-3 rounded-2xl border border-[#FF7EB6]/30 mb-4">
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="flex items-center gap-2">
+                      <span className="text-lg">🍽</span>
+                      <span className="text-sm font-bold text-[#FF69B4]">Current Level: {selectedSlime.level}/50</span>
+                    </div>
+                    <div className="text-xs font-bold text-[#FF1493]">
+                      {selectedSlime.level >= 50 ? 'MAX LEVEL' : `${50 - selectedSlime.level} levels to go`}
+                    </div>
+                  </div>
+                  <div className="w-full bg-gradient-to-r from-[#FFE4E1] to-[#FFB3D1] rounded-full h-2 mb-3">
+                    <div 
+                      className="bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] h-full rounded-full transition-all duration-500"
+                      style={{ width: `${(selectedSlime.level / 50) * 100}%` }}
+                    />
                   </div>
                 </div>
-              </div>
 
+                <div className="max-h-80 overflow-y-auto space-y-3 pb-4">
+                  {(Object.keys(SLIME_FOODS) as SlimeFoodType[]).map(foodId => {
+                    const food = SLIME_FOODS[foodId];
+                    const canAfford = state.goo >= food.cost;
+                    const isMaxLevel = selectedSlime.level >= 50;
+                    
+                    return (
+                      <button
+                        key={foodId}
+                        onClick={() => handleFeed(foodId)}
+                        disabled={!canAfford || isMaxLevel}
+                        className={`w-full flex items-center justify-between p-4 rounded-2xl border-2 transition-all active:scale-95 shadow-md relative overflow-hidden group ${
+                          canAfford && !isMaxLevel
+                            ? 'bg-white border-[#FF7EB6] hover:border-[#FF1493] hover:bg-[#FFE4E1] shadow-[#FF7EB6]/30 hover:shadow-[#FF1493]/40' 
+                            : 'opacity-40 grayscale bg-gray-200 border-gray-400 cursor-not-allowed'
+                        }`}
+                      >
+                        {/* Food effect preview */}
+                        <div className="absolute inset-0 bg-gradient-to-br from-transparent via-white/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                        
+                        <div className="flex items-center gap-3 relative z-10">
+                          <div className="relative">
+                            <span className="text-2xl transform transition-transform group-hover:scale-110 duration-200">{food.icon}</span>
+                            {canAfford && !isMaxLevel && (
+                              <div className="absolute -top-1 -right-1 w-3 h-3 bg-[#FF1493] rounded-full flex items-center justify-center animate-pulse">
+                                <span className="text-xs text-white font-bold">✨</span>
+                              </div>
+                            )}
+                          </div>
+                          <div className="text-left flex-1">
+                            <p className="text-sm font-black text-[#FF1493] uppercase leading-none" style={{ fontFamily: "'VT323', monospace" }}>{food.name}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <p className="text-xs font-bold text-[#FF69B4]">+{food.xpValue} XP</p>
+                              <p className="text-xs text-gray-500">
+                                {isMaxLevel ? 'Max Level' : `${Math.ceil((50 - selectedSlime.level) / food.xpValue)} feeds to level up`}
+                              </p>
+                            </div>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-1 bg-[#FF7EB6] px-2 py-1 rounded-full">
+                          <span className="text-sm font-black text-white">{food.cost}</span>
+                          <span className="text-sm">💧</span>
+                        </div>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -382,8 +534,6 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
           <div>
             <p className="text-xs text-white/60 font-bold tracking-wider uppercase">Inhabitants</p>
             <p className="text-lg font-black text-white">{assignedSlimes.length} <span className="text-white/60">/ {habitat.capacity}</span></p>
-          </div>
-          <div className="text-right">
             <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">Available Goo</p>
             <p className="text-lg font-black text-[#FF7EB6]">{state.goo.toFixed(1)} 💧</p>
           </div>

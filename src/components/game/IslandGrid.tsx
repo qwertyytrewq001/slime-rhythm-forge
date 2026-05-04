@@ -41,6 +41,51 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
 
   return (
     <div className="w-full flex flex-col items-center" style={{ fontFamily: "'VT323', monospace" }}>
+      {/* Habitat Placement Dialogue */}
+      {state.pendingHabitatPlacement && (
+        <div 
+          className="absolute shadow-2xl relative pointer-events-auto transition-all duration-500 z-[150]"
+          style={{
+            position: 'fixed',
+            top: '32px',
+            left: '50%',
+            transform: 'translateX(-50%)',
+            width: '640px',
+            maxWidth: '85vw',
+            background: 'rgba(255, 255, 255, 0.95)',
+            borderRadius: '24px',
+            border: '4px solid #FF7EB6',
+            padding: '16px 24px',
+            boxShadow: '0 20px 50px rgba(255, 126, 182, 0.2)'
+          }}
+        >
+          <div className="h-full flex flex-col">
+            {/* Character Name */}
+            <div className="mb-3">
+              <h3 className="text-[#FF7EB6] font-black text-xl uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>Habitat Placement</h3>
+            </div>
+
+            {/* Dialogue Text */}
+            <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '50px'}}>
+              <div className="flex items-start justify-between gap-4">
+                <p className="text-slate-800 text-2xl leading-relaxed font-bold italic flex-1" style={{ fontFamily: "'VT323', monospace" }}>
+                  "You're placing a {ELEMENT_DISPLAY_NAMES[state.pendingHabitatPlacement.element]} Sanctum! Click on any empty slot to place it."
+                </p>
+                
+                {/* Cancel Button */}
+                <button
+                  onClick={() => dispatch({ type: 'CANCEL_HABITAT_PLACEMENT' })}
+                  className="px-4 py-2 rounded-full bg-slate-200 hover:bg-slate-300 text-slate-700 font-bold transition-all text-lg whitespace-nowrap"
+                  style={{ fontFamily: "'VT323', monospace" }}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      
       <div className="flex items-center justify-between w-full mb-8 px-4">
         <button 
           onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
@@ -65,10 +110,27 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
 
       <div className="grid gap-8 w-full max-w-6xl" style={{ gridTemplateColumns: `repeat(${COLS}, 1fr)` }}>
         {displayHabitats.map((habitat, i) => {
+          const slotX = i % COLS;
+          const slotY = Math.floor(i / COLS);
+          
           if (!habitat) {
             return (
-              <div key={`empty-${i}`} className="aspect-square rounded-[2.5rem] border-4 border-dashed border-white/10 bg-black/20 flex items-center justify-center">
-                <span className="text-xs text-white/20 font-black uppercase tracking-widest">Available Slot</span>
+              <div 
+                key={`empty-${i}`} 
+                className="aspect-square rounded-[2.5rem] border-4 border-dashed border-white/10 bg-black/20 flex items-center justify-center cursor-pointer transition-all hover:border-[#FF7EB6] hover:bg-black/30 hover:scale-105"
+                onClick={() => {
+                  if (state.pendingHabitatPlacement) {
+                    dispatch({ type: 'PLACE_HABITAT_IN_SLOT', element: state.pendingHabitatPlacement.element, gridX: slotX, gridY: slotY });
+                  }
+                }}
+              >
+                <span className="text-sm font-black uppercase tracking-widest transition-colors">
+                  {state.pendingHabitatPlacement ? (
+                    <span className="text-[#FF7EB6] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Click to Place</span>
+                  ) : (
+                    <span className="text-white/40">Available Slot</span>
+                  )}
+                </span>
               </div>
             );
           }

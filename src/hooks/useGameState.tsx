@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useRef, useMemo } from 'react';
-import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType } from '@/types/slime';
+import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType, BreedResult } from '@/types/slime';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
@@ -103,6 +103,7 @@ function createInitialState(): GameState {
       discoveredModels: saved.discoveredModels ?? [],
       discoveredElements: saved.discoveredElements ?? [],
       habitats: saved.habitats ?? [],
+      pendingHabitatPlacement: saved.pendingHabitatPlacement ?? null,
       happiness: saved.happiness ?? {},
       lastEvolution: null,
       lastLevelUp: null,
@@ -110,6 +111,8 @@ function createInitialState(): GameState {
       currentLevel: saved.currentLevel ?? 1,
       tutorialCompleted: saved.tutorialCompleted ?? false,
       completedTutorialChapters: saved.completedTutorialChapters ?? [],
+      inventory: saved.inventory ?? { basic: 0, elemental: 0, royal: 0 },
+      floorFood: saved.floorFood ?? [],
     };
   }
   return {
@@ -130,6 +133,7 @@ function createInitialState(): GameState {
     discoveredModels: [0],
     discoveredElements: [],
     habitats: [],
+    pendingHabitatPlacement: null,
     happiness: {},
     lastEvolution: null,
     lastLevelUp: null,
@@ -137,7 +141,38 @@ function createInitialState(): GameState {
     currentLevel: 1,
     tutorialCompleted: false,
     completedTutorialChapters: [],
+    inventory: { basic: 0, elemental: 0, royal: 0 },
+    floorFood: [],
   };
+}
+
+export interface LocalGameState {
+  slimes: Slime[];
+  goo: number;
+  selectedSlimeId: string | null;
+  breedSlot1: string | null;
+  breedSlot2: string | null;
+  activeBreeding: { ritual: string } | null;
+  activeHatching: { slime: Slime; endTime: number } | null;
+  breedHistory: BreedResult[];
+  achievements: Achievement[];
+  mutationJuiceActive: boolean;
+  totalBreeds: number;
+  perfectTaps: number;
+  muted: boolean;
+  bestRarity: number;
+  discoveredModels: number[];
+  discoveredElements: SlimeElement[];
+  habitats: Habitat[];
+  happiness: Record<string, number>;
+  lastEvolution: { slimeId: string; stage: SlimeEvolutionStage } | null;
+  lastLevelUp: { slimeId: string; newLevel: number } | null;
+  lastPlayerLevelUp: { newLevel: number } | null;
+  currentLevel: number;
+  tutorialCompleted: boolean;
+  completedTutorialChapters: string[];
+  inventory: Record<SlimeFoodType, number>;
+  floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
 }
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -311,6 +346,34 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       };
       return { ...state, habitats: [...state.habitats, newHabitat] };
     }
+    case 'START_HABITAT_PLACEMENT': {
+      return { ...state, pendingHabitatPlacement: { element: action.element } };
+    }
+    case 'PLACE_HABITAT_IN_SLOT': {
+      if (!state.pendingHabitatPlacement) return state;
+      
+      // Check if slot is already occupied
+      const occupied = state.habitats.some(h => h.gridX === action.gridX && h.gridY === action.gridY);
+      if (occupied) return state;
+      
+      const newHabitat: Habitat = {
+        id: randomId(),
+        element: action.element,
+        gridX: action.gridX,
+        gridY: action.gridY,
+        assignedSlimeIds: [],
+        capacity: 2,
+      };
+      
+      return { 
+        ...state, 
+        habitats: [...state.habitats, newHabitat],
+        pendingHabitatPlacement: null 
+      };
+    }
+    case 'CANCEL_HABITAT_PLACEMENT': {
+      return { ...state, pendingHabitatPlacement: null };
+    }
     case 'ASSIGN_SLIME_TO_HABITAT': {
       const slime = state.slimes.find(s => s.id === action.slimeId);
       const habitat = state.habitats.find(h => h.id === action.habitatId);
@@ -343,6 +406,91 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         return h;
       });
       return { ...state, habitats };
+    }
+    case 'ADD_TO_INVENTORY': {
+      const currentQuantity = state.inventory[action.foodType] || 0;
+      return { ...state, inventory: { ...state.inventory, [action.foodType]: currentQuantity + action.quantity } };
+    }
+    case 'REMOVE_FROM_INVENTORY': {
+      const currentQuantity = state.inventory[action.foodType] || 0;
+      const newQuantity = Math.max(0, currentQuantity - action.quantity);
+      if (newQuantity === 0) {
+        const { [action.foodType]: removed, ...rest } = state.inventory;
+        return { ...state, inventory: { ...rest, basic: 0, elemental: 0, royal: 0 } };
+      }
+      return { ...state, inventory: { ...state.inventory, [action.foodType]: newQuantity } };
+    }
+    case 'ADD_FLOOR_FOOD': {
+      const newFloorFood = {
+        id: randomId(),
+        x: action.x,
+        y: action.y,
+        foodId: action.foodId,
+        timestamp: Date.now()
+      };
+      return { ...state, floorFood: [...state.floorFood, newFloorFood] };
+    }
+    case 'REMOVE_FLOOR_FOOD': {
+      return { ...state, floorFood: state.floorFood.filter(food => food.id !== action.id) };
+    }
+    case 'SLIME_EAT_FOOD': {
+      const floorFoodIndex = state.floorFood.findIndex(food => food.id === action.foodId);
+      if (floorFoodIndex === -1) return state;
+      
+      const newFloorFood = [...state.floorFood];
+      newFloorFood.splice(floorFoodIndex, 1);
+      
+      const food = SLIME_FOODS[action.foodId];
+      const slime = state.slimes.find(s => s.id === action.slimeId);
+      if (!slime) return state;
+      
+      let newXp = slime.xp + food.xpValue;
+      let newLevel = slime.level;
+      let xpToNext: number;
+      let didLevelUp = false;
+
+      const oldStage = getStage(newLevel);
+
+      // Progressive food requirements: harder as levels increase
+      if (newLevel < 15) {
+        // Levels 1-14: Standard progression (battle rewards as main source)
+        xpToNext = 8 + newLevel * 4; // More food needed each level
+      } else if (newLevel < 30) {
+        // Levels 15-29: Harder progression
+        xpToNext = 60 + (newLevel - 15) * 12; // Significantly more food needed
+      } else {
+        // Levels 30-50: Very hard progression
+        xpToNext = 240 + (newLevel - 30) * 25; // Much more food needed
+      }
+
+      while (newXp >= xpToNext && newLevel < 50) {
+        newXp -= xpToNext;
+        newLevel++;
+        
+        // Recalculate XP needed for next level
+        if (newLevel < 15) {
+          xpToNext = 8 + newLevel * 4;
+        } else if (newLevel < 30) {
+          xpToNext = 60 + (newLevel - 15) * 12;
+        } else {
+          xpToNext = 240 + (newLevel - 30) * 25;
+        }
+        
+        didLevelUp = true;
+      }
+
+      const newStage = getStage(newLevel);
+      let evolved: { slimeId: string; stage: SlimeEvolutionStage; timestamp: number } | null = null;
+      if (newStage !== oldStage) {
+        evolved = { slimeId: slime.id, stage: newStage, timestamp: Date.now() };
+      }
+
+      const updatedSlimes = state.slimes.map(s => {
+        if (s.id !== slime.id) return s;
+        return { ...s, level: newLevel, xp: newXp };
+      });
+
+      return { ...state, slimes: updatedSlimes, floorFood: newFloorFood };
     }
     case 'FEED_SLIME_XP': {
       const food = SLIME_FOODS[action.foodType];

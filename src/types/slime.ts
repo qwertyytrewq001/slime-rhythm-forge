@@ -130,6 +130,9 @@ export interface GameState {
   discoveredModels: number[];
   discoveredElements: string[];
   habitats: Habitat[];
+  pendingHabitatPlacement: {
+    element: SlimeElement;
+  } | null;
   happiness: Record<string, number>;
   lastEvolution: {
     slimeId: string;
@@ -150,6 +153,8 @@ export interface GameState {
   currentLevel: number; // For battle map progression
   tutorialCompleted: boolean;
   completedTutorialChapters: string[];
+  inventory: Record<SlimeFoodType, number>;
+  floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
 }
 
 export type SlimeFoodType = 'basic' | 'elemental' | 'royal';
@@ -217,6 +222,9 @@ export type GameAction =
   | { type: 'ADD_DISCOVERED_ELEMENT'; element: string }
   | { type: 'CLEAR_NEW_BADGE'; slimeId: string }
   | { type: 'BUY_HABITAT'; element: SlimeElement }
+  | { type: 'START_HABITAT_PLACEMENT'; element: SlimeElement }
+  | { type: 'PLACE_HABITAT_IN_SLOT'; element: SlimeElement; gridX: number; gridY: number }
+  | { type: 'CANCEL_HABITAT_PLACEMENT' }
   | { type: 'ASSIGN_SLIME_TO_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'REMOVE_SLIME_FROM_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType }
@@ -226,4 +234,9 @@ export type GameAction =
   | { type: 'BATTLE_REWARD'; result: BattleResult }
   | { type: 'SET_CURRENT_LEVEL'; level: number }
   | { type: 'COMPLETE_TUTORIAL' }
-  | { type: 'COMPLETE_TUTORIAL_CHAPTER'; chapterId: string };
+  | { type: 'COMPLETE_TUTORIAL_CHAPTER'; chapterId: string }
+  | { type: 'ADD_TO_INVENTORY'; foodType: SlimeFoodType; quantity: number }
+  | { type: 'REMOVE_FROM_INVENTORY'; foodType: SlimeFoodType; quantity: number }
+  | { type: 'ADD_FLOOR_FOOD'; id: string; x: number; y: number; foodId: SlimeFoodType }
+  | { type: 'REMOVE_FLOOR_FOOD'; id: string }
+  | { type: 'SLIME_EAT_FOOD'; slimeId: string; foodId: string };
