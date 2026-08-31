@@ -58,14 +58,20 @@ export const useDialogueTrigger = (callback: (trigger: DialogueTrigger, data?: a
   }, [callback]);
 
   useEffect(() => {
-    // Check for pending trigger on mount
+    // Check for pending trigger on mount. Cleared immediately after consuming it,
+    // otherwise every future remount of a listening component (e.g. on navigation)
+    // would re-fire the same stale trigger forever.
     if (globalTrigger) {
-      savedCallback.current(globalTrigger, globalTriggerData);
+      const trigger = globalTrigger;
+      const data = globalTriggerData;
+      clearDialogueTrigger();
+      savedCallback.current(trigger, data);
     }
 
     const handleTrigger = (event: any) => {
       if (event.detail?.trigger) {
         savedCallback.current(event.detail.trigger, event.detail.data);
+        clearDialogueTrigger();
       }
     };
 

@@ -367,16 +367,19 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     }
     case 'PLACE_HABITAT_IN_SLOT': {
       if (!state.pendingHabitatPlacement) return state;
-      
-      // Check if slot is already occupied
-      const occupied = state.habitats.some(h => h.gridX === action.gridX && h.gridY === action.gridY);
-      if (occupied) return state;
-      
+
+      // The grid renders habitats by their position in state.habitats, not by
+      // stored gridX/gridY, so the clicked slot's computed gridX/gridY is only
+      // a UI concept and can collide with an existing habitat's real coordinates
+      // (silently blocking placement with no feedback). Always assign a
+      // guaranteed-free slot instead, same as BUY_HABITAT does.
+      const slot = findNextGridSlot(state.habitats);
+
       const newHabitat: Habitat = {
         id: randomId(),
         element: action.element,
-        gridX: action.gridX,
-        gridY: action.gridY,
+        gridX: slot.x,
+        gridY: slot.y,
         assignedSlimeIds: [],
         capacity: 2,
       };

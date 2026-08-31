@@ -48,13 +48,14 @@ const hasSeenEvent = (eventName: string): boolean => {
 export function BazaarModal({ onClose }: BazaarModalProps) {
   const { state, dispatch, playerLevel } = useGameState();
   const { toast } = useToast();
-  const [selectedCategory, setSelectedCategory] = useState<'eggs' | 'habitats'>('eggs');
+  const [selectedCategory, setSelectedCategory] = useState<'eggs' | 'habitats' | 'items'>('eggs');
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
 
   // Pagination settings
   const EGGS_PER_PAGE = 4;
   const HABITATS_PER_PAGE = 3;
+  const ITEMS_SHOP_PER_PAGE = 4;
 
   const unlockedElements = getUnlockedElements(playerLevel);
 
@@ -98,6 +99,27 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
 
   const handleBuyItem = (itemId: string, cost: number) => {
     if (state.goo < cost) return;
+
+    // Some items require a precondition (a selected slime, an egg currently
+    // hatching) to do anything at all — check it up front so goo is never
+    // spent for an item that silently does nothing.
+    if ((itemId === 'wild_food' || itemId === 'element_treat') && !state.selectedSlimeId) {
+      toast({
+        title: "No Slime Selected",
+        description: "Select a slime first, then use this item on it.",
+        variant: "destructive"
+      });
+      return;
+    }
+    if (itemId === 'energy_crystal' && !state.activeHatching) {
+      toast({
+        title: "Nothing Hatching",
+        description: "You need an egg incubating in the Hatchery to use this.",
+        variant: "destructive"
+      });
+      return;
+    }
+
     dispatch({ type: 'SPEND_GOO', amount: cost });
     audioEngine.playSfx('purchase');
 
@@ -106,28 +128,31 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
     }
 
     switch (itemId) {
-      case 'mutation_juice': dispatch({ type: 'ACTIVATE_MUTATION_JUICE' }); break;
-      case 'wild_food':
-        if (state.selectedSlimeId) {
-          const traitKeys: (keyof SlimeTraits)[] = ['shape', 'color1', 'color2', 'eyes', 'mouth', 'spikes', 'pattern', 'glow', 'aura', 'rhythm', 'accessory'];
-          const randomTrait = traitKeys[Math.floor(Math.random() * traitKeys.length)];
-          dispatch({ type: 'BOOST_TRAIT', slimeId: state.selectedSlimeId, trait: randomTrait });
-        }
+      case 'mutation_juice':
+        dispatch({ type: 'ACTIVATE_MUTATION_JUICE' });
+        toast({ title: "Mutation Juice Active!", description: "Your next breed has a boosted mutation rate." });
         break;
+      case 'wild_food': {
+        const traitKeys: (keyof SlimeTraits)[] = ['shape', 'color1', 'color2', 'eyes', 'mouth', 'spikes', 'pattern', 'glow', 'aura', 'rhythm', 'accessory'];
+        const randomTrait = traitKeys[Math.floor(Math.random() * traitKeys.length)];
+        dispatch({ type: 'BOOST_TRAIT', slimeId: state.selectedSlimeId!, trait: randomTrait });
+        toast({ title: "Trait Boosted!", description: "Your slime's traits have shifted." });
+        break;
+      }
       case 'element_treat':
-        if (state.selectedSlimeId) dispatch({ type: 'FEED_SLIME_XP', slimeId: state.selectedSlimeId, foodType: 'elemental' });
+        dispatch({ type: 'FEED_SLIME_XP', slimeId: state.selectedSlimeId!, foodType: 'elemental' });
+        toast({ title: "Slime Fed!", description: "Your slime gained XP." });
         break;
       case 'energy_crystal':
-        if (state.activeHatching) {
-          dispatch({ type: 'FINISH_HATCHING' });
-          toast({
-            title: "Egg Ready!",
-            description: "Your egg has instantly hatched!",
-          });
-        }
+        dispatch({ type: 'FINISH_HATCHING' });
+        toast({
+          title: "Egg Ready!",
+          description: "Your egg has instantly hatched!",
+        });
         break;
       case 'lucky_charm':
         dispatch({ type: 'ACTIVATE_MUTATION_JUICE' });
+        toast({ title: "Lucky Charm Active!", description: "Higher chance of rare offspring on your next breed." });
         break;
     }
   };
@@ -178,6 +203,9 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
       case 'habitats':
         const habitatsStart = currentPage * HABITATS_PER_PAGE;
         return SHOP_HABITAT_ELEMENTS.slice(habitatsStart, habitatsStart + HABITATS_PER_PAGE);
+      case 'items':
+        const itemsStart = currentPage * ITEMS_SHOP_PER_PAGE;
+        return ITEM_SHOP.slice(itemsStart, itemsStart + ITEMS_SHOP_PER_PAGE);
       default:
         return [];
     }
@@ -189,6 +217,8 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         return Math.ceil(SHOP_EGG_ELEMENTS.length / EGGS_PER_PAGE);
       case 'habitats':
         return Math.ceil(SHOP_HABITAT_ELEMENTS.length / HABITATS_PER_PAGE);
+      case 'items':
+        return Math.ceil(ITEM_SHOP.length / ITEMS_SHOP_PER_PAGE);
       default:
         return 1;
     }
@@ -394,6 +424,47 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                       );
                     })
                   )}
+
+                  {selectedCategory === 'items' && (
+                    (getCurrentPageItems() as typeof ITEM_SHOP).map(item => {
+                      const canAfford = state.goo >= item.cost;
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => canAfford && handleBuyItem(item.id, item.cost)}
+                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-48 h-80 ${
+                            canAfford ? 'hover:scale-105' : 'opacity-40 grayscale'
+                          }`}
+                        >
+                          <div className={`w-32 h-32 rounded-3xl border-4 flex items-center justify-center mb-4 ${getRarityColor(item.rarity)} ${getRarityGlow(item.rarity)} shadow-lg`}>
+                            <span className="text-5xl">{item.icon}</span>
+                          </div>
+
+                          <div className="text-center flex-1 flex flex-col justify-end">
+                            <h3 className="text-lg font-black text-slate-700 uppercase tracking-widest mb-2">
+                              {item.name}
+                            </h3>
+                            <p className="text-xs text-pink-600 mb-3 max-w-xs">
+                              {item.desc}
+                            </p>
+                            <div
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                if (canAfford) handleBuyItem(item.id, item.cost);
+                              }}
+                              className={`flex items-center justify-center gap-1 px-3 py-2 rounded-full border-2 cursor-pointer transition-all transform active:scale-95 mt-4 ${
+                                canAfford
+                                  ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-white border-pink-400 hover:from-pink-400 hover:to-pink-500 shadow-lg'
+                                  : 'bg-pink-100 text-pink-700 border-pink-300 cursor-not-allowed'
+                              }`}
+                            >
+                              <span className="text-sm font-bold">{item.cost}g</span>
+                            </div>
+                          </div>
+                        </div>
+                      );
+                    })
+                  )}
                 </div>
 
                 {/* Next Arrow */}
@@ -452,6 +523,17 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
             >
               <Home className="w-6 h-6 inline mr-2" />
               SANCTUMS
+            </button>
+            <button
+              onClick={() => setSelectedCategory('items')}
+              className={`px-8 py-4 rounded-2xl font-bold transition-all ${
+                selectedCategory === 'items'
+                  ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-white shadow-lg scale-105'
+                  : 'bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700'
+              }`}
+            >
+              <Sparkles className="w-6 h-6 inline mr-2" />
+              ITEMS
             </button>
           </div>
         </div>

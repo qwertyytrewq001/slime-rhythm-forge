@@ -117,7 +117,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
             return (
               <div 
                 key={`empty-${i}`} 
-                className="aspect-square rounded-[2.5rem] border-4 border-dashed border-white/10 bg-black/20 flex items-center justify-center cursor-pointer transition-all hover:border-[#FF7EB6] hover:bg-black/30 hover:scale-105"
+                className="aspect-square rounded-[2.5rem] border-4 border-dashed border-white/30 bg-black/50 backdrop-blur-sm flex items-center justify-center cursor-pointer transition-all hover:border-[#FF7EB6] hover:bg-black/60 hover:scale-105"
                 onClick={() => {
                   if (state.pendingHabitatPlacement) {
                     dispatch({ type: 'PLACE_HABITAT_IN_SLOT', element: state.pendingHabitatPlacement.element, gridX: slotX, gridY: slotY });
@@ -143,14 +143,14 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
           return (
             <div
               key={habitat.id}
-              className="aspect-square rounded-[2.5rem] border-[6px] p-4 flex flex-col items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-105 group shadow-[0_20px_50px_rgba(0,0,0,0.8)]"
+              className="aspect-square rounded-[2.5rem] border-[6px] p-4 flex flex-col items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-105 group"
               style={{
-                borderColor: theme.accent + '99',
+                borderColor: theme.accent,
                 backgroundColor: theme.bgImage ? 'transparent' : theme.bg + 'CC',
                 backgroundImage: theme.bgImage ? `url("${theme.bgImage}")` : 'none',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
-                boxShadow: `0 15px 40px rgba(0,0,0,0.7), inset 0 0 30px ${theme.accent}30`,
+                boxShadow: `0 15px 40px rgba(0,0,0,0.9), 0 0 0 3px rgba(0,0,0,0.6), 0 0 25px ${theme.accent}80`,
               }}
               onDragOver={handleDragOver}
               onDrop={handleDrop(habitat.id)}

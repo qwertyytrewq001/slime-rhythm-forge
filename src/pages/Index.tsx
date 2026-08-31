@@ -208,10 +208,14 @@ function GameLayout() {
       {/* Background Layer - Conditional: Video for Altar, Image for Sanctuaries */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-black">
         {currentView === 'sanctuaries' ? (
-          <div 
-            className="w-full h-full bg-cover bg-center animate-fade-in"
-            style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
-          />
+          <div className="relative w-full h-full animate-fade-in">
+            <div
+              className="absolute inset-0 bg-cover bg-center"
+              style={{ backgroundImage: `url("${import.meta.env.BASE_URL}second_screen_background.png")` }}
+            />
+            {/* Dim the busy background art so habitat cards actually stand out against it */}
+            <div className="absolute inset-0 bg-black/45" />
+          </div>
         ) : (
           <video
             className="w-full h-full object-cover brightness-110"
