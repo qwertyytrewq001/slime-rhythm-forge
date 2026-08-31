@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { createElementSlime } from '@/utils/slimeGenerator';
 import { audioEngine } from '@/utils/audioEngine';
@@ -7,57 +7,21 @@ import { getUnlockedElements, ELEMENT_DISPLAY_NAMES, HABITAT_COSTS, HABITAT_THEM
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingBag, Sparkles, Home, Egg, X, Trophy, Star, Zap, Shield } from 'lucide-react';
-import { drawEnhancedEgg } from '@/utils/eggRenderer';
 import { useToast } from '@/hooks/use-toast';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Canvas component for drawing a proper pixel-art egg
-function EggCanvas({ element }: { element: SlimeElement }) {
-  const canvasRef = React.useRef<HTMLCanvasElement>(null);
-  
-  // Create a stable mock slime for the shop preview so the egg looks unique but consistent
-  const mockSlime = useMemo<Slime>(() => ({
-    id: element + '_preview',
-    name: 'Preview',
-    element: element,
-    elements: [element],
-    rarityScore: 10,
-    rarityStars: 1,
-    rarityTier: 'Common',
-    createdAt: 0,
-    level: 1,
-    xp: 0,
-    traits: {
-      shape: element.length,
-      color1: element.charCodeAt(0),
-      color2: element.charCodeAt(1),
-      eyes: 1,
-      mouth: 1,
-      spikes: element.length > 5 ? 6 : 2,
-      pattern: element.charCodeAt(2) || 0,
-      glow: 1,
-      size: 1,
-      aura: 0,
-      rhythm: 1,
-      accessory: 0,
-      model: 0
-    }
-  }), [element]);
-
-  React.useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    drawEnhancedEgg(ctx, {
-      size: 120,
-      slime: mockSlime
-    });
-  }, [mockSlime]);
-
-  return <canvas ref={canvasRef} width={120} height={120} className="w-30 h-30 pixel-art drop-shadow-lg hover:scale-110 transition-transform cursor-pointer" />;
-}
+const ELEMENT_EGG_IMAGE: Record<SlimeElement, string> = {
+  fire: 'egg_fire.png',
+  water: 'egg_water.png',
+  plant: 'egg_plant.png',
+  earth: 'egg_earth.png',
+  wind: 'egg_wind.png',
+  ice: 'egg_ice.png',
+  electric: 'egg_electric.png',
+  metal: 'egg_metal.png',
+  light: 'egg_light.png',
+  shadow: 'egg_shadow.png',
+};
 
 const ITEM_SHOP = [
   { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Next breed: 50% mutation rate', cost: 30, icon: '🧪', category: 'breeding', rarity: 'rare' },
@@ -314,7 +278,19 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                         >
                           {/* Egg Display - Fixed Alignment */}
                           <div className="h-32 flex items-center justify-center mb-4">
-                            <EggCanvas element={elem} />
+                            <div
+                              className="w-24 h-24 rounded-full flex items-center justify-center shadow-inner overflow-hidden"
+                              style={{
+                                background: `radial-gradient(circle, ${ELEMENT_COLORS[elem]?.[2] || '#FF7EB6'}55, ${ELEMENT_COLORS[elem]?.[0] || '#FF7EB6'}22)`,
+                              }}
+                            >
+                              <img
+                                src={`${import.meta.env.BASE_URL}${ELEMENT_EGG_IMAGE[elem]}`}
+                                alt={`${ELEMENT_DISPLAY_NAMES[elem]} Egg`}
+                                className="w-20 h-20 object-contain drop-shadow-lg hover:scale-110 transition-transform cursor-pointer"
+                                style={{ imageRendering: 'auto' }}
+                              />
+                            </div>
                           </div>
                           
                           {/* Description Underneath */}

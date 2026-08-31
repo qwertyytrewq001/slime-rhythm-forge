@@ -16,6 +16,18 @@ interface FarmScreenProps {
 
 const CROP_TYPES: SlimeFoodType[] = ['basic', 'elemental', 'royal'];
 
+const CROP_IMAGE: Record<SlimeFoodType, string> = {
+  basic: 'crop_basic.png',
+  elemental: 'crop_elemental.png',
+  royal: 'crop_royal.png',
+};
+
+const SEED_IMAGE: Record<SlimeFoodType, string> = {
+  basic: 'seed_basic.png',
+  elemental: 'seed_elemental.png',
+  royal: 'seed_royal.png',
+};
+
 function plotArt(cropType: SlimeFoodType | null, progress: number): string {
   if (!cropType) return `${import.meta.env.BASE_URL}plot_empty.png`;
   if (progress >= 1) return `${import.meta.env.BASE_URL}plot_ripe.png`;
@@ -103,6 +115,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                     src={plotArt(plot.cropType, progress)}
                     alt={plot.cropType ?? 'Empty plot'}
                     className={`w-32 h-32 object-contain drop-shadow-lg ${isReady ? 'animate-bounce' : ''}`}
+                    style={{ imageRendering: 'auto' }}
                   />
                   {plot.cropType && !isReady && plot.readyAt && (
                     <span className="text-[10px] text-white font-black drop-shadow-[0_2px_4px_rgba(0,0,0,0.9)]">
@@ -164,8 +177,13 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                         key={cropType}
                         className={`flex flex-col items-center text-center p-4 rounded-2xl border-2 bg-white shadow-lg ${accent.border} ${accent.glow}`}
                       >
-                        <div className={`w-20 h-20 rounded-2xl border-2 ${accent.border} bg-gradient-to-br from-white to-pink-50 flex items-center justify-center mb-3 shadow-inner`}>
-                          <span className="text-4xl drop-shadow-sm">{crop.icon}</span>
+                        <div className={`w-20 h-20 rounded-2xl border-2 ${accent.border} bg-gradient-to-br from-white to-pink-50 flex items-center justify-center mb-3 shadow-inner overflow-hidden`}>
+                          <img
+                            src={`${import.meta.env.BASE_URL}${CROP_IMAGE[cropType]}`}
+                            alt={crop.name}
+                            className="w-16 h-16 object-contain drop-shadow-sm"
+                            style={{ imageRendering: 'auto' }}
+                          />
                         </div>
                         <p className="text-sm font-black text-gray-800 uppercase">{crop.name}</p>
                         <p className="text-xs text-gray-500 mt-1 mb-2 leading-snug">{crop.description}</p>
@@ -191,13 +209,19 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                           <button
                             disabled={!canAffordSeed}
                             onClick={() => dispatch({ type: 'BUY_SEED', seedType: cropType })}
-                            className={`w-full py-2 rounded-full text-sm font-bold transition-all border-2 ${
+                            className={`w-full py-1.5 pl-1.5 pr-3 rounded-full text-sm font-bold transition-all border-2 flex items-center justify-center gap-2 ${
                               canAffordSeed
                                 ? 'bg-white text-gray-700 border-gray-300 hover:border-[#FF7EB6] hover:text-[#FF1493] hover:scale-105 shadow'
                                 : 'bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed'
                             }`}
                           >
-                            Buy Seed · {config.seedCost} 💧
+                            <img
+                              src={`${import.meta.env.BASE_URL}${SEED_IMAGE[cropType]}`}
+                              alt="Seed"
+                              className="w-7 h-7 object-contain"
+                              style={{ imageRendering: 'auto' }}
+                            />
+                            {config.seedCost} 💧
                           </button>
                         </div>
                       </div>
