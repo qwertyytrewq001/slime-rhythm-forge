@@ -75,10 +75,13 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
               className={`${navStyle} relative group`}
               style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
             >
+              <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
+              </div>
               <img
                 src={`${import.meta.env.BASE_URL}farm_building.png`}
                 alt="Farm"
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
+                style={{ width: 'auto', height: '52px', objectFit: 'contain' }}
               />
               <span className="text-game-ui" style={{
                 fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
