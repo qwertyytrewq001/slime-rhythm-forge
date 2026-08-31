@@ -18,6 +18,12 @@ export function saveGame(state: GameState): void {
       discoveredElements: state.discoveredElements,
       habitats: state.habitats,
       happiness: state.happiness,
+      currentLevel: state.currentLevel,
+      tutorialCompleted: state.tutorialCompleted,
+      completedTutorialChapters: state.completedTutorialChapters,
+      inventory: state.inventory,
+      floorFood: state.floorFood,
+      farmPlots: state.farmPlots,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {

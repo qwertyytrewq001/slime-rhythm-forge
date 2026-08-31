@@ -28,11 +28,12 @@ import { BattleSlime } from '@/types/slime';
 import { LoreTutorial } from '@/components/game/LoreTutorial';
 import { LevelDialogue } from '@/components/game/LevelDialogue';
 import { Sanctuaries } from '@/components/game/Sanctuaries';
+import { FarmScreen } from '@/components/game/FarmScreen';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
-  const [currentView, setCurrentView] = useState<'breeding' | 'breedingDen' | 'sanctuaries' | 'battleMap' | 'habitats' | 'hatchery'>('breeding');
+  const [currentView, setCurrentView] = useState<'breeding' | 'breedingDen' | 'sanctuaries' | 'battleMap' | 'habitats' | 'hatchery' | 'farm'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
   
@@ -253,8 +254,15 @@ function GameLayout() {
         </div>
       )}
 
+      {/* 1.7. FARM LAYER */}
+      {currentView === 'farm' && (
+        <div className="fixed inset-0 z-[95] pointer-events-auto">
+          <FarmScreen onClose={() => setCurrentView('breeding')} />
+        </div>
+      )}
+
       {/* 2. MAIN GAME INTERFACE */}
-      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' || currentView === 'breedingDen' || currentView === 'hatchery' ? 'hidden' : ''}`}>
+      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' || currentView === 'breedingDen' || currentView === 'hatchery' || currentView === 'farm' ? 'hidden' : ''}`}>
         
         {/* TopBar (Navigation) */}
         <div className={`pointer-events-auto relative z-[60] ${currentView === 'hatchery' ? 'hidden' : ''}`}>
@@ -264,6 +272,7 @@ function GameLayout() {
             onOpenSanctuaries={() => setCurrentView('sanctuaries')}
             onOpenBattle={() => setCurrentView('battleMap')}
             onOpenBreedingDen={() => setCurrentView('breedingDen')}
+            onOpenFarm={() => setCurrentView('farm')}
           />
         </div>
 

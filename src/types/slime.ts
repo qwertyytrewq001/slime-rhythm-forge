@@ -155,6 +155,7 @@ export interface GameState {
   completedTutorialChapters: string[];
   inventory: Record<SlimeFoodType, number>;
   floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
+  farmPlots: FarmPlot[];
 }
 
 export type SlimeFoodType = 'basic' | 'elemental' | 'royal';
@@ -194,6 +195,34 @@ export const SLIME_FOODS: Record<SlimeFoodType, SlimeFood> = {
     icon: '🌵',
   },
 };
+
+export interface FarmPlot {
+  id: number;
+  unlocked: boolean;
+  cropType: SlimeFoodType | null;
+  plantedAt: number | null;
+  readyAt: number | null;
+}
+
+export interface CropConfig {
+  plantCost: number;
+  growTimeMs: number;
+}
+
+export const CROP_CONFIG: Record<SlimeFoodType, CropConfig> = {
+  basic: { plantCost: 5, growTimeMs: 30 * 1000 },
+  elemental: { plantCost: 15, growTimeMs: 3 * 60 * 1000 },
+  royal: { plantCost: 30, growTimeMs: 10 * 60 * 1000 },
+};
+
+export const FARM_PLOT_UNLOCK_COSTS: Record<number, number> = {
+  2: 100,
+  3: 250,
+  4: 500,
+  5: 1000,
+};
+
+export const TOTAL_FARM_PLOTS = 6;
 
 export type GameAction =
   | { type: 'ADD_SLIME'; slime: Slime }
@@ -239,4 +268,7 @@ export type GameAction =
   | { type: 'REMOVE_FROM_INVENTORY'; foodType: SlimeFoodType; quantity: number }
   | { type: 'ADD_FLOOR_FOOD'; id: string; x: number; y: number; foodId: SlimeFoodType }
   | { type: 'REMOVE_FLOOR_FOOD'; id: string }
-  | { type: 'SLIME_EAT_FOOD'; slimeId: string; foodId: string };
+  | { type: 'SLIME_EAT_FOOD'; slimeId: string; foodId: string }
+  | { type: 'UNLOCK_FARM_PLOT'; plotId: number }
+  | { type: 'PLANT_CROP'; plotId: number; cropType: SlimeFoodType }
+  | { type: 'HARVEST_CROP'; plotId: number };

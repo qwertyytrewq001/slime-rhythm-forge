@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useReducer, useEffect, useRef, useMemo } from 'react';
-import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType, BreedResult } from '@/types/slime';
+import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType, BreedResult, FarmPlot, CROP_CONFIG, FARM_PLOT_UNLOCK_COSTS, TOTAL_FARM_PLOTS } from '@/types/slime';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
@@ -66,6 +66,16 @@ function migrateSlime(s: any): Slime {
   };
 }
 
+function createDefaultFarmPlots(): FarmPlot[] {
+  return Array.from({ length: TOTAL_FARM_PLOTS }, (_, i) => ({
+    id: i,
+    unlocked: i < 2,
+    cropType: null,
+    plantedAt: null,
+    readyAt: null,
+  }));
+}
+
 function randomId(): string {
   return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
 }
@@ -113,6 +123,7 @@ function createInitialState(): GameState {
       completedTutorialChapters: saved.completedTutorialChapters ?? [],
       inventory: saved.inventory ?? { basic: 0, elemental: 0, royal: 0 },
       floorFood: saved.floorFood ?? [],
+      farmPlots: saved.farmPlots ?? createDefaultFarmPlots(),
     };
   }
   return {
@@ -143,6 +154,7 @@ function createInitialState(): GameState {
     completedTutorialChapters: [],
     inventory: { basic: 0, elemental: 0, royal: 0 },
     floorFood: [],
+    farmPlots: createDefaultFarmPlots(),
   };
 }
 
@@ -173,6 +185,7 @@ export interface LocalGameState {
   completedTutorialChapters: string[];
   inventory: Record<SlimeFoodType, number>;
   floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
+  farmPlots: FarmPlot[];
 }
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -565,6 +578,41 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, lastLevelUp: null };
     case 'CLEAR_PLAYER_LEVEL_UP':
       return { ...state, lastPlayerLevelUp: null };
+    case 'UNLOCK_FARM_PLOT': {
+      const cost = FARM_PLOT_UNLOCK_COSTS[action.plotId] ?? Infinity;
+      if (state.goo < cost) return state;
+      const farmPlots = state.farmPlots.map(p =>
+        p.id === action.plotId ? { ...p, unlocked: true } : p
+      );
+      return { ...state, farmPlots, goo: Math.round((state.goo - cost) * 100) / 100 };
+    }
+    case 'PLANT_CROP': {
+      const plot = state.farmPlots.find(p => p.id === action.plotId);
+      if (!plot || !plot.unlocked || plot.cropType) return state;
+      const config = CROP_CONFIG[action.cropType];
+      if (state.goo < config.plantCost) return state;
+      const now = Date.now();
+      const farmPlots = state.farmPlots.map(p =>
+        p.id === action.plotId
+          ? { ...p, cropType: action.cropType, plantedAt: now, readyAt: now + config.growTimeMs }
+          : p
+      );
+      return { ...state, farmPlots, goo: Math.round((state.goo - config.plantCost) * 100) / 100 };
+    }
+    case 'HARVEST_CROP': {
+      const plot = state.farmPlots.find(p => p.id === action.plotId);
+      if (!plot || !plot.cropType || !plot.readyAt || Date.now() < plot.readyAt) return state;
+      const cropType = plot.cropType;
+      const farmPlots = state.farmPlots.map(p =>
+        p.id === action.plotId ? { ...p, cropType: null, plantedAt: null, readyAt: null } : p
+      );
+      const currentQuantity = state.inventory[cropType] || 0;
+      return {
+        ...state,
+        farmPlots,
+        inventory: { ...state.inventory, [cropType]: currentQuantity + 1 },
+      };
+    }
     case 'COMPLETE_TUTORIAL':
       return { ...state, tutorialCompleted: true };
     case 'COMPLETE_TUTORIAL_CHAPTER':
@@ -591,7 +639,6 @@ const codexManager = new CodexManager();
 
 export function GameProvider({ children }: { children: React.ReactNode }) {
   const [state, dispatch] = useReducer(gameReducer, undefined, createInitialState);
-  const saveTimer = useRef<ReturnType<typeof setTimeout>>();
   const lastKnownLevel = useRef<number>(0);
 
   // Initialize codex manager
@@ -630,11 +677,24 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }
   }, [playerLevel]);
 
+  const latestState = useRef(state);
+  latestState.current = state;
+
+  // Save on a fixed interval rather than debouncing on every state change:
+  // goo ticks every 100ms while slimes are producing, which would otherwise
+  // keep resetting a trailing-edge debounce forever and the game would never save.
   useEffect(() => {
-    if (saveTimer.current) clearTimeout(saveTimer.current);
-    saveTimer.current = setTimeout(() => saveGame(state), 500);
-    return () => { if (saveTimer.current) clearTimeout(saveTimer.current); };
-  }, [state]);
+    const interval = setInterval(() => saveGame(latestState.current), 3000);
+    const handleUnload = () => saveGame(latestState.current);
+    window.addEventListener('beforeunload', handleUnload);
+    window.addEventListener('pagehide', handleUnload);
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('beforeunload', handleUnload);
+      window.removeEventListener('pagehide', handleUnload);
+      saveGame(latestState.current);
+    };
+  }, []);
 
   useEffect(() => {
     const interval = setInterval(() => {
