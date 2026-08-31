@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
-import { CROP_CONFIG, FARM_PLOT_UNLOCK_COSTS, SLIME_FOODS, SlimeFoodType } from '@/types/slime';
+import { CROP_CONFIG, CROP_INFO, FARM_PLOT_UNLOCK_COSTS, SlimeFoodType } from '@/types/slime';
 import { formatTime } from '@/utils/timeUtils';
 import { Lock, X } from 'lucide-react';
 
@@ -128,32 +128,51 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
               </h3>
               <div className="flex flex-col gap-3">
                 {CROP_TYPES.map(cropType => {
-                  const food = SLIME_FOODS[cropType];
+                  const crop = CROP_INFO[cropType];
                   const config = CROP_CONFIG[cropType];
-                  const canAfford = state.goo >= config.plantCost;
+                  const ownedSeeds = state.seeds[cropType] || 0;
+                  const canAffordSeed = state.goo >= config.seedCost;
                   return (
-                    <button
+                    <div
                       key={cropType}
-                      disabled={!canAfford}
-                      onClick={() => {
-                        dispatch({ type: 'PLANT_CROP', plotId: pickerPlotId, cropType });
-                        setPickerPlotId(null);
-                      }}
-                      className={`flex items-center justify-between p-3 rounded-xl border-2 transition-all ${
-                        canAfford
-                          ? 'border-green-400 bg-green-50 hover:scale-102 hover:shadow-lg cursor-pointer'
-                          : 'border-gray-300 bg-gray-100 opacity-50 cursor-not-allowed'
-                      }`}
+                      className="flex items-center justify-between p-3 rounded-xl border-2 border-gray-200 bg-gray-50"
                     >
                       <div className="flex items-center gap-3">
-                        <span className="text-3xl">{food.icon}</span>
+                        <span className="text-3xl">{crop.icon}</span>
                         <div className="text-left">
-                          <p className="text-sm font-black text-gray-800">{food.name}</p>
-                          <p className="text-xs text-gray-500">Grows in {formatTime(config.growTimeMs)}</p>
+                          <p className="text-sm font-black text-gray-800">{crop.name}</p>
+                          <p className="text-xs text-gray-500">{crop.description}</p>
+                          <p className="text-xs text-gray-500">Grows in {formatTime(config.growTimeMs)} · Seeds owned: {ownedSeeds}</p>
                         </div>
                       </div>
-                      <span className="text-sm font-bold text-gray-700">{config.plantCost} 💧</span>
-                    </button>
+                      <div className="flex flex-col gap-1 items-stretch">
+                        <button
+                          disabled={ownedSeeds < 1}
+                          onClick={() => {
+                            dispatch({ type: 'PLANT_CROP', plotId: pickerPlotId, cropType });
+                            setPickerPlotId(null);
+                          }}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                            ownedSeeds >= 1
+                              ? 'bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] text-white hover:scale-105 shadow'
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                        >
+                          Plant
+                        </button>
+                        <button
+                          disabled={!canAffordSeed}
+                          onClick={() => dispatch({ type: 'BUY_SEED', seedType: cropType })}
+                          className={`px-3 py-1 rounded-lg text-xs font-bold transition-all ${
+                            canAffordSeed
+                              ? 'bg-green-500 text-white hover:scale-105 shadow'
+                              : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                          }`}
+                        >
+                          Buy Seed {config.seedCost} 💧
+                        </button>
+                      </div>
+                    </div>
                   );
                 })}
               </div>

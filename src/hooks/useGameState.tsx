@@ -124,6 +124,7 @@ function createInitialState(): GameState {
       inventory: saved.inventory ?? { basic: 0, elemental: 0, royal: 0 },
       floorFood: saved.floorFood ?? [],
       farmPlots: saved.farmPlots ?? createDefaultFarmPlots(),
+      seeds: saved.seeds ?? { basic: 0, elemental: 0, royal: 0 },
     };
   }
   return {
@@ -155,6 +156,7 @@ function createInitialState(): GameState {
     inventory: { basic: 0, elemental: 0, royal: 0 },
     floorFood: [],
     farmPlots: createDefaultFarmPlots(),
+    seeds: { basic: 0, elemental: 0, royal: 0 },
   };
 }
 
@@ -186,6 +188,7 @@ export interface LocalGameState {
   inventory: Record<SlimeFoodType, number>;
   floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
   farmPlots: FarmPlot[];
+  seeds: Record<SlimeFoodType, number>;
 }
 
 function gameReducer(state: GameState, action: GameAction): GameState {
@@ -586,18 +589,33 @@ function gameReducer(state: GameState, action: GameAction): GameState {
       );
       return { ...state, farmPlots, goo: Math.round((state.goo - cost) * 100) / 100 };
     }
+    case 'BUY_SEED': {
+      const cost = CROP_CONFIG[action.seedType].seedCost;
+      if (state.goo < cost) return state;
+      const currentQuantity = state.seeds[action.seedType] || 0;
+      return {
+        ...state,
+        goo: Math.round((state.goo - cost) * 100) / 100,
+        seeds: { ...state.seeds, [action.seedType]: currentQuantity + 1 },
+      };
+    }
     case 'PLANT_CROP': {
       const plot = state.farmPlots.find(p => p.id === action.plotId);
       if (!plot || !plot.unlocked || plot.cropType) return state;
+      const ownedSeeds = state.seeds[action.cropType] || 0;
+      if (ownedSeeds < 1) return state;
       const config = CROP_CONFIG[action.cropType];
-      if (state.goo < config.plantCost) return state;
       const now = Date.now();
       const farmPlots = state.farmPlots.map(p =>
         p.id === action.plotId
           ? { ...p, cropType: action.cropType, plantedAt: now, readyAt: now + config.growTimeMs }
           : p
       );
-      return { ...state, farmPlots, goo: Math.round((state.goo - config.plantCost) * 100) / 100 };
+      return {
+        ...state,
+        farmPlots,
+        seeds: { ...state.seeds, [action.cropType]: ownedSeeds - 1 },
+      };
     }
     case 'HARVEST_CROP': {
       const plot = state.farmPlots.find(p => p.id === action.plotId);

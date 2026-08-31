@@ -156,6 +156,7 @@ export interface GameState {
   inventory: Record<SlimeFoodType, number>;
   floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
   farmPlots: FarmPlot[];
+  seeds: Record<SlimeFoodType, number>;
 }
 
 export type SlimeFoodType = 'basic' | 'elemental' | 'royal';
@@ -196,6 +197,18 @@ export const SLIME_FOODS: Record<SlimeFoodType, SlimeFood> = {
   },
 };
 
+export interface CropInfo {
+  name: string;
+  icon: string;
+  description: string;
+}
+
+export const CROP_INFO: Record<SlimeFoodType, CropInfo> = {
+  basic: { name: 'Glimberries', icon: '🫐', description: 'Sweet little berries that glow faintly at dusk.' },
+  elemental: { name: 'Moonpetal Blossom', icon: '🌼', description: 'A rare flowering herb that hums with quiet magic.' },
+  royal: { name: 'Starfruit Vine', icon: '🍇', description: 'A vine that only fruits once the stars align. Wildly potent.' },
+};
+
 export interface FarmPlot {
   id: number;
   unlocked: boolean;
@@ -205,14 +218,14 @@ export interface FarmPlot {
 }
 
 export interface CropConfig {
-  plantCost: number;
+  seedCost: number;
   growTimeMs: number;
 }
 
 export const CROP_CONFIG: Record<SlimeFoodType, CropConfig> = {
-  basic: { plantCost: 5, growTimeMs: 30 * 1000 },
-  elemental: { plantCost: 15, growTimeMs: 3 * 60 * 1000 },
-  royal: { plantCost: 30, growTimeMs: 10 * 60 * 1000 },
+  basic: { seedCost: 5, growTimeMs: 30 * 1000 },
+  elemental: { seedCost: 15, growTimeMs: 3 * 60 * 1000 },
+  royal: { seedCost: 30, growTimeMs: 10 * 60 * 1000 },
 };
 
 export const FARM_PLOT_UNLOCK_COSTS: Record<number, number> = {
@@ -270,5 +283,6 @@ export type GameAction =
   | { type: 'REMOVE_FLOOR_FOOD'; id: string }
   | { type: 'SLIME_EAT_FOOD'; slimeId: string; foodId: string }
   | { type: 'UNLOCK_FARM_PLOT'; plotId: number }
+  | { type: 'BUY_SEED'; seedType: SlimeFoodType }
   | { type: 'PLANT_CROP'; plotId: number; cropType: SlimeFoodType }
   | { type: 'HARVEST_CROP'; plotId: number };

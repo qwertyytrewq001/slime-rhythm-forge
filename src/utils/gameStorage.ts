@@ -24,6 +24,7 @@ export function saveGame(state: GameState): void {
       inventory: state.inventory,
       floorFood: state.floorFood,
       farmPlots: state.farmPlots,
+      seeds: state.seeds,
     };
     localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
   } catch (e) {
