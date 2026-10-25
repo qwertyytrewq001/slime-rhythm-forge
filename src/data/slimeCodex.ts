@@ -715,6 +715,60 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
   }
 ];
 
+// 🧩 Coverage Slimes - fill element-pair gaps so every parent combination has outcomes
+export const COVERAGE_SLIMES: CodexSlime[] = [
+  {
+    id: 'chime_slime',
+    name: 'Chime Slime',
+    elements: ['metal', 'wind'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Hums a different note every time it is startled, which is often, and it blames the breeze every time. It remembers the Bell Sanctuaries of the Hollow Spires, where the wind once rang out warnings before Voss silenced the towers.',
+    family: 'metal-forged',
+    spriteId: 'chime_slime'
+  },
+  {
+    id: 'frostbolt_slime',
+    name: 'Frostbolt Slime',
+    elements: ['electric', 'ice'],
+    rarityTier: 'Rare',
+    weight: 25,
+    description: 'Gives static shocks that arrive pre-frozen, so you feel them a full minute later. It guards the Lightning Sanctuaries of the Glass Glacier, where storms once froze mid-strike and are still waiting to finish.',
+    family: 'frozen-realms',
+    spriteId: 'frostbolt_slime'
+  },
+  {
+    id: 'rust_slime',
+    name: 'Rust Slime',
+    elements: ['metal', 'water'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Carries its own umbrella and still somehow always ends up the soggiest in the room. It remembers the Pipeworks Sanctuaries of the Drowned Foundry, where every drip was once part of a plan.',
+    family: 'metal-forged',
+    spriteId: 'rust_slime'
+  },
+  {
+    id: 'nightshade_slime',
+    name: 'Nightshade Slime',
+    elements: ['plant', 'shadow'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Looks delicious and knows it, which is the entire point. It tends the Moonless Sanctuaries of the Gloam Garden, where flowers bloom only for those who walk in without a lantern.',
+    family: 'natures-garden',
+    spriteId: 'nightshade_slime'
+  },
+  {
+    id: 'geode_spark_slime',
+    name: 'Geode Spark Slime',
+    elements: ['earth', 'electric'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Cracked itself open once to show off and has been too embarrassed to close back up. It remembers the Crystal Sanctuaries of the Humming Deep, where the mountains themselves once sang in current.',
+    family: 'underground-depths',
+    spriteId: 'geode_spark_slime'
+  }
+];
+
 // Combine all slimes for easy access
 export const ALL_CODEX_SLIMES: CodexSlime[] = [
   ...PRIMAL_SLIMES,
@@ -722,7 +776,8 @@ export const ALL_CODEX_SLIMES: CodexSlime[] = [
   ...STORM_SLIMES,
   ...NATURE_SLIMES,
   ...LOST_SLIMES,
-  ...SPECIAL_SLIMES
+  ...SPECIAL_SLIMES,
+  ...COVERAGE_SLIMES
 ];
 
 // Create lookup map for quick access
