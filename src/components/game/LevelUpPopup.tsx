@@ -3,6 +3,7 @@ import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { Sparkles, Trophy, ArrowUpCircle, Star, X } from 'lucide-react';
 import { audioEngine } from '@/utils/audioEngine';
+import { isSanctuaryOpen } from '@/utils/sanctuaryState';
 import { FairySparkle } from './FairySparkle';
 
 export function LevelUpPopup() {
@@ -12,6 +13,11 @@ export function LevelUpPopup() {
 
   useEffect(() => {
     if (state.lastLevelUp && !isVisible) {
+      // The Sanctuary shows this on the slime itself
+      if (isSanctuaryOpen()) {
+        dispatch({ type: 'CLEAR_LEVEL_UP' });
+        return;
+      }
       setLocalLevelUp(state.lastLevelUp);
       setIsVisible(true);
       audioEngine.playSfx('achievement');

@@ -199,11 +199,11 @@ export const SLIME_FOODS: Record<SlimeFoodType, SlimeFood> = {
   },
   royal: {
     id: 'royal',
-    name: 'Enchanted Dragonfruit',
+    name: 'Enchanted Starfruit',
     description: 'A legendary fruit that grows once a century. Radiates powerful energy that accelerates evolution.',
     cost: 100,
     xpValue: 350,
-    icon: '🌵',
+    icon: '⭐',
   },
 };
 

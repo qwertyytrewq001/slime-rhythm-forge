@@ -3,6 +3,7 @@ import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { Sparkles, Trophy, ArrowUpCircle, X, Star } from 'lucide-react';
 import { audioEngine } from '@/utils/audioEngine';
+import { isSanctuaryOpen } from '@/utils/sanctuaryState';
 import { FairySparkle } from './FairySparkle';
 
 export function EvolutionPopup() {
@@ -12,6 +13,11 @@ export function EvolutionPopup() {
 
   useEffect(() => {
     if (state.lastEvolution && !isVisible) {
+      // The Sanctuary shows this on the slime itself
+      if (isSanctuaryOpen()) {
+        dispatch({ type: 'CLEAR_EVOLUTION' });
+        return;
+      }
       setLocalEvolution(state.lastEvolution);
       setIsVisible(true);
       audioEngine.playSfx('achievement');

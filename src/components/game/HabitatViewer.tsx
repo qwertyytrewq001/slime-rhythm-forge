@@ -1,14 +1,18 @@
-import { useState, useEffect, useRef } from 'react';
-import { useGameState } from '@/hooks/useGameState';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useGameState, xpToNextLevel, getStage } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { HABITAT_THEMES, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
-import { Habitat, Slime } from '@/types/slime';
-import { ChevronLeft, Plus, X } from 'lucide-react';
+import { Slime, SLIME_FOODS, SlimeFoodType } from '@/types/slime';
+import { ChevronLeft, Plus } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SlimeGallery } from './SlimeGallery';
-import { ScrollArea } from '@/components/ui/scroll-area';
-import { getCodexSlime } from '@/data/slimeCodex';
-import { FeedPanel } from './FeedPanel';
+import { FeedTray } from './FeedTray';
+import { foodSpriteUrl } from '@/data/foodSprites';
+import { audioEngine } from '@/utils/audioEngine';
+import { setSanctuaryOpen } from '@/utils/sanctuaryState';
+import { triggerDialogue } from '@/utils/dialogueTriggers';
+
+type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
 
 interface HabitatViewerProps {
   habitatId: string;
@@ -160,17 +164,48 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
   }
 };
 
-function BouncingSlime({ slime, habitatId, onSelect }: { slime: Slime; habitatId: string; onSelect: (s: Slime) => void }) {
+interface BouncingSlimeProps {
+  slime: Slime;
+  selected: boolean;
+  targeted: boolean;
+  frozen: boolean;
+  eatNonce: number;
+  onSelect: (id: string) => void;
+}
+
+const GROUND_LEVEL = 75;
+
+function BouncingSlime({ slime, selected, targeted, frozen, eatNonce, onSelect }: BouncingSlimeProps) {
   const [position, setPosition] = useState({ x: Math.random() * 60 + 20, y: 60 });
   const [velocity, setVelocity] = useState({ x: (Math.random() - 0.5) * 1.5, y: 0 });
   const [rotation, setRotation] = useState(0);
   const [scale, setScale] = useState(1);
+  const [eating, setEating] = useState(false);
   const startTime = useRef(Date.now() + Math.random() * 2000);
+  const holdRef = useRef(false);
+  holdRef.current = frozen || selected;
+
+  // Chomp whenever fed
+  useEffect(() => {
+    if (!eatNonce) return;
+    setEating(true);
+    const t = setTimeout(() => setEating(false), 600);
+    return () => clearTimeout(t);
+  }, [eatNonce]);
 
   useEffect(() => {
     const interval = setInterval(() => {
       const elapsed = (Date.now() - startTime.current) / 1000;
       setPosition(prev => {
+        // Selected slimes (and everyone while food is being dragged) settle on the ground and hold still
+        if (holdRef.current) {
+          const vx = velocity.x * 0.7;
+          setVelocity({ x: vx, y: 0 });
+          setRotation(0);
+          setScale(1);
+          return { x: Math.min(90, Math.max(10, prev.x + vx)), y: prev.y + (GROUND_LEVEL - prev.y) * 0.2 };
+        }
+
         let newX = prev.x + velocity.x;
         let newY = prev.y + velocity.y;
         let newVelX = velocity.x;
@@ -189,7 +224,7 @@ function BouncingSlime({ slime, habitatId, onSelect }: { slime: Slime; habitatId
             break;
           case 'plant':
           case 'earth':
-            newVelX *= 0.98; 
+            newVelX *= 0.98;
             break;
           default:
             newVelY += 0.12;
@@ -204,10 +239,9 @@ function BouncingSlime({ slime, habitatId, onSelect }: { slime: Slime; habitatId
           newX = newX < 10 ? 10 : 90;
         }
 
-        const groundLevel = 75;
-        if (newY > groundLevel) {
+        if (newY > GROUND_LEVEL) {
           newVelY *= -0.6;
-          newY = groundLevel;
+          newY = GROUND_LEVEL;
           if (Math.random() > 0.97) newVelY = -3 - (Math.random() * 2);
         }
 
@@ -225,53 +259,200 @@ function BouncingSlime({ slime, habitatId, onSelect }: { slime: Slime; habitatId
     return () => clearInterval(interval);
   }, [velocity, slime.element]);
 
+  const needed = xpToNextLevel(slime.level);
+  const maxed = slime.level >= 50;
+  const pct = maxed ? 100 : Math.min(100, (slime.xp / needed) * 100);
+
   return (
     <div
-      className="absolute transition-none cursor-pointer group"
-      onClick={(e) => {
-        console.log('🎯 Slime clicked!', { slimeId: slime.id, slimeName: slime.name });
-        onSelect(slime);
-      }}
-      onMouseEnter={() => console.log('👆 Slime hover:', { slimeId: slime.id, slimeName: slime.name })}
+      className="absolute transition-none cursor-pointer"
+      onClick={(e) => { e.stopPropagation(); onSelect(slime.id); }}
       data-slime-id={slime.id}
       style={{
         left: `${position.x}%`,
         top: `${position.y}%`,
         transform: `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`,
-        zIndex: 20,
+        zIndex: selected || targeted ? 25 : 20,
         filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.3))',
         pointerEvents: 'auto'
       }}
     >
-      <div className="absolute -top-12 left-1/2 -translate-x-1/2 opacity-0 group-hover:opacity-100 transition-opacity bg-white/10 backdrop-blur-md border border-white/20 px-2 py-1 rounded text-[8px] font-black text-white uppercase tracking-widest whitespace-nowrap z-30">
-        {slime.name}
-      </div>
-      <div style={{ pointerEvents: 'none' }}>
+      {(selected || targeted) && (
+        <div
+          className={`absolute left-1/2 bottom-2 -translate-x-1/2 h-6 rounded-[50%] blur-[3px] pointer-events-none ${targeted ? 'w-36 bg-[#7CFFB2]/70' : 'w-28 bg-[#FF7EB6]/60 animate-pulse'}`}
+        />
+      )}
+
+      {(selected || targeted) && (
+        <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center gap-1">
+          <div className="flex items-center gap-2 rounded-full border border-white/25 bg-black/65 backdrop-blur-md px-3 py-1 whitespace-nowrap">
+            <span className="text-[10px] font-black uppercase tracking-wider text-white">{slime.name}</span>
+            <span className="text-[10px] font-black text-amber-300">Lv {slime.level}</span>
+          </div>
+          <div className="w-24 h-2 rounded-full bg-black/60 border border-white/25 overflow-hidden">
+            <div className="h-full rounded-full bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] transition-all duration-500" style={{ width: `${pct}%` }} />
+          </div>
+        </div>
+      )}
+
+      <div
+        className={eating ? 'slime-eat' : targeted ? 'slime-target' : ''}
+        style={{ pointerEvents: 'none', transformOrigin: '50% 90%' }}
+      >
         <SlimeCanvas slime={slime} size={120} animated={true} />
       </div>
     </div>
   );
 }
 
-function randomId(): string {
-  return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
+// ---- Feeding effects, drawn above everything in viewport coordinates ----
+
+type Fx =
+  | { id: number; kind: 'fly'; x: number; y: number; toX: number; toY: number; img: string }
+  | { id: number; kind: 'text'; x: number; y: number; text: string; color: string; big?: boolean }
+  | { id: number; kind: 'burst'; x: number; y: number; emojis: string[]; count: number }
+  | { id: number; kind: 'ring'; x: number; y: number; color: string }
+  | { id: number; kind: 'flash'; x: number; y: number };
+
+function FlyingFood({ fx }: { fx: Extract<Fx, { kind: 'fly' }> }) {
+  const [go, setGo] = useState(false);
+  useEffect(() => {
+    const r = requestAnimationFrame(() => requestAnimationFrame(() => setGo(true)));
+    return () => cancelAnimationFrame(r);
+  }, []);
+  return (
+    <img
+      src={fx.img}
+      alt=""
+      className="fixed w-16 h-16 pointer-events-none"
+      style={{
+        left: go ? fx.toX : fx.x,
+        top: go ? fx.toY : fx.y,
+        transform: `translate(-50%, -50%) scale(${go ? 0.2 : 1.1}) rotate(${go ? 140 : -8}deg)`,
+        opacity: go ? 0.2 : 1,
+        transition: 'all 300ms cubic-bezier(.5,0,.9,.4)',
+        imageRendering: 'pixelated',
+      }}
+    />
+  );
+}
+
+function FxLayer({ items }: { items: Fx[] }) {
+  return (
+    <div className="fixed inset-0 z-[10050] pointer-events-none overflow-hidden">
+      {items.map(fx => {
+        switch (fx.kind) {
+          case 'fly':
+            return <FlyingFood key={fx.id} fx={fx} />;
+          case 'text':
+            return (
+              <div
+                key={fx.id}
+                className="fixed whitespace-nowrap font-black text-center"
+                style={{
+                  left: fx.x,
+                  top: fx.y,
+                  color: fx.color,
+                  fontSize: fx.big ? 34 : 20,
+                  fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif",
+                  textShadow: '0 2px 0 rgba(0,0,0,0.65), 0 0 12px rgba(0,0,0,0.5)',
+                  WebkitTextStroke: fx.big ? '1px rgba(0,0,0,0.5)' : undefined,
+                  animation: `fxRise ${fx.big ? 1.8 : 1.2}s ease-out forwards`,
+                }}
+              >
+                {fx.text}
+              </div>
+            );
+          case 'burst':
+            return (
+              <div key={fx.id} className="fixed" style={{ left: fx.x, top: fx.y }}>
+                {Array.from({ length: fx.count }).map((_, i) => {
+                  const angle = (i / fx.count) * Math.PI * 2 + (fx.id % 7);
+                  const dist = 60 + ((i * 37) % 45);
+                  return (
+                    <span
+                      key={i}
+                      className="absolute text-2xl"
+                      style={{
+                        ['--dx' as string]: `${Math.cos(angle) * dist}px`,
+                        ['--dy' as string]: `${Math.sin(angle) * dist - 30}px`,
+                        animation: `fxBurst 1s ease-out ${i * 0.03}s forwards`,
+                      }}
+                    >
+                      {fx.emojis[i % fx.emojis.length]}
+                    </span>
+                  );
+                })}
+              </div>
+            );
+          case 'ring':
+            return (
+              <div
+                key={fx.id}
+                className="fixed rounded-full"
+                style={{ left: fx.x, top: fx.y, width: 40, height: 40, border: `5px solid ${fx.color}`, animation: 'fxRing 0.9s ease-out forwards' }}
+              />
+            );
+          case 'flash':
+            return (
+              <div
+                key={fx.id}
+                className="fixed rounded-full"
+                style={{ left: fx.x, top: fx.y, width: 260, height: 260, background: 'radial-gradient(circle, rgba(255,255,255,0.95), rgba(255,255,255,0))', animation: 'fxFlash 0.8s ease-out forwards' }}
+              />
+            );
+        }
+      })}
+    </div>
+  );
 }
 
 export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
   const { state, dispatch } = useGameState();
   const [galleryOpen, setGalleryOpen] = useState(false);
-  const [selectedSlime, setSelectedSlime] = useState<Slime | null>(null);
+  const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [targetId, setTargetId] = useState<string | null>(null);
+  const [dragging, setDragging] = useState(false);
+  const [eatNonce, setEatNonce] = useState<Record<string, number>>({});
+  const [fx, setFx] = useState<Fx[]>([]);
+  const fxId = useRef(0);
+  const stateRef = useRef(state);
+  stateRef.current = state;
   const habitat = state.habitats.find(h => h.id === habitatId);
 
-  if (!habitat) return null;
-
-  const theme = HABITAT_THEMES[habitat.element];
-  const layers = ENVIRONMENT_LAYERS[habitat.element] || ENVIRONMENT_LAYERS.default;
-  const assignedSlimes = habitat.assignedSlimeIds
+  const assignedSlimes = (habitat?.assignedSlimeIds ?? [])
     .map(id => state.slimes.find(s => s.id === id))
-    .filter(Boolean);
+    .filter(Boolean) as Slime[];
+
+  const addFx = useCallback((item: DistributiveOmit<Fx, 'id'>, life = 1900) => {
+    const id = ++fxId.current;
+    setFx(list => [...list, { ...item, id } as Fx]);
+    setTimeout(() => setFx(list => list.filter(f => f.id !== id)), life);
+  }, []);
+
+  const centerOf = useCallback((slimeId: string) => {
+    const el = document.querySelector(`[data-slime-id="${slimeId}"]`);
+    if (!el) return null;
+    const r = el.getBoundingClientRect();
+    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+  }, []);
+
+  const slimeAt = useCallback((x: number, y: number) => {
+    let best: string | null = null;
+    let bestDist = Infinity;
+    document.querySelectorAll('[data-slime-id]').forEach(el => {
+      const r = el.getBoundingClientRect();
+      const pad = 24;
+      if (x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad) {
+        const d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+        if (d < bestDist) { bestDist = d; best = el.getAttribute('data-slime-id'); }
+      }
+    });
+    return best;
+  }, []);
 
   const handleSlimeSelect = (slimeId: string) => {
+    if (!habitat) return;
     const slime = state.slimes.find(s => s.id === slimeId);
     if (slime && slime.elements.includes(habitat.element)) {
       dispatch({ type: 'ASSIGN_SLIME_TO_HABITAT', habitatId, slimeId });
@@ -279,13 +460,80 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
     }
   };
 
-  const activeSlime = selectedSlime ? state.slimes.find(s => s.id === selectedSlime.id) || null : null;
+  const handleFeed = (food: SlimeFoodType, slimeId: string, origin: { x: number; y: number }) => {
+    const slime = state.slimes.find(s => s.id === slimeId);
+    if (!slime) return;
+    const info = SLIME_FOODS[food];
+    const c = centerOf(slimeId) ?? origin;
+
+    if (slime.level >= 50) {
+      addFx({ kind: 'text', x: c.x - 70, y: c.y - 90, text: 'Already max level!', color: '#ffffff' }, 1400);
+      return;
+    }
+    const owned = state.inventory[food] || 0;
+    if (owned < 1 && state.goo < info.cost) {
+      addFx({ kind: 'text', x: c.x - 50, y: c.y - 90, text: `Need ${info.cost} 💧`, color: '#ff8a8a' }, 1400);
+      return;
+    }
+
+    setSelectedId(slimeId);
+    audioEngine.playSfx('collect');
+    addFx({ kind: 'fly', x: origin.x, y: origin.y, toX: c.x, toY: c.y, img: foodSpriteUrl(food) }, 450);
+
+    // The slime eats when the food reaches it
+    setTimeout(() => {
+      const live = stateRef.current;
+      const have = live.inventory[food] || 0;
+      if (have < 1 && live.goo < info.cost) return;
+      dispatch({ type: 'FEED_SLIME_XP', slimeId, foodType: food, fromInventory: have > 0 });
+      setEatNonce(n => ({ ...n, [slimeId]: (n[slimeId] || 0) + 1 }));
+      const at = centerOf(slimeId) ?? c;
+      addFx({ kind: 'burst', x: at.x, y: at.y - 20, emojis: ['💖', '✨'], count: 6 });
+      addFx({ kind: 'text', x: at.x + 35, y: at.y - 45, text: `+${info.xpValue} XP`, color: '#7CFFB2' }, 1300);
+    }, 300);
+    setTimeout(() => triggerDialogue('firstFeed'), 2400);
+  };
+
+  // Celebrate level-ups (and evolutions) on the slime itself, whatever caused them
+  const levelKey = assignedSlimes.map(s => `${s.id}:${s.level}`).join('|');
+  const prevLevels = useRef<Record<string, number>>({});
+  useEffect(() => {
+    for (const s of assignedSlimes) {
+      const prev = prevLevels.current[s.id];
+      if (prev !== undefined && s.level > prev) {
+        const c = centerOf(s.id);
+        if (c) {
+          audioEngine.playSfx('achievement');
+          const evolved = getStage(s.level) !== getStage(prev);
+          addFx({ kind: 'ring', x: c.x - 20, y: c.y - 20, color: '#FFD84D' }, 1000);
+          if (evolved) addFx({ kind: 'flash', x: c.x - 130, y: c.y - 130 }, 900);
+          addFx({ kind: 'burst', x: c.x, y: c.y, emojis: ['⭐', '✨', '💖'], count: evolved ? 16 : 10 }, 1300);
+          addFx({ kind: 'text', x: c.x - 80, y: c.y - 110, text: 'LEVEL UP!', color: '#FFD84D', big: true }, 2000);
+          addFx({ kind: 'text', x: c.x - 25, y: c.y - 70, text: `Lv ${s.level}`, color: '#ffffff' }, 1800);
+          if (evolved) {
+            addFx({ kind: 'text', x: c.x - 70, y: c.y - 160, text: `${getStage(s.level) === 'teen' ? 'TEEN' : 'ADULT'} FORM!`, color: '#E7B4FF', big: true }, 2200);
+          }
+        }
+      }
+      prevLevels.current[s.id] = s.level;
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [levelKey]);
 
   useEffect(() => {
     const originalOverflow = document.body.style.overflow;
     document.body.style.overflow = 'hidden';
-    return () => { document.body.style.overflow = originalOverflow; };
+    setSanctuaryOpen(true);
+    return () => {
+      document.body.style.overflow = originalOverflow;
+      setSanctuaryOpen(false);
+    };
   }, []);
+
+  if (!habitat) return null;
+
+  const theme = HABITAT_THEMES[habitat.element];
+  const layers = ENVIRONMENT_LAYERS[habitat.element] || ENVIRONMENT_LAYERS.default;
 
   return (
     <div className="fixed inset-0 z-[10000] flex flex-col bg-black/80" style={{ pointerEvents: 'auto' }}>
@@ -299,57 +547,61 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
         <p className="text-center text-xs text-white/60 mt-2 font-bold tracking-wider">{theme.desc}</p>
       </div>
 
-      <div className="flex-1 relative">
+      <div className="flex-1 relative overflow-hidden">
         <div className="absolute inset-0" style={{ background: theme.bgImage ? `url("${theme.bgImage}")` : layers.backdrop, backgroundSize: 'cover', backgroundPosition: 'center' }} />
         {!theme.bgImage && <div className="absolute inset-0" style={{ background: layers.midground }} />}
         {!theme.bgImage && <div className="absolute bottom-0 left-0 right-0 h-1/2" style={{ background: layers.ground }} />}
 
-        <div className="absolute inset-0" style={{ pointerEvents: 'auto' }}>
-          {assignedSlimes.map((slime) => slime && (
-            <BouncingSlime key={slime.id} slime={slime} habitatId={habitatId} onSelect={setSelectedSlime} />
+        {/* Tap empty space to put the slime back down */}
+        <div className="absolute inset-0" style={{ pointerEvents: 'auto' }} onClick={() => setSelectedId(null)}>
+          {assignedSlimes.map(slime => (
+            <BouncingSlime
+              key={slime.id}
+              slime={slime}
+              selected={selectedId === slime.id}
+              targeted={targetId === slime.id}
+              frozen={dragging}
+              eatNonce={eatNonce[slime.id] || 0}
+              onSelect={setSelectedId}
+            />
           ))}
-          
+
           {assignedSlimes.length < habitat.capacity && (
-            <div className="absolute bottom-1/4 left-1/2 -translate-x-1/2 z-30">
-              <button onClick={() => setGalleryOpen(true)} className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#FF7EB6] hover:scale-110 transition-all flex items-center justify-center group">
+            <div className="absolute bottom-1/4 left-[15%] z-30">
+              <button
+                onClick={(e) => { e.stopPropagation(); setGalleryOpen(true); }}
+                className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#FF7EB6] hover:scale-110 transition-all flex items-center justify-center group"
+                aria-label="Add a slime"
+              >
                 <Plus className="w-8 h-8 text-white/40 group-hover:text-[#FF7EB6]" />
               </button>
             </div>
           )}
         </div>
 
-        {selectedSlime && activeSlime && (
-          <div 
-            className="absolute right-0 top-0 bottom-0 w-80 bg-gradient-to-b from-[#FFB3D1] via-[#FFE4E1] to-[#FFD1DC] border-l-4 border-[#FF7EB6] p-6 z-50 animate-in slide-in-from-right duration-300 overflow-y-auto"
-          >
-            <button 
-              onClick={() => setSelectedSlime(null)}
-              className="absolute top-4 right-4 p-2 hover:bg-[#FF7EB6] rounded-full transition-all cursor-pointer border-2 border-white"
-            >
-              <X className="w-5 h-5 text-white" />
-            </button>
-            <div className="flex flex-col gap-4">
-              <div className="text-center">
-                <h3 className="text-xl font-black text-[#FF1493] uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive" }}>{activeSlime.name}</h3>
-              </div>
-              <div className="bg-white p-4 rounded-2xl border-2 border-[#FF7EB6] shadow-lg">
-                <ScrollArea className="h-24">
-                  <p className="text-sm font-medium text-gray-700 leading-relaxed">
-                    {getCodexSlime(selectedSlime)?.description || 'A mysterious slime with unknown origins.'}
-                  </p>
-                </ScrollArea>
-              </div>
-              <FeedPanel slimeId={activeSlime.id} />
-            </div>
-          </div>
+        {assignedSlimes.length > 0 && (
+          <FeedTray
+            slimeAt={slimeAt}
+            selectedSlimeId={selectedId && assignedSlimes.some(s => s.id === selectedId) ? selectedId : null}
+            onDragHover={setTargetId}
+            onDragActive={setDragging}
+            onFeed={handleFeed}
+            onNeedSelect={() => {
+              const first = assignedSlimes[0];
+              const c = first && centerOf(first.id);
+              if (c) addFx({ kind: 'text', x: c.x - 70, y: c.y - 90, text: 'Drag it onto a slime!', color: '#ffffff' }, 1500);
+            }}
+          />
         )}
       </div>
 
-      <div className="sticky bottom-0 z-40 flex-shrink-0 bg-gradient-to-t from-black/95 via-black/90 to-black/70 px-6 py-4 mt-4 backdrop-blur-md border-t border-white/10">
+      <div className="sticky bottom-0 z-40 flex-shrink-0 bg-gradient-to-t from-black/95 via-black/90 to-black/70 px-6 py-4 backdrop-blur-md border-t border-white/10">
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-white/60 font-bold tracking-wider uppercase">Inhabitants</p>
             <p className="text-lg font-black text-white">{assignedSlimes.length} <span className="text-white/60">/ {habitat.capacity}</span></p>
+          </div>
+          <div className="text-right">
             <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">Available Goo</p>
             <p className="text-lg font-black text-[#FF7EB6]">{state.goo.toFixed(1)} 💧</p>
           </div>
@@ -369,6 +621,8 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
         </SheetContent>
       </Sheet>
 
+      <FxLayer items={fx} />
+
       <style>{`
         @keyframes float { 0%, 100% { transform: translateY(0px); } 50% { transform: translateY(-10px); } }
         @keyframes wave { 0%, 100% { transform: scaleY(1); } 50% { transform: scaleY(0.8); } }
@@ -378,6 +632,14 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
         @keyframes snowfall { to { transform: translateY(1000%); } }
         @keyframes spark-jump { 0% { transform: translate(0,0); opacity:1; } 100% { transform: translate(0, -50px); opacity:0; } }
         @keyframes rotate { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        @keyframes slimeEat { 0% { transform: scale(1,1) } 18% { transform: scale(1.28,0.72) } 38% { transform: scale(0.84,1.22) } 58% { transform: scale(1.12,0.9) } 100% { transform: scale(1,1) } }
+        @keyframes slimeTarget { 0%,100% { transform: scale(1.1) } 50% { transform: scale(1.18,1.05) } }
+        @keyframes fxRise { 0% { transform: translateY(10px) scale(.6); opacity: 0 } 15% { transform: translateY(0) scale(1.15); opacity: 1 } 100% { transform: translateY(-70px) scale(1); opacity: 0 } }
+        @keyframes fxBurst { 0% { transform: translate(0,0) scale(.4); opacity: 1 } 100% { transform: translate(var(--dx), var(--dy)) scale(1.1); opacity: 0 } }
+        @keyframes fxRing { 0% { transform: translate(0,0) scale(.3); opacity: 1 } 100% { transform: translate(0,0) scale(5); opacity: 0 } }
+        @keyframes fxFlash { 0% { transform: scale(.4); opacity: 1 } 100% { transform: scale(1.6); opacity: 0 } }
+        .slime-eat { animation: slimeEat .55s ease-out; }
+        .slime-target { animation: slimeTarget .5s ease-in-out infinite; filter: brightness(1.15) drop-shadow(0 0 14px rgba(124,255,178,.9)); }
       `}</style>
     </div>
   );
