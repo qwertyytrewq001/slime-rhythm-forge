@@ -41,6 +41,21 @@ const RARITY_VALUES: Record<RarityTier, number> = {
   'Ancient': 7
 };
 
+// Max possible BreedingPower: two level-50 parents (50) + two Ancient parents (7+7).
+const MAX_BREEDING_POWER = 64;
+
+// How much a fully-maxed pair of parents changes each tier's weight
+// (multiplier = 1 + power01 * bonus). Negative = less likely with strong parents.
+const POWER_TIER_BONUS: Record<RarityTier, number> = {
+  'Common': -0.6,
+  'Uncommon': -0.1,
+  'Rare': 4,
+  'Epic': 9,
+  'Legendary': 25,
+  'Divine': 30,
+  'Ancient': 30
+};
+
 // Helper function to validate slime elements
 function validateSlimeElements(elements: SlimeElement[]): string | null {
   if (!Array.isArray(elements)) {
@@ -132,18 +147,12 @@ export function calculateBreedingResult(
     const baseWeight = BASE_RARITY_WEIGHTS[slime.rarityTier];
     let finalWeight = baseWeight;
     
-    // Apply BreedingPower multiplier for higher tiers
-    if (slime.rarityTier === 'Rare') {
-      finalWeight = baseWeight * (1 + (breedingPower * 0.02));
-    } else if (slime.rarityTier === 'Epic') {
-      finalWeight = baseWeight * (1 + (breedingPower * 0.05));
-    } else if (slime.rarityTier === 'Legendary') {
-      finalWeight = baseWeight * (1 + (breedingPower * 0.08));
-    } else if (['Divine', 'Ancient'].includes(slime.rarityTier)) {
-      finalWeight = baseWeight * (1 + (breedingPower * 0.1));
-    }
-    
-    finalWeights[slime.id] = finalWeight;
+    // Strong parents (high level + high rarity) push odds toward rarer tiers
+    // and away from Common. power01: 0 = level-1 Common parents, 1 = maxed.
+    const power01 = Math.min(1, breedingPower / MAX_BREEDING_POWER);
+    finalWeight = baseWeight * (1 + power01 * POWER_TIER_BONUS[slime.rarityTier]);
+
+    finalWeights[slime.id] = Math.max(0.01, finalWeight);
   });
   
   // Calculate odds for debug logging
