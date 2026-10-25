@@ -324,7 +324,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         onClick={() => setShowPossibleModal(false)}
       >
         <div 
-          className="bg-gradient-to-br from-pink-100 via-white to-amber-100 rounded-3xl p-8 max-w-5xl w-full border-4 border-pink-300/50 shadow-2xl backdrop-blur-sm relative overflow-hidden"
+          className="bg-gradient-to-br from-pink-100 via-white to-amber-100 rounded-3xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto border-4 border-pink-300/50 shadow-2xl backdrop-blur-sm relative"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Decorative corner elements */}

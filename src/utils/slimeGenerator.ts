@@ -127,8 +127,10 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
   const breedingResult = calculateBreedingResult(
     parent1.elements, 
     parent2.elements, 
-    parent1.level || 1, 
-    parent2.level || 1
+    parent1.level || 1,
+    parent2.level || 1,
+    parent1.rarityTier,
+    parent2.rarityTier
   );
   
   if (!breedingResult) {

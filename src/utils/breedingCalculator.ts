@@ -67,24 +67,14 @@ function validateSlimeElements(elements: SlimeElement[]): string | null {
   return null;
 }
 
-// Helper function to filter slimes by exact element match only
+// Element Subset Rule (Dragon Mania Legends style): an offspring can be ANY
+// slime whose elements all come from the parents' combined elements, so
+// Iron+Fire+Shadow x Plant+Water can produce anything built from those five.
 function filterSlimesByExactElements(parentUnion: SlimeElement[]): CodexSlime[] {
-  // Sort once for comparison
-  const parentElementsSorted = [...parentUnion].sort();
-  
-  // Look for exact element matches only
-  return ALL_CODEX_SLIMES.filter(slime => {
-    // Quick length check first for performance
-    if (slime.elements.length !== parentElementsSorted.length) {
-      return false;
-    }
-    
-    // Sort slime elements for comparison
-    const slimeElements = [...slime.elements].sort();
-    
-    // Compare element by element
-    return slimeElements.every((element, index) => element === parentElementsSorted[index]);
-  });
+  const pool = new Set(parentUnion);
+  return ALL_CODEX_SLIMES.filter(slime =>
+    slime.elements.length > 0 && slime.elements.every(element => pool.has(element))
+  );
 }
 
 /**
