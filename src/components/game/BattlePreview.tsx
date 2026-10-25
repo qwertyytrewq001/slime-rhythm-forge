@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { Slime, BattleSlime } from '@/types/slime';
-import { generateAIOpponents, deriveBattleStats, toBattleSlime } from '@/utils/battleEngine';
+import { generateAIOpponents, deriveBattleStats, toBattleSlime, getRegionForLevel, isBossLevel } from '@/utils/battleEngine';
 import { SlimeCanvas } from './SlimeCanvas';
 import { Button } from '@/components/ui/button';
 import { X, Sword, Heart, Trophy } from 'lucide-react';
@@ -32,7 +32,10 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
     setIsSelectingFor(null);
   };
 
-  const isTeamReady = playerTeam.every(s => s !== null);
+  // Bring 1-3 slimes. (It used to require exactly 3, which a new player with one starter could never do.)
+  const isTeamReady = playerTeam.some(s => s !== null);
+  const region = getRegionForLevel(level);
+  const boss = isBossLevel(level);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md animate-in zoom-in duration-300 p-4">
@@ -53,7 +56,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
             </div>
             <div>
               <h2 className="text-xl font-black text-white uppercase tracking-tight">Team Preparation</h2>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Level {level} Challenge</p>
+              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Level {level} · {region.name}{boss ? <span className="ml-2 text-red-400">Boss Battle</span> : null}</p>
             </div>
           </div>
           <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-red-500/20 text-white rounded-full">
@@ -68,7 +71,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
             <div className="space-y-4">
               <div className="flex items-center justify-between px-2">
                 <h3 className="text-sm font-black text-blue-400 uppercase tracking-widest italic">Your Squad</h3>
-                <span className="text-[10px] font-bold text-slate-500 uppercase">Select 3 Slimes</span>
+                <span className="text-[10px] font-bold text-slate-500 uppercase">Bring 1-3 Slimes</span>
               </div>
               <div className="grid gap-3">
                 {playerTeam.map((slime, idx) => (
@@ -121,7 +124,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
                       <SlimeCanvas slime={slime} size={50} animated />
                     </div>
                     <div className="flex-1 text-left min-w-0">
-                      <div className="text-xs font-black text-white truncate">{slime.name}</div>
+                      <div className="text-xs font-black text-white truncate">{slime.name} <span className="text-red-300/70 font-bold">Lv.{slime.level}</span></div>
                       <div className="flex gap-3 mt-1">
                         <span className="flex items-center gap-1 text-[9px] font-bold text-red-400/40"><Heart className="w-2.5 h-2.5" /> {slime.battleStats.maxHp}</span>
                         <span className="flex items-center gap-1 text-[9px] font-bold text-orange-400/40"><Sword className="w-2.5 h-2.5" /> {slime.battleStats.attack}</span>
@@ -141,10 +144,10 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
           <div className="mt-8 flex justify-center pb-2">
             <Button
               disabled={!isTeamReady}
-              onClick={() => onStartBattle(playerTeam.map(s => toBattleSlime(s!)), opponentTeam)}
+              onClick={() => onStartBattle(playerTeam.filter((s): s is Slime => s !== null).map(toBattleSlime), opponentTeam)}
               className={`h-14 px-12 rounded-xl text-lg font-black uppercase tracking-tight transition-all duration-300 ${isTeamReady ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-xl hover:scale-105 active:scale-95' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}`}
             >
-              {isTeamReady ? <><Sword className="w-5 h-5 mr-3" /> Engage Battle</> : 'Ready Your Squad'}
+              {isTeamReady ? <><Sword className="w-5 h-5 mr-3" /> Engage Battle</> : 'Pick at least one slime'}
             </Button>
           </div>
         </div>

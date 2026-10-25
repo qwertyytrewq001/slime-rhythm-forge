@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { BattleSlime, SlimeElement } from '@/types/slime';
-import { calculateDamage } from '@/utils/battleEngine';
+import { calculateDamage, calculateBattleRewards, chooseBattleAction, effectivenessFromMultiplier, getSlimeMoves, getTypeMultiplier, isBossLevel, Effectiveness, Move } from '@/utils/battleEngine';
 import { SlimeCanvas } from './SlimeCanvas';
 import { Button } from '@/components/ui/button';
 import { Sword, Trophy, AlertCircle, TrendingUp, Coins, Zap, Shield, X } from 'lucide-react';
@@ -16,10 +16,13 @@ interface BattleArenaProps {
   onBattleComplete?: (result: { winner: 'player' | 'opponent'; level: number }) => void;
 }
 
-interface Move {
-  name: string;
-  type: SlimeElement;
-  power: number;
+interface DamagePopup {
+  id: string;
+  amount: number;
+  x: number;
+  y: number;
+  effectiveness: Effectiveness;
+  isCritical: boolean;
 }
 
 interface Projectile {
@@ -36,7 +39,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
   const { dispatch } = useGameState();
   const [pTeam, setPTeam] = useState<BattleSlime[]>(playerTeam.map(s => ({ ...s, battleStats: { ...s.battleStats } })));
   const [oTeam, setOTeam] = useState<BattleSlime[]>(opponentTeam.map(s => ({ ...s, battleStats: { ...s.battleStats } })));
-  
+
   const [activeSlimeIdx, setActiveSlimeIdx] = useState<number | null>(null);
   const [selectedMove, setSelectedMove] = useState<Move | null>(null);
   const [currentTurn, setCurrentTurn] = useState<'player' | 'ai'>('player');
@@ -50,25 +53,20 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
   const [defenderId, setDefenderId] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [dragPos, setDragPos] = useState({ x: 0, y: 0 });
-  
+
   const [projectiles, setProjectiles] = useState<Projectile[]>([]);
-  const [floatingDamage, setFloatingDamage] = useState<{ id: string, amount: number, x: number, y: number } | null>(null);
+  const [damagePopups, setDamagePopups] = useState<DamagePopup[]>([]);
+  const [rewards, setRewards] = useState<{ goo: number; xp: number } | null>(null);
 
   const containerRef = useRef<HTMLDivElement>(null);
   const battleLogsRef = useRef<HTMLDivElement>(null);
 
-  const getMoves = (slime: BattleSlime): Move[] => {
-    return slime.elements.slice(0, 3).map(el => ({
-      name: `${el.charAt(0).toUpperCase() + el.slice(1)} Burst`,
-      type: el,
-      power: 1.0
-    }));
-  };
+  const getMoves = (slime: BattleSlime): Move[] => getSlimeMoves(slime);
 
   const dispatchRewards = (resultWinner: 'player' | 'opponent') => {
-    const gooReward = resultWinner === 'player' ? 25 + Math.floor(Math.random() * 26) : 5;
-    const xpReward = resultWinner === 'player' ? 30 + Math.floor(Math.random() * 21) : 10;
-    
+    const { goo: gooReward, xp: xpReward } = calculateBattleRewards(level, resultWinner === 'player');
+    setRewards({ goo: gooReward, xp: xpReward });
+
     dispatch({
       type: 'BATTLE_REWARD',
       result: {
@@ -94,7 +92,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
 
     const attackerEl = document.getElementById(`slime-${attacker.id}`);
     const defenderEl = document.getElementById(`slime-${defender.id}`);
-    
+
     if (attackerEl && defenderEl) {
       const aRect = attackerEl.getBoundingClientRect();
       const dRect = defenderEl.getBoundingClientRect();
@@ -132,17 +130,23 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
   };
 
   const handleImpact = (attacker: BattleSlime, defender: BattleSlime, move: Move, isPlayerAttacker: boolean, dRect: any, cRect: any) => {
-    const { damage } = calculateDamage(attacker, defender, move.type);
+    const { damage, effectiveness, isCritical } = calculateDamage(attacker, defender, move.type);
     setDefenderId(defender.id);
-    setFloatingDamage({ 
-      id: defender.id, 
-      amount: damage, 
+    const popupId = Math.random().toString(36).slice(2);
+    setDamagePopups(prev => [...prev, {
+      id: popupId,
+      amount: damage,
       x: dRect.left + dRect.width / 2 - cRect.left,
-      y: dRect.top - cRect.top
-    });
+      y: dRect.top - cRect.top,
+      effectiveness,
+      isCritical,
+    }]);
+    setTimeout(() => setDamagePopups(prev => prev.filter(p => p.id !== popupId)), 1100);
     audioEngine.playSfx('hatch');
 
-    setBattleLogs(prev => [...prev, `${attacker.name} used ${move.name}! ${damage} DMG.`]);
+    const note = (isCritical ? ' Critical hit!' : '')
+      + (effectiveness === 'super' ? ' Super effective!' : effectiveness === 'weak' ? ' Not very effective.' : '');
+    setBattleLogs(prev => [...prev, `${attacker.name} used ${move.name}! ${damage} DMG.${note}`]);
 
     if (isPlayerAttacker) {
       setOTeam(prev => prev.map(s => s.id === defender.id ? { ...s, battleStats: { ...s.battleStats, hp: Math.max(0, s.battleStats.hp - damage) } } : s));
@@ -153,7 +157,6 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
     setTimeout(() => {
       setDefenderId(null);
       setAttackerId(null);
-      setFloatingDamage(null);
       setIsProcessing(false);
       if (!winner) {
         setCurrentTurn(isPlayerAttacker ? 'ai' : 'player');
@@ -164,7 +167,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
   // Win Detection
   useEffect(() => {
     if (winner) return;
-    
+
     const oDead = oTeam.every(s => s.battleStats.hp <= 0);
     const pDead = pTeam.every(s => s.battleStats.hp <= 0);
 
@@ -182,16 +185,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
   // AI Turn Logic
   useEffect(() => {
     if (currentTurn === 'ai' && !winner && !isProcessing) {
-      const aliveAI = oTeam.filter(s => s.battleStats.hp > 0);
-      const alivePlayers = pTeam.filter(s => s.battleStats.hp > 0);
-      
-      if (aliveAI.length > 0 && alivePlayers.length > 0) {
-        const attacker = aliveAI[Math.floor(Math.random() * aliveAI.length)];
-        const defender = alivePlayers[Math.floor(Math.random() * alivePlayers.length)];
-        const move = getMoves(attacker)[0];
-        
+      // Smart-ish opponent: usually the best attacker/move/target, sometimes a random pick
+      const action = chooseBattleAction(oTeam, pTeam, 0.75);
+
+      if (action) {
         const aiTimer = setTimeout(() => {
-          executeAttack(attacker, defender, move, false);
+          executeAttack(action.attacker, action.target, action.move, false);
         }, 1000);
         return () => clearTimeout(aiTimer);
       }
@@ -217,7 +216,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
 
   const onDragEnd = (e: MouseEvent | TouchEvent) => {
     if (!isDragging || !selectedMove || activeSlimeIdx === null) return;
-    
+
     const clientX = 'touches' in e ? (e as TouchEvent).changedTouches[0].clientX : (e as MouseEvent).clientX;
     const clientY = 'touches' in e ? (e as TouchEvent).changedTouches[0].clientY : (e as MouseEvent).clientY;
 
@@ -269,7 +268,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
           backgroundImage: `url("${import.meta.env.BASE_URL}${encodeURIComponent('Battle Arena.png')}")`,
         }}
       />
-      
+
       {/* Header */}
       <div className="relative z-10 p-6 flex justify-between bg-gradient-to-b from-black/80 to-transparent">
         <div className={`transition-all duration-500 ${currentTurn === 'player' ? 'scale-110' : 'opacity-50'}`}>
@@ -284,16 +283,25 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
         </div>
       </div>
 
+      <div className="relative z-10 text-center -mt-2 h-6">
+        {currentTurn === 'player' && !winner && !isProcessing && (
+          <p className="text-[11px] font-bold text-white/70 tracking-wide animate-in fade-in">
+            {activeSlimeIdx === null ? 'Click one of your slimes, then drag a move onto an enemy' : 'Drag a move onto an enemy'}
+            {isBossLevel(level) ? '  ·  BOSS BATTLE' : ''}
+          </p>
+        )}
+      </div>
+
       <div className="flex-1 relative flex items-center justify-center">
         <div className="w-full max-w-6xl px-12 flex justify-between items-center relative">
-          
+
           {/* Projectiles & Floating Damage */}
           <div className="absolute inset-0 pointer-events-none z-50">
             {projectiles.map(p => {
               const dx = p.targetX - p.x;
               const dy = p.targetY - p.y;
               return (
-                <div 
+                <div
                   key={p.id}
                   className="absolute text-5xl"
                   style={{
@@ -307,14 +315,29 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
                 </div>
               );
             })}
-            {floatingDamage && (
-              <div 
-                className="absolute text-5xl font-black text-white drop-shadow-[0_4px_8px_black] animate-bounce"
-                style={{ left: floatingDamage.x, top: floatingDamage.y - 60, transform: 'translateX(-50%)' }}
-              >
-                -{floatingDamage.amount}
-              </div>
-            )}
+            {damagePopups.map(pop => {
+              const color = pop.isCritical ? 'text-yellow-300'
+                : pop.effectiveness === 'super' ? 'text-green-300'
+                : pop.effectiveness === 'weak' ? 'text-slate-300'
+                : 'text-white';
+              const label = pop.isCritical ? 'CRITICAL!'
+                : pop.effectiveness === 'super' ? 'SUPER EFFECTIVE!'
+                : pop.effectiveness === 'weak' ? 'RESISTED' : null;
+              return (
+                <div
+                  key={pop.id}
+                  className="absolute flex flex-col items-center damage-pop"
+                  style={{ left: pop.x, top: pop.y - 40 }}
+                >
+                  {label && (
+                    <span className={`text-[11px] font-black tracking-widest drop-shadow-[0_2px_4px_black] ${color}`}>{label}</span>
+                  )}
+                  <span className={`font-black drop-shadow-[0_4px_8px_black] ${color} ${pop.isCritical ? 'text-6xl' : 'text-5xl'}`}>
+                    -{pop.amount}
+                  </span>
+                </div>
+              );
+            })}
           </div>
 
           {/* Player Team */}
@@ -323,11 +346,11 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
               const isActive = activeSlimeIdx === i;
               const isAttacking = attackerId === slime.id;
               const isBeingHit = defenderId === slime.id;
-              
+
               return (
                 <div key={slime.id} id={`slime-${slime.id}`} className="relative">
                   <div className={`relative transition-all duration-300 ${isAttacking ? 'translate-x-8 scale-105 z-20' : ''} ${isBeingHit ? 'animate-shake' : ''} ${slime.battleStats.hp <= 0 ? 'opacity-30 grayscale blur-[1px]' : ''}`}>
-                    <button 
+                    <button
                       disabled={slime.battleStats.hp <= 0 || isProcessing || currentTurn !== 'player' || !!winner}
                       onClick={() => setActiveSlimeIdx(isActive ? null : i)}
                       className={`relative z-10 p-1 rounded-full transition-all ${isActive ? 'ring-4 ring-blue-500 shadow-[0_0_30px_rgba(59,130,246,0.5)] scale-110' : 'hover:scale-105'}`}
@@ -349,7 +372,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
                           const radius = 80;
                           const x = Math.cos(angle * Math.PI / 180) * radius;
                           const y = Math.sin(angle * Math.PI / 180) * radius;
-                          
+
                           return (
                             <div
                               key={mIdx}
@@ -375,7 +398,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
             {oTeam.map((slime, i) => {
               const isAttacking = attackerId === slime.id;
               const isBeingHit = defenderId === slime.id;
-              
+
               return (
                 <div key={slime.id} id={`slime-${slime.id}`} className={`opponent-slime-target relative transition-all duration-300 ${isAttacking ? '-translate-x-8 scale-105 z-20' : ''} ${isBeingHit ? 'animate-shake' : ''} ${slime.battleStats.hp <= 0 ? 'opacity-30 grayscale blur-[1px]' : ''}`}>
                   <div className="relative z-10 p-1">
@@ -389,6 +412,15 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
                     {isDragging && slime.battleStats.hp > 0 && (
                       <div className="absolute inset-0 bg-red-500/10 border-2 border-red-500/50 rounded-full animate-pulse blur-md" />
                     )}
+                    {isDragging && selectedMove && slime.battleStats.hp > 0 && (() => {
+                      const eff = effectivenessFromMultiplier(getTypeMultiplier(selectedMove.type, slime.elements));
+                      if (eff === 'neutral') return null;
+                      return (
+                        <div className={`absolute -top-2 left-1/2 -translate-x-1/2 px-2 py-0.5 rounded-full text-[9px] font-black uppercase tracking-wider z-40 ${eff === 'super' ? 'bg-green-500 text-white' : 'bg-slate-600 text-slate-200'}`}>
+                          {eff === 'super' ? 'Strong x1.5' : 'Weak x0.6'}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
               );
@@ -397,7 +429,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
 
           {/* Drag Indicator */}
           {isDragging && selectedMove && (
-            <div 
+            <div
               className="fixed w-14 h-14 bg-white rounded-full flex items-center justify-center shadow-2xl border-4 border-blue-500 z-[100] pointer-events-none"
               style={{ left: dragPos.x - 28, top: dragPos.y - 28 }}
             >
@@ -436,11 +468,11 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
               <div className="grid grid-cols-2 gap-4 mb-8 mt-6">
                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                   <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">Goo</p>
-                  <p className="text-lg font-black text-white">+{winner === 'player' ? '25' : '5'}</p>
+                  <p className="text-lg font-black text-white">+{rewards?.goo ?? 0}</p>
                 </div>
                 <div className="bg-white/5 p-4 rounded-xl border border-white/5">
                   <p className="text-[10px] text-slate-500 font-bold uppercase mb-1">XP</p>
-                  <p className="text-lg font-black text-white">+{winner === 'player' ? '30' : '10'}</p>
+                  <p className="text-lg font-black text-white">+{rewards?.xp ?? 0}</p>
                 </div>
               </div>
               <Button onClick={onClose} className="w-full h-14 bg-blue-600 hover:bg-blue-500 text-white rounded-xl text-lg font-black uppercase tracking-tight">
@@ -460,6 +492,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
           75% { transform: translate(8px, 0); }
         }
         .animate-shake { animation: shake 0.1s ease-in-out infinite; }
+        @keyframes damage-pop {
+          0% { transform: translate(-50%, 10px) scale(0.6); opacity: 0; }
+          15% { transform: translate(-50%, -8px) scale(1.25); opacity: 1; }
+          100% { transform: translate(-50%, -60px) scale(1); opacity: 0; }
+        }
+        .damage-pop { animation: damage-pop 1.1s ease-out forwards; }
       `}</style>
     </div>
   );

@@ -26,6 +26,9 @@ export type SlimeEvolutionStage = 'baby' | 'teen' | 'adult';
 
 export interface Slime {
   id: string;
+  // Species id in the codex. `id` is unique per bred slime, so anything that needs the
+  // species (sprite, lore, codex discovery) must use codexId, not id.
+  codexId?: string;
   name: string;
   traits: SlimeTraits;
   elements: SlimeElement[];  // 1-4 elements (multi-element hybrids!)

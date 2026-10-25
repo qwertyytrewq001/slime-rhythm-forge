@@ -1,5 +1,5 @@
 import { Slime } from '@/types/slime';
-import { SLIME_CODEX_MAP } from '@/data/slimeCodex';
+import { getCodexSlime } from '@/data/slimeCodex';
 
 // Sprite cache for loaded images
 const spriteCache = new Map<string, HTMLImageElement>();
@@ -32,7 +32,7 @@ export async function loadSlimeSprite(spriteId: string): Promise<HTMLImageElemen
  */
 export function getSpriteIdForSlime(slime: Slime): string {
   // Try to get spriteId from codex
-  const codexSlime = SLIME_CODEX_MAP.get(slime.id);
+  const codexSlime = getCodexSlime(slime);
   if (codexSlime && codexSlime.spriteId) {
     // The spriteId in codex should directly match the sprite file name
     // Just return it directly, no mapping needed

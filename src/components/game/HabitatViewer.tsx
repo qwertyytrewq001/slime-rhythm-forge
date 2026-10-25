@@ -7,7 +7,7 @@ import { ChevronLeft, Plus, Utensils, X, Backpack } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SlimeGallery } from './SlimeGallery';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { SLIME_CODEX_MAP } from '@/data/slimeCodex';
+import { getCodexSlime } from '@/data/slimeCodex';
 import { FoodBag } from './FoodBag';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
@@ -441,7 +441,7 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
               <div className="bg-white p-4 rounded-2xl border-2 border-[#FF7EB6] shadow-lg">
                 <ScrollArea className="h-24">
                   <p className="text-sm font-medium text-gray-700 leading-relaxed">
-                    {SLIME_CODEX_MAP.get(selectedSlime.id)?.description || 'A mysterious slime with unknown origins.'}
+                    {getCodexSlime(selectedSlime)?.description || 'A mysterious slime with unknown origins.'}
                   </p>
                 </ScrollArea>
               </div>

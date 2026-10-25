@@ -26,11 +26,17 @@ export function createCodexSlime(codexId: string, parentIds?: [string, string]):
     throw new Error(`Codex slime with ID "${codexId}" not found`);
   }
   
-  // Generate unique ID for bred slimes, use codex ID for purchased slimes
-  const uniqueId = parentIds ? `slime_${Date.now()}_${Math.random().toString(36).substr(2, 9)}` : codexSlime.id;
+  // Every slime instance gets its own unique id. Purchased/hatched slimes used to reuse the
+  // species id, so owning two of the same species gave two slimes with the SAME id (feeding,
+  // habitat assignment and breeding-slot lookups then hit the wrong one). The species is
+  // tracked separately in codexId.
+  const uniqueId = parentIds
+    ? `slime_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+    : `${codexSlime.id}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
   
   return {
     id: uniqueId,
+    codexId: codexSlime.id,
     name: codexSlime.name,
     traits: {
       // Convert spriteId back to trait system for compatibility

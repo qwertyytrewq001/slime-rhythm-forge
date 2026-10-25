@@ -5,6 +5,7 @@ import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
 import { CodexManager } from '@/utils/codexManager';
+import { getCodexSlime } from '@/data/slimeCodex';
 
 const DEFAULT_ACHIEVEMENTS: Achievement[] = [
   { id: 'first_fusion', name: 'First Fusion', description: 'Breed your first slime', reward: '50 goo', rewardAmount: 50, unlocked: false, claimed: false },
@@ -91,6 +92,7 @@ function migrateSlime(s: any): Slime {
 
   return {
     ...s,
+    codexId: s.codexId ?? getCodexSlime(s)?.id,
     traits,
     element: primary,
     elements: s.elements ?? elements,
@@ -129,7 +131,18 @@ function findNextGridSlot(habitats: Habitat[]): { x: number; y: number } {
 function createInitialState(): GameState {
   const saved = loadGame();
   if (saved && saved.slimes && saved.slimes.length > 0) {
-    const migratedSlimes = saved.slimes.map(migrateSlime);
+    // Older saves can contain several slimes sharing one id (two eggs of the same species).
+    // Give every duplicate after the first its own id so lookups by id are unambiguous.
+    const seenIds = new Set<string>();
+    const migratedSlimes = saved.slimes.map(migrateSlime).map((slime: Slime) => {
+      if (!seenIds.has(slime.id)) {
+        seenIds.add(slime.id);
+        return slime;
+      }
+      const freshId = `${slime.codexId ?? slime.id}_${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
+      seenIds.add(freshId);
+      return { ...slime, id: freshId };
+    });
     return {
       slimes: migratedSlimes,
       goo: saved.goo ?? 500,
@@ -265,7 +278,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const slime = action.slime;
       
       // Discover slime in codex
-      codexManager.discoverSlime(slime.id);
+      codexManager.discoverSlime(getCodexSlime(slime)?.id ?? slime.id);
       codexManager.saveState();
       
       // Find available habitat
@@ -596,7 +609,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     
     // Discover existing slimes in the player's collection
     state.slimes.forEach(slime => {
-      codexManager.discoverSlime(slime.id);
+      codexManager.discoverSlime(getCodexSlime(slime)?.id ?? slime.id);
     });
   }, [state.slimes.length]); // Only run when slime count changes
 

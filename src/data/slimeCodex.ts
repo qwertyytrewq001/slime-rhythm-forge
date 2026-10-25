@@ -934,3 +934,13 @@ export const ALL_CODEX_SLIMES: CodexSlime[] = [
 export const SLIME_CODEX_MAP = new Map<string, CodexSlime>(
   ALL_CODEX_SLIMES.map(slime => [slime.id, slime])
 );
+
+const CODEX_BY_NAME = new Map<string, CodexSlime>(ALL_CODEX_SLIMES.map(slime => [slime.name, slime]));
+
+// Resolve the codex species for any slime. Bred slimes have a unique `id`, so prefer codexId,
+// then id, then fall back to the species name (covers saves made before codexId existed).
+export function getCodexSlime(slime: { id: string; name: string; codexId?: string }): CodexSlime | undefined {
+  return (slime.codexId && SLIME_CODEX_MAP.get(slime.codexId))
+    || SLIME_CODEX_MAP.get(slime.id)
+    || CODEX_BY_NAME.get(slime.name);
+}
