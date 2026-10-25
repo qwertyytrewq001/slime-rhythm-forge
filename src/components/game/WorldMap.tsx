@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
-import { ChevronLeft, ChevronRight, Lock, Skull, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Lock, Skull, Star, X } from 'lucide-react';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
-import { isBossLevel, MAP_SCREENS } from '@/utils/battleEngine';
+import { getEnemyCount, getEnemyLevel, isBossLevel, MAP_SCREENS } from '@/utils/battleEngine';
+import { getSpriteIdForSlime } from '@/utils/spriteLoader';
 
 interface WorldMapProps {
   onSelectLevel: (level: number) => void;
@@ -32,6 +33,18 @@ const SCREEN_NODES = [
 
 const MAP_IMAGES = [1, 2, 3, 4, 5].map(n => `${import.meta.env.BASE_URL}maps/map${n}.jpg`);
 
+const PARCHMENT = '#f6e8c3';
+const INK = '#4a2f17';
+const GOLD = '#f2b632';
+
+/** Smooth Catmull-Rom curve segment between pts[i] and pts[i+1], as an SVG path. */
+function segmentPath(pts: { x: number; y: number }[], i: number): string {
+  const p0 = pts[Math.max(0, i - 1)], p1 = pts[i], p2 = pts[i + 1], p3 = pts[Math.min(pts.length - 1, i + 2)];
+  const c1 = { x: p1.x + (p2.x - p0.x) / 6, y: p1.y + (p2.y - p0.y) / 6 };
+  const c2 = { x: p2.x - (p3.x - p1.x) / 6, y: p2.y - (p3.y - p1.y) / 6 };
+  return `M ${p1.x} ${p1.y} C ${c1.x} ${c1.y}, ${c2.x} ${c2.y}, ${p2.x} ${p2.y}`;
+}
+
 export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) => {
   const { state } = useGameState();
   const unlockedLevel = state.currentLevel || 1;
@@ -57,15 +70,33 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
     return () => window.removeEventListener('keydown', onKey);
   }, [furthestScreen]);
 
+  // The player's own slime stands on the current level
+  const marker = useMemo(() => {
+    const chosen = state.slimes.find(s => s.id === state.selectedSlimeId) ?? state.slimes[0];
+    return chosen ? `${import.meta.env.BASE_URL}${getSpriteIdForSlime(chosen)}.png` : null;
+  }, [state.slimes, state.selectedSlimeId]);
+
   const info = MAP_SCREENS[screen];
   const nodes = SCREEN_NODES[screen];
   const firstLevel = screen * levelsPerScreen + 1;
+  const clearedHere = Math.max(0, Math.min(levelsPerScreen, unlockedLevel - firstLevel));
+  const screenDone = unlockedLevel >= firstLevel + levelsPerScreen;
 
   const canGoNext = screen < lastScreen;
   const nextLocked = screen + 1 > furthestScreen;
+  const prevName = screen > 0 ? MAP_SCREENS[screen - 1].name : '';
+  const nextName = canGoNext ? MAP_SCREENS[screen + 1].name : '';
+
+  const arrowBtn = 'absolute top-1/2 -translate-y-1/2 flex flex-col items-center gap-1 group/arrow';
+  const arrowCircle = 'w-[max(40px,calc(var(--sw)*0.04))] h-[max(40px,calc(var(--sw)*0.04))] rounded-full flex items-center justify-center border-[3px] shadow-[0_4px_14px_rgba(0,0,0,0.55)] transition-transform';
 
   return (
-    <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center animate-fade-in select-none pointer-events-auto overflow-hidden">
+    <div className="fixed inset-0 z-[100] bg-black flex items-center justify-center animate-fade-in select-none pointer-events-auto overflow-hidden" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
+      <style>{`
+        @keyframes mapBob { 0%,100% { transform: translate(-50%, 0) } 50% { transform: translate(-50%, -14%) } }
+        @keyframes mapRing { 0% { transform: scale(.85); opacity: .9 } 100% { transform: scale(1.7); opacity: 0 } }
+      `}</style>
+
       {/* Blurred copy fills the letterbox bars so any window shape looks intentional */}
       <div
         key={`bg-${screen}`}
@@ -77,11 +108,34 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
       <div
         key={`stage-${screen}`}
         className="relative animate-fade-in shadow-2xl"
-        style={{ width: 'min(100vw, calc(100vh * 16 / 9))', height: 'min(100vh, calc(100vw * 9 / 16))' }}
+        style={{
+          ['--sw' as string]: 'min(100vw, calc(100vh * 16 / 9))',
+          width: 'min(100vw, calc(100vh * 16 / 9))',
+          height: 'min(100vh, calc(100vw * 9 / 16))',
+        }}
       >
         <img src={MAP_IMAGES[screen]} alt={info.name} draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
-        {/* gentle vignette so nodes and title read on any art */}
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.45) 100%)' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%)' }} />
+
+        {/* Travel trail: faint dashes ahead, gold dashes where you've been */}
+        <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">
+          {nodes.slice(0, -1).map((_, i) => {
+            const reached = firstLevel + i + 1 <= unlockedLevel;
+            return (
+              <path
+                key={i}
+                d={segmentPath(nodes, i)}
+                fill="none"
+                vectorEffect="non-scaling-stroke"
+                stroke={reached ? GOLD : 'rgba(255,255,255,0.55)'}
+                strokeWidth={reached ? 4 : 3}
+                strokeLinecap="round"
+                strokeDasharray="1 9"
+                style={{ filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.8))' }}
+              />
+            );
+          })}
+        </svg>
 
         {nodes.map((pos, i) => {
           const levelNum = firstLevel + i;
@@ -89,6 +143,8 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
           const isCurrent = levelNum === unlockedLevel;
           const isBoss = isBossLevel(levelNum);
           const cleared = levelNum < unlockedLevel;
+          const size = isBoss ? 0.046 : isUnlocked ? 0.036 : 0.026;
+          const tipBelow = pos.y < 22;
 
           return (
             <button
@@ -100,79 +156,160 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
                 onSelectLevel(levelNum);
               }}
               aria-label={`Level ${levelNum}${isBoss ? ' boss' : ''}${isUnlocked ? '' : ' locked'}`}
-              className={`group absolute -translate-x-1/2 -translate-y-1/2 flex items-center justify-center rounded-full transition-transform duration-200
-                ${isUnlocked ? 'cursor-pointer hover:scale-125' : 'cursor-not-allowed'}
-                ${isCurrent ? 'scale-125' : ''}`}
-              style={{ left: `${pos.x}%`, top: `${pos.y}%`, width: isBoss ? '4.2%' : '3.4%', aspectRatio: '1' }}
+              className={`group absolute -translate-x-1/2 -translate-y-1/2 transition-transform duration-200 focus:outline-none
+                ${isUnlocked ? 'cursor-pointer hover:scale-125 hover:z-20 focus-visible:scale-125' : 'cursor-not-allowed'}`}
+              style={{
+                left: `${pos.x}%`,
+                top: `${pos.y}%`,
+                width: `max(${isUnlocked ? 32 : 22}px, calc(var(--sw) * ${size}))`,
+                aspectRatio: '1',
+                zIndex: isCurrent ? 15 : 10,
+              }}
             >
-              {isCurrent && <span className="absolute inset-[-40%] rounded-full bg-white/50 animate-ping" />}
+              {isCurrent && (
+                <>
+                  <span className="absolute inset-0 rounded-full pointer-events-none" style={{ border: `3px solid ${GOLD}`, animation: 'mapRing 1.8s ease-out infinite' }} />
+                  {marker && (
+                    <img
+                      src={marker}
+                      alt=""
+                      draggable={false}
+                      className="absolute left-1/2 bottom-[55%] w-[270%] max-w-none pointer-events-none drop-shadow-[0_4px_4px_rgba(0,0,0,0.6)]"
+                      style={{ imageRendering: 'auto', animation: 'mapBob 1.4s ease-in-out infinite' }}
+                    />
+                  )}
+                </>
+              )}
+
+              {/* Medallion */}
               <span
-                className={`relative w-full h-full rounded-full flex items-center justify-center border-[3px] shadow-[0_3px_10px_rgba(0,0,0,0.6)]
-                  ${!isUnlocked
-                    ? 'bg-slate-800/80 border-slate-500/70 text-slate-400'
+                className="relative w-full h-full rounded-full flex items-center justify-center shadow-[0_3px_8px_rgba(0,0,0,0.65)]"
+                style={{
+                  border: `${isUnlocked ? 3 : 2}px solid ${!isUnlocked ? 'rgba(255,255,255,0.35)' : isBoss ? GOLD : INK}`,
+                  background: !isUnlocked
+                    ? 'rgba(25,22,35,0.62)'
                     : isBoss
-                      ? 'bg-gradient-to-b from-red-500 to-red-800 border-amber-300 text-white'
-                      : cleared
-                        ? 'bg-gradient-to-b from-emerald-400 to-emerald-700 border-white/90 text-white'
-                        : 'bg-gradient-to-b from-[#FF7EB6] to-[#FF1493] border-white text-white'}`}
+                      ? 'radial-gradient(circle at 35% 30%, #ff6a5a, #9c1c1c 75%)'
+                      : isCurrent
+                        ? `radial-gradient(circle at 35% 30%, #fff3c0, ${GOLD} 80%)`
+                        : `radial-gradient(circle at 35% 30%, #fffaf0, ${PARCHMENT} 85%)`,
+                  color: isBoss ? '#fff' : INK,
+                }}
               >
                 {!isUnlocked ? (
-                  <Lock className="w-1/2 h-1/2" />
+                  <Lock className="w-1/2 h-1/2 text-white/70" />
                 ) : isBoss ? (
-                  <Skull className="w-3/5 h-3/5" />
+                  <Skull className="w-3/5 h-3/5 drop-shadow" />
                 ) : (
-                  <span className="font-black leading-none drop-shadow" style={{ fontFamily: "'Press Start 2P', cursive", fontSize: 'clamp(8px, 1.2vw, 16px)' }}>
-                    {levelNum}
-                  </span>
+                  <span className="font-bold leading-none" style={{ fontSize: 'max(13px, calc(var(--sw) * 0.0165))' }}>{levelNum}</span>
+                )}
+                {cleared && !isBoss && (
+                  <Star className="absolute -top-[22%] -right-[22%] w-[48%] h-[48%] drop-shadow" style={{ color: GOLD, fill: GOLD }} />
+                )}
+                {cleared && isBoss && (
+                  <Star className="absolute -top-[18%] -right-[18%] w-[42%] h-[42%] drop-shadow" style={{ color: GOLD, fill: GOLD }} />
                 )}
               </span>
-              {isBoss && isUnlocked && (
-                <span className="absolute -bottom-[60%] text-[clamp(7px,0.8vw,11px)] font-black text-amber-200 drop-shadow-[0_1px_3px_rgba(0,0,0,0.9)] uppercase tracking-wider">
-                  {levelNum}
+
+              {isBoss && (
+                <span
+                  className="absolute left-1/2 -translate-x-1/2 -bottom-[52%] px-1.5 rounded text-[max(8px,calc(var(--sw)*0.0085))] font-bold uppercase tracking-wider text-amber-100 bg-black/65 whitespace-nowrap pointer-events-none"
+                >
+                  Boss {levelNum}
                 </span>
               )}
+
+              {/* Hover card */}
+              <span
+                className={`pointer-events-none absolute left-1/2 -translate-x-1/2 ${tipBelow ? 'top-[125%]' : 'bottom-[125%]'} opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-150
+                  px-3 py-1.5 rounded-lg whitespace-nowrap text-left shadow-xl`}
+                style={{ background: PARCHMENT, color: INK, border: `2px solid ${INK}` }}
+              >
+                <span className="block font-bold text-[max(11px,calc(var(--sw)*0.0115))] leading-tight">
+                  {isBoss ? `Boss · Level ${levelNum}` : `Level ${levelNum}`}
+                </span>
+                <span className="block font-semibold text-[max(9px,calc(var(--sw)*0.0095))] opacity-80 leading-tight">
+                  {isUnlocked ? `${getEnemyCount(levelNum)} foe${getEnemyCount(levelNum) > 1 ? 's' : ''} · enemy Lv ${getEnemyLevel(levelNum)}${cleared ? ' · cleared' : ''}` : 'Clear the level before it'}
+                </span>
+              </span>
             </button>
           );
         })}
 
         {/* Region banner */}
-        <div className="absolute top-[3%] left-1/2 -translate-x-1/2 px-6 py-2 rounded-full bg-black/55 backdrop-blur-sm border border-white/25 text-center pointer-events-none">
-          <p className="text-white font-black tracking-wide text-[clamp(11px,1.5vw,20px)]">{info.name}</p>
-          <p className="text-white/70 font-bold text-[clamp(8px,0.9vw,12px)] uppercase tracking-widest">
-            Levels {firstLevel}–{firstLevel + levelsPerScreen - 1} · Screen {screen + 1}/{MAP_SCREENS.length}
-          </p>
+        <div className="absolute top-[2.5%] left-1/2 -translate-x-1/2 pointer-events-none flex flex-col items-center">
+          <div
+            className="relative px-[max(20px,calc(var(--sw)*0.03))] py-[max(6px,calc(var(--sw)*0.006))] rounded-lg text-center shadow-[0_6px_16px_rgba(0,0,0,0.55)]"
+            style={{ background: `linear-gradient(${PARCHMENT}, #e8d5a3)`, border: `3px solid ${INK}`, color: INK }}
+          >
+            <span className="absolute -left-2 top-1/2 -translate-y-1/2 w-3 h-3 rotate-45" style={{ background: GOLD, border: `2px solid ${INK}` }} />
+            <span className="absolute -right-2 top-1/2 -translate-y-1/2 w-3 h-3 rotate-45" style={{ background: GOLD, border: `2px solid ${INK}` }} />
+            <p className="font-bold leading-tight text-[max(14px,calc(var(--sw)*0.0185))]">{info.name}</p>
+            <div className="flex items-center justify-center gap-2 mt-0.5">
+              <p className="font-semibold uppercase tracking-widest opacity-70 text-[max(8px,calc(var(--sw)*0.0085))]">Levels {firstLevel}–{firstLevel + levelsPerScreen - 1}</p>
+              <span className="flex items-center gap-1 text-[max(9px,calc(var(--sw)*0.009))] font-bold">
+                <Star className="w-3 h-3" style={{ color: GOLD, fill: GOLD }} />
+                {screenDone ? levelsPerScreen : clearedHere}/{levelsPerScreen}
+              </span>
+            </div>
+          </div>
         </div>
+
+        {/* Region arrows, inside the art, with the neighbouring region's name */}
+        {screen > 0 && (
+          <button onClick={() => setScreen(screen - 1)} aria-label="Previous region" className={`${arrowBtn} left-[1.2%]`}>
+            <span className={`${arrowCircle} group-hover/arrow:scale-110`} style={{ background: PARCHMENT, borderColor: INK, color: INK }}>
+              <ChevronLeft className="w-3/5 h-3/5" strokeWidth={3} />
+            </span>
+            <span className="px-2 py-0.5 rounded bg-black/65 text-white font-semibold text-[max(8px,calc(var(--sw)*0.0085))] max-w-[12vw] text-center leading-tight">{prevName}</span>
+          </button>
+        )}
+        {canGoNext && (
+          <button
+            onClick={() => !nextLocked && setScreen(screen + 1)}
+            disabled={nextLocked}
+            aria-label={nextLocked ? 'Next region locked' : 'Next region'}
+            className={`${arrowBtn} right-[1.2%] ${nextLocked ? 'cursor-not-allowed' : ''}`}
+          >
+            <span
+              className={`${arrowCircle} ${nextLocked ? '' : 'group-hover/arrow:scale-110'}`}
+              style={nextLocked ? { background: 'rgba(25,22,35,0.75)', borderColor: 'rgba(255,255,255,0.35)', color: 'rgba(255,255,255,0.7)' } : { background: PARCHMENT, borderColor: INK, color: INK }}
+            >
+              {nextLocked ? <Lock className="w-1/2 h-1/2" /> : <ChevronRight className="w-3/5 h-3/5" strokeWidth={3} />}
+            </span>
+            <span className="px-2 py-0.5 rounded bg-black/65 text-white font-semibold text-[max(8px,calc(var(--sw)*0.0085))] max-w-[12vw] text-center leading-tight">
+              {nextLocked ? '???' : nextName}
+            </span>
+          </button>
+        )}
+
+        {/* Region pager */}
+        <div className="absolute bottom-[2.5%] left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/55 backdrop-blur-sm">
+          {MAP_SCREENS.map((s, i) => {
+            const reachable = i <= furthestScreen;
+            return (
+              <button
+                key={s.name}
+                onClick={() => reachable && setScreen(i)}
+                disabled={!reachable}
+                aria-label={reachable ? s.name : 'Locked region'}
+                title={reachable ? s.name : 'Locked'}
+                className={`h-2.5 rounded-full transition-all ${i === screen ? 'w-7' : 'w-2.5'} ${reachable ? 'cursor-pointer hover:scale-125' : 'cursor-not-allowed opacity-40'}`}
+                style={{ background: i === screen ? GOLD : reachable ? PARCHMENT : 'rgba(255,255,255,0.5)' }}
+              />
+            );
+          })}
+        </div>
+
+        <button
+          onClick={onClose}
+          aria-label="Close map"
+          className="absolute top-[2.5%] right-[1.5%] w-[max(38px,calc(var(--sw)*0.032))] h-[max(38px,calc(var(--sw)*0.032))] flex items-center justify-center rounded-full border-[3px] shadow-[0_4px_14px_rgba(0,0,0,0.55)] hover:scale-110 transition-transform"
+          style={{ background: PARCHMENT, borderColor: INK, color: INK }}
+        >
+          <X className="w-3/5 h-3/5" strokeWidth={3} />
+        </button>
       </div>
-
-      {/* Screen arrows */}
-      {screen > 0 && (
-        <button
-          onClick={() => setScreen(screen - 1)}
-          aria-label="Previous region"
-          className="absolute left-3 top-1/2 -translate-y-1/2 w-14 h-14 flex items-center justify-center rounded-full bg-black/55 border border-white/30 text-white hover:bg-black/75 hover:scale-110 transition-all"
-        >
-          <ChevronLeft className="w-8 h-8" />
-        </button>
-      )}
-      {canGoNext && (
-        <button
-          onClick={() => !nextLocked && setScreen(screen + 1)}
-          disabled={nextLocked}
-          aria-label={nextLocked ? 'Next region locked' : 'Next region'}
-          className={`absolute right-3 top-1/2 -translate-y-1/2 w-14 h-14 flex items-center justify-center rounded-full border text-white transition-all
-            ${nextLocked ? 'bg-black/40 border-white/15 text-white/40 cursor-not-allowed' : 'bg-black/55 border-white/30 hover:bg-black/75 hover:scale-110'}`}
-        >
-          {nextLocked ? <Lock className="w-6 h-6" /> : <ChevronRight className="w-8 h-8" />}
-        </button>
-      )}
-
-      <button
-        onClick={onClose}
-        aria-label="Close map"
-        className="absolute top-6 right-6 w-12 h-12 flex items-center justify-center bg-black/50 rounded-full border border-white/25 text-white/70 hover:text-white hover:bg-black/70 transition-all"
-      >
-        <X className="w-6 h-6" />
-      </button>
     </div>
   );
 };
