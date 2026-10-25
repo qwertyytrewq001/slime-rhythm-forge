@@ -16,7 +16,7 @@ export function getStage(level: number): SlimeEvolutionStage {
 }
 
 // XP needed to go from this level to the next one
-function xpToNextLevel(level: number): number {
+export function xpToNextLevel(level: number): number {
   if (level < 15) return 8 + level * 4;          // levels 1-14
   if (level < 30) return 60 + (level - 15) * 12; // levels 15-29
   return 240 + (level - 30) * 25;                // levels 30-49
@@ -48,6 +48,14 @@ export function addXp(slime: Slime, amount: number): {
       : null,
     evolved: newStage !== oldStage ? { slimeId: slime.id, stage: newStage, timestamp: now } : null,
   };
+}
+
+function returnFloorFood(inventory: any, floorFood: any): GameState['inventory'] {
+  const bag = { basic: 0, elemental: 0, royal: 0, ...(inventory ?? {}) };
+  if (Array.isArray(floorFood)) {
+    for (const f of floorFood) if (f && f.foodId in bag) bag[f.foodId as keyof typeof bag] += 1;
+  }
+  return bag;
 }
 
 function migrateRarityTier(tier: string): string {
@@ -162,8 +170,9 @@ function createInitialState(): GameState {
       currentLevel: saved.currentLevel ?? 1,
       tutorialCompleted: saved.tutorialCompleted ?? false,
       completedTutorialChapters: saved.completedTutorialChapters ?? [],
-      inventory: saved.inventory ?? { basic: 0, elemental: 0, royal: 0 },
-      floorFood: saved.floorFood ?? [],
+      // Food left lying on a Sanctuary floor (old drag-and-drop feeding) goes back to the bag
+      inventory: returnFloorFood(saved.inventory, saved.floorFood),
+      floorFood: [],
       farmPlots: saved.farmPlots ?? createDefaultFarmPlots(),
       seeds: saved.seeds ?? { basic: 0, elemental: 0, royal: 0 },
       stats: { ...DEFAULT_STATS, ...(saved.stats ?? {}) },
@@ -517,17 +526,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
     case 'FEED_SLIME_XP': {
       const food = SLIME_FOODS[action.foodType];
-      if (state.goo < food.cost) return state;
+      // Owned food (bought earlier or harvested on the farm) is free to feed; otherwise it costs Goo
+      const owned = state.inventory[action.foodType] || 0;
+      if (action.fromInventory ? owned < 1 : state.goo < food.cost) return state;
 
       const target = state.slimes.find(s => s.id === action.slimeId);
-      if (!target) return state;
+      if (!target || target.level >= MAX_SLIME_LEVEL) return state;
 
       const gained = addXp(target, food.xpValue);
 
       return {
         ...state,
         slimes: state.slimes.map(s => (s.id === target.id ? gained.slime : s)),
-        goo: Math.round((state.goo - food.cost) * 100) / 100,
+        goo: action.fromInventory ? state.goo : Math.round((state.goo - food.cost) * 100) / 100,
+        inventory: action.fromInventory ? { ...state.inventory, [action.foodType]: owned - 1 } : state.inventory,
         stats: { ...state.stats, feeds: state.stats.feeds + 1 },
         lastEvolution: gained.evolved ?? state.lastEvolution,
         lastLevelUp: gained.leveledUp ?? state.lastLevelUp,

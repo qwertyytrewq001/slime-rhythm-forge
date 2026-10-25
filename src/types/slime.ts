@@ -279,7 +279,7 @@ export type GameAction =
   | { type: 'CANCEL_HABITAT_PLACEMENT' }
   | { type: 'ASSIGN_SLIME_TO_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'REMOVE_SLIME_FROM_HABITAT'; habitatId: string; slimeId: string }
-  | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType }
+  | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType; fromInventory?: boolean }
   | { type: 'CLEAR_EVOLUTION' }
   | { type: 'CLEAR_LEVEL_UP' }
   | { type: 'CLEAR_PLAYER_LEVEL_UP' }

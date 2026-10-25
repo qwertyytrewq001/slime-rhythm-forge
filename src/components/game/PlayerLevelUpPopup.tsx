@@ -37,7 +37,7 @@ export function PlayerLevelUpPopup() {
   const hasUnlocks = unlockedElements.length > 0;
 
   return (
-    <div className={`fixed inset-0 z-[200] flex items-center justify-center transition-all duration-700 ${
+    <div className={`fixed inset-0 z-[10100] flex items-center justify-center transition-all duration-700 ${
       isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
     }`}>
       {/* Backdrop */}

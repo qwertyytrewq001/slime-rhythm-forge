@@ -48,7 +48,7 @@ export function EvolutionPopup() {
 
   return (
     <div 
-      className={`fixed top-32 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 pointer-events-none ${
+      className={`fixed top-56 left-1/2 -translate-x-1/2 z-[10100] transition-all duration-500 pointer-events-none ${
         isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-12 scale-90'
       }`}
     >

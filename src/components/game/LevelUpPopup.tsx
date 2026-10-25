@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
-import { Sparkles, Trophy, ArrowUpCircle, Star } from 'lucide-react';
+import { Sparkles, Trophy, ArrowUpCircle, Star, X } from 'lucide-react';
 import { audioEngine } from '@/utils/audioEngine';
 import { FairySparkle } from './FairySparkle';
 
@@ -40,7 +40,7 @@ export function LevelUpPopup() {
 
   return (
     <div 
-      className={`fixed top-24 left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 pointer-events-none ${
+      className={`fixed top-24 left-1/2 -translate-x-1/2 z-[10100] transition-all duration-500 pointer-events-none ${
         isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-12 scale-90'
       }`}
     >
@@ -50,6 +50,15 @@ export function LevelUpPopup() {
         
         {/* Main Banner */}
         <div className="relative bg-white/90 backdrop-blur-xl border-4 border-[#FF7EB6] px-8 py-4 rounded-3xl shadow-[0_0_30px_rgba(255,126,182,0.3)] flex items-center gap-6 overflow-hidden">
+          {/* Close Button */}
+          <button
+            onClick={(e) => { e.stopPropagation(); handleClose(); }}
+            aria-label="Close"
+            className="absolute top-2 right-2 w-6 h-6 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 z-10"
+          >
+            <X className="w-3 h-3 text-gray-600" />
+          </button>
+
           {/* Sparkles Decoration */}
           <div className="absolute inset-0 overflow-hidden pointer-events-none">
             {[...Array(6)].map((_, i) => (
