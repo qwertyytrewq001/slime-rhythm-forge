@@ -856,6 +856,46 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     description: 'Spends the whole day trying to catch its own reflection and is always one blink too slow. It remembers the Prism Sanctuaries of the Radiant Ice Fields, where every glacier once held a rainbow in reserve.',
     family: 'frozen-realms',
     spriteId: 'glacier_gleam_slime'
+  },
+  {
+    id: 'umbra_frost_slime',
+    name: 'Umbra Frost Slime',
+    elements: ['ice', 'shadow'],
+    rarityTier: 'Rare',
+    weight: 25,
+    description: 'Gets noticeably colder whenever someone says it looks spiky, which is how you can tell it likes the attention. It keeps watch over the Midnight Sanctuaries of the Black Glacier, where the cold stopped being weather and started being a warning.',
+    family: 'frozen-realms',
+    spriteId: 'umbra_frost_slime'
+  },
+  {
+    id: 'cinderheart_slime',
+    name: 'Cinderheart Slime',
+    elements: ['fire', 'earth'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Hides a warm little flame inside a pile of rubble and acts shocked when you find it. It remembers the Hearth Sanctuaries of the Smoldering Cairns, where every campfire was built on a stone that still held the heat.',
+    family: 'elemental-foundations',
+    spriteId: 'cinderheart_slime'
+  },
+  {
+    id: 'aurora_slime',
+    name: 'Aurora Slime',
+    elements: ['electric', 'light'],
+    rarityTier: 'Rare',
+    weight: 25,
+    description: 'Drifts through the air like a jellyfish and refuses to confirm it is not one. It remembers the Sky Sanctuaries of the Shimmering Veil, where the night itself was lit by lightning that learned how to glow instead of strike.',
+    family: 'cosmic-elements',
+    spriteId: 'aurora_slime'
+  },
+  {
+    id: 'dynamo_slime',
+    name: 'Dynamo Slime',
+    elements: ['electric', 'metal'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Runs on pure enthusiasm and a suspicious amount of copper wire, and has never once been switched off. It remembers the Generator Sanctuaries of the Clockwork Grid, where the gears turned for the joy of it long before Voss gave them a quota.',
+    family: 'metal-forged',
+    spriteId: 'dynamo_slime'
   }
 ];
 
