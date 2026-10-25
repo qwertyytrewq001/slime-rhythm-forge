@@ -185,7 +185,7 @@ const FIRST_HABITAT_DIALOGUE = [
   {
     id: 'firstHabitatBuilt',
     expression: 'warm',
-    text: "Each Sanctuary you build restores Goo to the world and pulls feral slimes back from the edge."
+    text: "Each Sanctuary you build restores Goo to the world and calms the slimes that have been out there fighting."
   },
   {
     id: 'firstHabitatBuilt',
@@ -272,203 +272,96 @@ const FIRST_BATTLE_DIALOGUE = [
   {
     id: 'firstBattleMapOpen',
     expression: 'sad_glim',
-    text: "The Whispering Wilds. Once a safe network of paths between Sanctuaries."
+    text: "These are the Verdant Lowlands. People used to stroll between Sanctuaries here with a picnic and no weapons."
   },
   {
     id: 'firstBattleMapOpen',
     expression: 'sad_glim',
-    text: "Now overrun. Every feral slime out there was someone's companion before Goo ran dry."
+    text: "Then the Goo dried up. The slimes out there got hungry and cranky, and now they pick a fight with anyone who walks past."
   },
   {
     id: 'firstBattleMapOpen',
     expression: 'important',
-    text: "Defeating them in battle doesn't destroy them — it shocks them back to awareness."
+    text: "Good news, though: when you win, nobody gets hurt. They snap out of it a bit embarrassed, like waking up on someone's couch."
   },
   {
     id: 'firstBattleMapOpen',
     expression: 'important',
-    text: "Your restored Goo reaches them. They heal. The world heals."
-  },
-  {
-    id: 'firstBattleMapOpen',
-    expression: 'important',
-    text: "This is restoration. Not conquest."
+    text: "And once your Goo reaches them, they start to heal. That's really what this map is for."
   },
   {
     id: 'firstBattleMapOpen',
     expression: 'smirk',
-    text: "Also those slimes at Level 5 are genuinely quite rude and I will not pretend otherwise."
+    text: "Fair warning, the slimes around level 5 are very rude. I've met them. I'm still not over it."
   },
   {
     id: 'firstBattleMapOpen',
     expression: 'smirk',
-    text: "Go. Fight. Win."
+    text: "Go on, pick a level. Bring a friend or two."
   }
 ];
 
 // PART 2 - LEVEL-BASED LORE DIALOGUE
 const LEVEL_DIALOGUE = {
   1: [
-    {
-      expression: 'relieved',
-      text: "First battle done. The woods haven't seen a Forger in centuries."
-    },
-    {
-      expression: 'relieved',
-      text: "The trees are gossiping about you. I can tell."
-    }
+    { expression: 'relieved', text: "That's the first one down. Honestly, I wasn't sure it would work." },
+    { expression: 'relieved', text: "The trees are whispering about you, by the way. I think they approve." }
   ],
   5: [
-    {
-      expression: 'serious',
-      text: "...Wait. Those tracks. Human boots. Fresh."
-    },
-    {
-      expression: 'serious',
-      text: "Someone else has been through Glimmerswell recently. And they weren't here to help."
-    }
+    { expression: 'serious', text: "Hold on. See those boot prints? They're fresh, and they're definitely not slime." },
+    { expression: 'serious', text: "Someone came through Glimmerswell recently, and they didn't stop to help anybody." }
   ],
   10: [
-    {
-      expression: 'grim',
-      text: "I found what's left of the Crystal Ridge Goo pool."
-    },
-    {
-      expression: 'grim',
-      text: "Drained completely. Extracted by force. This isn't natural — this is someone's plan."
-    },
-    {
-      expression: 'grim',
-      text: "Keep moving. I need to think."
-    }
+    { expression: 'grim', text: "I checked the Crystal Ridge Goo pool. It's bone dry." },
+    { expression: 'grim', text: "That didn't happen by itself. Somebody pumped it out on purpose." },
+    { expression: 'grim', text: "Let's keep moving. I need to think this over." }
   ],
   14: [
-    {
-      expression: 'dreadful',
-      text: "I know who it is."
-    },
-    {
-      expression: 'dreadful',
-      text: "I was hoping I was wrong."
-    },
-    {
-      expression: 'dreadful',
-      text: "His name is Voss. Do not underestimate him."
-    }
+    { expression: 'dreadful', text: "I think I know who's behind this." },
+    { expression: 'dreadful', text: "I really hoped I was wrong." },
+    { expression: 'dreadful', text: "His name is Voss. Don't let him fool you, he's a lot smarter than he looks." }
   ],
   15: [
-    {
-      expression: 'grim',
-      text: "...We move faster now."
-    }
+    { expression: 'grim', text: "Right. We need to move faster from here." }
   ],
   20: [
-    {
-      expression: 'urgent',
-      text: "He's heading for the Marsh. The Shadow slimes there are ancient."
-    },
-    {
-      expression: 'urgent',
-      text: "If he extracts them, Goo imbalance could become permanent."
-    },
-    {
-      expression: 'urgent',
-      text: "We can't let him reach them first."
-    }
+    { expression: 'urgent', text: "Voss is heading for the Murkmire Swamp. The shadow slimes there are older than the Sanctuaries." },
+    { expression: 'urgent', text: "If he drains them, the Goo could stay out of balance for good." },
+    { expression: 'urgent', text: "We have to get there before he does." }
   ],
   25: [
-    {
-      expression: 'holding',
-      text: "A feral slime dropped this. Voss's insignia."
-    },
-    {
-      expression: 'holding',
-      text: "He's using extracted Goo to drive slimes feral on purpose — creating chaos so no one can protect the Sanctuaries while he harvests them."
-    },
-    {
-      expression: 'holding',
-      text: "This isn't greed. This is a strategy."
-    }
+    { expression: 'holding', text: "One of the slimes dropped this. It's Voss's badge." },
+    { expression: 'holding', text: "He's been making slimes angry on purpose by taking their Goo. If everyone's busy fighting, nobody is guarding the Sanctuaries." },
+    { expression: 'holding', text: "So he's not just greedy, he has a plan. That's worse." }
   ],
   30: [
-    {
-      expression: 'quiet',
-      text: "I need to tell you something."
-    },
-    {
-      expression: 'quiet',
-      text: "The Forgotten Castle didn't just fall silent. It was silenced. By a Forger who wanted power over all slime-kind."
-    },
-    {
-      expression: 'quiet',
-      text: "Voss found the old texts. He knows what's buried there."
-    },
-    {
-      expression: 'quiet',
-      text: "And so do I."
-    }
+    { expression: 'quiet', text: "Can I tell you something?" },
+    { expression: 'quiet', text: "The Forgotten Castle didn't just go quiet. Someone shut it down, a Forger who wanted every slime answering to them." },
+    { expression: 'quiet', text: "Voss has found the old books, so he knows what's buried there." },
+    { expression: 'quiet', text: "So do I." }
   ],
   35: [
-    {
-      expression: 'still',
-      text: "Before you go in — I want you to know something."
-    },
-    {
-      expression: 'still',
-      text: "The first Forger who went dark... I knew him."
-    },
-    {
-      expression: 'still',
-      text: "Before everything went wrong, before the castle fell — I knew him."
-    },
-    {
-      expression: 'still',
-      text: "Just keep fighting."
-    }
+    { expression: 'still', text: "Before we go on, there's something you should know." },
+    { expression: 'still', text: "The first Forger who went bad was a friend of mine." },
+    { expression: 'still', text: "Before the castle fell, we used to argue about breeding charts over tea." },
+    { expression: 'still', text: "Anyway. Keep fighting." }
   ],
   40: [
-    {
-      expression: 'serious',
-      text: "This is it."
-    },
-    {
-      expression: 'serious',
-      text: "Everything you've bred, every Sanctuary restored, every bond forged — it all comes down to this."
-    },
-    {
-      expression: 'serious',
-      text: "Voss extracts. We create. Show him what that means."
-    }
+    { expression: 'serious', text: "We're close now. I can see the castle from here." },
+    { expression: 'serious', text: "Everything you've bred and every Sanctuary you've rebuilt got us this far." },
+    { expression: 'serious', text: "Voss takes Goo. We make slimes. Let's show him which one works better." }
   ],
   45: [
-    {
-      expression: 'smirk',
-      text: "You can't control it."
-    }
+    { expression: 'smirk', text: "Careful. Whatever he's cooking up in there, he can't control it." }
   ],
   49: [
-    {
-      expression: 'scared',
-      text: "Everything we've built — every slime, every Sanctuary, every bond — it matters now more than ever."
-    },
-    {
-      expression: 'scared',
-      text: "Don't stop."
-    }
+    { expression: 'scared', text: "This is the last stretch. Whatever happens at the gate, you've already done more than anyone expected." },
+    { expression: 'scared', text: "Don't stop now." }
   ],
   50: [
-    {
-      expression: 'determined',
-      text: "This is it."
-    },
-    {
-      expression: 'determined',
-      text: "Everything you've bred, every Sanctuary restored, every bond forged — it all comes down to this."
-    },
-    {
-      expression: 'determined',
-      text: "Voss extracts. We create. Show him what that means."
-    }
+    { expression: 'determined', text: "This is it." },
+    { expression: 'determined', text: "Every slime you've bred and every Sanctuary you've restored led us here." },
+    { expression: 'determined', text: "Voss takes Goo. We make slimes. Go and show him." }
   ]
 };
 
@@ -684,16 +577,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     }
 
     if (triggerId === 'finalBattle') {
-      startDialogue([{
-        expression: 'determined',
-        text: "This is it."
-      }, {
-        expression: 'determined',
-        text: "Everything you've bred, every Sanctuary restored, every bond forged — it all comes down to this."
-      }, {
-        expression: 'determined',
-        text: "Voss extracts. We create. Show him what that means."
-      }]);
+      startDialogue(LEVEL_DIALOGUE[50]);
       setCurrentExpression('determined');
       setGlimPosition('bottom-left');
     }
