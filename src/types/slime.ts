@@ -107,6 +107,13 @@ export interface BattleResult {
   levelReached: number;
 }
 
+export interface GameStats {
+  battlesWon: number;
+  bossesDefeated: number;
+  harvests: number;
+  feeds: number;
+}
+
 export interface GameState {
   slimes: Slime[];
   goo: number;
@@ -136,7 +143,6 @@ export interface GameState {
   pendingHabitatPlacement: {
     element: SlimeElement;
   } | null;
-  happiness: Record<string, number>;
   lastEvolution: {
     slimeId: string;
     stage: SlimeEvolutionStage;
@@ -160,6 +166,7 @@ export interface GameState {
   floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
   farmPlots: FarmPlot[];
   seeds: Record<SlimeFoodType, number>;
+  stats: GameStats;
 }
 
 export type SlimeFoodType = 'basic' | 'elemental' | 'royal';
@@ -285,6 +292,7 @@ export type GameAction =
   | { type: 'ADD_FLOOR_FOOD'; id: string; x: number; y: number; foodId: SlimeFoodType }
   | { type: 'REMOVE_FLOOR_FOOD'; id: string }
   | { type: 'SLIME_EAT_FOOD'; slimeId: string; foodId: string }
+  | { type: 'SPEED_UP_HATCHING' }
   | { type: 'UNLOCK_FARM_PLOT'; plotId: number }
   | { type: 'BUY_SEED'; seedType: SlimeFoodType }
   | { type: 'PLANT_CROP'; plotId: number; cropType: SlimeFoodType }

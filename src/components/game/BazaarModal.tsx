@@ -153,10 +153,11 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         toast({ title: "Slime Fed!", description: "Your slime gained XP." });
         break;
       case 'energy_crystal':
-        dispatch({ type: 'FINISH_HATCHING' });
+        // Make the egg ready to crack now. (FINISH_HATCHING just deleted the egg and the slime.)
+        dispatch({ type: 'SPEED_UP_HATCHING' });
         toast({
           title: "Egg Ready!",
-          description: "Your egg has instantly hatched!",
+          description: "Your egg is ready - tap it in the Hatchery to crack it open.",
         });
         break;
       case 'lucky_charm':

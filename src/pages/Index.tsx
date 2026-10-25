@@ -36,6 +36,7 @@ function GameLayout() {
   const [currentView, setCurrentView] = useState<'breeding' | 'breedingDen' | 'sanctuaries' | 'battleMap' | 'habitats' | 'hatchery' | 'farm'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
+  const claimableAchievements = state.achievements.filter(a => a.unlocked && !a.claimed).length;
   
   // Preload sprites on app startup
   useEffect(() => {
@@ -351,6 +352,18 @@ function GameLayout() {
               <BookOpen className={toolbarIcon} />
               <span className={toolbarLabel}>Codex</span>
             </button>
+
+          <div className="relative group">
+            <button onClick={() => setShowAchievements(true)} className={toolbarCircle}>
+              <Trophy className={toolbarIcon} />
+              <span className={toolbarLabel}>Achievements</span>
+              {claimableAchievements > 0 && (
+                <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1 rounded-full bg-[#FF1493] text-white text-[11px] font-black flex items-center justify-center border-2 border-white shadow-lg animate-pulse">
+                  {claimableAchievements}
+                </span>
+              )}
+            </button>
+          </div>
         </div>
 
         {/* Habitat Viewer Modal */}

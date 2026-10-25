@@ -6,14 +6,8 @@ import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS
 import { audioEngine } from '@/utils/audioEngine';
 import { CodexManager } from '@/utils/codexManager';
 import { getCodexSlime } from '@/data/slimeCodex';
-
-const DEFAULT_ACHIEVEMENTS: Achievement[] = [
-  { id: 'first_fusion', name: 'First Fusion', description: 'Breed your first slime', reward: '50 goo', rewardAmount: 50, unlocked: false, claimed: false },
-  { id: 'rare_find', name: 'Rare Find', description: 'Obtain a Rare+ slime', reward: '50 goo', rewardAmount: 50, unlocked: false, claimed: false },
-  { id: 'slime_hoarder', name: 'Slime Hoarder', description: 'Collect 20 slimes', reward: '200 goo', rewardAmount: 200, unlocked: false, claimed: false },
-  { id: 'mythic_hunter', name: 'Legendary Hunter', description: 'Obtain a Legendary slime', reward: '500 goo', rewardAmount: 500, unlocked: false, claimed: false },
-  { id: 'rhythm_master', name: 'Rhythm Master', description: 'Hit 10 perfect rhythm taps in a row', reward: '100 goo', rewardAmount: 100, unlocked: false, claimed: false },
-];
+import { ACHIEVEMENT_DEFS, DEFAULT_STATS, createAchievementState, mergeAchievements } from '@/data/achievements';
+import { toast } from '@/hooks/use-toast';
 
 export function getStage(level: number): SlimeEvolutionStage {
   if (level < 5) return 'baby';
@@ -152,7 +146,7 @@ function createInitialState(): GameState {
       activeBreeding: saved.activeBreeding ?? null,
       activeHatching: saved.activeHatching ?? null,
       breedHistory: saved.breedHistory ?? [],
-      achievements: saved.achievements ?? DEFAULT_ACHIEVEMENTS,
+      achievements: mergeAchievements(saved.achievements),
       mutationJuiceActive: saved.mutationJuiceActive ?? false,
       totalBreeds: saved.totalBreeds ?? 0,
       perfectTaps: saved.perfectTaps ?? 0,
@@ -162,7 +156,6 @@ function createInitialState(): GameState {
       discoveredElements: saved.discoveredElements ?? [],
       habitats: saved.habitats ?? [],
       pendingHabitatPlacement: saved.pendingHabitatPlacement ?? null,
-      happiness: saved.happiness ?? {},
       lastEvolution: null,
       lastLevelUp: null,
       lastPlayerLevelUp: saved.lastPlayerLevelUp ?? null,
@@ -173,6 +166,7 @@ function createInitialState(): GameState {
       floorFood: saved.floorFood ?? [],
       farmPlots: saved.farmPlots ?? createDefaultFarmPlots(),
       seeds: saved.seeds ?? { basic: 0, elemental: 0, royal: 0 },
+      stats: { ...DEFAULT_STATS, ...(saved.stats ?? {}) },
     };
   }
   return {
@@ -184,7 +178,7 @@ function createInitialState(): GameState {
     activeBreeding: null,
     activeHatching: null,
     breedHistory: [],
-    achievements: DEFAULT_ACHIEVEMENTS,
+    achievements: createAchievementState(),
     mutationJuiceActive: false,
     totalBreeds: 0,
     perfectTaps: 0,
@@ -194,7 +188,6 @@ function createInitialState(): GameState {
     discoveredElements: [],
     habitats: [],
     pendingHabitatPlacement: null,
-    happiness: {},
     lastEvolution: null,
     lastLevelUp: null,
     lastPlayerLevelUp: null,
@@ -205,6 +198,7 @@ function createInitialState(): GameState {
     floorFood: [],
     farmPlots: createDefaultFarmPlots(),
     seeds: { basic: 0, elemental: 0, royal: 0 },
+    stats: { ...DEFAULT_STATS },
   };
 }
 
@@ -226,7 +220,6 @@ export interface LocalGameState {
   discoveredModels: number[];
   discoveredElements: SlimeElement[];
   habitats: Habitat[];
-  happiness: Record<string, number>;
   lastEvolution: { slimeId: string; stage: SlimeEvolutionStage } | null;
   lastLevelUp: { slimeId: string; newLevel: number } | null;
   lastPlayerLevelUp: { newLevel: number } | null;
@@ -268,6 +261,11 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         slimes: updatedSlimes,
         goo: Math.round((state.goo + result.gooReward) * 100) / 100,
         currentLevel: nextLevel,
+        stats: {
+          ...state.stats,
+          battlesWon: state.stats.battlesWon + (isWin ? 1 : 0),
+          bossesDefeated: state.stats.bossesDefeated + (isWin && result.levelReached % 5 === 0 ? 1 : 0),
+        },
         lastLevelUp: levelUp ?? state.lastLevelUp,
         lastEvolution: evolution ?? state.lastEvolution,
       };
@@ -328,6 +326,20 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           a.id === action.id ? { ...a, unlocked: true, unlockedAt: Date.now() } : a
         ),
       };
+    case 'CLAIM_ACHIEVEMENT': {
+      const ach = state.achievements.find(a => a.id === action.id);
+      if (!ach || !ach.unlocked || ach.claimed) return state;
+      return {
+        ...state,
+        goo: Math.round((state.goo + ach.rewardAmount) * 100) / 100,
+        achievements: state.achievements.map(a => (a.id === action.id ? { ...a, claimed: true } : a)),
+      };
+    }
+    case 'SPEED_UP_HATCHING':
+      // Make the egg ready to crack right now (it used to be deleted, losing the slime)
+      return state.activeHatching
+        ? { ...state, activeHatching: { ...state.activeHatching, endTime: Date.now() } }
+        : state;
     case 'ADD_BREED_HISTORY':
       return {
         ...state,
@@ -498,6 +510,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         slimes: state.slimes.map(s => (s.id === slime.id ? gained.slime : s)),
         floorFood: newFloorFood,
+        stats: { ...state.stats, feeds: state.stats.feeds + 1 },
         lastLevelUp: gained.leveledUp ?? state.lastLevelUp,
         lastEvolution: gained.evolved ?? state.lastEvolution,
       };
@@ -515,6 +528,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         slimes: state.slimes.map(s => (s.id === target.id ? gained.slime : s)),
         goo: Math.round((state.goo - food.cost) * 100) / 100,
+        stats: { ...state.stats, feeds: state.stats.feeds + 1 },
         lastEvolution: gained.evolved ?? state.lastEvolution,
         lastLevelUp: gained.leveledUp ?? state.lastLevelUp,
       };
@@ -573,6 +587,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         ...state,
         farmPlots,
         inventory: { ...state.inventory, [cropType]: currentQuantity + 1 },
+        stats: { ...state.stats, harvests: state.stats.harvests + 1 },
       };
     }
     case 'COMPLETE_TUTORIAL':
@@ -677,21 +692,26 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         }
       }
 
-      // Happiness bonus, cut to 20%
-      for (const [slimeId, happiness] of Object.entries(state.happiness)) {
-        if (happiness > 50) {
-          const slime = state.slimes.find(s => s.id === slimeId);
-          if (slime) {
-            const levelMult = 1 + (slime.level - 1) * 0.1;
-            gooPerTick += ((happiness / 100) * (slime.rarityScore * 0.05 * levelMult) / 10) * 0.2;
-          }
-        }
-      }
-
       if (gooPerTick > 0) dispatch({ type: 'ADD_GOO', amount: gooPerTick });
     }, 100);
     return () => clearInterval(interval);
-  }, [state.slimes, state.habitats, state.happiness]);
+  }, [state.slimes, state.habitats]);
+
+  // Unlock achievements as soon as their requirements are met. Deliberately NOT dependent
+  // on goo (it changes every 100ms); only on the state the achievements actually read.
+  useEffect(() => {
+    for (const def of ACHIEVEMENT_DEFS) {
+      const ach = state.achievements.find(a => a.id === def.id);
+      if (!ach || ach.unlocked) continue;
+      if (def.progress(state) >= def.target) {
+        dispatch({ type: 'UNLOCK_ACHIEVEMENT', id: def.id });
+        toast({
+          title: `🏆 Achievement unlocked: ${def.name}`,
+          description: `${def.description} — claim ${def.rewardAmount} goo in the Achievements menu.`,
+        });
+      }
+    }
+  }, [state.slimes, state.totalBreeds, state.habitats, state.stats, state.currentLevel, state.farmPlots, state.achievements]);
 
   useEffect(() => {
     if (state.muted !== audioEngine.muted) audioEngine.toggleMute();

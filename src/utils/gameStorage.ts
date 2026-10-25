@@ -17,7 +17,7 @@ export function saveGame(state: GameState): void {
       discoveredModels: state.discoveredModels,
       discoveredElements: state.discoveredElements,
       habitats: state.habitats,
-      happiness: state.happiness,
+      stats: state.stats,
       currentLevel: state.currentLevel,
       tutorialCompleted: state.tutorialCompleted,
       completedTutorialChapters: state.completedTutorialChapters,
