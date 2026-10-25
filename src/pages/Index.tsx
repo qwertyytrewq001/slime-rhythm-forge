@@ -164,6 +164,10 @@ function GameLayout() {
       if (dialogueLevels.includes(result.level)) {
         setDialogueLevel(result.level);
         setShowLevelDialogue(true);
+      } else {
+        // Later story beats (Voss at 30/45, final battle at 50, ...) live in the
+        // Glim tutorial and were never triggered for levels above 16.
+        triggerDialogue('levelUp', { level: result.level });
       }
     }
   };

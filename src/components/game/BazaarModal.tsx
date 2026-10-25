@@ -59,6 +59,14 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
 
   const unlockedElements = getUnlockedElements(playerLevel);
 
+  // The Bazaar intro ("Eggs! Pick one...") belongs to the moment the shop is first
+  // opened, not after the first purchase (it used to fire from the buy handlers).
+  React.useEffect(() => {
+    if (!hasSeenEvent('firstBazaarOpen')) {
+      triggerDialogue('shop-purchase');
+    }
+  }, []);
+
   const getRequiredLevel = (element: SlimeElement): number => {
     return 1;
   };
@@ -84,9 +92,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
     }
     dispatch({ type: 'SPEND_GOO', amount: STARTER_EGG_COST });
     audioEngine.playSfx('purchase');
-    
-    if (!state.completedTutorialChapters.includes('breeding') && !hasSeenEvent('firstBazaarOpen')) {
-      triggerDialogue('shop-purchase');
+
+    // First egg ever bought: "Good. Now head to the hatchery and get that egg warm."
+    if (!hasSeenEvent('firstEggBought')) {
+      triggerDialogue('breeding-intro');
     }
 
     const newSlime = createElementSlime(element);

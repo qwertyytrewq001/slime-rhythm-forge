@@ -103,11 +103,9 @@ export function BreedingPod(props: BreedingPodProps) {
   const [whisperIndex, setWhisperIndex] = useState(0);
 
   useEffect(() => {
-    // Trigger breeding intro lore if chapter not finished AND only once
-    if (!state.completedTutorialChapters.includes('breeding') && !hasSeenEvent('secondHatch') && !hasSeenEvent('breedingIntroShown')) {
-      triggerDialogue('breeding-intro');
-    }
-    
+    // NOTE: the 'breeding-intro' dialogue ("head to the hatchery") is fired when
+    // the first egg is bought (BazaarModal). It used to fire here on mount, which
+    // marked it as seen at launch so it never played at the right time.
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);

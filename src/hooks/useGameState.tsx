@@ -20,6 +20,41 @@ export function getStage(level: number): SlimeEvolutionStage {
   return 'adult';
 }
 
+// XP needed to go from this level to the next one
+function xpToNextLevel(level: number): number {
+  if (level < 15) return 8 + level * 4;          // levels 1-14
+  if (level < 30) return 60 + (level - 15) * 12; // levels 15-29
+  return 240 + (level - 30) * 25;                // levels 30-49
+}
+
+const MAX_SLIME_LEVEL = 50;
+
+// Single source of truth for giving a slime XP (battles, feeding, floor food).
+// Also reports level-ups and evolutions so the popups can fire for every source.
+export function addXp(slime: Slime, amount: number): {
+  slime: Slime;
+  leveledUp: GameState['lastLevelUp'];
+  evolved: GameState['lastEvolution'];
+} {
+  const oldLevel = slime.level;
+  const oldStage = getStage(oldLevel);
+  let level = slime.level;
+  let xp = slime.xp + amount;
+  while (level < MAX_SLIME_LEVEL && xp >= xpToNextLevel(level)) {
+    xp -= xpToNextLevel(level);
+    level++;
+  }
+  const newStage = getStage(level);
+  const now = Date.now();
+  return {
+    slime: { ...slime, level, xp },
+    leveledUp: level > oldLevel
+      ? { slimeId: slime.id, slimeName: slime.name, oldLevel, newLevel: level, timestamp: now }
+      : null,
+    evolved: newStage !== oldStage ? { slimeId: slime.id, stage: newStage, timestamp: now } : null,
+  };
+}
+
 function migrateRarityTier(tier: string): string {
   if (tier === 'Mythic') return 'Divine';
   if (tier === 'Supreme') return 'Ancient';
@@ -191,48 +226,27 @@ export interface LocalGameState {
   seeds: Record<SlimeFoodType, number>;
 }
 
-function gameReducer(state: GameState, action: GameAction): GameState {
+export function gameReducer(state: GameState, action: GameAction): GameState {
   switch (action.type) {
     case 'BATTLE_REWARD': {
       const { result } = action;
       const isWin = result.winner === 'player';
-      
-      const updatedSlimes = state.slimes.map(s => {
-        const teamSlime = result.playerTeam.find(ps => ps.id === s.id);
-        if (!teamSlime) return s;
 
-        let newXp = s.xp + result.xpReward;
-        let newLevel = s.level;
-        let xpToNext: number;
-        
-        // Progressive food requirements: harder as levels increase
-        if (newLevel < 15) {
-          // Levels 1-14: Standard progression (battle rewards as main source)
-          xpToNext = 8 + newLevel * 4;
-        } else if (newLevel < 30) {
-          // Levels 15-29: Harder progression
-          xpToNext = 60 + (newLevel - 15) * 12;
-        } else {
-          // Levels 30-50: Very hard progression
-          xpToNext = 240 + (newLevel - 30) * 25;
+      // Run XP through the shared helper so battle XP triggers the same
+      // level-up / evolution popups as feeding does.
+      let levelUp: GameState['lastLevelUp'] = null;
+      let evolution: GameState['lastEvolution'] = null;
+      const updatedSlimes: Slime[] = [];
+      for (const s of state.slimes) {
+        if (!result.playerTeam.find(ps => ps.id === s.id)) {
+          updatedSlimes.push(s);
+          continue;
         }
-        
-        while (newXp >= xpToNext && newLevel < 50) {
-          newXp -= xpToNext;
-          newLevel++;
-          
-          // Recalculate XP needed for next level
-          if (newLevel < 15) {
-            xpToNext = 8 + newLevel * 4;
-          } else if (newLevel < 30) {
-            xpToNext = 60 + (newLevel - 15) * 12;
-          } else {
-            xpToNext = 240 + (newLevel - 30) * 25;
-          }
-        }
-        
-        return { ...s, level: newLevel, xp: newXp };
-      });
+        const gained = addXp(s, result.xpReward);
+        levelUp = levelUp ?? gained.leveledUp;
+        evolution = evolution ?? gained.evolved;
+        updatedSlimes.push(gained.slime);
+      }
 
       const nextLevel = isWin ? Math.max(state.currentLevel, result.levelReached + 1) : state.currentLevel;
 
@@ -241,6 +255,8 @@ function gameReducer(state: GameState, action: GameAction): GameState {
         slimes: updatedSlimes,
         goo: Math.round((state.goo + result.gooReward) * 100) / 100,
         currentLevel: nextLevel,
+        lastLevelUp: levelUp ?? state.lastLevelUp,
+        lastEvolution: evolution ?? state.lastEvolution,
       };
     }
     case 'SET_CURRENT_LEVEL':
@@ -455,127 +471,39 @@ function gameReducer(state: GameState, action: GameAction): GameState {
     case 'SLIME_EAT_FOOD': {
       const floorFoodIndex = state.floorFood.findIndex(food => food.id === action.foodId);
       if (floorFoodIndex === -1) return state;
-      
-      const newFloorFood = [...state.floorFood];
-      newFloorFood.splice(floorFoodIndex, 1);
-      
-      const food = SLIME_FOODS[action.foodId];
+
+      const food = SLIME_FOODS[state.floorFood[floorFoodIndex].foodId];
       const slime = state.slimes.find(s => s.id === action.slimeId);
       if (!slime) return state;
-      
-      let newXp = slime.xp + food.xpValue;
-      let newLevel = slime.level;
-      let xpToNext: number;
-      let didLevelUp = false;
 
-      const oldStage = getStage(newLevel);
+      const newFloorFood = [...state.floorFood];
+      newFloorFood.splice(floorFoodIndex, 1);
 
-      // Progressive food requirements: harder as levels increase
-      if (newLevel < 15) {
-        // Levels 1-14: Standard progression (battle rewards as main source)
-        xpToNext = 8 + newLevel * 4; // More food needed each level
-      } else if (newLevel < 30) {
-        // Levels 15-29: Harder progression
-        xpToNext = 60 + (newLevel - 15) * 12; // Significantly more food needed
-      } else {
-        // Levels 30-50: Very hard progression
-        xpToNext = 240 + (newLevel - 30) * 25; // Much more food needed
-      }
+      const gained = addXp(slime, food.xpValue);
 
-      while (newXp >= xpToNext && newLevel < 50) {
-        newXp -= xpToNext;
-        newLevel++;
-        
-        // Recalculate XP needed for next level
-        if (newLevel < 15) {
-          xpToNext = 8 + newLevel * 4;
-        } else if (newLevel < 30) {
-          xpToNext = 60 + (newLevel - 15) * 12;
-        } else {
-          xpToNext = 240 + (newLevel - 30) * 25;
-        }
-        
-        didLevelUp = true;
-      }
-
-      const newStage = getStage(newLevel);
-      let evolved: { slimeId: string; stage: SlimeEvolutionStage; timestamp: number } | null = null;
-      if (newStage !== oldStage) {
-        evolved = { slimeId: slime.id, stage: newStage, timestamp: Date.now() };
-      }
-
-      const updatedSlimes = state.slimes.map(s => {
-        if (s.id !== slime.id) return s;
-        return { ...s, level: newLevel, xp: newXp };
-      });
-
-      return { ...state, slimes: updatedSlimes, floorFood: newFloorFood };
+      return {
+        ...state,
+        slimes: state.slimes.map(s => (s.id === slime.id ? gained.slime : s)),
+        floorFood: newFloorFood,
+        lastLevelUp: gained.leveledUp ?? state.lastLevelUp,
+        lastEvolution: gained.evolved ?? state.lastEvolution,
+      };
     }
     case 'FEED_SLIME_XP': {
       const food = SLIME_FOODS[action.foodType];
       if (state.goo < food.cost) return state;
 
-      let evolved: { slimeId: string; stage: SlimeEvolutionStage; timestamp: number } | null = null;
+      const target = state.slimes.find(s => s.id === action.slimeId);
+      if (!target) return state;
 
-      const slimes = state.slimes.map(s => {
-        if (s.id !== action.slimeId) return s;
-        
-        let newXp = s.xp + food.xpValue;
-        let newLevel = s.level;
-        let xpToNext: number;
-        let didLevelUp = false;
+      const gained = addXp(target, food.xpValue);
 
-        const oldStage = getStage(newLevel);
-
-        // Progressive food requirements: harder as levels increase
-        if (newLevel < 15) {
-          // Levels 1-14: Standard progression (battle rewards as main source)
-          xpToNext = 8 + newLevel * 4; // More food needed each level
-        } else if (newLevel < 30) {
-          // Levels 15-29: Harder progression
-          xpToNext = 60 + (newLevel - 15) * 12; // Significantly more food needed
-        } else {
-          // Levels 30-50: Very hard progression
-          xpToNext = 240 + (newLevel - 30) * 25; // Much more food needed
-        }
-
-        while (newXp >= xpToNext && newLevel < 50) {
-          newXp -= xpToNext;
-          newLevel++;
-          
-          // Recalculate XP needed for next level
-          if (newLevel < 15) {
-            xpToNext = 8 + newLevel * 4;
-          } else if (newLevel < 30) {
-            xpToNext = 60 + (newLevel - 15) * 12;
-          } else {
-            xpToNext = 240 + (newLevel - 30) * 25;
-          }
-          
-          didLevelUp = true;
-        }
-
-        const newStage = getStage(newLevel);
-        if (newStage !== oldStage) {
-          evolved = { slimeId: s.id, stage: newStage, timestamp: Date.now() };
-        }
-
-        return { ...s, level: newLevel, xp: newXp };
-      });
-
-      // Find if any slime leveled up for celebration
-      const fedSlime = slimes.find(s => s.id === action.slimeId);
-      const originalSlime = state.slimes.find(s => s.id === action.slimeId);
-      const leveledUp = fedSlime && originalSlime && fedSlime.level > originalSlime.level 
-        ? { slimeId: fedSlime.id, slimeName: fedSlime.name, oldLevel: originalSlime.level, newLevel: fedSlime.level, timestamp: Date.now() }
-        : null;
-
-      return { 
-        ...state, 
-        slimes, 
+      return {
+        ...state,
+        slimes: state.slimes.map(s => (s.id === target.id ? gained.slime : s)),
         goo: Math.round((state.goo - food.cost) * 100) / 100,
-        lastEvolution: evolved || state.lastEvolution,
-        lastLevelUp: leveledUp || state.lastLevelUp
+        lastEvolution: gained.evolved ?? state.lastEvolution,
+        lastLevelUp: gained.leveledUp ?? state.lastLevelUp,
       };
     }
     case 'CLEAR_EVOLUTION':

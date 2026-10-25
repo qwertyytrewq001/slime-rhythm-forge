@@ -9,6 +9,7 @@ import { drawEnhancedEgg } from '@/utils/eggRenderer';
 import { SlimeCanvas } from './SlimeCanvas';
 import { FairySparkle } from './FairySparkle';
 import { DiscoveryPopup } from './DiscoveryPopup';
+import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 interface HatcheryScreenProps {
   onClose: () => void;
@@ -97,6 +98,9 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
     if (!activeHatching) return;
     setIsHatching(true);
     audioEngine.playSfx('hatch');
+    // Story beats: first hatch ("it needs a home") and second hatch (altar/breeding intro).
+    // The trigger handler picks the right one using its seen-flags.
+    triggerDialogue('hatch-egg');
     
     // Add slime to state immediately
     const newSlime = activeHatching.slime;

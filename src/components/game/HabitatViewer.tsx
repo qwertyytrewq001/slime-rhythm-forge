@@ -9,6 +9,7 @@ import { SlimeGallery } from './SlimeGallery';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { FoodBag } from './FoodBag';
+import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 interface HabitatViewerProps {
   habitatId: string;
@@ -282,6 +283,7 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
 
   const handleFeed = (foodType: SlimeFoodType) => {
     if (!selectedSlime) return;
+    triggerDialogue('firstFeed');
     dispatch({ type: 'FEED_SLIME_XP', slimeId: selectedSlime.id, foodType });
   };
 

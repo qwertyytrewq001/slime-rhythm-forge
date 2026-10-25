@@ -49,14 +49,18 @@ const FIRST_TIME_EVENTS = {
 };
 
 // Check if event has been seen
-const hasSeenEvent = (eventName: keyof typeof FIRST_TIME_EVENTS): boolean => {
+type SeenEventName = keyof typeof FIRST_TIME_EVENTS | `levelStory_${number}`;
+
+const hasSeenEvent = (eventName: SeenEventName): boolean => {
   return localStorage.getItem(`glim_event_${eventName}`) === 'true';
 };
 
 // Mark event as seen
-const markEventSeen = (eventName: keyof typeof FIRST_TIME_EVENTS): void => {
+const markEventSeen = (eventName: SeenEventName): void => {
   localStorage.setItem(`glim_event_${eventName}`, 'true');
-  FIRST_TIME_EVENTS[eventName] = true;
+  if (eventName in FIRST_TIME_EVENTS) {
+    FIRST_TIME_EVENTS[eventName as keyof typeof FIRST_TIME_EVENTS] = true;
+  }
 };
 
 // PART 1 - FIRST TIME TUTORIAL FLOW
@@ -510,17 +514,19 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     console.log('🔍 hasSeenEvent secondHatch:', hasSeenEvent('secondHatch'));
     console.log('🔍 hasSeenEvent breedingIntroShown:', hasSeenEvent('breedingIntroShown'));
     
-    // Re-open if closed
-    if (!isOpen && onOpen) {
-      onOpen();
-    }
+    // Only open the panel when a trigger actually starts a NEW dialogue. Re-opening
+    // it for every trigger replayed stale text whenever an already-seen event fired.
+    const startDialogue = (lines: any[]) => {
+      setCurrentDialogue(lines);
+      if (!isOpen && onOpen) onOpen();
+    };
 
     // Handle breeding-intro trigger (what actually fires when egg is bought)
     if (triggerId === 'breeding-intro' && !hasSeenEvent('firstEggBought')) {
       console.log('🚀 Executing breeding-intro trigger for firstEggBought');
       markEventSeen('firstEggBought');
       markEventSeen('breedingIntroShown'); // Prevent repeated triggers
-      setCurrentDialogue(FIRST_EGG_DIALOGUE);
+      startDialogue(FIRST_EGG_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('proud');
@@ -531,7 +537,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'hatch-egg' && hasSeenEvent('firstHatch') && !hasSeenEvent('secondHatch')) {
       console.log('🚀 Executing second hatch trigger for breeding tutorial');
       markEventSeen('secondHatch');
-      setCurrentDialogue(FIRST_ALTAR_DIALOGUE);
+      startDialogue(FIRST_ALTAR_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('reverent');
@@ -551,7 +557,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'battle-start' && !hasSeenEvent('firstBattleMapOpen')) {
       console.log('🚀 Executing battle-start trigger for firstBattleMapOpen');
       markEventSeen('firstBattleMapOpen');
-      setCurrentDialogue(FIRST_BATTLE_DIALOGUE);
+      startDialogue(FIRST_BATTLE_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('surveying');
@@ -562,7 +568,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'shop-purchase' && !hasSeenEvent('firstBazaarOpen')) {
       console.log('🚀 Executing shop-purchase trigger for firstBazaarOpen');
       markEventSeen('firstBazaarOpen');
-      setCurrentDialogue(FIRST_BAZAAR_DIALOGUE);
+      startDialogue(FIRST_BAZAAR_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('excited');
@@ -576,7 +582,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       if (!hasSeenEvent('firstHabitatBuilt')) {
         console.log('🚀 Executing habitat-purchase trigger for firstHabitatBuilt');
         markEventSeen('firstHabitatBuilt');
-        setCurrentDialogue(FIRST_HABITAT_DIALOGUE);
+        startDialogue(FIRST_HABITAT_DIALOGUE);
         setCurrentDialogueIndex(0); // Reset to start
         setDisplayedText(''); // Clear displayed text
         setCurrentExpression('warm');
@@ -590,7 +596,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'hatch-egg' && !hasSeenEvent('firstHatch')) {
       console.log('🚀 Executing hatch-egg trigger for firstHatch');
       markEventSeen('firstHatch');
-      setCurrentDialogue(FIRST_HATCH_DIALOGUE);
+      startDialogue(FIRST_HATCH_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('frozen');
@@ -601,7 +607,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'breeding-complete' && !hasSeenEvent('firstBreedComplete')) {
       console.log('🚀 Executing breeding-complete trigger for firstBreedComplete');
       markEventSeen('firstBreedComplete');
-      setCurrentDialogue(FIRST_BREED_DIALOGUE);
+      startDialogue(FIRST_BREED_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('delighted');
@@ -612,7 +618,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstLaunch' && !hasSeenEvent('firstLaunch')) {
       console.log('🚀 Executing firstLaunch trigger');
       markEventSeen('firstLaunch');
-      setCurrentDialogue(FIRST_LAUNCH_DIALOGUE);
+      startDialogue(FIRST_LAUNCH_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('shocked');
@@ -626,7 +632,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
     if (triggerId === 'firstFeed' && !hasSeenEvent('firstFeed')) {
       markEventSeen('firstFeed');
-      setCurrentDialogue(FIRST_FEED_DIALOGUE);
+      startDialogue(FIRST_FEED_DIALOGUE);
       setCurrentDialogueIndex(0); // Reset to start
       setDisplayedText(''); // Clear displayed text
       setCurrentExpression('watching');
@@ -649,11 +655,15 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     }
 
     // Handle level-based dialogue
+    // (keyed by battle-map level; each story beat plays once)
     if (triggerId === 'levelUp') {
-      const playerLevel = data?.level || 1;
-      const levelDialogue = LEVEL_DIALOGUE[playerLevel as keyof typeof LEVEL_DIALOGUE];
-      if (levelDialogue) {
-        setCurrentDialogue(levelDialogue);
+      const battleLevel = data?.level || 1;
+      const levelDialogue = LEVEL_DIALOGUE[battleLevel as keyof typeof LEVEL_DIALOGUE];
+      if (levelDialogue && !hasSeenEvent(`levelStory_${battleLevel}`)) {
+        markEventSeen(`levelStory_${battleLevel}`);
+        startDialogue(levelDialogue);
+        setCurrentDialogueIndex(0);
+        setDisplayedText('');
         setCurrentExpression(levelDialogue[0].expression);
         setGlimPosition('bottom-left');
       }
@@ -674,7 +684,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     }
 
     if (triggerId === 'finalBattle') {
-      setCurrentDialogue([{
+      startDialogue([{
         expression: 'determined',
         text: "This is it."
       }, {
@@ -774,7 +784,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
   return (
     <div 
-      className="fixed inset-0 z-[200] pointer-events-none"
+      className="fixed inset-0 z-[10050] pointer-events-none"
       // The main container for dialogue should not be styled itself
       // but should act as a portal root for its children.
     >
