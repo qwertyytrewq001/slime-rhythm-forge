@@ -896,6 +896,26 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     description: 'Runs on pure enthusiasm and a suspicious amount of copper wire, and has never once been switched off. It remembers the Generator Sanctuaries of the Clockwork Grid, where the gears turned for the joy of it long before Voss gave them a quota.',
     family: 'metal-forged',
     spriteId: 'dynamo_slime'
+  },
+  {
+    id: 'chrome_slime',
+    name: 'Chrome Slime',
+    elements: ['light', 'metal'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Cannot walk past a puddle without checking its own reflection, and has never once been disappointed. It remembers the Mirror Sanctuaries of the Gleaming Foundry, where metal was polished until it learned to hold the light on its own.',
+    family: 'metal-forged',
+    spriteId: 'chrome_slime'
+  },
+  {
+    id: 'blightsteel_slime',
+    name: 'Blightsteel Slime',
+    elements: ['metal', 'shadow'],
+    rarityTier: 'Rare',
+    weight: 25,
+    description: 'Wears a stolen helmet two sizes too big and glares from under it like that was the plan all along. It haunts the Ruined Sanctuaries of the Blighted Armory, where the steel Voss left behind slowly remembered how to fight back.',
+    family: 'metal-forged',
+    spriteId: 'blightsteel_slime'
   }
 ];
 
