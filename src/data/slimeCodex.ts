@@ -766,6 +766,96 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     description: 'Cracked itself open once to show off and has been too embarrassed to close back up. It remembers the Crystal Sanctuaries of the Humming Deep, where the mountains themselves once sang in current.',
     family: 'underground-depths',
     spriteId: 'geode_spark_slime'
+  },
+  {
+    id: 'spark_slime',
+    name: 'Spark Slime',
+    elements: ['electric'],
+    rarityTier: 'Common',
+    weight: 100,
+    description: 'Cannot be hugged without a small, offended zap, and has never once apologized for it. It remembers the Dynamo Sanctuaries of the Static Fields, where the first lightning was caught and taught to behave.',
+    family: 'storm-forces',
+    spriteId: 'spark_slime'
+  },
+  {
+    id: 'cinderfrost_slime',
+    name: 'Cinderfrost Slime',
+    elements: ['fire', 'ice'],
+    rarityTier: 'Rare',
+    weight: 25,
+    description: 'Argues with itself constantly about whether the room is too hot or too cold, and both sides lose. It guards the Ember Sanctuaries of the Ashen Glacier, where fire and frost once called a truce and nobody knows who blinked first.',
+    family: 'frozen-realms',
+    spriteId: 'cinderfrost_slime'
+  },
+  {
+    id: 'voltfire_slime',
+    name: 'Voltfire Slime',
+    elements: ['electric', 'fire'],
+    rarityTier: 'Rare',
+    weight: 25,
+    description: 'Gets overexcited at the smallest things, and anything nearby tends to catch fire as a result. It remembers the Forge Sanctuaries of the Blazing Grid, where Voss first learned that wildfire could be made to run on a schedule.',
+    family: 'storm-forces',
+    spriteId: 'voltfire_slime'
+  },
+  {
+    id: 'cinder_wraith_slime',
+    name: 'Cinder Wraith Slime',
+    elements: ['fire', 'shadow'],
+    rarityTier: 'Rare',
+    weight: 25,
+    description: 'Holds the record for most dramatic entrance, mostly because it hovers in a doorway until someone notices. It haunts the Pyre Sanctuaries of the Smoldering Hollow, where fires that were put out still refuse to be forgotten.',
+    family: 'cosmic-elements',
+    spriteId: 'cinder_wraith_slime'
+  },
+  {
+    id: 'slush_slime',
+    name: 'Slush Slime',
+    elements: ['ice', 'water'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Cannot decide whether it is a liquid or a solid and is deeply sensitive about being asked. It remembers the Thaw Sanctuaries of the Brimming Shallows, where winter once melted politely instead of all at once.',
+    family: 'frozen-realms',
+    spriteId: 'slush_slime'
+  },
+  {
+    id: 'sprout_spark_slime',
+    name: 'Sprout Spark Slime',
+    elements: ['electric', 'plant'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Grows an inch every time it gets startled, and it startles at everything. It tends the Greenhouse Sanctuaries of the Humming Canopy, where plants once grew toward lightning instead of sunlight.',
+    family: 'natures-garden',
+    spriteId: 'sprout_spark_slime'
+  },
+  {
+    id: 'phantom_gust_slime',
+    name: 'Phantom Gust Slime',
+    elements: ['shadow', 'wind'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Slips through keyholes just to rearrange the furniture, then slips out again without a word. It drifts through the Whisper Sanctuaries of the Hollow Moors, where the wind carries the last words of things Voss tried to erase.',
+    family: 'cosmic-elements',
+    spriteId: 'phantom_gust_slime'
+  },
+  {
+    id: 'frostplate_slime',
+    name: 'Frostplate Slime',
+    elements: ['ice', 'metal'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Wears armor it does not need, because it saw a knight do it once and thought it looked important. It remembers the Bastion Sanctuaries of the Winterforge Wall, where the cold itself was hammered into a shield.',
+    family: 'frozen-realms',
+    spriteId: 'frostplate_slime'
+  },
+  {
+    id: 'glacier_gleam_slime',
+    name: 'Glacier Gleam Slime',
+    elements: ['ice', 'light'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: 'Spends the whole day trying to catch its own reflection and is always one blink too slow. It remembers the Prism Sanctuaries of the Radiant Ice Fields, where every glacier once held a rainbow in reserve.',
+    family: 'frozen-realms',
+    spriteId: 'glacier_gleam_slime'
   }
 ];
 
