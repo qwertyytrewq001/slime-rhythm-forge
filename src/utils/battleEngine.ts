@@ -112,19 +112,15 @@ export function toBattleSlime(slime: Slime): BattleSlime {
 // Opponents
 // ---------------------------------------------------------------------------
 
-// Matches the regions painted on the battle map (see WorldMap LEVEL_NODES).
-const REGIONS: Array<{ upTo: number; name: string; elements: SlimeElement[] }> = [
-  { upTo: 5, name: 'Starting Dock & Lowlands', elements: ['water', 'plant', 'earth', 'wind'] },
-  { upTo: 10, name: 'The Winding River', elements: ['water', 'plant', 'earth', 'ice'] },
-  { upTo: 15, name: 'Forest Ascent', elements: ['plant', 'earth', 'wind', 'light'] },
-  { upTo: 20, name: 'Central Plains', elements: ['wind', 'fire', 'earth', 'electric'] },
-  { upTo: 25, name: 'Rocky Highlands', elements: ['earth', 'fire', 'metal', 'wind'] },
-  { upTo: 30, name: 'Swampy Hollow', elements: ['water', 'plant', 'shadow', 'earth'] },
-  { upTo: 35, name: 'Peak Approaches', elements: ['ice', 'wind', 'light', 'metal'] },
-  { upTo: 40, name: 'Skyward Path', elements: ['wind', 'electric', 'light', 'water'] },
-  { upTo: 45, name: 'Ancient Spire', elements: ['shadow', 'light', 'metal', 'electric'] },
-  { upTo: 50, name: 'The Forgotten Castle', elements: ['shadow', 'metal', 'electric', 'fire', 'ice'] },
+// One region per world-map screen (10 levels each). Names match the painted maps in public/maps.
+export const MAP_SCREENS: Array<{ upTo: number; name: string; elements: SlimeElement[] }> = [
+  { upTo: 10, name: 'Verdant Lowlands', elements: ['water', 'plant', 'earth', 'wind'] },
+  { upTo: 20, name: 'Whispering Wood & Golden Plains', elements: ['plant', 'earth', 'wind', 'light', 'electric'] },
+  { upTo: 30, name: 'Ironcliff Mines & Murkmire Swamp', elements: ['earth', 'fire', 'metal', 'shadow', 'water', 'plant'] },
+  { upTo: 40, name: 'Frostpeak Skyway', elements: ['ice', 'wind', 'electric', 'light', 'water', 'metal'] },
+  { upTo: 50, name: 'The Forgotten Castle', elements: ['shadow', 'metal', 'electric', 'fire', 'light', 'ice'] },
 ];
+const REGIONS = MAP_SCREENS;
 
 export function getRegionForLevel(level: number) {
   return REGIONS.find(r => level <= r.upTo) ?? REGIONS[REGIONS.length - 1];
