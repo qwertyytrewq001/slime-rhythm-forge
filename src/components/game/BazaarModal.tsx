@@ -26,7 +26,6 @@ const ELEMENT_EGG_IMAGE: Record<SlimeElement, string> = {
 const ITEM_SHOP = [
   { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Next breed: 50% mutation rate', cost: 30, icon: '🧪', category: 'breeding', rarity: 'rare' },
   { id: 'wild_food', name: 'Wild Food', desc: 'Boost a random trait on selected slime', cost: 20, icon: '🥩', category: 'boosts', rarity: 'common' },
-  { id: 'element_treat', name: 'Element Treat', desc: 'Feed selected slime (+happiness)', cost: 15, icon: '🍬', category: 'boosts', rarity: 'common' },
   { id: 'energy_crystal', name: 'Energy Crystal', desc: 'Instantly complete hatching', cost: 50, icon: '💎', category: 'time', rarity: 'epic' },
   { id: 'lucky_charm', name: 'Lucky Charm', desc: 'Higher chance of rare offspring', cost: 40, icon: '🍀', category: 'breeding', rarity: 'rare' },
 ];
@@ -112,7 +111,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
     // Some items require a precondition (a selected slime, an egg currently
     // hatching) to do anything at all — check it up front so goo is never
     // spent for an item that silently does nothing.
-    if ((itemId === 'wild_food' || itemId === 'element_treat') && !state.selectedSlimeId) {
+    if (itemId === 'wild_food' && !state.selectedSlimeId) {
       toast({
         title: "No Slime Selected",
         description: "Select a slime first, then use this item on it.",
@@ -148,10 +147,6 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         toast({ title: "Trait Boosted!", description: "Your slime's traits have shifted." });
         break;
       }
-      case 'element_treat':
-        dispatch({ type: 'FEED_SLIME_XP', slimeId: state.selectedSlimeId!, foodType: 'elemental' });
-        toast({ title: "Slime Fed!", description: "Your slime gained XP." });
-        break;
       case 'energy_crystal':
         // Make the egg ready to crack now. (FINISH_HATCHING just deleted the egg and the slime.)
         dispatch({ type: 'SPEED_UP_HATCHING' });

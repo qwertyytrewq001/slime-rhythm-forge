@@ -7,21 +7,15 @@ import { audioEngine } from '@/utils/audioEngine';
 const FOODS: SlimeFoodType[] = ['basic', 'elemental', 'royal'];
 const DRAG_THRESHOLD = 6;
 
-export function FoodBagIcon({ className = '' }: { className?: string }) {
-  return (
-    <svg viewBox="0 0 64 64" className={className} aria-hidden="true">
-      <ellipse cx="32" cy="59" rx="20" ry="3.5" fill="rgba(0,0,0,0.3)" />
-      <path d="M20 21c-6 8-12 17-10 28 1 6 7 9 22 9s21-3 22-9c2-11-4-20-10-28z" fill="#d9a066" stroke="#5a3a1e" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M17 38c2 8 8 15 15 15" fill="none" stroke="#b0773f" strokeWidth="3" strokeLinecap="round" />
-      <path d="M20 21c2-5 5-8 8-9h8c3 1 6 4 8 9z" fill="#e8b97c" stroke="#5a3a1e" strokeWidth="3" strokeLinejoin="round" />
-      <path d="M18.5 24.5c9 3 18 3 27 0" fill="none" stroke="#ff7eb6" strokeWidth="5" strokeLinecap="round" />
-      <path d="M18.5 24.5c9 3 18 3 27 0" fill="none" stroke="#5a3a1e" strokeWidth="1.2" strokeLinecap="round" opacity="0.35" />
-      <path d="M32 26l-7 8 7-2 7 2z" fill="#ff1493" stroke="#5a3a1e" strokeWidth="2" strokeLinejoin="round" />
-      <circle cx="32" cy="27" r="2.6" fill="#ff7eb6" stroke="#5a3a1e" strokeWidth="1.6" />
-      <ellipse cx="25" cy="42" rx="3" ry="5" fill="#f4d3a4" opacity="0.7" />
-    </svg>
-  );
-}
+// Measured on public/ui_tray.png (1290x540): the four round slots, as fractions of the frame
+const FRAME_ASPECT = 1290 / 540;
+const SLOT_X = [0.1919, 0.3961, 0.6023, 0.8078];
+const SLOT_Y = 0.5019;
+const SLOT_SIZE = 0.163; // diameter as a fraction of the frame width
+const LABEL_Y = 0.805;
+
+const asset = (name: string) => `${import.meta.env.BASE_URL}${name}`;
+const crisp = { imageRendering: 'auto' as const };
 
 interface FeedTrayProps {
   /** The slime under a viewport point, or null. Used while dragging and to aim the drop. */
@@ -29,6 +23,10 @@ interface FeedTrayProps {
   selectedSlimeId: string | null;
   onDragHover: (slimeId: string | null) => void;
   onDragActive: (active: boolean) => void;
+  /** Where the dragged food is (viewport px), or null when the drag ends. Slimes run toward it. */
+  onDragMove?: (point: { x: number; y: number } | null) => void;
+  /** Shown when the bag is empty. */
+  onOpenFarm?: () => void;
   /** origin is where the food was released, or the tray item's centre for a tap. */
   onFeed: (food: SlimeFoodType, slimeId: string, origin: { x: number; y: number }) => void;
   onNeedSelect: () => void;
@@ -44,7 +42,7 @@ interface Drag {
   pointerId: number;
 }
 
-export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, onFeed, onNeedSelect }: FeedTrayProps) {
+export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, onDragMove, onOpenFarm, onFeed, onNeedSelect }: FeedTrayProps) {
   const { state } = useGameState();
   const [drag, setDrag] = useState<Drag | null>(null);
   const dragRef = useRef<Drag | null>(null);
@@ -65,6 +63,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
       const moved = cur.moved || Math.hypot(e.clientX - cur.startX, e.clientY - cur.startY) > DRAG_THRESHOLD;
       setDragBoth({ ...cur, x: e.clientX, y: e.clientY, moved });
       if (moved) {
+        onDragMove?.({ x: e.clientX, y: e.clientY });
         const over = slimeAt(e.clientX, e.clientY);
         if (over !== hoverRef.current) {
           hoverRef.current = over;
@@ -78,6 +77,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
       if (!cur || e.pointerId !== cur.pointerId) return;
       setDragBoth(null);
       onDragActive(false);
+      onDragMove?.(null);
       const over = hoverRef.current;
       hoverRef.current = null;
       onDragHover(null);
@@ -97,6 +97,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
     const cancel = () => {
       setDragBoth(null);
       onDragActive(false);
+      onDragMove?.(null);
       hoverRef.current = null;
       onDragHover(null);
     };
@@ -115,12 +116,30 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
   const startDrag = (e: React.PointerEvent, food: SlimeFoodType) => {
     if (e.button !== undefined && e.button !== 0) return;
     e.preventDefault();
+    if ((state.inventory[food] || 0) < 1) {
+      setShaking(food);
+      setTimeout(() => setShaking(null), 450);
+      return;
+    }
     audioEngine.playSfx('tap');
     onDragActive(true);
     setDragBoth({ food, startX: e.clientX, startY: e.clientY, x: e.clientX, y: e.clientY, moved: false, pointerId: e.pointerId });
   };
 
-  const showHint = state.stats.feeds === 0 && !selectedSlimeId && !drag;
+  const bagEmpty = FOODS.every(f => (state.inventory[f] || 0) < 1);
+  const showHint = !bagEmpty && state.stats.feeds === 0 && !selectedSlimeId && !drag;
+  const slotStyle = (i: number): React.CSSProperties => ({
+    left: `${SLOT_X[i] * 100}%`,
+    top: `${SLOT_Y * 100}%`,
+    width: `${SLOT_SIZE * 100}%`,
+    aspectRatio: '1',
+    transform: 'translate(-50%, -50%)',
+  });
+  const labelStyle = (i: number): React.CSSProperties => ({
+    left: `${SLOT_X[i] * 100}%`,
+    top: `${LABEL_Y * 100}%`,
+    transform: 'translate(-50%, -50%)',
+  });
 
   return (
     <>
@@ -128,34 +147,72 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
         {showHint && (
           <p className="px-3 py-1 rounded-full bg-black/60 text-white text-xs font-bold animate-pulse">Drag food onto a slime</p>
         )}
-        <div className="flex items-end gap-3 sm:gap-4 rounded-3xl border-2 border-white/25 bg-black/55 backdrop-blur-md px-4 pt-3 pb-2 shadow-[0_8px_30px_rgba(0,0,0,0.5)]">
-          <FoodBagIcon className={`w-14 h-14 sm:w-16 sm:h-16 shrink-0 drop-shadow-lg ${selectedSlimeId && !drag ? 'animate-bounce' : ''}`} />
+        {bagEmpty && !drag && (
+          <div className="flex items-center gap-2 rounded-full bg-black/65 backdrop-blur-md border border-white/20 pl-3 pr-1 py-1">
+            <span className="text-white text-xs font-bold">Bag empty. Grow food on the Farm</span>
+            {onOpenFarm && (
+              <button onClick={onOpenFarm} className="rounded-full bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] px-3 py-1 text-xs font-black text-white hover:scale-105 transition-transform">
+                Go to Farm
+              </button>
+            )}
+          </div>
+        )}
 
-          {FOODS.map(food => {
+        <div
+          className="relative drop-shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
+          style={{ width: 'min(92vw, 430px)', aspectRatio: String(FRAME_ASPECT) }}
+        >
+          <img src={asset('ui_tray.png')} alt="" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none" style={crisp} />
+
+          {/* Slot 1: the bag itself */}
+          <div className="absolute flex items-center justify-center pointer-events-none" style={slotStyle(0)}>
+            <img
+              src={asset('food_bag.png')}
+              alt=""
+              draggable={false}
+              className={`w-[88%] h-[88%] object-contain drop-shadow-lg ${selectedSlimeId && !drag ? 'animate-bounce' : ''}`}
+              style={crisp}
+            />
+          </div>
+          <span className="absolute text-[10px] sm:text-[11px] font-black text-[#5a3a1e] leading-none whitespace-nowrap pointer-events-none" style={labelStyle(0)}>
+            Food Bag
+          </span>
+
+          {/* Slots 2-4: the foods */}
+          {FOODS.map((food, idx) => {
+            const i = idx + 1;
             const info = SLIME_FOODS[food];
             const owned = state.inventory[food] || 0;
-            const affordable = owned > 0 || state.goo >= info.cost;
+            const affordable = owned > 0;
             const beingDragged = drag?.food === food && drag.moved;
 
             return (
-              <div key={food} className="flex flex-col items-center gap-1">
+              <div key={food}>
                 <button
                   onPointerDown={e => startDrag(e, food)}
-                  aria-label={`${info.name}, ${owned > 0 ? `${owned} owned` : `${info.cost} Goo`}`}
-                  className={`relative w-14 h-14 sm:w-16 sm:h-16 rounded-2xl border-2 flex items-center justify-center transition-all
-                    ${affordable ? 'bg-white/15 border-white/40 hover:bg-white/25 hover:-translate-y-1 cursor-grab active:cursor-grabbing' : 'bg-white/5 border-white/15 opacity-50'}
-                    ${beingDragged ? 'opacity-40' : ''}`}
-                  style={{ touchAction: 'none', animation: shaking === food ? 'feedShake .4s' : undefined }}
+                  aria-label={`${info.name}, ${owned} in bag`}
+                  className={`absolute rounded-full flex items-center justify-center transition-transform
+                    ${affordable ? 'hover:scale-110 cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'}`}
+                  style={{ ...slotStyle(i), touchAction: 'none', animation: shaking === food ? 'feedShake .4s' : undefined }}
                 >
-                  <img src={foodSpriteUrl(food)} alt="" draggable={false} className="w-10 h-10 sm:w-11 sm:h-11 pointer-events-none" style={{ imageRendering: 'pixelated' }} />
+                  <img
+                    src={foodSpriteUrl(food)}
+                    alt=""
+                    draggable={false}
+                    className={`w-[82%] h-[82%] object-contain pointer-events-none drop-shadow-md transition-opacity ${affordable ? '' : 'opacity-40 grayscale'} ${beingDragged ? 'opacity-30' : ''}`}
+                    style={crisp}
+                  />
                   {owned > 0 && (
-                    <span className="absolute -top-2 -right-2 min-w-[22px] h-[22px] px-1 rounded-full bg-[#FF1493] text-white text-xs font-black flex items-center justify-center border-2 border-white shadow">
+                    <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1 rounded-full bg-[#FF1493] text-white text-xs font-black flex items-center justify-center border-2 border-white shadow">
                       {owned}
                     </span>
                   )}
                 </button>
-                <span className={`text-[11px] font-black leading-none ${owned > 0 ? 'text-emerald-300' : affordable ? 'text-white/80' : 'text-red-300'}`}>
-                  {owned > 0 ? `+${info.xpValue} XP` : `${info.cost} 💧`}
+                <span
+                  className={`absolute text-[10px] sm:text-[11px] font-black leading-none whitespace-nowrap pointer-events-none ${owned > 0 ? 'text-emerald-700' : 'text-[#5a3a1e]/50'}`}
+                  style={labelStyle(i)}
+                >
+                  {owned > 0 ? `+${info.xpValue} XP` : 'Empty'}
                 </span>
               </div>
             );
@@ -169,12 +226,12 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
           src={foodSpriteUrl(drag.food)}
           alt=""
           draggable={false}
-          className="fixed z-[10060] w-16 h-16 pointer-events-none drop-shadow-[0_8px_8px_rgba(0,0,0,0.5)]"
-          style={{ left: drag.x, top: drag.y, transform: 'translate(-50%, -60%) rotate(-8deg) scale(1.1)', imageRendering: 'pixelated' }}
+          className="fixed z-[10060] w-20 h-20 pointer-events-none drop-shadow-[0_8px_8px_rgba(0,0,0,0.5)]"
+          style={{ left: drag.x, top: drag.y, transform: 'translate(-50%, -60%) rotate(-8deg) scale(1.1)', ...crisp }}
         />
       )}
 
-      <style>{`@keyframes feedShake { 0%,100% { transform: translateX(0) } 20% { transform: translateX(-6px) } 40% { transform: translateX(6px) } 60% { transform: translateX(-4px) } 80% { transform: translateX(4px) } }`}</style>
+      <style>{`@keyframes feedShake { 0%,100% { transform: translate(-50%,-50%) } 20% { transform: translate(calc(-50% - 6px),-50%) } 40% { transform: translate(calc(-50% + 6px),-50%) } 60% { transform: translate(calc(-50% - 4px),-50%) } 80% { transform: translate(calc(-50% + 4px),-50%) } }`}</style>
     </>
   );
 }

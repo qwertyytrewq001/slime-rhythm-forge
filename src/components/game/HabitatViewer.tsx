@@ -17,6 +17,7 @@ type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : nev
 interface HabitatViewerProps {
   habitatId: string;
   onClose: () => void;
+  onOpenFarm?: () => void;
 }
 
 // Pixel-art layered backgrounds for each element type
@@ -168,22 +169,73 @@ interface BouncingSlimeProps {
   slime: Slime;
   selected: boolean;
   targeted: boolean;
-  frozen: boolean;
+  dragging: boolean;
+  wantsFood: boolean;
+  attractRef: React.MutableRefObject<{ x: number; y: number } | null>;
   eatNonce: number;
   onSelect: (id: string) => void;
+  onPoke: (id: string) => void;
 }
 
-const GROUND_LEVEL = 75;
+// The ground band slimes live in (percent of the scene), and how they feel about moving around it
+const BAND = { minX: 10, maxX: 90, minY: 61, maxY: 80 };
+const GRAVITY = 1700; // px/s^2
 
-function BouncingSlime({ slime, selected, targeted, frozen, eatNonce, onSelect }: BouncingSlimeProps) {
-  const [position, setPosition] = useState({ x: Math.random() * 60 + 20, y: 60 });
-  const [velocity, setVelocity] = useState({ x: (Math.random() - 0.5) * 1.5, y: 0 });
-  const [rotation, setRotation] = useState(0);
-  const [scale, setScale] = useState(1);
+interface Personality {
+  idle: [number, number]; // seconds between moves
+  jump: [number, number]; // launch speed, px/s
+  range: number; // how far a wander can go, % of the scene
+  float?: boolean; // glides instead of hopping
+}
+const DEFAULT_PERSONALITY: Personality = { idle: [1.0, 2.4], jump: [320, 430], range: 22 };
+const PERSONALITIES: Record<string, Personality> = {
+  fire: { idle: [0.5, 1.3], jump: [430, 560], range: 30 },
+  electric: { idle: [0.4, 1.1], jump: [450, 590], range: 34 },
+  plant: { idle: [1.6, 3.2], jump: [250, 340], range: 16 },
+  earth: { idle: [1.8, 3.6], jump: [230, 320], range: 14 },
+  metal: { idle: [1.4, 2.8], jump: [290, 380], range: 18 },
+  ice: { idle: [1.0, 2.4], jump: [320, 420], range: 22 },
+  light: { idle: [0.9, 2.0], jump: [370, 470], range: 24 },
+  shadow: { idle: [1.0, 2.4], jump: [320, 440], range: 26 },
+  water: { idle: [0.8, 1.8], jump: [0, 0], range: 20, float: true },
+  wind: { idle: [0.5, 1.2], jump: [0, 0], range: 30, float: true },
+};
+
+const MOOD_BUBBLES = ['💤', '🎵', '💖', '✨', '🍃'];
+const rand = (a: number, b: number) => a + Math.random() * (b - a);
+const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
+
+type Mode = 'idle' | 'crouch' | 'air' | 'land' | 'glide';
+
+function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attractRef, eatNonce, onSelect, onPoke }: BouncingSlimeProps) {
+  const groundRef = useRef<HTMLDivElement>(null);
+  const bodyRef = useRef<HTMLDivElement>(null);
+  const shadowRef = useRef<HTMLDivElement>(null);
   const [eating, setEating] = useState(false);
-  const startTime = useRef(Date.now() + Math.random() * 2000);
-  const holdRef = useRef(false);
-  holdRef.current = frozen || selected;
+  const [bubble, setBubble] = useState<string | null>(null);
+
+  // Latest props for the animation loop, which must not restart on every render
+  const live = useRef({ selected, targeted, dragging, wantsFood });
+  live.current = { selected, targeted, dragging, wantsFood };
+
+  const sim = useRef({
+    x: rand(22, 78),
+    y: rand(BAND.minY + 2, BAND.maxY - 2),
+    z: 0,
+    vz: 0,
+    vx: 0,
+    vy: 0,
+    sx: 1,
+    sy: 1,
+    tilt: 0,
+    mode: 'idle' as Mode,
+    t: rand(0.2, 1.6),
+    tx: 0,
+    ty: 0,
+    jump: 0,
+    phase: rand(0, 6),
+    bubbleIn: rand(4, 10),
+  });
 
   // Chomp whenever fed
   useEffect(() => {
@@ -194,112 +246,246 @@ function BouncingSlime({ slime, selected, targeted, frozen, eatNonce, onSelect }
   }, [eatNonce]);
 
   useEffect(() => {
-    const interval = setInterval(() => {
-      const elapsed = (Date.now() - startTime.current) / 1000;
-      setPosition(prev => {
-        // Selected slimes (and everyone while food is being dragged) settle on the ground and hold still
-        if (holdRef.current) {
-          const vx = velocity.x * 0.7;
-          setVelocity({ x: vx, y: 0 });
-          setRotation(0);
-          setScale(1);
-          return { x: Math.min(90, Math.max(10, prev.x + vx)), y: prev.y + (GROUND_LEVEL - prev.y) * 0.2 };
+    const ground = groundRef.current;
+    const body = bodyRef.current;
+    const shadow = shadowRef.current;
+    if (!ground || !body || !shadow) return;
+    const pers = PERSONALITIES[slime.element] ?? DEFAULT_PERSONALITY;
+    let raf = 0;
+    let last = performance.now();
+
+    const startHop = (tx: number, ty: number, jump: number) => {
+      const s = sim.current;
+      s.tx = clamp(tx, BAND.minX, BAND.maxX);
+      s.ty = clamp(ty, BAND.minY, BAND.maxY);
+      s.jump = jump;
+      if (pers.float) {
+        s.mode = 'glide';
+      } else {
+        s.mode = 'crouch';
+        s.t = 0.14;
+      }
+    };
+
+    // Choose what to do next
+    const decide = () => {
+      const s = sim.current;
+      const l = live.current;
+      const parent = ground.parentElement;
+      const rect = parent?.getBoundingClientRect();
+      const attract = attractRef.current;
+
+      if (l.targeted) {
+        // food is right over me: bounce with excitement
+        startHop(s.x, s.y, 210);
+        return;
+      }
+      if (l.selected) {
+        // picked up: stay put but keep bouncing happily
+        startHop(s.x, s.y, 240);
+        s.t = 0; // next idle shortened below
+        return;
+      }
+      if (attract && rect && rect.width > 0) {
+        const px = ((attract.x - rect.left) / rect.width) * 100;
+        const py = ((attract.y - rect.top) / rect.height) * 100;
+        const dx = px - s.x;
+        const dy = clamp(py, BAND.minY, BAND.maxY) - s.y;
+        if (Math.abs(dx) < 9 && Math.abs(dy) < 8) {
+          startHop(s.x, s.y, 200); // close: fidget with excitement
+        } else {
+          // run toward the food, a few hops at a time
+          startHop(s.x + clamp(dx, -22, 22), s.y + clamp(dy, -8, 8), rand(pers.jump[0] || 300, pers.jump[1] || 420));
         }
+        return;
+      }
+      if (Math.random() < 0.18) {
+        // sometimes just look around
+        s.t = rand(pers.idle[0], pers.idle[1]);
+        return;
+      }
+      startHop(s.x + rand(-pers.range, pers.range), s.y + rand(-6, 6), rand(pers.jump[0], pers.jump[1]));
+    };
 
-        let newX = prev.x + velocity.x;
-        let newY = prev.y + velocity.y;
-        let newVelX = velocity.x;
-        let newVelY = velocity.y;
+    const tick = (now: number) => {
+      const dt = Math.min(0.05, (now - last) / 1000);
+      last = now;
+      const s = sim.current;
+      const l = live.current;
+      const secs = now / 1000;
+      s.t -= dt;
 
-        const element = slime.element;
-        switch(element) {
-          case 'fire':
-          case 'electric':
-            newVelX += (Math.random() - 0.5) * 0.4;
-            newVelY += (Math.random() - 0.5) * 0.4;
-            break;
-          case 'water':
-          case 'wind':
-            newVelY = Math.sin(elapsed * 2) * 0.5;
-            break;
-          case 'plant':
-          case 'earth':
-            newVelX *= 0.98;
-            break;
-          default:
-            newVelY += 0.12;
+      switch (s.mode) {
+        case 'idle': {
+          // breathing
+          s.sy = 1 + Math.sin(secs * 3 + s.phase) * 0.035;
+          s.sx = 1 + (1 - s.sy) * 0.7;
+          s.tilt *= 0.85;
+          if (pers.float) s.z = 16 + Math.sin(secs * 2.2 + s.phase) * 9;
+          s.bubbleIn -= dt;
+          if (s.bubbleIn <= 0) {
+            s.bubbleIn = rand(8, 15);
+            const pick = l.wantsFood && Math.random() < 0.35 ? '🍓' : MOOD_BUBBLES[Math.floor(Math.random() * MOOD_BUBBLES.length)];
+            setBubble(pick);
+            setTimeout(() => setBubble(null), 2000);
+          }
+          if (s.t <= 0) {
+            decide();
+            if (s.mode === 'idle') s.t = rand(pers.idle[0], pers.idle[1]);
+          }
+          break;
         }
-
-        if (!['water', 'wind'].includes(element)) {
-          newVelY += 0.15;
+        case 'crouch': {
+          s.sy += (0.76 - s.sy) * 0.4;
+          s.sx += (1.2 - s.sx) * 0.4;
+          if (s.t <= 0) {
+            const T = (2 * s.jump) / GRAVITY;
+            s.vz = s.jump;
+            s.vx = (s.tx - s.x) / T;
+            s.vy = (s.ty - s.y) / T;
+            s.mode = 'air';
+          }
+          break;
         }
-
-        if (newX < 10 || newX > 90) {
-          newVelX *= -0.8;
-          newX = newX < 10 ? 10 : 90;
+        case 'air': {
+          s.vz -= GRAVITY * dt;
+          s.z += s.vz * dt;
+          s.x = clamp(s.x + s.vx * dt, BAND.minX, BAND.maxX);
+          s.y = clamp(s.y + s.vy * dt, BAND.minY, BAND.maxY);
+          const stretch = clamp(Math.abs(s.vz) / (s.jump || 1), 0, 1);
+          s.sy += (1 + stretch * 0.2 - s.sy) * 0.3;
+          s.sx += (1 - stretch * 0.1 - s.sx) * 0.3;
+          s.tilt = clamp(s.vx * 0.6, -9, 9);
+          if (s.z <= 0 && s.vz < 0) {
+            s.z = 0;
+            s.mode = 'land';
+            s.t = 0.17;
+            s.sy = 0.74;
+            s.sx = 1.24;
+          }
+          break;
         }
-
-        if (newY > GROUND_LEVEL) {
-          newVelY *= -0.6;
-          newY = GROUND_LEVEL;
-          if (Math.random() > 0.97) newVelY = -3 - (Math.random() * 2);
+        case 'land': {
+          s.sy += (1 - s.sy) * 0.22;
+          s.sx += (1 - s.sx) * 0.22;
+          s.tilt *= 0.7;
+          if (s.t <= 0) {
+            s.mode = 'idle';
+            const bounceNow = l.selected || l.targeted;
+            s.t = bounceNow ? rand(0.25, 0.55) : rand(pers.idle[0], pers.idle[1]);
+          }
+          break;
         }
+        case 'glide': {
+          // floaters drift toward their target with a gentle bob and lean
+          const dx = s.tx - s.x;
+          const dy = s.ty - s.y;
+          const dist = Math.hypot(dx, dy);
+          const speed = (l.dragging ? 30 : 15) * dt;
+          if (dist < 0.8) {
+            s.mode = 'idle';
+            s.t = rand(pers.idle[0], pers.idle[1]);
+          } else {
+            s.x += (dx / dist) * Math.min(speed, dist);
+            s.y += (dy / dist) * Math.min(speed, dist);
+            s.tilt = clamp(dx * 0.8, -10, 10);
+          }
+          s.z = 16 + Math.sin(secs * 2.6 + s.phase) * 9;
+          s.sy = 1 + Math.sin(secs * 2.6 + s.phase) * 0.04;
+          s.sx = 1 + (1 - s.sy) * 0.7;
+          break;
+        }
+      }
 
-        newVelX *= 0.99;
-        newVelY *= 0.99;
+      // Depth: lower on screen reads as closer
+      const depth = (s.y - BAND.minY) / (BAND.maxY - BAND.minY);
+      const scale = 0.82 + 0.3 * depth;
+      ground.style.left = `${s.x}%`;
+      ground.style.top = `${s.y}%`;
+      ground.style.zIndex = String(20 + Math.round(s.y));
+      ground.style.transform = `translate(-50%, -100%) translateY(10px) scale(${scale})`;
+      body.style.transform = `translateY(${-s.z}px) rotate(${s.tilt}deg) scale(${s.sx}, ${s.sy})`;
+      const lift = clamp(s.z / 170, 0, 1);
+      shadow.style.transform = `translateX(-50%) scale(${1 - lift * 0.45}, ${1 - lift * 0.45})`;
+      shadow.style.opacity = String(0.4 - lift * 0.22);
 
-        setVelocity({ x: newVelX, y: newVelY });
-        setRotation(newVelX * 10);
-        setScale(1 + Math.sin(elapsed * 4) * 0.05);
+      raf = requestAnimationFrame(tick);
+    };
 
-        return { x: newX, y: newY };
-      });
-    }, 30);
+    raf = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(raf);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [slime.element]);
 
-    return () => clearInterval(interval);
-  }, [velocity, slime.element]);
+  // Tapping makes it hop and squeal
+  const poke = () => {
+    const s = sim.current;
+    if (s.mode === 'idle' || s.mode === 'land' || s.mode === 'glide') {
+      s.mode = 'air';
+      s.vz = 430;
+      s.jump = 430;
+      s.vx = 0;
+      s.vy = 0;
+      s.z = Math.max(s.z, 1);
+    }
+    onPoke(slime.id);
+  };
 
   const needed = xpToNextLevel(slime.level);
   const maxed = slime.level >= 50;
   const pct = maxed ? 100 : Math.min(100, (slime.xp / needed) * 100);
+  const start = sim.current;
 
   return (
     <div
-      className="absolute transition-none cursor-pointer"
-      onClick={(e) => { e.stopPropagation(); onSelect(slime.id); }}
-      data-slime-id={slime.id}
-      style={{
-        left: `${position.x}%`,
-        top: `${position.y}%`,
-        transform: `translate(-50%, -50%) rotate(${rotation}deg) scale(${scale})`,
-        zIndex: selected || targeted ? 25 : 20,
-        filter: 'drop-shadow(0 10px 15px rgba(0,0,0,0.3))',
-        pointerEvents: 'auto'
-      }}
+      ref={groundRef}
+      className="absolute pointer-events-none"
+      style={{ left: `${start.x}%`, top: `${start.y}%`, width: 120, height: 120, transform: 'translate(-50%, -100%)', transformOrigin: '50% 100%' }}
     >
+      {/* soft ground shadow, shrinks as the slime leaves the floor */}
+      <div
+        ref={shadowRef}
+        className="absolute left-1/2 bottom-[2px] w-24 h-5 rounded-[50%] bg-black blur-[3px]"
+        style={{ transform: 'translateX(-50%)', opacity: 0.4 }}
+      />
+
       {(selected || targeted) && (
         <div
-          className={`absolute left-1/2 bottom-2 -translate-x-1/2 h-6 rounded-[50%] blur-[3px] pointer-events-none ${targeted ? 'w-36 bg-[#7CFFB2]/70' : 'w-28 bg-[#FF7EB6]/60 animate-pulse'}`}
+          className={`absolute left-1/2 bottom-[-2px] -translate-x-1/2 h-6 rounded-[50%] blur-[3px] ${targeted ? 'w-36 bg-[#7CFFB2]/70' : 'w-28 bg-[#FF7EB6]/60 animate-pulse'}`}
         />
       )}
 
-      {(selected || targeted) && (
-        <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center gap-1">
-          <div className="flex items-center gap-2 rounded-full border border-white/25 bg-black/65 backdrop-blur-md px-3 py-1 whitespace-nowrap">
-            <span className="text-[10px] font-black uppercase tracking-wider text-white">{slime.name}</span>
-            <span className="text-[10px] font-black text-amber-300">Lv {slime.level}</span>
-          </div>
-          <div className="w-24 h-2 rounded-full bg-black/60 border border-white/25 overflow-hidden">
-            <div className="h-full rounded-full bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] transition-all duration-500" style={{ width: `${pct}%` }} />
-          </div>
-        </div>
-      )}
-
       <div
-        className={eating ? 'slime-eat' : targeted ? 'slime-target' : ''}
-        style={{ pointerEvents: 'none', transformOrigin: '50% 90%' }}
+        ref={bodyRef}
+        data-slime-id={slime.id}
+        className="absolute inset-0 cursor-pointer pointer-events-auto"
+        onClick={(e) => { e.stopPropagation(); onSelect(slime.id); poke(); }}
+        style={{ transformOrigin: '50% 100%', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,0.25))' }}
       >
-        <SlimeCanvas slime={slime} size={120} animated={true} />
+        {bubble && !selected && !targeted && (
+          <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-30 pointer-events-none rounded-full bg-white/85 px-2 py-0.5 text-base shadow animate-in zoom-in-50 fade-in duration-300">
+            {bubble}
+          </div>
+        )}
+
+        {(selected || targeted) && (
+          <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center gap-1">
+            <div className="flex items-center gap-2 rounded-full border border-white/25 bg-black/65 backdrop-blur-md px-3 py-1 whitespace-nowrap">
+              <span className="text-[10px] font-black uppercase tracking-wider text-white">{slime.name}</span>
+              <span className="text-[10px] font-black text-amber-300">Lv {slime.level}</span>
+            </div>
+            <div className="w-24 h-2 rounded-full bg-black/60 border border-white/25 overflow-hidden">
+              <div className="h-full rounded-full bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] transition-all duration-500" style={{ width: `${pct}%` }} />
+            </div>
+          </div>
+        )}
+
+        <div
+          className={eating ? 'slime-eat' : targeted ? 'slime-target' : ''}
+          style={{ pointerEvents: 'none', transformOrigin: '50% 90%' }}
+        >
+          <SlimeCanvas slime={slime} size={120} animated={true} />
+        </div>
       </div>
     </div>
   );
@@ -331,7 +517,7 @@ function FlyingFood({ fx }: { fx: Extract<Fx, { kind: 'fly' }> }) {
         transform: `translate(-50%, -50%) scale(${go ? 0.2 : 1.1}) rotate(${go ? 140 : -8}deg)`,
         opacity: go ? 0.2 : 1,
         transition: 'all 300ms cubic-bezier(.5,0,.9,.4)',
-        imageRendering: 'pixelated',
+        imageRendering: 'auto',
       }}
     />
   );
@@ -407,7 +593,7 @@ function FxLayer({ items }: { items: Fx[] }) {
   );
 }
 
-export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
+export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerProps) {
   const { state, dispatch } = useGameState();
   const [galleryOpen, setGalleryOpen] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
@@ -416,6 +602,7 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
   const [eatNonce, setEatNonce] = useState<Record<string, number>>({});
   const [fx, setFx] = useState<Fx[]>([]);
   const fxId = useRef(0);
+  const attractRef = useRef<{ x: number; y: number } | null>(null);
   const stateRef = useRef(state);
   stateRef.current = state;
   const habitat = state.habitats.find(h => h.id === habitatId);
@@ -460,6 +647,12 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
     }
   };
 
+  const handlePoke = (slimeId: string) => {
+    const c = centerOf(slimeId);
+    if (c) addFx({ kind: 'burst', x: c.x, y: c.y - 30, emojis: ['💖'], count: 3 }, 1100);
+    audioEngine.playSfx('tap');
+  };
+
   const handleFeed = (food: SlimeFoodType, slimeId: string, origin: { x: number; y: number }) => {
     const slime = state.slimes.find(s => s.id === slimeId);
     if (!slime) return;
@@ -470,9 +663,8 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
       addFx({ kind: 'text', x: c.x - 70, y: c.y - 90, text: 'Already max level!', color: '#ffffff' }, 1400);
       return;
     }
-    const owned = state.inventory[food] || 0;
-    if (owned < 1 && state.goo < info.cost) {
-      addFx({ kind: 'text', x: c.x - 50, y: c.y - 90, text: `Need ${info.cost} 💧`, color: '#ff8a8a' }, 1400);
+    if ((state.inventory[food] || 0) < 1) {
+      addFx({ kind: 'text', x: c.x - 60, y: c.y - 90, text: 'None left in the bag', color: '#ff8a8a' }, 1400);
       return;
     }
 
@@ -483,9 +675,8 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
     // The slime eats when the food reaches it
     setTimeout(() => {
       const live = stateRef.current;
-      const have = live.inventory[food] || 0;
-      if (have < 1 && live.goo < info.cost) return;
-      dispatch({ type: 'FEED_SLIME_XP', slimeId, foodType: food, fromInventory: have > 0 });
+      if ((live.inventory[food] || 0) < 1) return;
+      dispatch({ type: 'FEED_SLIME_XP', slimeId, foodType: food });
       setEatNonce(n => ({ ...n, [slimeId]: (n[slimeId] || 0) + 1 }));
       const at = centerOf(slimeId) ?? c;
       addFx({ kind: 'burst', x: at.x, y: at.y - 20, emojis: ['💖', '✨'], count: 6 });
@@ -495,6 +686,7 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
   };
 
   // Celebrate level-ups (and evolutions) on the slime itself, whatever caused them
+  const hasFood = Object.values(state.inventory).some(n => n > 0);
   const levelKey = assignedSlimes.map(s => `${s.id}:${s.level}`).join('|');
   const prevLevels = useRef<Record<string, number>>({});
   useEffect(() => {
@@ -560,9 +752,12 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
               slime={slime}
               selected={selectedId === slime.id}
               targeted={targetId === slime.id}
-              frozen={dragging}
+              dragging={dragging}
+              wantsFood={hasFood && slime.level < 50}
+              attractRef={attractRef}
               eatNonce={eatNonce[slime.id] || 0}
               onSelect={setSelectedId}
+              onPoke={handlePoke}
             />
           ))}
 
@@ -585,6 +780,8 @@ export function HabitatViewer({ habitatId, onClose }: HabitatViewerProps) {
             selectedSlimeId={selectedId && assignedSlimes.some(s => s.id === selectedId) ? selectedId : null}
             onDragHover={setTargetId}
             onDragActive={setDragging}
+            onDragMove={p => { attractRef.current = p; }}
+            onOpenFarm={onOpenFarm}
             onFeed={handleFeed}
             onNeedSelect={() => {
               const first = assignedSlimes[0];

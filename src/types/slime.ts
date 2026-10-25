@@ -183,24 +183,24 @@ export interface SlimeFood {
 export const SLIME_FOODS: Record<SlimeFoodType, SlimeFood> = {
   basic: {
     id: 'basic',
-    name: 'Sun-Ripened Berries',
-    description: 'Freshly foraged berries bursting with natural sweetness. A simple, wholesome snack.',
+    name: 'Glimberries',
+    description: 'Sweet little berries that glow faintly at dusk. Grown from Glimberry seeds.',
     cost: 20, // Increased from 5 to 20
     xpValue: 10,
     icon: '🍓',
   },
   elemental: {
     id: 'elemental',
-    name: 'Wildflower Honey',
-    description: 'Pure, golden nectar collected from rare spirit blooms. Provides a significant energy boost.',
+    name: 'Moonpetal Honey',
+    description: 'Golden honey made from Moonpetal Blossoms. A significant energy boost.',
     cost: 50, // Increased from 20 to 50
     xpValue: 55,
     icon: '🍯',
   },
   royal: {
     id: 'royal',
-    name: 'Enchanted Starfruit',
-    description: 'A legendary fruit that grows once a century. Radiates powerful energy that accelerates evolution.',
+    name: 'Starfruit',
+    description: 'A fruit that only ripens once the stars align. Wildly potent.',
     cost: 100,
     xpValue: 350,
     icon: '⭐',
@@ -215,7 +215,7 @@ export interface CropInfo {
 
 export const CROP_INFO: Record<SlimeFoodType, CropInfo> = {
   basic: { name: 'Glimberries', icon: '🫐', description: 'Sweet little berries that glow faintly at dusk.' },
-  elemental: { name: 'Moonpetal Blossom', icon: '🌼', description: 'A rare flowering herb that hums with quiet magic.' },
+  elemental: { name: 'Moonpetal Blossom', icon: '🌼', description: 'A rare flowering herb that hums with quiet magic. Its nectar is turned into honey.' },
   royal: { name: 'Starfruit Vine', icon: '🍇', description: 'A vine that only fruits once the stars align. Wildly potent.' },
 };
 
@@ -279,7 +279,7 @@ export type GameAction =
   | { type: 'CANCEL_HABITAT_PLACEMENT' }
   | { type: 'ASSIGN_SLIME_TO_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'REMOVE_SLIME_FROM_HABITAT'; habitatId: string; slimeId: string }
-  | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType; fromInventory?: boolean }
+  | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType }
   | { type: 'CLEAR_EVOLUTION' }
   | { type: 'CLEAR_LEVEL_UP' }
   | { type: 'CLEAR_PLAYER_LEVEL_UP' }

@@ -12,9 +12,8 @@ interface FeedPanelProps {
 }
 
 /**
- * The one place to feed a slime. Every food row shows what it gives and what it costs:
- * food you own (bought earlier or harvested on the farm) is used first and is free to feed,
- * otherwise the same button spends Goo.
+ * Feeding from the Spirit Codex. Food only comes from the farm (seeds cost Goo, harvests fill
+ * the bag), so every row feeds one item from the bag.
  */
 export function FeedPanel({ slimeId }: FeedPanelProps) {
   const { state, dispatch } = useGameState();
@@ -51,9 +50,9 @@ export function FeedPanel({ slimeId }: FeedPanelProps) {
   const stage = getStage(slime.level);
   const nextStageLevel = slime.level < 5 ? 5 : slime.level < 10 ? 10 : null;
 
-  const feed = (foodType: SlimeFoodType, fromInventory: boolean) => {
+  const feed = (foodType: SlimeFoodType) => {
     triggerDialogue('firstFeed');
-    dispatch({ type: 'FEED_SLIME_XP', slimeId: slime.id, foodType, fromInventory });
+    dispatch({ type: 'FEED_SLIME_XP', slimeId: slime.id, foodType });
     const key = ++lastGain.current;
     setGains(g => [...g, { key, amount: SLIME_FOODS[foodType].xpValue }]);
     setTimeout(() => setGains(g => g.filter(x => x.key !== key)), 1100);
@@ -109,20 +108,19 @@ export function FeedPanel({ slimeId }: FeedPanelProps) {
         <Utensils className="w-4 h-4" />
         <span className="text-xs font-black uppercase tracking-widest">Feed {slime.name}</span>
       </div>
-      <p className="text-[11px] font-semibold text-slate-500 -mt-1">Food you own is used first. If you have none, feeding costs Goo.</p>
+      <p className="text-[11px] font-semibold text-slate-500 -mt-1">Grow food on the Farm, then feed it here.</p>
 
       <div className="space-y-2">
         {FOOD_ORDER.map(foodId => {
           const food = SLIME_FOODS[foodId];
           const owned = state.inventory[foodId] || 0;
-          const useOwned = owned > 0;
-          const canFeed = !isMax && (useOwned || state.goo >= food.cost);
+          const canFeed = !isMax && owned > 0;
           const toLevel = isMax ? 0 : Math.max(1, Math.ceil((needed - slime.xp) / food.xpValue));
 
           return (
             <button
               key={foodId}
-              onClick={() => canFeed && feed(foodId, useOwned)}
+              onClick={() => canFeed && feed(foodId)}
               disabled={!canFeed}
               className={`w-full flex items-center gap-3 rounded-2xl border-2 px-3 py-2.5 text-left transition-all active:scale-[0.98] ${
                 canFeed
@@ -143,12 +141,8 @@ export function FeedPanel({ slimeId }: FeedPanelProps) {
                 <span className="block text-xs font-bold text-emerald-600">+{food.xpValue} XP</span>
                 {!isMax && <span className="block text-[11px] text-slate-500">{toLevel} to level up</span>}
               </span>
-              <span
-                className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-black text-white ${
-                  useOwned ? 'bg-emerald-500' : 'bg-gradient-to-r from-[#FF7EB6] to-[#FF1493]'
-                }`}
-              >
-                {useOwned ? 'Feed' : `Feed · ${food.cost} 💧`}
+              <span className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-black text-white ${canFeed ? 'bg-emerald-500' : 'bg-slate-400'}`}>
+                {isMax ? 'Max' : owned > 0 ? 'Feed' : 'None'}
               </span>
             </button>
           );

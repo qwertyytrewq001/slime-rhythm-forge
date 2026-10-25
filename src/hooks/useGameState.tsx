@@ -203,7 +203,7 @@ function createInitialState(): GameState {
     currentLevel: 1,
     tutorialCompleted: false,
     completedTutorialChapters: [],
-    inventory: { basic: 0, elemental: 0, royal: 0 },
+    inventory: { basic: 3, elemental: 0, royal: 0 },
     floorFood: [],
     farmPlots: createDefaultFarmPlots(),
     seeds: { basic: 0, elemental: 0, royal: 0 },
@@ -526,9 +526,9 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
     }
     case 'FEED_SLIME_XP': {
       const food = SLIME_FOODS[action.foodType];
-      // Owned food (bought earlier or harvested on the farm) is free to feed; otherwise it costs Goo
+      // Food only comes from the farm: seeds cost Goo, harvests fill the bag, feeding uses the bag
       const owned = state.inventory[action.foodType] || 0;
-      if (action.fromInventory ? owned < 1 : state.goo < food.cost) return state;
+      if (owned < 1) return state;
 
       const target = state.slimes.find(s => s.id === action.slimeId);
       if (!target || target.level >= MAX_SLIME_LEVEL) return state;
@@ -538,8 +538,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return {
         ...state,
         slimes: state.slimes.map(s => (s.id === target.id ? gained.slime : s)),
-        goo: action.fromInventory ? state.goo : Math.round((state.goo - food.cost) * 100) / 100,
-        inventory: action.fromInventory ? { ...state.inventory, [action.foodType]: owned - 1 } : state.inventory,
+        inventory: { ...state.inventory, [action.foodType]: owned - 1 },
         stats: { ...state.stats, feeds: state.stats.feeds + 1 },
         lastEvolution: gained.evolved ?? state.lastEvolution,
         lastLevelUp: gained.leveledUp ?? state.lastLevelUp,

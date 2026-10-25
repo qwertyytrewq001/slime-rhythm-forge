@@ -369,7 +369,11 @@ function GameLayout() {
         {/* Habitat Viewer Modal */}
         <div className="pointer-events-auto">
           {selectedHabitatId && (
-            <HabitatViewer habitatId={selectedHabitatId} onClose={() => setSelectedHabitatId(null)} />
+            <HabitatViewer
+              habitatId={selectedHabitatId}
+              onClose={() => setSelectedHabitatId(null)}
+              onOpenFarm={() => { setSelectedHabitatId(null); setCurrentView('farm'); }}
+            />
           )}
         </div>
       </div>

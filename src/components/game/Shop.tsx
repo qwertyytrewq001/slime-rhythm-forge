@@ -61,7 +61,6 @@ function EggCanvas({ element }: { element: SlimeElement }) {
 const ITEM_SHOP = [
   { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Next breed: 50% mutation rate', cost: 30, icon: '🧪' },
   { id: 'wild_food', name: 'Wild Food', desc: 'Boost a random trait on selected slime', cost: 20, icon: '🥩' },
-  { id: 'element_treat', name: 'Element Treat', desc: 'Feed selected slime (+happiness)', cost: 15, icon: '🍬' },
 ];
 
 const STARTER_EGG_COST = 50;
@@ -136,9 +135,6 @@ export function Shop() {
           const randomTrait = traitKeys[Math.floor(Math.random() * traitKeys.length)];
           dispatch({ type: 'BOOST_TRAIT', slimeId: state.selectedSlimeId, trait: randomTrait });
         }
-        break;
-      case 'element_treat':
-        if (state.selectedSlimeId) dispatch({ type: 'FEED_SLIME_XP', slimeId: state.selectedSlimeId, foodType: 'elemental' });
         break;
     }
   };
