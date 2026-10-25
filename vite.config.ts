@@ -14,6 +14,11 @@ export default defineConfig(({ mode }) => ({
     emptyOutDir: true, // Cleans the folder before building
   },
 
+  // Strip debug console.log from production builds (errors/warnings are kept)
+  esbuild: {
+    pure: mode === 'production' ? ['console.log', 'console.debug'] : [],
+  },
+
   server: {
     host: "::",
     // Use a non-conflicting dev port; 8080 is taken by Postgres on your machine.
