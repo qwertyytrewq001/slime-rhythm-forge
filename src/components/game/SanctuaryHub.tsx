@@ -3,7 +3,11 @@ import { useGameState } from '@/hooks/useGameState';
 import { Habitat, HabitatGift } from '@/types/slime';
 import { ELEMENT_DISPLAY_NAMES, HABITAT_THEMES } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
-import { JOY_MAX, activePerks, collectAll, giftCap, habitatLevel, perksFrom, totalGifts } from '@/utils/sanctuaryCore';
+import { JOY_MAX, TOTAL_SLOTS, activePerks, dayPhase, giftCap, habitatLevel, perksFrom, slotsOpen, totalGifts } from '@/utils/sanctuaryCore';
+import { canDeliver } from '@/utils/visitorCore';
+import { CROPS } from '@/utils/farmCore';
+import { foodSpriteUrl } from '@/data/foodSprites';
+import { formatDuration } from '@/utils/timeUtils';
 import { SlimeCanvas } from './SlimeCanvas';
 import { SanctuaryPanel } from './SanctuaryPanel';
 import { ArtImg, BASE, Emblem, Heart, giftLabel } from './sanctuary/sanctArt';
@@ -17,7 +21,7 @@ interface SanctuaryHubProps {
 const PARCHMENT = '#f6e8c3';
 const INK = '#4a2f17';
 const GOLD = '#f2b632';
-const SLOTS = 8;
+const SLOTS = TOTAL_SLOTS;
 // Two rows of four floating islands; the lower row is staggered so it feels like a scatter, not a table.
 const SLOT_POS = [
   { x: 0.16, y: 0.4 }, { x: 0.385, y: 0.36 }, { x: 0.615, y: 0.4 }, { x: 0.84, y: 0.36 },
@@ -32,6 +36,9 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
   const [sw, setSw] = useState(1000);
   const [pops, setPops] = useState<Pop[]>([]);
   const [manage, setManage] = useState<string | null>(null);
+  const [day, setDay] = useState(() => dayPhase(new Date()));
+  const [visitOpen, setVisitOpen] = useState(false);
+  const [mascotBloop, setMascotBloop] = useState(0);
   const popId = useRef(0);
 
   useEffect(() => {
@@ -44,8 +51,14 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
     return () => ro.disconnect();
   }, []);
 
+  useEffect(() => {
+    const t = setInterval(() => setDay(dayPhase(new Date())), 60_000);
+    return () => clearInterval(t);
+  }, []);
+
   const sh = (sw * 9) / 16;
-  const { habitats, slimes, pendingHabitatPlacement } = state;
+  const { habitats, slimes, pendingHabitatPlacement, visitor } = state;
+  const open = slotsOpen(habitats);
   const gifts = totalGifts(habitats);
   const perks = useMemo(() => perksFrom(habitats, slimes), [habitats, slimes]);
   const perkLines = useMemo(() => activePerks(habitats, slimes), [habitats, slimes]);
@@ -113,14 +126,37 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
                   cap={giftCap(habitat, perks)}
                   onOpen={() => onOpenHabitat(habitat.id)}
                   onManage={() => setManage(habitat.id)}
+                  night={day.night}
                   onCollect={() => collectFrom(habitat, { x: pos.x * sw, y: pos.y * sh - island * 0.3 })}
                 />
+              ) : i >= open ? (
+                <LockedSite w={island} sw={sw} level={i - 2} />
               ) : (
-                <EmptySite w={island} pending={!!pendingHabitatPlacement} onClick={() => placeHere(i)} />
+                <EmptySite w={island} active={i === habitats.length} pending={!!pendingHabitatPlacement} onClick={() => placeHere(i)} />
               )}
             </div>
           );
         })}
+
+        {day.tint && <div className="absolute inset-0 pointer-events-none" style={{ background: day.tint, mixBlendMode: 'multiply', zIndex: 200 }} />}
+
+        {/* a friendly mascot who lives in the corner */}
+        <button
+          onClick={() => { setMascotBloop(n => n + 1); addPop(sw * 0.075, sh * 0.9, ['Bloop!', 'Hi hi!', '♪', 'Boing!'][mascotBloop % 4]); audioEngine.playSfx('tap'); }}
+          aria-label="Say hi to the blueberry slime"
+          className="absolute sanct-hop"
+          style={{ left: sw * 0.012, bottom: sw * 0.01, width: sw * 0.075, zIndex: 120 }}
+        >
+          <ArtImg file="mascot_blueberry.png" className="w-full" fallback={null} />
+        </button>
+
+        {/* the visitor */}
+        {visitor && (
+          <button onClick={() => setVisitOpen(true)} aria-label="Talk to the visitor" className="absolute sanct-gift" style={{ right: sw * 0.004, bottom: sw * 0.004, width: sw * 0.1, zIndex: 310, transform: 'none' }}>
+            <ArtImg file={visitor.done ? 'visitor_idle.png' : 'visitor_wave.png'} className="w-full" fallback={<span style={{ fontSize: sw * 0.05 }}>🦉</span>} />
+            {!visitor.done && <span className="absolute rounded-full font-bold text-white flex items-center justify-center sanct-ready" style={{ left: '4%', top: '2%', width: sw * 0.024, height: sw * 0.024, background: '#e8344c', border: '2px solid #fff', fontSize: sw * 0.0145 }}>!</span>}
+          </button>
+        )}
 
         {/* floating text */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 400 }}>
@@ -171,11 +207,12 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
             <button onClick={() => dispatch({ type: 'CANCEL_HABITAT_PLACEMENT' })} className="ml-3 rounded-full border-2 font-bold" style={{ borderColor: INK, background: '#fff7dc', padding: `0 ${sw * 0.008}px`, fontSize: sw * 0.011 }}>Cancel</button>
           </Banner>
         ) : habitats.length === 0 ? (
-          <Banner sw={sw}>No sanctuaries yet. Build one in the Bazaar and your slimes will have a home.
+          <Banner sw={sw}><ArtImg file="mascot_cap.png" className="inline-block align-middle mr-2" style={{ width: sw * 0.045 }} fallback={null} />No sanctuaries yet. Build one in the Bazaar and your slimes will have a home.
             <button onClick={onOpenBazaar} className="ml-3 rounded-full border-2 font-bold" style={{ borderColor: INK, background: 'linear-gradient(#ffe98a,#f2b632)', padding: `0 ${sw * 0.008}px`, fontSize: sw * 0.011 }}>Open Bazaar</button>
           </Banner>
         ) : null}
 
+        {visitOpen && visitor && <VisitorDialog sw={sw} onClose={() => setVisitOpen(false)} />}
         {managed && <SanctuaryPanel habitat={managed} sw={sw} onClose={() => setManage(null)} />}
       </div>
     </div>
@@ -186,8 +223,15 @@ const Banner: React.FC<{ sw: number; children: React.ReactNode }> = ({ sw, child
   <div className="absolute left-1/2 -translate-x-1/2 rounded-2xl shadow-xl font-bold text-center sanct-rise" style={{ top: sw * 0.075, background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.006}px ${sw * 0.014}px`, zIndex: 350, maxWidth: '70%' }}>{children}</div>
 );
 
-const EmptySite: React.FC<{ w: number; pending: boolean; onClick: () => void }> = ({ w, pending, onClick }) => (
-  <button onClick={onClick} className="absolute inset-0 sanct-bob" style={{ animationDelay: '-1s' }} aria-label={pending ? 'Place sanctuary here' : 'Empty sanctuary site'}>
+const LockedSite: React.FC<{ w: number; sw: number; level: number }> = ({ w, sw, level }) => (
+  <div className="absolute inset-0 sanct-bob pointer-events-none" style={{ animationDelay: '-2s' }}>
+    <ArtImg file="island_locked.png" className="absolute inset-0 w-full h-full" style={{ objectFit: 'contain', objectPosition: 'center bottom', opacity: 0.9 }} fallback={<div className="absolute" style={{ left: '8%', right: '8%', top: '18%', height: '50%', borderRadius: '50%', background: 'rgba(120,110,150,0.55)' }} />} />
+    <div className="absolute left-1/2 -translate-x-1/2 text-center whitespace-nowrap font-bold text-white" style={{ top: '84%', fontSize: sw * 0.0105, textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>Reach Sanctuary Lv {level}</div>
+  </div>
+);
+
+const EmptySite: React.FC<{ w: number; active: boolean; pending: boolean; onClick: () => void }> = ({ w, active, pending, onClick }) => (
+  <button onClick={onClick} disabled={!active} className="absolute inset-0 sanct-bob" style={{ animationDelay: '-1s', opacity: active ? 1 : 0.55, cursor: active ? 'pointer' : 'default' }} aria-label={pending ? 'Place sanctuary here' : 'Empty sanctuary site'}>
     <ArtImg
       file="island_empty.png"
       className="absolute inset-0 w-full h-full"
@@ -197,14 +241,14 @@ const EmptySite: React.FC<{ w: number; pending: boolean; onClick: () => void }> 
       }
     />
     {pending && <div className="absolute rounded-full sanct-ring" style={{ left: '8%', right: '8%', top: '18%', height: '50%', border: `3px solid ${GOLD}` }} />}
-    <div className="absolute inset-x-0 text-center font-bold text-white" style={{ top: '38%', fontSize: w * 0.09, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{pending ? 'Place here' : '+'}</div>
+    <div className="absolute inset-x-0 text-center font-bold text-white" style={{ top: '38%', fontSize: w * 0.09, textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>{pending && active ? 'Place here' : active ? '+' : ''}</div>
   </button>
 );
 
 const IslandView: React.FC<{
-  habitat: Habitat; index: number; sw: number; w: number; cap: number;
+  habitat: Habitat; index: number; sw: number; w: number; cap: number; night: boolean;
   onOpen: () => void; onManage: () => void; onCollect: () => void;
-}> = ({ habitat, index, sw, w, cap, onOpen, onManage, onCollect }) => {
+}> = ({ habitat, index, sw, w, cap, night, onOpen, onManage, onCollect }) => {
   const { state } = useGameState();
   const theme = HABITAT_THEMES[habitat.element];
   const living = habitat.assignedSlimeIds.map(id => state.slimes.find(s => s.id === id)).filter(Boolean);
@@ -227,8 +271,9 @@ const IslandView: React.FC<{
         />
         {/* the slimes living here */}
         {living.map((s, k) => s && (
-          <div key={s.id} className="absolute sanct-hop pointer-events-none" style={{ left: `${living.length === 1 ? 50 : 34 + (k * 32) / (living.length - 1)}%`, marginLeft: -w * 0.12, top: '13%', width: w * 0.24, height: w * 0.24, animationDelay: `${-k * 0.8 - index * 0.3}s` }}>
+          <div key={s.id} className={`absolute pointer-events-none ${night ? '' : 'sanct-hop'}`} style={{ left: `${living.length === 1 ? 50 : 34 + (k * 32) / (living.length - 1)}%`, marginLeft: -w * 0.12, top: '13%', width: w * 0.24, height: w * 0.24, animationDelay: `${-k * 0.8 - index * 0.3}s` }}>
             <SlimeCanvas slime={s} size={Math.round(w * 0.24)} animated={false} />
+            {night && k === 0 && <div className="absolute sanct-zzz" style={{ right: '-10%', top: '-30%', width: '55%' }}><ArtImg file="icon_sleep.png" className="w-full" fallback={<span style={{ fontSize: w * 0.07 }}>💤</span>} /></div>}
           </div>
         ))}
         {!living.length && <div className="absolute inset-x-0 text-center font-bold text-white/85 pointer-events-none" style={{ top: '30%', fontSize: w * 0.075, textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>Empty</div>}
@@ -262,6 +307,54 @@ const IslandView: React.FC<{
   );
 };
 
+const VisitorDialog: React.FC<{ sw: number; onClose: () => void }> = ({ sw, onClose }) => {
+  const { state, dispatch } = useGameState();
+  const [now, setNow] = useState(Date.now());
+  useEffect(() => { const t = setInterval(() => setNow(Date.now()), 1000); return () => clearInterval(t); }, []);
+  const v = state.visitor;
+  if (!v) return null;
+  const have = state.inventory[v.crop] || 0;
+  const ok = canDeliver(state);
+  const f = sw / 1000;
+  const give = () => {
+    audioEngine.playSfx('purchase');
+    dispatch({ type: 'VISITOR_DELIVER', now: Date.now(), rolls: Array.from({ length: 12 }, Math.random) });
+  };
+  return (
+    <div className="absolute inset-0 flex items-center justify-center bg-black/55 sanct-rise" style={{ zIndex: 700 }} onClick={onClose}>
+      <div onClick={e => e.stopPropagation()} className="rounded-3xl shadow-2xl flex items-center" style={{ width: 640 * f, background: `linear-gradient(${PARCHMENT}, #ecd9a8)`, border: `4px solid ${INK}`, color: INK, padding: 16 * f, gap: 14 * f }}>
+        <ArtImg file={v.done ? 'visitor_idle.png' : 'visitor_wave.png'} style={{ width: 190 * f, flexShrink: 0 }} fallback={<span style={{ fontSize: 90 * f }}>🦉</span>} />
+        <div className="flex-1">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="font-bold leading-none" style={{ fontSize: 24 * f }}>Wicks the Wanderer</div>
+              <div className="font-semibold opacity-70" style={{ fontSize: 12 * f }}>{v.done ? 'Heading off soon' : `Stays for ${formatDuration(v.leavesAt - now)}`}</div>
+            </div>
+            <button onClick={onClose} aria-label="Close" className="rounded-full font-bold border-2 hover:scale-110 transition-transform" style={{ width: 30 * f, height: 30 * f, borderColor: INK, background: '#fff7dc', fontSize: 16 * f }}>×</button>
+          </div>
+          <div className="rounded-2xl font-semibold" style={{ background: 'rgba(255,255,255,0.55)', border: `2px solid ${INK}33`, padding: 10 * f, margin: `${8 * f}px 0`, fontSize: 14 * f }}>
+            {v.done ? 'Wonderful, wonderful! Your slimes are so lovely. Do come again!' : `Hoo hoo! I'm after ${v.qty} ${CROPS[v.crop].name}. Bring them and I'll make it worth your while.`}
+          </div>
+          {!v.done && (
+            <>
+              <div className="flex items-center flex-wrap" style={{ gap: 10 * f }}>
+                <span className="inline-flex items-center rounded-full font-bold" style={{ background: ok ? '#d9f7c8' : '#ffd9d0', border: `2px solid ${ok ? '#3a8a2a' : '#c0392b'}`, padding: `0 ${10 * f}px`, fontSize: 14 * f, gap: 4 * f }}>
+                  <img src={foodSpriteUrl(v.crop)} alt="" draggable={false} style={{ width: 26 * f, imageRendering: 'auto' }} /> {have} / {v.qty}
+                </span>
+                <span className="font-bold" style={{ fontSize: 13 * f }}>Reward: {v.rewardGoo.toLocaleString()} 💧</span>
+                <span className="font-bold inline-flex items-center" style={{ fontSize: 13 * f, gap: 3 * f }}>and <Heart size={18 * f} /> +{v.rewardJoy} Joy in every sanctuary</span>
+              </div>
+              <button onClick={give} disabled={!ok} className={`rounded-full font-bold border-[3px] shadow-lg transition-transform ${ok ? 'hover:scale-105 active:scale-95' : 'opacity-55 cursor-not-allowed'}`} style={{ marginTop: 10 * f, background: ok ? 'linear-gradient(#ffe98a,#f2b632)' : '#e8dfc9', borderColor: INK, fontSize: 15 * f, padding: `${5 * f}px ${18 * f}px` }}>
+                {ok ? 'Hand it over' : 'Grow some on the farm first!'}
+              </button>
+            </>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const CSS = `
   @keyframes sanctBob { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-3.5%) } }
   @keyframes sanctHop { 0%,70%,100% { transform: translateY(0) scale(1,1) } 78% { transform: translateY(2%) scale(1.08,0.9) } 88% { transform: translateY(-22%) scale(0.95,1.08) } 95% { transform: translateY(0) scale(1.06,0.94) } }
@@ -279,4 +372,6 @@ const CSS = `
   .sanct-ring { animation: sanctRing 1.5s ease-out infinite }
   .sanct-rise { animation: sanctRise 0.25s ease-out forwards }
   .sanct-ready { animation: sanctReady 1s ease-in-out infinite }
+  @keyframes sanctZzz { 0%,100% { transform: translateY(0); opacity: 0.8 } 50% { transform: translateY(-14%); opacity: 1 } }
+  .sanct-zzz { animation: sanctZzz 2.6s ease-in-out infinite }
 `;

@@ -12,8 +12,8 @@ import { audioEngine } from '@/utils/audioEngine';
 import { setSanctuaryOpen } from '@/utils/sanctuaryState';
 import { JOY_MAX } from '@/utils/sanctuaryCore';
 import { SanctuaryPanel } from './SanctuaryPanel';
-import { ArtImg, Heart, giftLabel } from './sanctuary/sanctArt';
-import { decorById } from '@/utils/sanctuaryCore';
+import { ArtImg, Heart, MOOD_ICON, giftLabel } from './sanctuary/sanctArt';
+import { dayPhase, decorById } from '@/utils/sanctuaryCore';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
@@ -889,12 +889,16 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         style={{ transformOrigin: '50% 100%', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,0.25))' }}
       >
         {sleeping && (
-          <div className="absolute top-[4%] left-[68%] z-30 pointer-events-none text-lg animate-pulse">💤</div>
+          <div className="absolute top-[0%] left-[62%] z-30 pointer-events-none animate-pulse" style={{ width: 34 }}><ArtImg file="icon_sleep.png" className="w-full" fallback={<span className="text-lg">💤</span>} /></div>
         )}
         {bubble && !sleeping && (
+          MOOD_ICON[bubble] ? (
+            <div className="absolute z-30 pointer-events-none top-[-2%] left-[64%] animate-in zoom-in-50 fade-in duration-300" style={{ width: 38 }}><ArtImg file={`icon_${MOOD_ICON[bubble]}.png`} className="w-full drop-shadow" fallback={<span className="text-sm">{bubble}</span>} /></div>
+          ) : (
           <div className="absolute z-30 pointer-events-none top-[2%] left-[70%] rounded-full bg-white/90 px-1.5 py-0.5 text-sm leading-none shadow animate-in zoom-in-50 fade-in duration-300">
             {bubble}
           </div>
+          )
         )}
 
         {(selected || targeted) && (
@@ -1292,6 +1296,9 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         <div className="absolute inset-0" style={{ background: theme.bgImage ? `url("${theme.bgImage}")` : layers.backdrop, backgroundSize: 'cover', backgroundPosition: 'center' }} />
         {!theme.bgImage && <div className="absolute inset-0" style={{ background: layers.midground }} />}
         {!theme.bgImage && <div className="absolute bottom-0 left-0 right-0 h-1/2" style={{ background: layers.ground }} />}
+
+        {/* the sanctuary follows the real clock: warm at dawn and dusk, dark and blue at night */}
+        {dayPhase(new Date()).tint && <div className="absolute inset-0 pointer-events-none" style={{ background: dayPhase(new Date()).tint ?? undefined, mixBlendMode: 'multiply', zIndex: 2 }} />}
 
         {/* Tap empty ground to deselect; slimes are handled by the pointer controller above */}
         <div ref={sceneRef} className="absolute inset-0" style={{ pointerEvents: 'auto', touchAction: 'none' }}>

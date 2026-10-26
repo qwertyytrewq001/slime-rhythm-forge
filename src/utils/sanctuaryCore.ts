@@ -304,3 +304,27 @@ export function minutesToNextGift(h: Habitat, slimes: Slime[], perks: SanctuaryP
   if (rate <= 0) return null;
   return Math.ceil((JOY_MAX - (h.joy ?? 0)) / rate);
 }
+
+// ---- time of day: the sanctuaries follow the player's real clock ----
+export type DayPhase = 'night' | 'dawn' | 'day' | 'dusk';
+export interface DayInfo {
+  phase: DayPhase;
+  /** A colour to multiply over the scene, or null in full daylight. */
+  tint: string | null;
+  night: boolean;
+}
+export function dayPhase(d: Date): DayInfo {
+  const h = d.getHours() + d.getMinutes() / 60;
+  if (h >= 5 && h < 7) return { phase: 'dawn', tint: 'rgb(255,222,200)', night: false };
+  if (h >= 7 && h < 18) return { phase: 'day', tint: null, night: false };
+  if (h >= 18 && h < 20) return { phase: 'dusk', tint: 'rgb(255,196,170)', night: false };
+  return { phase: 'night', tint: 'rgb(130,140,215)', night: true };
+}
+
+// ---- slots on the Sanctuary Isles: space opens up as the sanctuaries grow ----
+export const TOTAL_SLOTS = 8;
+/** Four sites from the start; the best sanctuary level opens one more per level above 1. */
+export function slotsOpen(habitats: Habitat[]): number {
+  const best = habitats.reduce((n, h) => Math.max(n, habitatLevel(h)), 1);
+  return Math.min(TOTAL_SLOTS, Math.max(habitats.length, 4 + (best - 1)));
+}

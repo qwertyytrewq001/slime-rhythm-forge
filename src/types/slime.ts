@@ -43,6 +43,18 @@ export interface Slime {
   xp: number;
 }
 
+/** A travelling merchant who sometimes visits the sanctuaries and asks for food from the farm. */
+export interface VisitorState {
+  id: string;
+  arrivedAt: number;
+  leavesAt: number;
+  crop: SlimeFoodType;
+  qty: number;
+  rewardGoo: number;
+  rewardJoy: number;
+  done: boolean;
+}
+
 export type HabitatGiftKind = 'goo' | 'food' | 'seeds' | 'jackpot';
 
 /** Something a happy slime left behind, waiting to be collected. */
@@ -185,6 +197,8 @@ export interface GameState {
   floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
   farmPlots: FarmPlot[];
   farm: FarmState;
+  visitor: VisitorState | null;
+  nextVisitAt?: number;
   seeds: Record<SlimeFoodType, number>;
   stats: GameStats;
 }
@@ -286,6 +300,8 @@ export type GameAction =
   | { type: 'PLACE_HABITAT_IN_SLOT'; element: SlimeElement; gridX: number; gridY: number }
   | { type: 'CANCEL_HABITAT_PLACEMENT' }
   | { type: 'SANCT_TICK'; now: number; rolls: number[] }
+  | { type: 'VISITOR_TICK'; now: number; rolls: number[] }
+  | { type: 'VISITOR_DELIVER'; now: number; rolls: number[] }
   | { type: 'SANCT_JOY'; habitatId: string; source: 'pet' | 'feed'; now: number; rolls: number[] }
   | { type: 'SANCT_COLLECT'; habitatId?: string; giftId?: string }
   | { type: 'SANCT_UPGRADE'; habitatId: string }

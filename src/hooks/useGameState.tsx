@@ -2,6 +2,7 @@ import React, { createContext, useContext, useReducer, useEffect, useRef, useMem
 import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType, BreedResult, FarmPlot, FarmState } from '@/types/slime';
 import { FarmSlice, createFarmPlots, createFarmState, migrateFarm, plant as farmPlant, plantAll as farmPlantAll, harvest as farmHarvest, harvestAll as farmHarvestAll, water as farmWater, waterAll as farmWaterAll, rush as farmRush, unlockPlot as farmUnlock } from '@/utils/farmCore';
 import { SanctSlice, FEED_JOY, addJoy, collectAll, collectGift, normalizeHabitat, perksFrom, petHabitat, placeDecor, removeDecor, rollerFrom, tickHabitat, upgradeHabitat } from '@/utils/sanctuaryCore';
+import { visitorTick, deliver as visitorDeliver } from '@/utils/visitorCore';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
@@ -154,6 +155,8 @@ function createInitialState(): GameState {
       bestRarity: saved.bestRarity ?? 0,
       discoveredModels: saved.discoveredModels ?? [],
       discoveredElements: saved.discoveredElements ?? [],
+      visitor: saved.visitor ?? null,
+      nextVisitAt: saved.nextVisitAt,
       habitats: (saved.habitats ?? []).map((h: Habitat) => normalizeHabitat(h, Date.now())),
       pendingHabitatPlacement: saved.pendingHabitatPlacement ?? null,
       lastEvolution: null,
@@ -188,6 +191,7 @@ function createInitialState(): GameState {
     discoveredModels: [0],
     discoveredElements: [],
     habitats: [],
+    visitor: null,
     pendingHabitatPlacement: null,
     lastEvolution: null,
     lastLevelUp: null,
@@ -589,6 +593,17 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         }),
       };
     }
+    case 'VISITOR_TICK': {
+      const r = rollerFrom(action.rolls);
+      const res = visitorTick(state.visitor, state.nextVisitAt, action.now, state.habitats.length > 0, [r(), r(), r()], state.farm.level);
+      if (res.visitor === state.visitor && res.nextVisitAt === state.nextVisitAt) return state;
+      return { ...state, visitor: res.visitor, nextVisitAt: res.nextVisitAt };
+    }
+    case 'VISITOR_DELIVER': {
+      const out = visitorDeliver({ goo: state.goo, inventory: state.inventory, habitats: state.habitats, visitor: state.visitor }, action.now, rollerFrom(action.rolls));
+      if (!out) return state;
+      return { ...state, goo: out.goo, inventory: out.inventory, habitats: out.habitats, visitor: out.visitor };
+    }
     case 'SANCT_COLLECT':
     case 'SANCT_UPGRADE':
     case 'SANCT_DECOR': {
@@ -709,7 +724,10 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
 
   // Sanctuaries: slimes living there build Joy over time, including while the player was away.
   useEffect(() => {
-    const tick = () => dispatch({ type: 'SANCT_TICK', now: Date.now(), rolls: Array.from({ length: 48 }, Math.random) });
+    const tick = () => {
+      dispatch({ type: 'SANCT_TICK', now: Date.now(), rolls: Array.from({ length: 48 }, Math.random) });
+      dispatch({ type: 'VISITOR_TICK', now: Date.now(), rolls: Array.from({ length: 3 }, Math.random) });
+    };
     tick();
     const interval = setInterval(tick, 30_000);
     return () => clearInterval(interval);

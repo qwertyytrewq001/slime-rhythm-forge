@@ -25,6 +25,13 @@ export const Heart: React.FC<{ size: number; kind?: 'full' | 'half' | 'empty' }>
   <ArtImg file={`icon_heart_${kind}.png`} style={{ width: size, height: size, display: 'inline-block', verticalAlign: 'middle', flexShrink: 0 }} fallback={<span style={{ fontSize: size * 0.85, lineHeight: 1 }}>💖</span>} />
 );
 
+/** The little emoji bubbles slimes show map to painted mood icons. */
+export const MOOD_ICON: Record<string, string> = {
+  '🎵': 'mood_calm', '🍃': 'mood_calm', '✨': 'mood_calm',
+  '😊': 'mood_happy', '💖': 'mood_happy', '😆': 'mood_happy', '🥰': 'mood_happy',
+  '🥺': 'mood_lonely', '💧': 'mood_lonely', '❓': 'mood_curious',
+};
+
 export const DECOR_EMOJI: Record<string, string> = {
   flowers: '🌸', ball: '🎾', lantern: '🏮', swing: '🪁', fountain: '⛲', stump: '🪵', hammock: '🛏️', mushroom: '🍄',
 };

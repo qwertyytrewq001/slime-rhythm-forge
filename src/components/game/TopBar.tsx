@@ -23,7 +23,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
     const t = setInterval(() => setNowMs(Date.now()), 5000);
     return () => clearInterval(t);
   }, []);
-  const giftsWaiting = totalGifts(state.habitats);
+  const giftsWaiting = totalGifts(state.habitats) + (state.visitor && !state.visitor.done ? 1 : 0);
   const readyCrops = state.farmPlots.filter(p => isReady(p, nowMs)).length;
 
   // Simple clean styling with hover effects and explicit font control
