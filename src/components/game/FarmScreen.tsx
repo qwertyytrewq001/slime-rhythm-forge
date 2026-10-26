@@ -245,6 +245,46 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     setInfo(prev => (prev === plot.id ? null : plot.id));
   };
 
+  /** Which plot is under a point of the stage: the plant you can see first, then the soil mound. Front rows win. */
+  const plotAt = (x: number, y: number): FarmPlot | null => {
+    const front = [...farmPlots].sort((a, b) => b.id - a.id);
+    for (const p of front) {
+      if (!p.unlocked || !p.cropType) continue;
+      const c = plotCenter(p.id);
+      const w = unitW * c.scale;
+      const st = stageOf(progressOf(p, now));
+      const ph = w * [0.2, 0.35, 0.5, 0.55][st];
+      const pw = w * [0.14, 0.18, 0.3, 0.4][st] * (p.cropType === 'elemental' ? 0.75 : 1);
+      const dx = (x - c.x * sw) / pw;
+      const dy = (y - (c.y * sh - ph / 2)) / (ph / 2);
+      if (dx * dx + dy * dy <= 1) return p;
+    }
+    for (const p of front) {
+      const c = plotCenter(p.id);
+      const w = unitW * c.scale;
+      const dx = (x - c.x * sw) / (w / 2);
+      const dy = (y - c.y * sh) / (w * 0.25);
+      if (dx * dx + dy * dy <= 1) return p;
+    }
+    return null;
+  };
+  const stagePoint = (e: React.MouseEvent) => {
+    const r = stageRef.current!.getBoundingClientRect();
+    return { x: e.clientX - r.left, y: e.clientY - r.top };
+  };
+  const onStageClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (picker || (e.target as HTMLElement).closest('button')) return;
+    const pt = stagePoint(e);
+    const hit = plotAt(pt.x, pt.y);
+    if (hit) onPlotClick(hit);
+    else if (info !== null) setInfo(null);
+  };
+  const onStageMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    const overUi = !!(e.target as HTMLElement).closest('button');
+    const pt = stagePoint(e);
+    e.currentTarget.style.cursor = !overUi && !picker && plotAt(pt.x, pt.y) ? 'pointer' : 'default';
+  };
+
   const infoPlot = info !== null ? farmPlots.find(p => p.id === info) : null;
   const unitW = sw * 0.105;
 
@@ -257,7 +297,8 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         ref={stageRef}
         className="relative"
         style={{ width: 'min(100vw, calc(100vh * 16 / 9))', height: 'min(100vh, calc(100vw * 9 / 16))' }}
-        onClick={() => info !== null && setInfo(null)}
+        onClick={onStageClick}
+        onMouseMove={onStageMove}
       >
         <img src={`${BASE}farm_background.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(30,10,40,0.35) 100%)' }} />
@@ -293,13 +334,13 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
 
               {/* the plant */}
               {plot.unlocked && plot.cropType && (
-                <div className={`absolute left-1/2 ${ready ? 'farm-ripe' : 'farm-sway'}`} style={{ width: w * 1.25, height: w * 1.25, bottom: h * 0.5, transform: 'translateX(-50%)', transformOrigin: '50% 100%' }}>
+                <div className={`absolute left-1/2 ${ready ? 'farm-ripe' : 'farm-sway'}`} style={{ width: w * 1.1, height: w * 1.1, bottom: h * 0.5, transform: 'translateX(-50%)', transformOrigin: '50% 100%' }}>
                   <CropArt crop={plot.cropType} stage={stageOf(progress)} className="w-full h-full" />
                 </div>
               )}
               {ready && plot.cropType && (
                 <>
-                  <img src={foodSpriteUrl(plot.cropType)} alt="" draggable={false} className="absolute left-1/2 farm-float pointer-events-none" style={{ width: w * 0.3, top: -w * 1.2, transform: 'translateX(-50%)', imageRendering: 'auto', filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.4))' }} />
+                  <img src={foodSpriteUrl(plot.cropType)} alt="" draggable={false} className="absolute left-1/2 farm-float pointer-events-none" style={{ width: w * 0.3, top: -w * 1.05, transform: 'translateX(-50%)', imageRendering: 'auto', filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.4))' }} />
                   <div className="absolute left-1/2 rounded-full farm-ripe-ring pointer-events-none" style={{ width: w * 1.0, height: h * 1.05, top: h * 0.02, transform: 'translateX(-50%)', border: `3px solid ${GOLD}` }} />
                 </>
               )}
@@ -321,12 +362,12 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                 </div>
               )}
 
-              {/* hit area */}
+              {/* keyboard / assistive target only; real clicks are resolved by plotAt so one plot's box never covers another */}
               <button
                 onClick={e => { e.stopPropagation(); onPlotClick(plot); }}
                 aria-label={`Plot ${plot.id + 1}${plot.cropType ? ` ${CROPS[plot.cropType].name}` : ''}${ready ? ' ready' : ''}`}
                 className="absolute"
-                style={{ left: -w * 0.05, right: -w * 0.05, top: -w * 0.85, bottom: -h * 0.4, cursor: 'pointer', background: 'transparent' }}
+                style={{ inset: 0, pointerEvents: 'none', background: 'transparent' }}
               />
             </div>
           );
@@ -340,12 +381,10 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
           const h = w * 0.5;
           const progress = progressOf(plot, now);
           return (
-            <div key={`t${plot.id}`} className="absolute pointer-events-none flex flex-col items-center" style={{ left: `${c.x * 100}%`, top: `${c.y * 100}%`, transform: `translate(-50%, ${h * 0.62}px)`, zIndex: 150 }}>
-              <div className="whitespace-nowrap rounded-full font-bold text-white" style={{ background: 'rgba(30,14,40,0.82)', fontSize: Math.max(9, sw * 0.0105 * c.scale), padding: `${sw * 0.0012}px ${sw * 0.006}px`, border: '1px solid rgba(255,255,255,0.35)' }}>
-                {plot.watered && <Ico name="icon_drop" w={Math.max(9, sw * 0.0105 * c.scale)} style={{ marginRight: 2 }} />}{formatDuration(plot.readyAt - now)}
-              </div>
-              <div className="rounded-full overflow-hidden" style={{ width: w * 0.6, height: Math.max(3, sw * 0.003), marginTop: 2, background: 'rgba(0,0,0,0.5)' }}>
-                <div className="h-full" style={{ width: `${progress * 100}%`, background: 'linear-gradient(90deg,#7dff9e,#f2d94a)' }} />
+            <div key={`t${plot.id}`} className="absolute pointer-events-none" style={{ left: `${c.x * 100}%`, top: `${c.y * 100}%`, transform: `translate(-50%, ${h * 0.16}px)`, zIndex: 11 + c.row * 3 }}>
+              <div className="relative overflow-hidden whitespace-nowrap rounded-full font-bold text-white flex items-center" style={{ background: 'rgba(30,14,40,0.82)', fontSize: Math.max(8, sw * 0.0088 * c.scale), padding: `${sw * 0.0008}px ${sw * 0.0048}px ${sw * 0.002}px`, border: '1px solid rgba(255,255,255,0.3)', lineHeight: 1.15 }}>
+                {plot.watered && <Ico name="icon_drop" w={Math.max(8, sw * 0.0088 * c.scale)} style={{ marginRight: 2 }} />}{formatDuration(plot.readyAt - now)}
+                <div className="absolute left-0 bottom-0" style={{ height: Math.max(2, sw * 0.0022), width: `${progress * 100}%`, background: 'linear-gradient(90deg,#7dff9e,#f2d94a)' }} />
               </div>
             </div>
           );
