@@ -174,12 +174,12 @@ interface BouncingSlimeProps {
   attractRef: React.MutableRefObject<{ x: number; y: number } | null>;
   eatNonce: number;
   onSelect: (id: string) => void;
-  onPoke: (id: string) => void;
+  onPoke: (id: string, quiet?: boolean) => void;
 }
 
 // The ground band slimes live in (percent of the scene), and how they feel about moving around it
 const BAND = { minX: 10, maxX: 90, minY: 61, maxY: 80 };
-const GRAVITY = 1700; // px/s^2
+const GRAVITY = 1150; // px/s^2: low on purpose, so hops hang in the air
 
 interface Personality {
   idle: [number, number]; // seconds between moves
@@ -201,12 +201,14 @@ const PERSONALITIES: Record<string, Personality> = {
   wind: { idle: [0.4, 1.0], jump: [0, 0], range: 38, float: true },
 };
 
-const MOOD_BUBBLES = ['🎵', '💖', '✨', '🍃', '😊'];
+const CALM_BUBBLES = ['🎵', '✨', '🍃', '😊'];
 const POKE_BUBBLES = ['💖', '😊', '😆'];
+const PET_BUBBLES = ['💖', '🥰', '😊'];
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
 type Mode = 'idle' | 'crouch' | 'air' | 'land' | 'glide' | 'sleep' | 'carried';
+type Mood = 'calm' | 'lonely' | 'curious' | 'happy';
 
 function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attractRef, eatNonce, onSelect, onPoke }: BouncingSlimeProps) {
   const groundRef = useRef<HTMLDivElement>(null);
@@ -215,13 +217,16 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
   const [eating, setEating] = useState(false);
   const [bubble, setBubble] = useState<string | null>(null);
   const [sleeping, setSleeping] = useState(false);
+  const bubbleRef = useRef<string | null>(null);
+  bubbleRef.current = bubble;
   const ptr = useRef<{ x: number; y: number; t: number } | null>(null);
+  const ptrHist = useRef<{ x: number; y: number; t: number }[]>([]);
   const dragInfo = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
   const suppressClick = useRef(false);
-  const flash = (emoji: string, ms = 1500) => {
-    setBubble(emoji);
-    setTimeout(() => setBubble(b => (b === emoji ? null : b)), ms);
-  };
+  const hover = useRef(false);
+  const pressed = useRef(false);
+  const cb = useRef({ onPoke });
+  cb.current = { onPoke };
 
   // Latest props for the animation loop, which must not restart on every render
   const live = useRef({ selected, targeted, dragging, wantsFood });
@@ -234,58 +239,109 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
     vz: 0,
     vx: 0,
     vy: 0,
-    sx: 1,
     sy: 1,
+    syv: 0,
     tilt: 0,
     mode: 'idle' as Mode,
-    t: rand(0.2, 1.6),
-    tx: 0,
-    ty: 0,
+    t: rand(0.2, 1.4),
+    fx: 0,
+    fy: 0,
+    hasTarget: false,
     jump: 0,
+    thrown: false,
+    throwPower: 0,
+    dizzy: 0,
     phase: rand(0, 6),
     bubbleIn: rand(4, 10),
     look: 0,
-    blink: 0,
     blinkIn: rand(2.5, 6),
     last: performance.now() / 1000,
+    mood: 'calm' as Mood,
+    lonelySince: 0,
+    lonelyIn: rand(4, 8),
+    pet: 0,
   });
+
+  // Show a reaction bubble. Soft ones (mood chatter) never interrupt a bubble that is already up.
+  const say = (emoji: string, ms = 1600, force = true) => {
+    if (!force && bubbleRef.current) return;
+    setBubble(emoji);
+    setTimeout(() => setBubble(b => (b === emoji ? null : b)), ms);
+  };
 
   // Chomp whenever fed
   useEffect(() => {
     if (!eatNonce) return;
     setEating(true);
-    flash('😋', 1600);
+    say('😋', 1600);
     sim.current.last = performance.now() / 1000;
     const t = setTimeout(() => setEating(false), 600);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eatNonce]);
 
-  // Pointer: slimes look toward it, and can be picked up and carried
+  // Pointer: slimes watch it, can be petted, picked up, and thrown
   useEffect(() => {
     const move = (e: PointerEvent) => {
-      ptr.current = { x: e.clientX, y: e.clientY, t: performance.now() };
+      const now = performance.now();
+      ptr.current = { x: e.clientX, y: e.clientY, t: now };
+      const hist = ptrHist.current;
+      hist.push({ x: e.clientX, y: e.clientY, t: now });
+      while (hist.length > 1 && now - hist[0].t > 140) hist.shift();
       const d = dragInfo.current;
       if (d && !d.moved && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > 6) {
         d.moved = true;
         suppressClick.current = true;
-        sim.current.mode = 'carried';
+        pressed.current = false;
+        const s = sim.current;
+        s.mode = 'carried';
+        s.thrown = false;
         setSleeping(false);
-        flash('😮', 6000);
+        say('😮', 8000);
       }
     };
     const up = () => {
+      const wasPressed = pressed.current;
+      pressed.current = false;
       const d = dragInfo.current;
       dragInfo.current = null;
+      const s = sim.current;
+      if (wasPressed && !(d?.moved)) s.syv += 5; // let go of a squish: boing
       if (d?.moved) {
-        const s = sim.current;
         if (s.mode === 'carried') {
-          s.mode = 'air';
-          s.vz = 0;
-          s.vx = 0;
-          s.vy = 0;
-          s.jump = 1;
           s.last = performance.now() / 1000;
-          flash('😄', 1600);
+          const hist = ptrHist.current;
+          const rect = groundRef.current?.parentElement?.getBoundingClientRect();
+          let vpx = 0;
+          let vpy = 0;
+          if (hist.length > 1) {
+            const a = hist[0];
+            const b = hist[hist.length - 1];
+            const dt = (b.t - a.t) / 1000;
+            if (dt > 0.02) {
+              vpx = (b.x - a.x) / dt;
+              vpy = (b.y - a.y) / dt;
+            }
+          }
+          const speed = Math.hypot(vpx, vpy);
+          s.mode = 'air';
+          s.jump = 1;
+          s.hasTarget = false;
+          if (speed > 380 && rect && rect.width > 0) {
+            // thrown: keep the pointer's momentum
+            s.thrown = true;
+            s.throwPower = clamp(speed / 1400, 0.2, 1.4);
+            s.vx = clamp((vpx / rect.width) * 100 * 0.9, -110, 110);
+            s.vy = clamp((vpy / rect.height) * 100 * 0.5, -35, 35);
+            s.vz = clamp(220 - vpy * 0.5, 120, 760);
+            say('🤩', 2200);
+          } else {
+            s.thrown = false;
+            s.vz = 0;
+            s.vx = 0;
+            s.vy = 0;
+            say('😄', 1600);
+          }
         }
         setTimeout(() => { suppressClick.current = false; }, 60);
       }
@@ -310,57 +366,128 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
     let raf = 0;
     let last = performance.now();
 
+    const idleTime = () => {
+      const s = sim.current;
+      const mult = s.mood === 'lonely' ? 1.4 : s.mood === 'curious' ? 0.7 : 1;
+      return rand(pers.idle[0], pers.idle[1]) * mult;
+    };
+
     const startHop = (tx: number, ty: number, jump: number) => {
       const s = sim.current;
-      s.tx = clamp(tx, BAND.minX, BAND.maxX);
-      s.ty = clamp(ty, BAND.minY, BAND.maxY);
+      s.fx = clamp(tx, BAND.minX, BAND.maxX);
+      s.fy = clamp(ty, BAND.minY, BAND.maxY);
+      s.hasTarget = Math.hypot(s.fx - s.x, s.fy - s.y) > 1.5;
       s.jump = jump;
       if (pers.float) {
         s.mode = 'glide';
       } else {
         s.mode = 'crouch';
-        s.t = 0.14;
+        s.t = 0.12;
       }
     };
 
-    // Choose what to do next
-    const decide = () => {
+    // One hop of a chain: move part of the way to the target, so travelling is a series of bounces
+    const launchHop = () => {
+      const s = sim.current;
+      let hx = 0;
+      let hy = 0;
+      if (s.hasTarget) {
+        const dx = s.fx - s.x;
+        const dy = s.fy - s.y;
+        const d = Math.hypot(dx, dy) || 1;
+        const step = Math.min(d, 9 + s.jump / 55);
+        hx = (dx / d) * step;
+        hy = (dy / d) * step;
+      }
+      const T = (2 * s.jump) / GRAVITY;
+      s.vz = s.jump;
+      s.vx = hx / T;
+      s.vy = hy / T;
+      s.mode = 'air';
+    };
+
+    const decide = (p: { x: number; y: number } | null, pDist: number) => {
       const s = sim.current;
       const l = live.current;
       const parent = ground.parentElement;
       const rect = parent?.getBoundingClientRect();
       const attract = attractRef.current;
+      const toPct = (pt: { x: number; y: number }) => ({
+        x: rect && rect.width > 0 ? ((pt.x - rect.left) / rect.width) * 100 : s.x,
+        y: rect && rect.height > 0 ? ((pt.y - rect.top) / rect.height) * 100 : s.y,
+      });
+      const hopJump = () => rand(pers.jump[0] || 300, pers.jump[1] || 420) * 1.25;
 
       if (l.targeted) {
-        // food is right over me: bounce with excitement
-        startHop(s.x, s.y, 210);
+        startHop(s.x, s.y, 210); // food right over me: bounce with excitement
         return;
       }
-      if (attract && rect && rect.width > 0) {
-        const px = ((attract.x - rect.left) / rect.width) * 100;
-        const py = ((attract.y - rect.top) / rect.height) * 100;
-        const dx = px - s.x;
-        const dy = clamp(py, BAND.minY, BAND.maxY) - s.y;
-        if (Math.abs(dx) < 9 && Math.abs(dy) < 8) {
-          startHop(s.x, s.y, 200); // close: fidget with excitement
-        } else {
-          // run toward the food, a few hops at a time
-          startHop(s.x + clamp(dx, -22, 22), s.y + clamp(dy, -8, 8), rand(pers.jump[0] || 300, pers.jump[1] || 420));
+      if (attract && rect) {
+        const a = toPct(attract);
+        const dx = a.x - s.x;
+        const dy = clamp(a.y, BAND.minY, BAND.maxY) - s.y;
+        if (Math.abs(dx) < 9 && Math.abs(dy) < 8) startHop(s.x, s.y, 200);
+        else startHop(s.x + clamp(dx, -26, 26), s.y + clamp(dy, -8, 8), hopJump());
+        return;
+      }
+      if (s.mood === 'happy') {
+        // pointer right here: playful bouncing in place, now and then a little shuffle
+        if (Math.random() < 0.65) startHop(s.x, s.y, 230);
+        else startHop(s.x + rand(-6, 6), s.y + rand(-3, 3), 240);
+        return;
+      }
+      if (s.mood === 'curious' && p && rect && Math.random() < 0.55) {
+        // sidle over to see what the pointer is up to
+        const a = toPct(p);
+        const dx = a.x - s.x;
+        if (Math.abs(dx) > 10) {
+          startHop(s.x + clamp(dx * 0.6, -16, 16), s.y + clamp((a.y - s.y) * 0.3, -4, 4), hopJump());
+          return;
         }
-        return;
       }
-      if (!pers.float && performance.now() / 1000 - s.last > 12 && Math.random() < 0.12) {
+      if (!pers.float && (s.mood === 'lonely' || s.mood === 'calm') && performance.now() / 1000 - s.last > 25 && Math.random() < 0.06) {
         s.mode = 'sleep';
         s.t = rand(7, 13);
         setSleeping(true);
         return;
       }
       if (Math.random() < 0.1) {
-        // sometimes just look around
-        s.t = rand(pers.idle[0], pers.idle[1]);
+        s.t = idleTime(); // just look around
         return;
       }
-      startHop(s.x + rand(-pers.range, pers.range), s.y + rand(-6, 6), rand(pers.jump[0], pers.jump[1]));
+      // wander: half the time a trip across the whole scene, otherwise a nearby shuffle (never pinned to an edge)
+      const reach = s.mood === 'lonely' ? pers.range * 0.75 : pers.range;
+      let tx = Math.random() < 0.45 ? rand(BAND.minX + 4, BAND.maxX - 4) : s.x + rand(-reach, reach);
+      if (tx < BAND.minX + 2 || tx > BAND.maxX - 2) tx = s.x + (s.x > 50 ? -1 : 1) * rand(reach * 0.5, reach);
+      startHop(tx, s.y + rand(-6, 6), hopJump() * (s.mood === 'lonely' ? 0.9 : 1));
+    };
+
+    const setMood = (m: Mood) => {
+      const s = sim.current;
+      const prev = s.mood;
+      s.mood = m;
+      if (s.mode === 'sleep' || s.mode === 'carried') return;
+      const grounded = s.mode === 'idle' || s.mode === 'land';
+      if (m === 'lonely') {
+        say('🥺', 2600, false);
+        s.lonelyIn = rand(7, 12);
+      } else if (m === 'curious' && prev !== 'happy') {
+        say('❓', 1500, false);
+      } else if (m === 'happy' && prev !== 'happy') {
+        say('💖', 1500, false);
+      }
+      // noticing company after being alone: a little startled hop
+      if (prev === 'lonely' && m !== 'lonely' && grounded && !pers.float) {
+        s.mode = 'air';
+        s.vz = 360;
+        s.jump = 360;
+        s.vx = 0;
+        s.vy = 0;
+        s.hasTarget = false;
+        s.thrown = false;
+        s.syv += 4;
+        say('❗', 1100);
+      }
     };
 
     const tick = (now: number) => {
@@ -376,61 +503,185 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
       const cy = box.top + box.height / 2;
       const p = ptr.current;
       const pDist = p ? Math.hypot(p.x - cx, p.y - cy) : Infinity;
-      const pRecent = !!p && now - p.t < 5000;
-      if (pDist < 130 && pRecent) s.last = performance.now() / 1000;
-      // look toward a nearby pointer; ease back to neutral otherwise
-      const lookTarget = pRecent && pDist < 320 && s.mode !== 'sleep' && s.mode !== 'carried' ? clamp((p!.x - cx) / 200, -1, 1) : 0;
+      const pAge = p ? (now - p.t) / 1000 : 99;
+      const hovering = hover.current && pAge < 4;
+      if (pDist < 130 && pAge < 4) s.last = secs;
+
+      // What does it feel about the pointer? Lonely needs 5s of the pointer being away or idle.
+      let want: Mood = 'calm';
+      if (hovering || (p && pDist < 110 && pAge < 3)) want = 'happy';
+      else if (p && pDist < 340 && pAge < 6) want = 'curious';
+      else if (!p || pAge > 20 || pDist > 560) want = 'lonely';
+      if (want === 'lonely' && s.mood !== 'lonely') {
+        if (!s.lonelySince) s.lonelySince = secs;
+        if (secs - s.lonelySince > 5) setMood('lonely');
+      } else {
+        s.lonelySince = 0;
+        if (want !== s.mood) setMood(want);
+      }
+
+      // watching: lean toward the pointer, further into a pet
+      const watching = (s.mood === 'curious' || s.mood === 'happy') && p && pDist < 340 && s.mode !== 'sleep' && s.mode !== 'carried';
+      const lookTarget = watching ? clamp((p!.x - cx) / (hovering ? 70 : 200), -1, 1) : 0;
       s.look += (lookTarget - s.look) * 0.12;
 
+      // petting: rubbing the pointer over it
+      const rubbing = hovering && !pressed.current && s.mode !== 'carried' && !!p && now - p.t < 160;
+      if (rubbing) {
+        s.pet += dt;
+        if (s.pet > 1.1) {
+          s.pet = 0;
+          say(PET_BUBBLES[Math.floor(Math.random() * PET_BUBBLES.length)], 1400);
+          cb.current.onPoke(slime.id, true);
+        }
+      } else {
+        s.pet = Math.max(0, s.pet - dt * 2);
+      }
+
+      let syTarget = 1;
       switch (s.mode) {
         case 'idle': {
-          // breathing, perking up when the pointer is close, and the odd blink-squish
-          const perk = pRecent && pDist < 150 ? 0.05 : 0;
-          s.sy = 1 + Math.sin(secs * 3 + s.phase) * 0.035 + perk;
-          s.sx = 1 + (1 - s.sy) * 0.7;
-          s.tilt = s.tilt * 0.85 + s.look * 5 * 0.15;
-          if (pers.float) s.z = 16 + Math.sin(secs * 2.2 + s.phase) * 9;
+          const breathe = Math.sin(secs * 3 + s.phase) * 0.03;
+          syTarget = 1 + breathe + (s.mood === 'curious' ? 0.04 : 0) + (s.mood === 'happy' ? 0.02 : 0) - (s.mood === 'lonely' ? 0.07 : 0);
+          if (rubbing) syTarget -= 0.05 + Math.sin(secs * 12) * 0.02;
+          s.tilt += (s.look * 5 - (s.mood === 'lonely' ? 3 : 0) - s.tilt) * 0.15;
+          if (pers.float) {
+            // floaty idle: keep drifting and bobbing, never parked
+            s.z = 16 + Math.sin(secs * 2.2 + s.phase) * 9;
+            s.vx *= Math.pow(0.25, dt);
+            s.vy *= Math.pow(0.25, dt);
+            s.x = clamp(s.x + (s.vx + Math.sin(secs * 0.6 + s.phase) * 1.4) * dt, BAND.minX, BAND.maxX);
+            s.y = clamp(s.y + (s.vy + Math.cos(secs * 0.5 + s.phase) * 0.5) * dt, BAND.minY, BAND.maxY);
+          } else {
+            s.x = clamp(s.x + Math.sin(secs * 0.8 + s.phase) * 0.5 * dt, BAND.minX, BAND.maxX); // slow sway
+          }
           s.blinkIn -= dt;
           if (s.blinkIn <= 0) {
-            s.blink = 0.13;
+            s.syv -= 3.2; // blink-squish
             s.blinkIn = rand(2.5, 6);
-          }
-          if (s.blink > 0) {
-            s.blink -= dt;
-            s.sy = Math.min(s.sy, 0.9);
-            s.sx = Math.max(s.sx, 1.06);
           }
           s.bubbleIn -= dt;
           if (s.bubbleIn <= 0) {
             s.bubbleIn = rand(8, 15);
-            const pick = l.wantsFood && Math.random() < 0.35 ? '🍓' : MOOD_BUBBLES[Math.floor(Math.random() * MOOD_BUBBLES.length)];
-            flash(pick, 2000);
+            if (s.mood === 'calm') {
+              const pick = l.wantsFood && Math.random() < 0.35 ? '🍓' : CALM_BUBBLES[Math.floor(Math.random() * CALM_BUBBLES.length)];
+              say(pick, 2000, false);
+            }
+          }
+          if (s.mood === 'lonely') {
+            s.lonelyIn -= dt;
+            if (s.lonelyIn <= 0) {
+              s.lonelyIn = rand(8, 13);
+              say(Math.random() < 0.6 ? '🥺' : '💧', 2200, false);
+            }
           }
           if (s.t <= 0) {
-            decide();
-            if (s.mode === 'idle') s.t = rand(pers.idle[0], pers.idle[1]);
+            decide(p, pDist);
+            if (s.mode === 'idle') s.t = idleTime();
           }
           break;
         }
+        case 'crouch': {
+          syTarget = 0.78;
+          if (s.t <= 0) launchHop();
+          break;
+        }
+        case 'air': {
+          s.vz -= GRAVITY * dt;
+          s.z += s.vz * dt;
+          s.x += s.vx * dt;
+          s.y += s.vy * dt;
+          if (s.x < BAND.minX) { s.x = BAND.minX; s.vx = s.thrown ? Math.abs(s.vx) * 0.4 : 0; }
+          if (s.x > BAND.maxX) { s.x = BAND.maxX; s.vx = s.thrown ? -Math.abs(s.vx) * 0.4 : 0; }
+          if (s.y < BAND.minY) { s.y = BAND.minY; s.vy = s.thrown ? Math.abs(s.vy) * 0.7 : 0; }
+          if (s.y > BAND.maxY) { s.y = BAND.maxY; s.vy = s.thrown ? -Math.abs(s.vy) * 0.7 : 0; }
+          const ref = s.thrown ? 520 : s.jump || 1;
+          syTarget = 1 + clamp(Math.abs(s.vz) / ref, 0, 1) * 0.2;
+          s.tilt += (clamp(s.vx * 0.35, -14, 14) - s.tilt) * 0.2;
+          if (s.thrown) s.tilt += Math.sin(secs * 20) * 1.2; // tumbling
+          if (s.z <= 0 && s.vz < 0) {
+            const impact = -s.vz;
+            s.z = 0;
+            if (s.thrown && impact > 170) {
+              s.vz = impact * 0.5; // bounce again
+              s.vx *= 0.7;
+              s.vy *= 0.7;
+              s.sy = 0.78;
+              s.syv = 0;
+            } else {
+              if (s.thrown && s.throwPower > 0.5) {
+                s.dizzy = 1.4;
+                say('😵', 2200);
+              }
+              s.thrown = false;
+              s.vx = 0;
+              s.vy = 0;
+              s.mode = 'land';
+              s.t = s.dizzy > 0 ? 0.25 : 0.14;
+              s.sy = impact > 400 ? 0.7 : 0.8;
+              s.syv = 0;
+            }
+          }
+          break;
+        }
+        case 'land': {
+          s.tilt *= 0.8;
+          if (s.dizzy > 0) {
+            s.dizzy -= dt;
+            s.tilt = Math.sin(secs * 16) * 7 * Math.min(1, s.dizzy);
+          }
+          if (s.t <= 0) {
+            const remaining = s.hasTarget ? Math.hypot(s.fx - s.x, s.fy - s.y) : 0;
+            if (s.hasTarget && remaining > 1.6 && s.dizzy <= 0) {
+              s.mode = 'crouch'; // keep bouncing toward the target
+              s.t = 0.05;
+            } else {
+              s.mode = 'idle';
+              s.hasTarget = false;
+              s.t = l.targeted ? rand(0.25, 0.55) : Math.max(idleTime(), s.dizzy > 0 ? s.dizzy : 0);
+            }
+          }
+          break;
+        }
+        case 'glide': {
+          // floaters ease toward their target: smooth speed-up and slow-down, leaning into the move
+          const dx = s.fx - s.x;
+          const dy = s.fy - s.y;
+          const dist = Math.hypot(dx, dy);
+          const maxSpeed = l.dragging ? 32 : s.mood === 'lonely' ? 7 : s.mood === 'calm' ? 15 : 18;
+          if (dist < 0.6 || !s.hasTarget) {
+            s.mode = 'idle';
+            s.hasTarget = false;
+            s.t = idleTime();
+          } else {
+            const sp = Math.min(maxSpeed, dist * 1.6);
+            const k = Math.min(1, dt * 2.4);
+            s.vx += ((dx / dist) * sp - s.vx) * k;
+            s.vy += ((dy / dist) * sp - s.vy) * k;
+          }
+          s.x = clamp(s.x + s.vx * dt, BAND.minX, BAND.maxX);
+          s.y = clamp(s.y + s.vy * dt, BAND.minY, BAND.maxY);
+          s.tilt += (clamp(s.vx * 0.6, -12, 12) - s.tilt) * 0.12;
+          s.z = 16 + Math.sin(secs * 2.6 + s.phase) * 9;
+          syTarget = 1 + Math.sin(secs * 2.6 + s.phase) * 0.04;
+          break;
+        }
         case 'sleep': {
-          // slow, flattened breathing until something wakes it
-          s.sy = 0.86 + Math.sin(secs * 1.3 + s.phase) * 0.025;
-          s.sx = 1.1 + (0.86 - s.sy) * 0.8;
+          syTarget = 0.86 + Math.sin(secs * 1.3 + s.phase) * 0.025;
           s.tilt *= 0.9;
           s.z = 0;
-          if (s.t <= 0 || l.selected || l.targeted || l.dragging || (pRecent && pDist < 110)) {
+          if (s.t <= 0 || l.selected || l.targeted || l.dragging || (p && pAge < 5 && pDist < 110)) {
             s.mode = 'idle';
             s.t = 0.35;
             s.sy = 1.18;
-            s.sx = 0.9;
+            s.syv = 0;
             setSleeping(false);
           }
           break;
         }
         case 'carried': {
           // dangling from the pointer
-          const parent = ground.parentElement;
-          const rect = parent?.getBoundingClientRect();
+          const rect = ground.parentElement?.getBoundingClientRect();
           if (p && rect && rect.width > 0) {
             const tx = clamp(((p.x - rect.left) / rect.width) * 100, BAND.minX, BAND.maxX);
             const ty = clamp(((p.y - rect.top) / rect.height) * 100 + 10, BAND.minY, BAND.maxY);
@@ -440,80 +691,28 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
             s.tilt = clamp((s.x - prevX) * 14, -14, 14) + Math.sin(secs * 14) * 3;
           }
           s.z += (46 - s.z) * 0.3;
-          s.sx = 0.96;
-          s.sy = 1.07 + Math.sin(secs * 10) * 0.02;
-          break;
-        }
-        case 'crouch': {
-          s.sy += (0.76 - s.sy) * 0.4;
-          s.sx += (1.2 - s.sx) * 0.4;
-          if (s.t <= 0) {
-            const T = (2 * s.jump) / GRAVITY;
-            s.vz = s.jump;
-            s.vx = (s.tx - s.x) / T;
-            s.vy = (s.ty - s.y) / T;
-            s.mode = 'air';
-          }
-          break;
-        }
-        case 'air': {
-          s.vz -= GRAVITY * dt;
-          s.z += s.vz * dt;
-          s.x = clamp(s.x + s.vx * dt, BAND.minX, BAND.maxX);
-          s.y = clamp(s.y + s.vy * dt, BAND.minY, BAND.maxY);
-          const stretch = clamp(Math.abs(s.vz) / (s.jump || 1), 0, 1);
-          s.sy += (1 + stretch * 0.2 - s.sy) * 0.3;
-          s.sx += (1 - stretch * 0.1 - s.sx) * 0.3;
-          s.tilt = clamp(s.vx * 0.6, -9, 9);
-          if (s.z <= 0 && s.vz < 0) {
-            s.z = 0;
-            s.mode = 'land';
-            s.t = 0.17;
-            s.sy = 0.74;
-            s.sx = 1.24;
-          }
-          break;
-        }
-        case 'land': {
-          s.sy += (1 - s.sy) * 0.22;
-          s.sx += (1 - s.sx) * 0.22;
-          s.tilt *= 0.7;
-          if (s.t <= 0) {
-            s.mode = 'idle';
-            const bounceNow = l.targeted;
-            s.t = bounceNow ? rand(0.25, 0.55) : rand(pers.idle[0], pers.idle[1]);
-          }
-          break;
-        }
-        case 'glide': {
-          // floaters drift toward their target with a gentle bob and lean
-          const dx = s.tx - s.x;
-          const dy = s.ty - s.y;
-          const dist = Math.hypot(dx, dy);
-          const speed = (l.dragging ? 30 : 15) * dt;
-          if (dist < 0.8) {
-            s.mode = 'idle';
-            s.t = rand(pers.idle[0], pers.idle[1]);
-          } else {
-            s.x += (dx / dist) * Math.min(speed, dist);
-            s.y += (dy / dist) * Math.min(speed, dist);
-            s.tilt = clamp(dx * 0.8, -10, 10);
-          }
-          s.z = 16 + Math.sin(secs * 2.6 + s.phase) * 9;
-          s.sy = 1 + Math.sin(secs * 2.6 + s.phase) * 0.04;
-          s.sx = 1 + (1 - s.sy) * 0.7;
+          syTarget = 1.07 + Math.sin(secs * 10) * 0.02;
           break;
         }
       }
 
+      // Jelly: squash and stretch follow a damped spring, so every hop, landing and poke wobbles
+      if (pressed.current && s.mode !== 'carried') syTarget = 0.8; // being squished
+      s.syv += ((syTarget - s.sy) * 260 - s.syv * 15) * dt;
+      s.sy += s.syv * dt;
+      s.sy = clamp(s.sy, 0.55, 1.4);
+      const sx = 1 + (1 - s.sy) * 0.7;
+
       // Depth: lower on screen reads as closer
       const depth = (s.y - BAND.minY) / (BAND.maxY - BAND.minY);
       const scale = 0.82 + 0.3 * depth;
+      ground.dataset.mode = s.mode;
+      ground.dataset.mood = s.mood;
       ground.style.left = `${s.x}%`;
       ground.style.top = `${s.y}%`;
       ground.style.zIndex = String(20 + Math.round(s.y));
       ground.style.transform = `translate(-50%, -100%) translateY(10px) scale(${scale})`;
-      body.style.transform = `translate(${s.look * 4}px, ${-s.z}px) rotate(${s.tilt}deg) scale(${s.sx}, ${s.sy})`;
+      body.style.transform = `translate(${s.look * 4}px, ${-s.z}px) rotate(${s.tilt}deg) scale(${sx}, ${s.sy})`;
       const lift = clamp(s.z / 170, 0, 1);
       shadow.style.transform = `translateX(-50%) scale(${1 - lift * 0.45}, ${1 - lift * 0.45})`;
       shadow.style.opacity = String(0.4 - lift * 0.22);
@@ -531,16 +730,19 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
     const s = sim.current;
     s.last = performance.now() / 1000;
     if (s.mode === 'sleep') setSleeping(false);
-    flash(POKE_BUBBLES[Math.floor(Math.random() * POKE_BUBBLES.length)], 1400);
+    say(POKE_BUBBLES[Math.floor(Math.random() * POKE_BUBBLES.length)], 1400);
     if (s.mode === 'idle' || s.mode === 'land' || s.mode === 'glide' || s.mode === 'sleep') {
       s.mode = 'air';
       s.vz = 430;
       s.jump = 430;
       s.vx = 0;
       s.vy = 0;
+      s.hasTarget = false;
+      s.thrown = false;
       s.z = Math.max(s.z, 1);
+      s.syv += 4;
     }
-    onPoke(slime.id);
+    cb.current.onPoke(slime.id);
   };
 
   const needed = xpToNextLevel(slime.level);
@@ -571,7 +773,19 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
         ref={bodyRef}
         data-slime-id={slime.id}
         className="absolute inset-0 cursor-pointer pointer-events-auto select-none outline-none"
-        onPointerDown={(e) => { if (e.button === 0) dragInfo.current = { startX: e.clientX, startY: e.clientY, moved: false }; }}
+        draggable={false}
+        onMouseDown={(e) => e.preventDefault()}
+        onDragStart={(e) => e.preventDefault()}
+        onDoubleClick={(e) => e.preventDefault()}
+        onPointerEnter={(e) => { if (e.pointerType === 'mouse') hover.current = true; }}
+        onPointerLeave={() => { hover.current = false; }}
+        onPointerDown={(e) => {
+          if (e.button !== 0) return;
+          window.getSelection()?.removeAllRanges();
+          dragInfo.current = { startX: e.clientX, startY: e.clientY, moved: false };
+          pressed.current = true;
+          sim.current.last = performance.now() / 1000;
+        }}
         onClick={(e) => {
           e.stopPropagation();
           if (suppressClick.current) return;
@@ -772,10 +986,10 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     }
   };
 
-  const handlePoke = (slimeId: string) => {
+  const handlePoke = (slimeId: string, quiet = false) => {
     const c = centerOf(slimeId);
-    if (c) addFx({ kind: 'burst', x: c.x, y: c.y - 30, emojis: ['💖'], count: 3 }, 1100);
-    audioEngine.playSfx('tap');
+    if (c) addFx({ kind: 'burst', x: c.x, y: c.y - 30, emojis: ['💖'], count: quiet ? 2 : 3 }, 1100);
+    if (!quiet) audioEngine.playSfx('tap');
   };
 
   const handleFeed = (food: SlimeFoodType, slimeId: string, origin: { x: number; y: number }) => {
@@ -854,7 +1068,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
 
   return (
     <div
-      className="fixed inset-0 z-[10000] flex flex-col bg-black/80 select-none"
+      className="sanctuary-root fixed inset-0 z-[10000] flex flex-col bg-black/80 select-none"
       style={{ pointerEvents: 'auto', WebkitUserSelect: 'none', userSelect: 'none', WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none' }}
     >
       <div className="sticky top-0 z-40 flex-shrink-0 bg-gradient-to-b from-black/95 via-black/90 to-black/70 pt-4 pb-8 px-6 backdrop-blur-md border-b border-white/10">
@@ -963,6 +1177,9 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         @keyframes fxBurst { 0% { transform: translate(0,0) scale(.4); opacity: 1 } 100% { transform: translate(var(--dx), var(--dy)) scale(1.1); opacity: 0 } }
         @keyframes fxRing { 0% { transform: translate(0,0) scale(.3); opacity: 1 } 100% { transform: translate(0,0) scale(5); opacity: 0 } }
         @keyframes fxFlash { 0% { transform: scale(.4); opacity: 1 } 100% { transform: scale(1.6); opacity: 0 } }
+        .sanctuary-root, .sanctuary-root * { -webkit-user-select: none; user-select: none; -webkit-user-drag: none; }
+        .sanctuary-root ::selection, .sanctuary-root canvas::selection { background: transparent; color: inherit; }
+        .sanctuary-root canvas { -webkit-user-drag: none; outline: none; }
         .slime-eat { animation: slimeEat .55s ease-out; }
         .slime-target { animation: slimeTarget .5s ease-in-out infinite; filter: brightness(1.15) drop-shadow(0 0 14px rgba(124,255,178,.9)); }
       `}</style>
