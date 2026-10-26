@@ -146,10 +146,11 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
   return (
     <>
       <div
-        className={`absolute bottom-1 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1 select-none transition-all duration-300 ease-out ${
+        className={`absolute bottom-1 left-1/2 -translate-x-1/2 z-[200] flex flex-col items-center gap-1 select-none transition-all duration-300 ease-out ${
           open ? 'translate-y-0 opacity-100' : 'translate-y-[140%] opacity-0 pointer-events-none'
         }`}
         style={{ touchAction: 'none' }}
+        data-sanctuary-ui
         aria-hidden={!open}
       >
         {showHint && (
@@ -241,7 +242,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
           <button
             onClick={() => { audioEngine.playSfx('tap'); setOpen(true); }}
             aria-label={`Open food bag, ${total} items`}
-            className={`absolute bottom-2 left-3 z-30 w-[60px] h-[60px] rounded-full flex items-center justify-center bg-black/45 backdrop-blur-md border-2 border-white/30 shadow-[0_6px_18px_rgba(0,0,0,0.5)] hover:scale-110 transition-all duration-300 ${
+            className={`absolute bottom-2 left-3 z-[200] w-[60px] h-[60px] rounded-full flex items-center justify-center bg-black/45 backdrop-blur-md border-2 border-white/30 shadow-[0_6px_18px_rgba(0,0,0,0.5)] hover:scale-110 transition-all duration-300 ${
               open ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
             }`}
           >

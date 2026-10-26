@@ -165,15 +165,52 @@ const ENVIRONMENT_LAYERS: Record<string, { ground: string; midground: string; ba
   }
 };
 
+interface Landmark {
+  x: number; // % of the scene
+  y: number;
+  e: string; // what the slime thinks about it
+}
+
+// Things worth visiting in each Sanctuary backdrop (placed from the painted art; slimes stand in the lower band)
+const LANDMARKS: Record<string, Landmark[]> = {
+  fire: [{ x: 38, y: 66, e: '🌋' }, { x: 20, y: 70, e: '💎' }, { x: 60, y: 76, e: '🔥' }, { x: 82, y: 68, e: '🌿' }],
+  water: [{ x: 24, y: 78, e: '🪷' }, { x: 68, y: 72, e: '💧' }, { x: 12, y: 66, e: '🗿' }, { x: 84, y: 65, e: '🏛️' }, { x: 47, y: 63, e: '🌊' }],
+  plant: [{ x: 24, y: 76, e: '🪷' }, { x: 38, y: 63, e: '🍄' }, { x: 56, y: 66, e: '🌳' }, { x: 78, y: 70, e: '🪨' }, { x: 68, y: 78, e: '🌸' }],
+  earth: [{ x: 18, y: 66, e: '🗿' }, { x: 45, y: 64, e: '✨' }, { x: 60, y: 76, e: '🌵' }, { x: 82, y: 74, e: '💎' }, { x: 25, y: 78, e: '🌼' }],
+  wind: [{ x: 22, y: 76, e: '💧' }, { x: 12, y: 72, e: '💎' }, { x: 50, y: 70, e: '🌬️' }, { x: 75, y: 68, e: '💧' }, { x: 82, y: 78, e: '🌼' }],
+  ice: [{ x: 18, y: 78, e: '🧊' }, { x: 35, y: 66, e: '🏮' }, { x: 60, y: 70, e: '❄️' }, { x: 70, y: 77, e: '⛏️' }, { x: 80, y: 64, e: '💎' }],
+  electric: [{ x: 36, y: 64, e: '⚡' }, { x: 26, y: 74, e: '💧' }, { x: 60, y: 70, e: '🔌' }, { x: 78, y: 74, e: '🪷' }, { x: 14, y: 68, e: '💎' }],
+  metal: [{ x: 34, y: 66, e: '🔥' }, { x: 55, y: 70, e: '⚙️' }, { x: 72, y: 66, e: '🔩' }, { x: 78, y: 78, e: '⚙️' }, { x: 20, y: 76, e: '⚒️' }],
+  light: [{ x: 40, y: 62, e: '🏛️' }, { x: 22, y: 76, e: '💧' }, { x: 68, y: 68, e: '🌼' }, { x: 80, y: 76, e: '🌸' }, { x: 12, y: 70, e: '✨' }],
+  shadow: [{ x: 22, y: 76, e: '🪷' }, { x: 38, y: 64, e: '🌺' }, { x: 60, y: 62, e: '🏰' }, { x: 75, y: 70, e: '🟣' }, { x: 12, y: 66, e: '🗿' }],
+};
+
+interface SlimeApi {
+  poke: () => void;
+  carry: () => void;
+  drop: () => void;
+  setPressed: (v: boolean) => void;
+  setHover: (v: boolean) => void;
+}
+
+interface PointerSample {
+  x: number;
+  y: number;
+  t: number;
+}
+
 interface BouncingSlimeProps {
   slime: Slime;
   selected: boolean;
   targeted: boolean;
   dragging: boolean;
   wantsFood: boolean;
+  landmarks: Landmark[];
   attractRef: React.MutableRefObject<{ x: number; y: number } | null>;
+  pointerRef: React.MutableRefObject<PointerSample | null>;
+  histRef: React.MutableRefObject<PointerSample[]>;
+  apiRef: React.MutableRefObject<Record<string, SlimeApi>>;
   eatNonce: number;
-  onSelect: (id: string) => void;
   onPoke: (id: string, quiet?: boolean) => void;
 }
 
@@ -185,7 +222,7 @@ interface Personality {
   idle: [number, number]; // seconds between moves
   jump: [number, number]; // launch speed, px/s
   range: number; // how far a wander can go, % of the scene
-  float?: boolean; // glides instead of hopping
+  float?: boolean; // always floats between places (and bounces on arrival)
 }
 const DEFAULT_PERSONALITY: Personality = { idle: [0.7, 1.7], jump: [330, 440], range: 32 };
 const PERSONALITIES: Record<string, Personality> = {
@@ -197,8 +234,8 @@ const PERSONALITIES: Record<string, Personality> = {
   ice: { idle: [0.7, 1.7], jump: [330, 430], range: 32 },
   light: { idle: [0.6, 1.5], jump: [380, 480], range: 34 },
   shadow: { idle: [0.7, 1.7], jump: [330, 450], range: 34 },
-  water: { idle: [0.6, 1.4], jump: [0, 0], range: 30, float: true },
-  wind: { idle: [0.4, 1.0], jump: [0, 0], range: 38, float: true },
+  water: { idle: [0.6, 1.4], jump: [260, 340], range: 30, float: true },
+  wind: { idle: [0.4, 1.0], jump: [260, 340], range: 38, float: true },
 };
 
 const CALM_BUBBLES = ['🎵', '✨', '🍃', '😊'];
@@ -207,10 +244,10 @@ const PET_BUBBLES = ['💖', '🥰', '😊'];
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
-type Mode = 'idle' | 'crouch' | 'air' | 'land' | 'glide' | 'sleep' | 'carried';
+type Mode = 'idle' | 'crouch' | 'air' | 'land' | 'glide' | 'sleep' | 'carried' | 'inspect';
 type Mood = 'calm' | 'lonely' | 'curious' | 'happy';
 
-function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attractRef, eatNonce, onSelect, onPoke }: BouncingSlimeProps) {
+function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmarks, attractRef, pointerRef, histRef, apiRef, eatNonce, onPoke }: BouncingSlimeProps) {
   const groundRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const shadowRef = useRef<HTMLDivElement>(null);
@@ -219,14 +256,10 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
   const [sleeping, setSleeping] = useState(false);
   const bubbleRef = useRef<string | null>(null);
   bubbleRef.current = bubble;
-  const ptr = useRef<{ x: number; y: number; t: number } | null>(null);
-  const ptrHist = useRef<{ x: number; y: number; t: number }[]>([]);
-  const dragInfo = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
-  const suppressClick = useRef(false);
   const hover = useRef(false);
   const pressed = useRef(false);
-  const cb = useRef({ onPoke });
-  cb.current = { onPoke };
+  const cb = useRef({ onPoke, landmarks });
+  cb.current = { onPoke, landmarks };
 
   // Latest props for the animation loop, which must not restart on every render
   const live = useRef({ selected, targeted, dragging, wantsFood });
@@ -247,7 +280,13 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
     fx: 0,
     fy: 0,
     hasTarget: false,
+    viaFloat: false,
     jump: 0,
+    bounceQ: [] as number[],
+    explore: null as Landmark | null,
+    inspecting: null as Landmark | null,
+    lastLm: -1,
+    sniff: 1,
     thrown: false,
     throwPower: 0,
     dizzy: 0,
@@ -280,82 +319,95 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [eatNonce]);
 
-  // Pointer: slimes watch it, can be petted, picked up, and thrown
+  // Tapping makes it hop and squeal
+  const poke = () => {
+    const s = sim.current;
+    s.last = performance.now() / 1000;
+    if (s.mode === 'sleep') setSleeping(false);
+    say(POKE_BUBBLES[Math.floor(Math.random() * POKE_BUBBLES.length)], 1400);
+    if (s.mode === 'idle' || s.mode === 'land' || s.mode === 'glide' || s.mode === 'sleep' || s.mode === 'inspect') {
+      s.mode = 'air';
+      s.vz = 430;
+      s.jump = 430;
+      s.vx = 0;
+      s.vy = 0;
+      s.hasTarget = false;
+      s.thrown = false;
+      s.explore = null;
+      s.bounceQ = [];
+      s.z = Math.max(s.z, 1);
+      s.syv += 4;
+    }
+    cb.current.onPoke(slime.id);
+  };
+
+  // What the Sanctuary's pointer controller can do to this slime
   useEffect(() => {
-    const move = (e: PointerEvent) => {
-      const now = performance.now();
-      ptr.current = { x: e.clientX, y: e.clientY, t: now };
-      const hist = ptrHist.current;
-      hist.push({ x: e.clientX, y: e.clientY, t: now });
-      while (hist.length > 1 && now - hist[0].t > 140) hist.shift();
-      const d = dragInfo.current;
-      if (d && !d.moved && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > 6) {
-        d.moved = true;
-        suppressClick.current = true;
-        pressed.current = false;
+    const api: SlimeApi = {
+      poke,
+      carry: () => {
         const s = sim.current;
         s.mode = 'carried';
         s.thrown = false;
+        s.hasTarget = false;
+        s.explore = null;
+        s.bounceQ = [];
         setSleeping(false);
         say('😮', 8000);
-      }
-    };
-    const up = () => {
-      const wasPressed = pressed.current;
-      pressed.current = false;
-      const d = dragInfo.current;
-      dragInfo.current = null;
-      const s = sim.current;
-      if (wasPressed && !(d?.moved)) s.syv += 5; // let go of a squish: boing
-      if (d?.moved) {
-        if (s.mode === 'carried') {
-          s.last = performance.now() / 1000;
-          const hist = ptrHist.current;
-          const rect = groundRef.current?.parentElement?.getBoundingClientRect();
-          let vpx = 0;
-          let vpy = 0;
-          if (hist.length > 1) {
-            const a = hist[0];
-            const b = hist[hist.length - 1];
-            const dt = (b.t - a.t) / 1000;
-            if (dt > 0.02) {
-              vpx = (b.x - a.x) / dt;
-              vpy = (b.y - a.y) / dt;
-            }
-          }
-          const speed = Math.hypot(vpx, vpy);
-          s.mode = 'air';
-          s.jump = 1;
-          s.hasTarget = false;
-          if (speed > 380 && rect && rect.width > 0) {
-            // thrown: keep the pointer's momentum
-            s.thrown = true;
-            s.throwPower = clamp(speed / 1400, 0.2, 1.4);
-            s.vx = clamp((vpx / rect.width) * 100 * 0.9, -110, 110);
-            s.vy = clamp((vpy / rect.height) * 100 * 0.5, -35, 35);
-            s.vz = clamp(220 - vpy * 0.5, 120, 760);
-            say('🤩', 2200);
-          } else {
-            s.thrown = false;
-            s.vz = 0;
-            s.vx = 0;
-            s.vy = 0;
-            say('😄', 1600);
+      },
+      drop: () => {
+        const s = sim.current;
+        if (s.mode !== 'carried') return;
+        s.last = performance.now() / 1000;
+        const hist = histRef.current;
+        const rect = groundRef.current?.parentElement?.getBoundingClientRect();
+        let vpx = 0;
+        let vpy = 0;
+        if (hist.length > 1) {
+          const a = hist[0];
+          const b = hist[hist.length - 1];
+          const dt = (b.t - a.t) / 1000;
+          if (dt > 0.02) {
+            vpx = (b.x - a.x) / dt;
+            vpy = (b.y - a.y) / dt;
           }
         }
-        setTimeout(() => { suppressClick.current = false; }, 60);
-      }
+        const speed = Math.hypot(vpx, vpy);
+        s.mode = 'air';
+        s.jump = 1;
+        s.hasTarget = false;
+        if (speed > 380 && rect && rect.width > 0) {
+          // thrown: keep the pointer's momentum
+          s.thrown = true;
+          s.throwPower = clamp(speed / 1400, 0.2, 1.4);
+          s.vx = clamp((vpx / rect.width) * 100 * 0.9, -110, 110);
+          s.vy = clamp((vpy / rect.height) * 100 * 0.5, -35, 35);
+          s.vz = clamp(220 - vpy * 0.5, 120, 760);
+          say('🤩', 2200);
+        } else {
+          s.thrown = false;
+          s.vz = 0;
+          s.vx = 0;
+          s.vy = 0;
+          say('😄', 1600);
+        }
+      },
+      setPressed: (v: boolean) => {
+        const was = pressed.current;
+        pressed.current = v;
+        if (!v && was) sim.current.syv += 5; // let go of a squish: boing
+        if (v) sim.current.last = performance.now() / 1000;
+      },
+      setHover: (v: boolean) => {
+        hover.current = v;
+      },
     };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-    window.addEventListener('pointercancel', up);
+    apiRef.current[slime.id] = api;
     return () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-      window.removeEventListener('pointercancel', up);
+      delete apiRef.current[slime.id];
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [slime.id]);
 
   useEffect(() => {
     const ground = groundRef.current;
@@ -371,19 +423,129 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
       const mult = s.mood === 'lonely' ? 1.4 : s.mood === 'curious' ? 0.7 : 1;
       return rand(pers.idle[0], pers.idle[1]) * mult;
     };
+    const hopJump = () => rand(pers.jump[0] || 300, pers.jump[1] || 420) * 1.2 * rand(0.85, 1.15);
 
-    const startHop = (tx: number, ty: number, jump: number) => {
+    // Head somewhere: floating (smooth glide, then a few bounces on arrival) or a chain of hops
+    const goTo = (tx: number, ty: number, style: 'hop' | 'float', jump: number) => {
       const s = sim.current;
       s.fx = clamp(tx, BAND.minX, BAND.maxX);
       s.fy = clamp(ty, BAND.minY, BAND.maxY);
       s.hasTarget = Math.hypot(s.fx - s.x, s.fy - s.y) > 1.5;
       s.jump = jump;
-      if (pers.float) {
+      s.viaFloat = style === 'float';
+      if (style === 'float') {
         s.mode = 'glide';
       } else {
         s.mode = 'crouch';
-        s.t = 0.12;
+        s.t = 0.08;
       }
+    };
+    const travelStyle = (): 'hop' | 'float' => (pers.float || Math.random() < 0.45 ? 'float' : 'hop');
+
+    const bounceIn = (jump: number) => {
+      const s = sim.current;
+      s.hasTarget = false;
+      s.jump = jump;
+      s.mode = 'crouch';
+      s.t = 0.07;
+    };
+    const bounceNext = () => {
+      const s = sim.current;
+      const j = s.bounceQ.shift();
+      if (j) bounceIn(j);
+      else {
+        s.mode = 'idle';
+        s.t = idleTime();
+      }
+    };
+    // Arrived: look around if this was an exploration, otherwise maybe a few happy bounces
+    const finishTrip = (viaFloat: boolean) => {
+      const s = sim.current;
+      s.hasTarget = false;
+      if (s.explore) {
+        s.inspecting = s.explore;
+        s.explore = null;
+        s.mode = 'inspect';
+        s.t = rand(2.6, 4.2);
+        s.sniff = rand(0.6, 1.1);
+        say(s.inspecting.e, 2600, false);
+        return;
+      }
+      if (viaFloat && Math.random() < (pers.float ? 0.6 : 0.85)) {
+        const base = rand(250, 330);
+        s.bounceQ = [base, base * 0.7, base * 0.45].slice(0, Math.random() < 0.5 ? 2 : 3);
+        bounceNext();
+        return;
+      }
+      s.mode = 'idle';
+      s.t = idleTime();
+    };
+
+    const decide = (p: { x: number; y: number } | null) => {
+      const s = sim.current;
+      const l = live.current;
+      const parent = ground.parentElement;
+      const rect = parent?.getBoundingClientRect();
+      const attract = attractRef.current;
+      const toPct = (pt: { x: number; y: number }) => ({
+        x: rect && rect.width > 0 ? ((pt.x - rect.left) / rect.width) * 100 : s.x,
+        y: rect && rect.height > 0 ? ((pt.y - rect.top) / rect.height) * 100 : s.y,
+      });
+      s.explore = null;
+
+      if (l.targeted) {
+        goTo(s.x, s.y, 'hop', 210); // food right over me: bounce with excitement
+        return;
+      }
+      if (attract && rect) {
+        const a = toPct(attract);
+        const dx = a.x - s.x;
+        const dy = clamp(a.y, BAND.minY, BAND.maxY) - s.y;
+        if (Math.abs(dx) < 9 && Math.abs(dy) < 8) goTo(s.x, s.y, 'hop', 200);
+        else goTo(s.x + clamp(dx, -26, 26), s.y + clamp(dy, -8, 8), pers.float ? 'float' : 'hop', hopJump());
+        return;
+      }
+      if (s.mood === 'happy') {
+        // pointer right here: playful bouncing in place, now and then a little shuffle
+        if (Math.random() < 0.65) goTo(s.x, s.y, 'hop', 230);
+        else goTo(s.x + rand(-6, 6), s.y + rand(-3, 3), 'hop', 240);
+        return;
+      }
+      if (s.mood === 'curious' && p && rect && Math.random() < 0.55) {
+        // sidle over to see what the pointer is up to
+        const a = toPct(p);
+        const dx = a.x - s.x;
+        if (Math.abs(dx) > 10) {
+          goTo(s.x + clamp(dx * 0.6, -16, 16), s.y + clamp((a.y - s.y) * 0.3, -4, 4), travelStyle(), hopJump());
+          return;
+        }
+      }
+      if (!pers.float && (s.mood === 'lonely' || s.mood === 'calm') && performance.now() / 1000 - s.last > 25 && Math.random() < 0.06) {
+        s.mode = 'sleep';
+        s.t = rand(7, 13);
+        setSleeping(true);
+        return;
+      }
+      // explore: wander over to something in the habitat and have a look at it
+      const lms = cb.current.landmarks;
+      if (lms.length && Math.random() < 0.3) {
+        let i = Math.floor(Math.random() * lms.length);
+        if (i === s.lastLm) i = (i + 1) % lms.length;
+        s.lastLm = i;
+        const lm = lms[i];
+        s.explore = lm;
+        goTo(lm.x + rand(-2.5, 2.5), lm.y + rand(-1.5, 1.5), travelStyle(), hopJump());
+        return;
+      }
+      if (Math.random() < 0.1) {
+        s.t = idleTime(); // just look around
+        return;
+      }
+      // wander: half the time a trip across the whole scene, otherwise a nearby shuffle
+      const reach = s.mood === 'lonely' ? pers.range * 0.75 : pers.range;
+      let tx = Math.random() < 0.45 ? rand(BAND.minX + 4, BAND.maxX - 4) : s.x + rand(-reach, reach);
+      if (tx < BAND.minX + 2 || tx > BAND.maxX - 2) tx = s.x + (s.x > 50 ? -1 : 1) * rand(reach * 0.5, reach);
+      goTo(tx, s.y + rand(-6, 6), travelStyle(), hopJump() * (s.mood === 'lonely' ? 0.9 : 1));
     };
 
     // One hop of a chain: move part of the way to the target, so travelling is a series of bounces
@@ -404,62 +566,6 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
       s.vx = hx / T;
       s.vy = hy / T;
       s.mode = 'air';
-    };
-
-    const decide = (p: { x: number; y: number } | null, pDist: number) => {
-      const s = sim.current;
-      const l = live.current;
-      const parent = ground.parentElement;
-      const rect = parent?.getBoundingClientRect();
-      const attract = attractRef.current;
-      const toPct = (pt: { x: number; y: number }) => ({
-        x: rect && rect.width > 0 ? ((pt.x - rect.left) / rect.width) * 100 : s.x,
-        y: rect && rect.height > 0 ? ((pt.y - rect.top) / rect.height) * 100 : s.y,
-      });
-      const hopJump = () => rand(pers.jump[0] || 300, pers.jump[1] || 420) * 1.25;
-
-      if (l.targeted) {
-        startHop(s.x, s.y, 210); // food right over me: bounce with excitement
-        return;
-      }
-      if (attract && rect) {
-        const a = toPct(attract);
-        const dx = a.x - s.x;
-        const dy = clamp(a.y, BAND.minY, BAND.maxY) - s.y;
-        if (Math.abs(dx) < 9 && Math.abs(dy) < 8) startHop(s.x, s.y, 200);
-        else startHop(s.x + clamp(dx, -26, 26), s.y + clamp(dy, -8, 8), hopJump());
-        return;
-      }
-      if (s.mood === 'happy') {
-        // pointer right here: playful bouncing in place, now and then a little shuffle
-        if (Math.random() < 0.65) startHop(s.x, s.y, 230);
-        else startHop(s.x + rand(-6, 6), s.y + rand(-3, 3), 240);
-        return;
-      }
-      if (s.mood === 'curious' && p && rect && Math.random() < 0.55) {
-        // sidle over to see what the pointer is up to
-        const a = toPct(p);
-        const dx = a.x - s.x;
-        if (Math.abs(dx) > 10) {
-          startHop(s.x + clamp(dx * 0.6, -16, 16), s.y + clamp((a.y - s.y) * 0.3, -4, 4), hopJump());
-          return;
-        }
-      }
-      if (!pers.float && (s.mood === 'lonely' || s.mood === 'calm') && performance.now() / 1000 - s.last > 25 && Math.random() < 0.06) {
-        s.mode = 'sleep';
-        s.t = rand(7, 13);
-        setSleeping(true);
-        return;
-      }
-      if (Math.random() < 0.1) {
-        s.t = idleTime(); // just look around
-        return;
-      }
-      // wander: half the time a trip across the whole scene, otherwise a nearby shuffle (never pinned to an edge)
-      const reach = s.mood === 'lonely' ? pers.range * 0.75 : pers.range;
-      let tx = Math.random() < 0.45 ? rand(BAND.minX + 4, BAND.maxX - 4) : s.x + rand(-reach, reach);
-      if (tx < BAND.minX + 2 || tx > BAND.maxX - 2) tx = s.x + (s.x > 50 ? -1 : 1) * rand(reach * 0.5, reach);
-      startHop(tx, s.y + rand(-6, 6), hopJump() * (s.mood === 'lonely' ? 0.9 : 1));
     };
 
     const setMood = (m: Mood) => {
@@ -501,7 +607,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
       const box = body.getBoundingClientRect();
       const cx = box.left + box.width / 2;
       const cy = box.top + box.height / 2;
-      const p = ptr.current;
+      const p = pointerRef.current;
       const pDist = p ? Math.hypot(p.x - cx, p.y - cy) : Infinity;
       const pAge = p ? (now - p.t) / 1000 : 99;
       const hovering = hover.current && pAge < 4;
@@ -520,9 +626,10 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
         if (want !== s.mood) setMood(want);
       }
 
-      // watching: lean toward the pointer, further into a pet
+      // watching: lean toward the pointer (further into a pet); when exploring, sweep a slow look around
       const watching = (s.mood === 'curious' || s.mood === 'happy') && p && pDist < 340 && s.mode !== 'sleep' && s.mode !== 'carried';
-      const lookTarget = watching ? clamp((p!.x - cx) / (hovering ? 70 : 200), -1, 1) : 0;
+      let lookTarget = watching ? clamp((p!.x - cx) / (hovering ? 70 : 200), -1, 1) : 0;
+      if (s.mode === 'inspect') lookTarget = Math.sin(secs * 1.6 + s.phase);
       s.look += (lookTarget - s.look) * 0.12;
 
       // petting: rubbing the pointer over it
@@ -547,12 +654,13 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
           s.tilt += (s.look * 5 - (s.mood === 'lonely' ? 3 : 0) - s.tilt) * 0.15;
           if (pers.float) {
             // floaty idle: keep drifting and bobbing, never parked
-            s.z = 16 + Math.sin(secs * 2.2 + s.phase) * 9;
+            s.z += (16 + Math.sin(secs * 2.2 + s.phase) * 9 - s.z) * Math.min(1, dt * 6);
             s.vx *= Math.pow(0.25, dt);
             s.vy *= Math.pow(0.25, dt);
             s.x = clamp(s.x + (s.vx + Math.sin(secs * 0.6 + s.phase) * 1.4) * dt, BAND.minX, BAND.maxX);
             s.y = clamp(s.y + (s.vy + Math.cos(secs * 0.5 + s.phase) * 0.5) * dt, BAND.minY, BAND.maxY);
           } else {
+            s.z += (0 - s.z) * Math.min(1, dt * 8); // settle softly after a float
             s.x = clamp(s.x + Math.sin(secs * 0.8 + s.phase) * 0.5 * dt, BAND.minX, BAND.maxX); // slow sway
           }
           s.blinkIn -= dt;
@@ -576,13 +684,30 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
             }
           }
           if (s.t <= 0) {
-            decide(p, pDist);
+            decide(p);
             if (s.mode === 'idle') s.t = idleTime();
           }
           break;
         }
+        case 'inspect': {
+          // exploring: sweeping a slow look around, a curious sniff-bob now and then
+          syTarget = 1.03 + Math.sin(secs * 3 + s.phase) * 0.03;
+          s.tilt += (Math.sin(secs * 1.6 + s.phase) * 8 - s.tilt) * 0.1;
+          s.z += ((pers.float ? 16 + Math.sin(secs * 2.2 + s.phase) * 9 : 0) - s.z) * Math.min(1, dt * 6);
+          s.sniff -= dt;
+          if (s.sniff <= 0) {
+            s.sniff = rand(0.8, 1.4);
+            s.syv += 3.5;
+          }
+          if (s.t <= 0 || l.targeted || l.dragging || (p && pAge < 3 && pDist < 110)) {
+            s.mode = 'idle';
+            s.inspecting = null;
+            s.t = rand(0.3, 0.8);
+          }
+          break;
+        }
         case 'crouch': {
-          syTarget = 0.78;
+          syTarget = 0.86;
           if (s.t <= 0) launchHop();
           break;
         }
@@ -596,7 +721,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
           if (s.y < BAND.minY) { s.y = BAND.minY; s.vy = s.thrown ? Math.abs(s.vy) * 0.7 : 0; }
           if (s.y > BAND.maxY) { s.y = BAND.maxY; s.vy = s.thrown ? -Math.abs(s.vy) * 0.7 : 0; }
           const ref = s.thrown ? 520 : s.jump || 1;
-          syTarget = 1 + clamp(Math.abs(s.vz) / ref, 0, 1) * 0.2;
+          syTarget = 1 + clamp(Math.abs(s.vz) / ref, 0, 1) * 0.16;
           s.tilt += (clamp(s.vx * 0.35, -14, 14) - s.tilt) * 0.2;
           if (s.thrown) s.tilt += Math.sin(secs * 20) * 1.2; // tumbling
           if (s.z <= 0 && s.vz < 0) {
@@ -606,7 +731,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
               s.vz = impact * 0.5; // bounce again
               s.vx *= 0.7;
               s.vy *= 0.7;
-              s.sy = 0.78;
+              s.sy = 0.82;
               s.syv = 0;
             } else {
               if (s.thrown && s.throwPower > 0.5) {
@@ -617,8 +742,8 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
               s.vx = 0;
               s.vy = 0;
               s.mode = 'land';
-              s.t = s.dizzy > 0 ? 0.25 : 0.14;
-              s.sy = impact > 400 ? 0.7 : 0.8;
+              s.t = s.dizzy > 0 ? 0.25 : 0.1;
+              s.sy = impact > 400 ? 0.76 : 0.87; // landing squash; the spring lets it wobble back
               s.syv = 0;
             }
           }
@@ -634,7 +759,11 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
             const remaining = s.hasTarget ? Math.hypot(s.fx - s.x, s.fy - s.y) : 0;
             if (s.hasTarget && remaining > 1.6 && s.dizzy <= 0) {
               s.mode = 'crouch'; // keep bouncing toward the target
-              s.t = 0.05;
+              s.t = 0.04;
+            } else if (s.bounceQ.length && s.dizzy <= 0) {
+              bounceNext();
+            } else if (s.hasTarget || s.explore) {
+              finishTrip(false);
             } else {
               s.mode = 'idle';
               s.hasTarget = false;
@@ -644,25 +773,24 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
           break;
         }
         case 'glide': {
-          // floaters ease toward their target: smooth speed-up and slow-down, leaning into the move
+          // floating between places: ease up, cruise with a bob, ease down; then bounce on arrival
           const dx = s.fx - s.x;
           const dy = s.fy - s.y;
           const dist = Math.hypot(dx, dy);
-          const maxSpeed = l.dragging ? 32 : s.mood === 'lonely' ? 7 : s.mood === 'calm' ? 15 : 18;
+          const maxSpeed = l.dragging ? 32 : s.mood === 'lonely' ? 8 : s.mood === 'calm' ? 16 : 19;
           if (dist < 0.6 || !s.hasTarget) {
-            s.mode = 'idle';
-            s.hasTarget = false;
-            s.t = idleTime();
+            finishTrip(true);
           } else {
-            const sp = Math.min(maxSpeed, dist * 1.6);
-            const k = Math.min(1, dt * 2.4);
+            const sp = Math.min(maxSpeed, dist * 1.5);
+            const k = Math.min(1, dt * 2.2);
             s.vx += ((dx / dist) * sp - s.vx) * k;
             s.vy += ((dy / dist) * sp - s.vy) * k;
           }
           s.x = clamp(s.x + s.vx * dt, BAND.minX, BAND.maxX);
           s.y = clamp(s.y + s.vy * dt, BAND.minY, BAND.maxY);
           s.tilt += (clamp(s.vx * 0.6, -12, 12) - s.tilt) * 0.12;
-          s.z = 16 + Math.sin(secs * 2.6 + s.phase) * 9;
+          const hoverH = pers.float ? 16 + Math.sin(secs * 2.6 + s.phase) * 9 : 15 + Math.sin(secs * 3 + s.phase) * 5;
+          s.z += (hoverH - s.z) * Math.min(1, dt * 5);
           syTarget = 1 + Math.sin(secs * 2.6 + s.phase) * 0.04;
           break;
         }
@@ -696,9 +824,9 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
         }
       }
 
-      // Jelly: squash and stretch follow a damped spring, so every hop, landing and poke wobbles
+      // Jelly: squash and stretch follow a soft damped spring, so every hop, landing and poke wobbles
       if (pressed.current && s.mode !== 'carried') syTarget = 0.8; // being squished
-      s.syv += ((syTarget - s.sy) * 260 - s.syv * 15) * dt;
+      s.syv += ((syTarget - s.sy) * 210 - s.syv * 11) * dt;
       s.sy += s.syv * dt;
       s.sy = clamp(s.sy, 0.55, 1.4);
       const sx = 1 + (1 - s.sy) * 0.7;
@@ -725,31 +853,12 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [slime.element]);
 
-  // Tapping makes it hop and squeal
-  const poke = () => {
-    const s = sim.current;
-    s.last = performance.now() / 1000;
-    if (s.mode === 'sleep') setSleeping(false);
-    say(POKE_BUBBLES[Math.floor(Math.random() * POKE_BUBBLES.length)], 1400);
-    if (s.mode === 'idle' || s.mode === 'land' || s.mode === 'glide' || s.mode === 'sleep') {
-      s.mode = 'air';
-      s.vz = 430;
-      s.jump = 430;
-      s.vx = 0;
-      s.vy = 0;
-      s.hasTarget = false;
-      s.thrown = false;
-      s.z = Math.max(s.z, 1);
-      s.syv += 4;
-    }
-    cb.current.onPoke(slime.id);
-  };
-
   const needed = xpToNextLevel(slime.level);
   const maxed = slime.level >= 50;
   const pct = maxed ? 100 : Math.min(100, (slime.xp / needed) * 100);
   const start = sim.current;
 
+  // No pointer handlers here: the Sanctuary's controller finds slimes by geometry (see HabitatViewer)
   return (
     <div
       ref={groundRef}
@@ -772,43 +881,20 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
       <div
         ref={bodyRef}
         data-slime-id={slime.id}
-        className="absolute inset-0 cursor-pointer pointer-events-auto select-none outline-none"
-        draggable={false}
-        onMouseDown={(e) => e.preventDefault()}
-        onDragStart={(e) => e.preventDefault()}
-        onDoubleClick={(e) => e.preventDefault()}
-        onPointerEnter={(e) => { if (e.pointerType === 'mouse') hover.current = true; }}
-        onPointerLeave={() => { hover.current = false; }}
-        onPointerDown={(e) => {
-          if (e.button !== 0) return;
-          window.getSelection()?.removeAllRanges();
-          dragInfo.current = { startX: e.clientX, startY: e.clientY, moved: false };
-          pressed.current = true;
-          sim.current.last = performance.now() / 1000;
-        }}
-        onClick={(e) => {
-          e.stopPropagation();
-          if (suppressClick.current) return;
-          onSelect(slime.id);
-          poke();
-        }}
-        style={{ transformOrigin: '50% 100%', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,0.25))', touchAction: 'none' }}
+        className="absolute inset-0 select-none outline-none pointer-events-none"
+        style={{ transformOrigin: '50% 100%', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,0.25))' }}
       >
         {sleeping && (
-          <div className="absolute -top-6 left-[62%] z-30 pointer-events-none text-xl animate-pulse">💤</div>
+          <div className="absolute top-[4%] left-[68%] z-30 pointer-events-none text-lg animate-pulse">💤</div>
         )}
         {bubble && !sleeping && (
-          <div
-            className={`absolute z-30 pointer-events-none rounded-full bg-white/90 px-2 py-0.5 text-base shadow animate-in zoom-in-50 fade-in duration-300 ${
-              selected || targeted ? 'top-0 left-[78%]' : '-top-7 left-1/2 -translate-x-1/2'
-            }`}
-          >
+          <div className="absolute z-30 pointer-events-none top-[2%] left-[70%] rounded-full bg-white/90 px-1.5 py-0.5 text-sm leading-none shadow animate-in zoom-in-50 fade-in duration-300">
             {bubble}
           </div>
         )}
 
         {(selected || targeted) && (
-          <div className="absolute -top-14 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center gap-1">
+          <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center gap-1">
             <div className="flex items-center gap-2 rounded-full border border-white/25 bg-black/65 backdrop-blur-md px-3 py-1 whitespace-nowrap">
               <span className="text-[10px] font-black uppercase tracking-wider text-white">{slime.name}</span>
               <span className="text-[10px] font-black text-amber-300">Lv {slime.level}</span>
@@ -893,14 +979,14 @@ function FxLayer({ items }: { items: Fx[] }) {
               <div key={fx.id} className="fixed" style={{ left: fx.x, top: fx.y }}>
                 {Array.from({ length: fx.count }).map((_, i) => {
                   const angle = (i / fx.count) * Math.PI * 2 + (fx.id % 7);
-                  const dist = 60 + ((i * 37) % 45);
+                  const dist = 34 + ((i * 37) % 28);
                   return (
                     <span
                       key={i}
                       className="absolute text-2xl"
                       style={{
                         ['--dx' as string]: `${Math.cos(angle) * dist}px`,
-                        ['--dy' as string]: `${Math.sin(angle) * dist - 30}px`,
+                        ['--dy' as string]: `${Math.sin(angle) * dist - 16}px`,
                         animation: `fxBurst 1s ease-out ${i * 0.03}s forwards`,
                       }}
                     >
@@ -942,6 +1028,11 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
   const [fx, setFx] = useState<Fx[]>([]);
   const fxId = useRef(0);
   const attractRef = useRef<{ x: number; y: number } | null>(null);
+  const sceneRef = useRef<HTMLDivElement>(null);
+  const pointerRef = useRef<PointerSample | null>(null);
+  const histRef = useRef<PointerSample[]>([]);
+  const apiRef = useRef<Record<string, SlimeApi>>({});
+  const draggingFoodRef = useRef(false);
   const stateRef = useRef(state);
   stateRef.current = state;
   const habitat = state.habitats.find(h => h.id === habitatId);
@@ -988,7 +1079,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
 
   const handlePoke = (slimeId: string, quiet = false) => {
     const c = centerOf(slimeId);
-    if (c) addFx({ kind: 'burst', x: c.x, y: c.y - 30, emojis: ['💖'], count: quiet ? 2 : 3 }, 1100);
+    if (c) addFx({ kind: 'burst', x: c.x, y: c.y - 24, emojis: ['💖'], count: quiet ? 2 : 3 }, 1100);
     if (!quiet) audioEngine.playSfx('tap');
   };
 
@@ -1024,6 +1115,90 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     setTimeout(() => triggerDialogue('firstFeed'), 2400);
   };
 
+  // One controller for every pointer interaction with the slimes. It finds the slime under the
+  // pointer by geometry instead of relying on element hit-testing, so it keeps working while a
+  // slime is moving, tilted, squashed or has anything transparent over it.
+  draggingFoodRef.current = dragging;
+  useEffect(() => {
+    const press = { current: null as null | { id: string | null; startX: number; startY: number; moved: boolean } };
+    let hoverId: string | null = null;
+    const isUi = (t: EventTarget | null) =>
+      t instanceof Element && !!t.closest('button, a, input, textarea, select, [role="dialog"], [data-sanctuary-ui]');
+    const inScene = (x: number, y: number) => {
+      const r = sceneRef.current?.getBoundingClientRect();
+      return !!r && x >= r.left && x <= r.right && y >= r.top && y <= r.bottom;
+    };
+    const setCursor = (c: string) => { if (sceneRef.current) sceneRef.current.style.cursor = c; };
+    const setHover = (id: string | null) => {
+      if (id === hoverId) return;
+      if (hoverId) apiRef.current[hoverId]?.setHover(false);
+      if (id) apiRef.current[id]?.setHover(true);
+      hoverId = id;
+    };
+
+    const down = (e: PointerEvent) => {
+      if (e.button !== 0 || draggingFoodRef.current) return;
+      if (!inScene(e.clientX, e.clientY) || isUi(e.target)) return;
+      const id = slimeAt(e.clientX, e.clientY);
+      window.getSelection()?.removeAllRanges();
+      press.current = { id, startX: e.clientX, startY: e.clientY, moved: false };
+      if (id) {
+        apiRef.current[id]?.setPressed(true);
+        e.preventDefault();
+      }
+    };
+    const move = (e: PointerEvent) => {
+      const now = performance.now();
+      pointerRef.current = { x: e.clientX, y: e.clientY, t: now };
+      const hist = histRef.current;
+      hist.push({ x: e.clientX, y: e.clientY, t: now });
+      while (hist.length > 1 && now - hist[0].t > 140) hist.shift();
+
+      const pr = press.current;
+      if (pr?.id && !pr.moved && Math.hypot(e.clientX - pr.startX, e.clientY - pr.startY) > 6) {
+        pr.moved = true;
+        apiRef.current[pr.id]?.setPressed(false);
+        apiRef.current[pr.id]?.carry();
+      }
+      if (e.pointerType === 'mouse' && !draggingFoodRef.current && inScene(e.clientX, e.clientY) && !isUi(e.target)) {
+        const h = pr?.moved ? pr.id : slimeAt(e.clientX, e.clientY);
+        setHover(h);
+        setCursor(pr?.moved ? 'grabbing' : h ? 'grab' : '');
+      } else {
+        setHover(null);
+        setCursor('');
+      }
+    };
+    const up = () => {
+      const pr = press.current;
+      press.current = null;
+      if (!pr) return;
+      if (pr.id) {
+        const api = apiRef.current[pr.id];
+        api?.setPressed(false);
+        if (pr.moved) api?.drop();
+        else {
+          setSelectedId(pr.id); // a tap: pick it for feeding, and it reacts
+          api?.poke();
+        }
+      } else if (!pr.moved) {
+        setSelectedId(null); // tapped empty ground
+      }
+      setCursor(hoverId ? 'grab' : '');
+    };
+
+    window.addEventListener('pointerdown', down, true);
+    window.addEventListener('pointermove', move, true);
+    window.addEventListener('pointerup', up, true);
+    window.addEventListener('pointercancel', up, true);
+    return () => {
+      window.removeEventListener('pointerdown', down, true);
+      window.removeEventListener('pointermove', move, true);
+      window.removeEventListener('pointerup', up, true);
+      window.removeEventListener('pointercancel', up, true);
+    };
+  }, [slimeAt]);
+
   // Celebrate level-ups (and evolutions) on the slime itself, whatever caused them
   const hasFood = Object.values(state.inventory).some(n => n > 0);
   const levelKey = assignedSlimes.map(s => `${s.id}:${s.level}`).join('|');
@@ -1039,10 +1214,10 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           addFx({ kind: 'ring', x: c.x - 20, y: c.y - 20, color: '#FFD84D' }, 1000);
           if (evolved) addFx({ kind: 'flash', x: c.x - 130, y: c.y - 130 }, 900);
           addFx({ kind: 'burst', x: c.x, y: c.y, emojis: ['⭐', '✨', '💖'], count: evolved ? 16 : 10 }, 1300);
-          addFx({ kind: 'text', x: c.x - 80, y: c.y - 110, text: 'LEVEL UP!', color: '#FFD84D', big: true }, 2000);
-          addFx({ kind: 'text', x: c.x - 25, y: c.y - 70, text: `Lv ${s.level}`, color: '#ffffff' }, 1800);
+          addFx({ kind: 'text', x: c.x - 80, y: c.y - 92, text: 'LEVEL UP!', color: '#FFD84D', big: true }, 2000);
+          addFx({ kind: 'text', x: c.x - 25, y: c.y - 58, text: `Lv ${s.level}`, color: '#ffffff' }, 1800);
           if (evolved) {
-            addFx({ kind: 'text', x: c.x - 70, y: c.y - 160, text: `${getStage(s.level) === 'teen' ? 'TEEN' : 'ADULT'} FORM!`, color: '#E7B4FF', big: true }, 2200);
+            addFx({ kind: 'text', x: c.x - 70, y: c.y - 130, text: `${getStage(s.level) === 'teen' ? 'TEEN' : 'ADULT'} FORM!`, color: '#E7B4FF', big: true }, 2200);
           }
         }
       }
@@ -1086,8 +1261,8 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         {!theme.bgImage && <div className="absolute inset-0" style={{ background: layers.midground }} />}
         {!theme.bgImage && <div className="absolute bottom-0 left-0 right-0 h-1/2" style={{ background: layers.ground }} />}
 
-        {/* Tap empty space to put the slime back down */}
-        <div className="absolute inset-0" style={{ pointerEvents: 'auto' }} onClick={() => setSelectedId(null)}>
+        {/* Tap empty ground to deselect; slimes are handled by the pointer controller above */}
+        <div ref={sceneRef} className="absolute inset-0" style={{ pointerEvents: 'auto', touchAction: 'none' }}>
           {assignedSlimes.map(slime => (
             <BouncingSlime
               key={slime.id}
@@ -1096,17 +1271,20 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
               targeted={targetId === slime.id}
               dragging={dragging}
               wantsFood={hasFood && slime.level < 50}
+              landmarks={LANDMARKS[habitat.element] ?? []}
               attractRef={attractRef}
+              pointerRef={pointerRef}
+              histRef={histRef}
+              apiRef={apiRef}
               eatNonce={eatNonce[slime.id] || 0}
-              onSelect={setSelectedId}
               onPoke={handlePoke}
             />
           ))}
 
           {assignedSlimes.length < habitat.capacity && (
-            <div className="absolute bottom-1/4 left-[15%] z-30">
+            <div className="absolute bottom-1/4 left-[15%] z-[150]" data-sanctuary-ui>
               <button
-                onClick={(e) => { e.stopPropagation(); setGalleryOpen(true); }}
+                onClick={() => setGalleryOpen(true)}
                 className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#FF7EB6] hover:scale-110 transition-all flex items-center justify-center group"
                 aria-label="Add a slime"
               >
