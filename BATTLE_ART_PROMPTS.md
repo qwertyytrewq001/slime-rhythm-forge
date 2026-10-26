@@ -54,3 +54,36 @@ Two large ornate ribbon banners, same hand-painted style: one gold and cream wit
 
 ## After generating
 Send them as you get them; they don't need to be perfect. For the UI kit I will cut each item out and use them as the button and panel frames, health bars, the podium and the turn-order bar.
+
+---
+
+# ARENAS 1-4 (exact prompts, matched to the castle arena)
+
+Do these in the SAME chat as the castle arena. Attach the castle arena image first and say:
+"This is the reference. Match its rendering style, camera angle and platform position exactly."
+
+Why so exact: the game draws six podiums (3 per side) on the platform itself, so every arena must have the platform in the SAME place and size, and nothing painted on it.
+
+Common block (already included in each prompt below, do not remove):
+- 16:9 landscape, 1920x1080 or larger
+- soft painterly game background, same look as the reference: simplified shapes, soft light, NO heavy black outlines
+- low three-quarter camera, the horizon about 40% down the image
+- ONE flat oval stone platform, centred horizontally, its centre about 62% down from the top, about 56% of the image width, matching the reference platform
+- the platform surface is completely empty and flat: no runes, no circles, no podiums, no cracks that look like patterns, no objects on it
+- background and corners slightly softer and a bit darker than the platform so characters will stand out
+- ABSOLUTELY NO characters, no creatures, no people, no text, no letters, no numbers, no UI, no frames or borders, no logos, no watermark, no sparkle logo in the corner
+
+## Arena 1: Verdant Lowlands (levels 1-10)
+Use the reference's style, camera, and platform size and position exactly. A sunny, peaceful meadow riverbank in morning light. A worn flat oval stone platform with moss on its rim and a few small yellow and white flowers growing at the edge, sitting on short grass. A gentle river winds behind it on the left with lily pads, rolling green hills in the distance, a tiny thatched-roof village with chimney smoke far away on the right, leafy trees framing the left and right edges, a pink-and-blue morning sky with soft clouds. Warm golden light, fresh green and yellow colours. The platform is completely empty and flat. No characters, no text, no UI, no watermark.
+
+## Arena 2: Whispering Wood and Golden Plains (levels 11-20)
+Use the reference's style, camera, and platform size and position exactly. A forest clearing where an ancient glowing forest meets golden wheat plains. A worn flat oval stone platform with roots and moss around its rim, resting on packed earth. On the left, huge mossy tree trunks with a rope bridge and tiny treehouses high up and a few softly glowing blue-purple mushrooms near the ground. On the right, rolling golden wheat fields with two windmills far away under a cloudy warm sky. Soft light rays through the trees, a handful of fireflies. Greens, golds and warm browns. The platform is completely empty and flat. No characters, no text, no UI, no watermark.
+
+## Arena 3: Ironcliff Mines and Murkmire Swamp (levels 21-30)
+Use the reference's style, camera, and platform size and position exactly. Dusk. A worn flat oval stone platform with a rusty iron rim band, half set into the ground. On the left, red-brown canyon cliffs with a wooden mine entrance, an old gear wheel and a rusty mine cart. On the right, a misty dark swamp with twisted trees hung with glowing purple lanterns and still green water. A hazy orange-and-purple dusk sky, low drifting fog behind the platform. Rust reds, murky greens and glowing purple accents. The platform is completely empty and flat. No characters, no text, no UI, no watermark.
+
+## Arena 4: Frostpeak Skyway (levels 31-40)
+Use the reference's style, camera, and platform size and position exactly. A high mountain pass above the clouds. A worn flat oval stone platform dusted with snow and edged with pale ice, with small blue ice crystals along its rim. Snowy rock peaks on the left with a frozen waterfall, floating snow-capped islands connected by a stone bridge in the distance, and a stormy dark-blue cloud bank on the right with faint blue and yellow lightning far away. Drifting snow, cold bright light, whites, ice blues and slate greys. The platform is completely empty and flat. No characters, no text, no UI, no watermark.
+
+## If a result comes out slightly different
+It's fine if the platform is a bit bigger or smaller: send it anyway and I'll measure where the platform is and place the podiums on it. The only hard rules are: nothing on the platform, no characters, no text, no watermark, and the platform in the middle-lower part of the image.
