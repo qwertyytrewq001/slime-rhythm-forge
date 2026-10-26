@@ -226,11 +226,11 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     const rule = PLOT_RULES[plot.id];
     const at = px(plot.id);
     if (farm.level < rule.level) {
-      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Farm Lv ${rule.level}`, color: '#ffd9a0', size: 0.95 }, 1100);
+      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Reach Farm Level ${rule.level} to unlock`, color: '#ffd9a0', size: 0.85 }, 1500);
       return;
     }
     if (goo < rule.cost) {
-      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Need ${rule.cost.toLocaleString()} 💧`, color: '#ff9a9a', size: 0.95 }, 1100);
+      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Need ${rule.cost.toLocaleString()} 💧 to buy this land`, color: '#ff9a9a', size: 0.85 }, 1500);
       return;
     }
     addFx({ kind: 'burst', x: at.x, y: at.y, emojis: ['🌿', '✨'], count: 8 }, 1000);
@@ -353,11 +353,12 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
               )}
 
               {/* locked land */}
+              {canBuy && <div className="absolute rounded-full farm-buy-ring pointer-events-none" style={{ left: "4%", right: "4%", top: "4%", bottom: "4%", border: `3px solid ${GOLD}` }} />}
               {!plot.unlocked && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" style={{ color: '#fff', textShadow: '0 2px 3px rgba(0,0,0,0.85)' }}>
                   <Lock style={{ width: w * 0.2, height: w * 0.2, opacity: 0.85 }} />
                   <span className="font-bold leading-none" style={{ fontSize: Math.max(9, sw * 0.0105 * c.scale), marginTop: 2 }}>
-                    {canBuy ? <>{rule.cost.toLocaleString()} <Ico name="icon_drop" w={Math.max(10, sw * 0.011 * c.scale)} /></> : `Lv ${rule.level}`}
+                    {canBuy ? <>Buy {rule.cost.toLocaleString()} <Ico name="icon_drop" w={Math.max(10, sw * 0.011 * c.scale)} /></> : `Farm Lv ${rule.level}`}
                   </span>
                 </div>
               )}
@@ -679,6 +680,8 @@ const CSS = `
   .farm-ripe { animation: farmRipe 1.4s ease-in-out infinite }
   .farm-float { animation: farmFloat 1.3s ease-in-out infinite }
   .farm-ripe-ring { animation: farmRipeRing 1.5s ease-out infinite }
+  @keyframes farmBuyRing { 0% { opacity: 0.95; transform: scale(0.92) } 100% { opacity: 0; transform: scale(1.2) } }
+  .farm-buy-ring { animation: farmBuyRing 1.6s ease-out infinite }
   .farm-plus { animation: farmPlus 2s ease-in-out infinite }
   .farm-spark { animation: farmSpark 8s ease-out infinite }
   .farm-butterfly { animation: farmButterfly 22s linear infinite }
