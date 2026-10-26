@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
-import { Slime, BattleSlime } from '@/types/slime';
-import { generateAIOpponents, deriveBattleStats, toBattleSlime, getRegionForLevel, isBossLevel } from '@/utils/battleEngine';
+import { Slime, BattleSlime, SlimeElement } from '@/types/slime';
+import { generateAIOpponents, deriveBattleStats, toBattleSlime, getRegionForLevel, getTypeMultiplier, isBossLevel, MAP_SCREENS } from '@/utils/battleEngine';
 import { SlimeCanvas } from './SlimeCanvas';
-import { Button } from '@/components/ui/button';
-import { X, Sword, Heart, Trophy } from 'lucide-react';
 import { ELEMENT_ICONS } from '@/data/traitData';
+import { Skull, Swords, Wand2, X } from 'lucide-react';
 
 interface BattlePreviewProps {
   level: number;
@@ -13,186 +12,226 @@ interface BattlePreviewProps {
   onClose: () => void;
 }
 
+const PARCHMENT = '#f6e8c3';
+const INK = '#4a2f17';
+const GOLD = '#f2b632';
+const ALL_ELEMENTS = Object.keys(ELEMENT_ICONS) as SlimeElement[];
+
+const powerOf = (s: { hp?: number; maxHp: number; attack: number; defense: number; speed: number }) =>
+  Math.round(s.maxHp / 8 + s.attack * 2 + s.defense * 1.5 + s.speed);
+
+/** How well a slime's best element does against the enemy team, averaged (1 = neutral) */
+const matchupVs = (slime: Slime, foes: BattleSlime[]) => {
+  if (!foes.length) return 1;
+  const total = foes.reduce((sum, f) => sum + Math.max(...slime.elements.map(el => getTypeMultiplier(el, f.elements))), 0);
+  return total / foes.length;
+};
+
+const verdict = (m: number) =>
+  m >= 1.2 ? { label: 'Strong', color: '#1f9d55', arrow: '▲' } : m <= 0.85 ? { label: 'Weak', color: '#c0392b', arrow: '▼' } : { label: 'Even', color: '#8a6d3b', arrow: '●' };
+
 export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBattle, onClose }) => {
   const { state } = useGameState();
   const [playerTeam, setPlayerTeam] = useState<(Slime | null)[]>([null, null, null]);
   const [opponentTeam, setOpponentTeam] = useState<BattleSlime[]>([]);
-  const [isSelectingFor, setIsSelectingFor] = useState<number | null>(null);
 
   useEffect(() => {
     const avgLevel = state.slimes.reduce((sum, s) => sum + s.level, 0) / state.slimes.length || 1;
     setOpponentTeam(generateAIOpponents(level, avgLevel));
   }, [level, state.slimes]);
 
-  const handleSelectSlime = (slime: Slime) => {
-    if (isSelectingFor === null || playerTeam.some(s => s?.id === slime.id)) return;
-    const newTeam = [...playerTeam];
-    newTeam[isSelectingFor] = slime;
-    setPlayerTeam(newTeam);
-    setIsSelectingFor(null);
-  };
-
-  // Bring 1-3 slimes. (It used to require exactly 3, which a new player with one starter could never do.)
-  const isTeamReady = playerTeam.some(s => s !== null);
   const region = getRegionForLevel(level);
   const boss = isBossLevel(level);
+  const mapIndex = Math.min(MAP_SCREENS.length - 1, Math.floor((level - 1) / 10)) + 1;
+  const backdrop = `${import.meta.env.BASE_URL}maps/map${mapIndex}.jpg`;
+
+  const picked = playerTeam.filter((s): s is Slime => s !== null);
+  const isTeamReady = picked.length > 0;
+
+  // The roster, best matchup first
+  const roster = useMemo(
+    () =>
+      state.slimes
+        .filter(s => !playerTeam.some(p => p?.id === s.id))
+        .map(s => ({ slime: s, match: matchupVs(s, opponentTeam), power: powerOf(deriveBattleStats(s)) }))
+        .sort((a, b) => b.match * b.power - a.match * a.power),
+    [state.slimes, playerTeam, opponentTeam],
+  );
+
+  const addSlime = (slime: Slime) => {
+    const idx = playerTeam.findIndex(s => s === null);
+    if (idx === -1) return;
+    const next = [...playerTeam];
+    next[idx] = slime;
+    setPlayerTeam(next);
+  };
+  const removeAt = (idx: number) => {
+    const next = [...playerTeam];
+    next[idx] = null;
+    setPlayerTeam(next);
+  };
+  const autoPick = () => {
+    const best = [...state.slimes]
+      .map(s => ({ s, score: matchupVs(s, opponentTeam) * powerOf(deriveBattleStats(s)) }))
+      .sort((a, b) => b.score - a.score)
+      .slice(0, 3)
+      .map(x => x.s);
+    setPlayerTeam([best[0] ?? null, best[1] ?? null, best[2] ?? null]);
+  };
+
+  const yourPower = picked.reduce((sum, s) => sum + powerOf(deriveBattleStats(s)), 0);
+  const theirPower = opponentTeam.reduce((sum, s) => sum + powerOf(s.battleStats), 0);
+  const ratio = theirPower > 0 ? yourPower / theirPower : 1;
+  const outlook =
+    !picked.length ? { text: 'Pick your squad', color: '#d8c9a3' } : ratio >= 1.25 ? { text: 'Favoured', color: '#1f9d55' } : ratio >= 0.85 ? { text: 'Even fight', color: '#b8860b' } : { text: 'Tough fight', color: '#c0392b' };
+  const youShare = yourPower + theirPower > 0 ? (yourPower / (yourPower + theirPower)) * 100 : 50;
+
+  const panel: React.CSSProperties = { background: `linear-gradient(${PARCHMENT}, #ecd9a8)`, border: `3px solid ${INK}`, color: INK };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md animate-in zoom-in duration-300 p-4">
-      <div className="relative w-full max-w-4xl h-[85vh] bg-[#0f172a] border-4 border-slate-800 rounded-[2rem] overflow-hidden flex flex-col shadow-2xl">
-        {/* Background Layer */}
-        <div 
-          className="absolute inset-0 bg-cover bg-center opacity-10 pointer-events-none"
-          style={{
-            backgroundImage: `url("${import.meta.env.BASE_URL}${encodeURIComponent('Preview arena.png')}")`,
-          }}
-        />
+    <div className="fixed inset-0 z-[120] flex items-center justify-center overflow-hidden animate-in fade-in duration-300 select-none" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
+      {/* The region's own map, blurred and darkened */}
+      <div className="absolute inset-0 bg-cover bg-center scale-110 blur-md" style={{ backgroundImage: `url("${backdrop}")` }} />
+      <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(20,10,5,0.35), rgba(10,5,2,0.85))' }} />
 
-        {/* Header */}
-        <div className="relative z-10 p-4 px-6 flex justify-between items-center bg-black/40 border-b border-white/5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-yellow-500/20 rounded-xl flex items-center justify-center">
-              <Trophy className="w-6 h-6 text-yellow-500" />
-            </div>
-            <div>
-              <h2 className="text-xl font-black text-white uppercase tracking-tight">Team Preparation</h2>
-              <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest">Level {level} · {region.name}{boss ? <span className="ml-2 text-red-400">Boss Battle</span> : null}</p>
-            </div>
+      <div className="relative w-full max-w-5xl h-full max-h-[100vh] flex flex-col gap-3 p-3 sm:p-5">
+        {/* Banner */}
+        <div className="flex items-center justify-between gap-3">
+          <div className="relative rounded-lg px-5 py-2 shadow-[0_6px_16px_rgba(0,0,0,0.5)]" style={panel}>
+            <p className="font-bold leading-tight text-lg sm:text-2xl flex items-center gap-2">
+              {boss && <Skull className="w-5 h-5 text-red-700" />}
+              {boss ? 'Boss Battle' : 'Get Ready'} · Level {level}
+            </p>
+            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-widest opacity-70">{region.name}</p>
           </div>
-          <Button variant="ghost" size="icon" onClick={onClose} className="hover:bg-red-500/20 text-white rounded-full">
-            <X className="w-5 h-5" />
-          </Button>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            className="w-11 h-11 rounded-full flex items-center justify-center border-[3px] shadow-lg hover:scale-110 transition-transform"
+            style={{ background: PARCHMENT, borderColor: INK, color: INK }}
+          >
+            <X className="w-6 h-6" strokeWidth={3} />
+          </button>
         </div>
 
-        {/* Main Content Area */}
-        <div className="relative z-10 flex-1 flex flex-col overflow-hidden px-8 py-6">
-          <div className="flex-1 grid grid-cols-2 gap-10 items-center min-h-0">
-            {/* Player Side */}
-            <div className="space-y-4">
-              <div className="flex items-center justify-between px-2">
-                <h3 className="text-sm font-black text-blue-400 uppercase tracking-widest italic">Your Squad</h3>
-                <span className="text-[10px] font-bold text-slate-500 uppercase">Bring 1-3 Slimes</span>
-              </div>
-              <div className="grid gap-3">
-                {playerTeam.map((slime, idx) => (
-                  <div key={idx} className="relative">
-                    <button
-                      onClick={() => setIsSelectingFor(idx)}
-                      className={`w-full h-20 flex items-center gap-4 p-3 rounded-2xl border-2 transition-all duration-300 ${slime ? 'bg-blue-900/20 border-blue-500/30' : 'bg-black/40 border-dashed border-white/10 hover:border-blue-500/40'}`}
-                    >
-                      <div className={`w-14 h-14 rounded-lg flex items-center justify-center ${slime ? 'bg-blue-500/10' : 'bg-white/5'}`}>
-                        {slime ? <SlimeCanvas slime={slime} size={50} animated /> : <Sword className="w-5 h-5 text-white/10" />}
-                      </div>
-                      <div className="flex-1 text-left min-w-0">
-                        {slime ? (
-                          <>
-                            <div className="text-xs font-black text-white truncate">{slime.name}</div>
-                            <div className="flex gap-3 mt-1">
-                              <span className="flex items-center gap-1 text-[9px] font-bold text-red-400/70"><Heart className="w-2.5 h-2.5" /> {deriveBattleStats(slime).maxHp}</span>
-                              <span className="flex items-center gap-1 text-[9px] font-bold text-orange-400/70"><Sword className="w-2.5 h-2.5" /> {deriveBattleStats(slime).attack}</span>
-                            </div>
-                          </>
-                        ) : (
-                          <div className="text-[10px] font-bold text-blue-400/40 uppercase">Enlist Slot {idx + 1}</div>
-                        )}
-                      </div>
-                      {slime && (
-                        <div className="flex gap-1">
-                          {slime.elements.slice(0, 2).map(el => (
-                            <span key={el} className="w-5 h-5 rounded-full bg-black/40 flex items-center justify-center text-[10px] border border-white/5">{ELEMENT_ICONS[el]}</span>
-                          ))}
-                        </div>
-                      )}
+        {/* The two squads */}
+        <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 md:gap-4 items-center overflow-y-auto">
+          {/* Yours */}
+          <section>
+            <p className="text-white font-bold text-sm uppercase tracking-widest mb-2 drop-shadow">Your squad</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {playerTeam.map((slime, idx) => {
+                const m = slime ? verdict(matchupVs(slime, opponentTeam)) : null;
+                const stats = slime ? deriveBattleStats(slime) : null;
+                return slime && stats && m ? (
+                  <div key={idx} className="relative rounded-2xl p-2 flex flex-col items-center text-center shadow-lg animate-in zoom-in-95 duration-200" style={panel}>
+                    <button onClick={() => removeAt(idx)} aria-label={`Remove ${slime.name}`} className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center border-2 border-white shadow hover:scale-110 transition-transform">
+                      <X className="w-4 h-4" strokeWidth={3} />
                     </button>
-                    {slime && (
-                      <button onClick={(e) => { e.stopPropagation(); const t = [...playerTeam]; t[idx] = null; setPlayerTeam(t); }} className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                        <X className="w-3.5 h-3.5" />
-                      </button>
-                    )}
+                    <span className="absolute top-1 left-1 px-1.5 rounded text-[10px] font-bold text-white" style={{ background: m.color }}>{m.arrow} {m.label}</span>
+                    <div className="w-full aspect-square flex items-center justify-center mt-3 rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.7), rgba(255,255,255,0) 70%)' }}>
+                      <SlimeCanvas slime={slime} size={96} animated />
+                    </div>
+                    <p className="font-bold text-sm leading-tight truncate w-full">{slime.name}</p>
+                    <p className="text-[11px] font-semibold opacity-70">Lv {slime.level} · {slime.elements.map(e => ELEMENT_ICONS[e]).join(' ')}</p>
+                    <div className="flex gap-2 mt-1 text-[11px] font-bold">
+                      <span>❤️ {stats.maxHp}</span>
+                      <span>⚔️ {stats.attack}</span>
+                    </div>
                   </div>
-                ))}
-              </div>
+                ) : (
+                  <div key={idx} className="rounded-2xl p-2 flex flex-col items-center justify-center text-center border-[3px] border-dashed aspect-[3/4] sm:aspect-auto sm:min-h-[200px]" style={{ borderColor: 'rgba(246,232,195,0.55)', background: 'rgba(0,0,0,0.3)', color: PARCHMENT }}>
+                    <Swords className="w-8 h-8 opacity-60" />
+                    <p className="text-xs font-bold mt-1 opacity-80">Slot {idx + 1}</p>
+                    <p className="text-[10px] font-semibold opacity-60">tap a slime below</p>
+                  </div>
+                );
+              })}
             </div>
+          </section>
 
-            {/* Opponent Side */}
-            <div className="space-y-4">
-              <h3 className="text-sm font-black text-red-400 uppercase tracking-widest italic px-2">Opponents</h3>
-              <div className="grid gap-3">
-                {opponentTeam.map((slime, idx) => (
-                  <div key={idx} className="w-full h-20 flex items-center gap-4 p-3 rounded-2xl border-2 bg-red-950/10 border-red-900/20 opacity-90">
-                    <div className="w-14 h-14 rounded-lg bg-red-500/5 flex items-center justify-center grayscale-[0.3]">
-                      <SlimeCanvas slime={slime} size={50} animated />
-                    </div>
-                    <div className="flex-1 text-left min-w-0">
-                      <div className="text-xs font-black text-white truncate">{slime.name} <span className="text-red-300/70 font-bold">Lv.{slime.level}</span></div>
-                      <div className="flex gap-3 mt-1">
-                        <span className="flex items-center gap-1 text-[9px] font-bold text-red-400/40"><Heart className="w-2.5 h-2.5" /> {slime.battleStats.maxHp}</span>
-                        <span className="flex items-center gap-1 text-[9px] font-bold text-orange-400/40"><Sword className="w-2.5 h-2.5" /> {slime.battleStats.attack}</span>
-                      </div>
-                    </div>
-                    <div className="flex gap-1">
-                      {slime.elements.slice(0, 2).map(el => (
-                        <span key={el} className="w-5 h-5 rounded-full bg-black/40 flex items-center justify-center text-[10px] border border-white/5">{ELEMENT_ICONS[el]}</span>
-                      ))}
-                    </div>
-                  </div>
-                ))}
+          {/* VS + outlook */}
+          <div className="flex md:flex-col items-center justify-center gap-3 py-1">
+            <div className="w-14 h-14 rounded-full flex items-center justify-center font-black text-2xl shadow-[0_0_24px_rgba(242,182,50,0.6)]" style={{ background: `radial-gradient(circle at 35% 30%, #fff3c0, ${GOLD})`, border: `3px solid ${INK}`, color: INK }}>
+              VS
+            </div>
+            <div className="w-40 md:w-28 text-center">
+              <div className="h-2.5 rounded-full overflow-hidden border-2 bg-red-500/80" style={{ borderColor: INK }}>
+                <div className="h-full bg-sky-400 transition-all duration-500" style={{ width: `${picked.length ? youShare : 50}%` }} />
               </div>
+              <p className="mt-1 text-xs font-bold drop-shadow" style={{ color: outlook.color === '#d8c9a3' ? PARCHMENT : '#fff', textShadow: '0 1px 3px rgba(0,0,0,0.8)' }}>
+                <span className="px-2 py-0.5 rounded-full" style={{ background: outlook.color }}>{outlook.text}</span>
+              </p>
             </div>
           </div>
 
-          <div className="mt-8 flex justify-center pb-2">
-            <Button
-              disabled={!isTeamReady}
-              onClick={() => onStartBattle(playerTeam.filter((s): s is Slime => s !== null).map(toBattleSlime), opponentTeam)}
-              className={`h-14 px-12 rounded-xl text-lg font-black uppercase tracking-tight transition-all duration-300 ${isTeamReady ? 'bg-blue-600 hover:bg-blue-500 text-white shadow-xl hover:scale-105 active:scale-95' : 'bg-slate-800 text-slate-500 cursor-not-allowed'}`}
-            >
-              {isTeamReady ? <><Sword className="w-5 h-5 mr-3" /> Engage Battle</> : 'Pick at least one slime'}
-            </Button>
+          {/* Theirs */}
+          <section>
+            <p className="text-white font-bold text-sm uppercase tracking-widest mb-2 text-right drop-shadow">Enemies</p>
+            <div className="grid grid-cols-3 gap-2 sm:gap-3">
+              {opponentTeam.map((foe, idx) => {
+                const weakTo = ALL_ELEMENTS.filter(el => getTypeMultiplier(el, foe.elements) >= 1.2).slice(0, 3);
+                return (
+                  <div key={idx} className="rounded-2xl p-2 flex flex-col items-center text-center shadow-lg" style={{ background: 'linear-gradient(#f3d3c8, #e2b3a4)', border: `3px solid #5b2417`, color: '#4a1a10' }}>
+                    <div className="w-full aspect-square flex items-center justify-center rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.6), rgba(255,255,255,0) 70%)' }}>
+                      <SlimeCanvas slime={foe} size={96} animated />
+                    </div>
+                    <p className="font-bold text-sm leading-tight truncate w-full">{foe.name}</p>
+                    <p className="text-[11px] font-semibold opacity-70">Lv {foe.level} · {foe.elements.map(e => ELEMENT_ICONS[e]).join(' ')}</p>
+                    <p className="mt-1 text-[10px] font-bold opacity-80">{weakTo.length ? `Weak to ${weakTo.map(e => ELEMENT_ICONS[e]).join(' ')}` : 'No clear weakness'}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </section>
+        </div>
+
+        {/* Roster */}
+        <div className="rounded-2xl p-2 sm:p-3 shadow-[0_-6px_20px_rgba(0,0,0,0.4)]" style={panel}>
+          <div className="flex items-center justify-between mb-2 gap-2">
+            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Your slimes · best matchup first</p>
+            <button onClick={autoPick} className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border-2 hover:scale-105 transition-transform" style={{ background: '#fff7dc', borderColor: INK }}>
+              <Wand2 className="w-3.5 h-3.5" /> Auto-pick best
+            </button>
+          </div>
+          <div className="flex gap-2 overflow-x-auto pb-1">
+            {roster.length === 0 && <p className="text-sm font-semibold opacity-60 py-4 px-2">{state.slimes.length ? 'Everyone is in your squad.' : 'Hatch a slime first!'}</p>}
+            {roster.map(({ slime, match, power }) => {
+              const v = verdict(match);
+              const full = picked.length >= 3;
+              return (
+                <button
+                  key={slime.id}
+                  onClick={() => addSlime(slime)}
+                  disabled={full}
+                  className={`relative shrink-0 w-[104px] rounded-xl p-1.5 flex flex-col items-center border-2 transition-transform ${full ? 'opacity-50 cursor-not-allowed' : 'hover:scale-105 hover:-translate-y-0.5'}`}
+                  style={{ background: '#fff7dc', borderColor: INK }}
+                >
+                  <span className="absolute top-0.5 left-0.5 px-1 rounded text-[9px] font-bold text-white" style={{ background: v.color }}>{v.arrow} {v.label}</span>
+                  <div className="mt-2"><SlimeCanvas slime={slime} size={64} animated /></div>
+                  <p className="text-[11px] font-bold truncate w-full text-center">{slime.name}</p>
+                  <p className="text-[10px] font-semibold opacity-70">Lv {slime.level} · {slime.elements.map(e => ELEMENT_ICONS[e]).join('')}</p>
+                  <p className="text-[10px] font-bold">💪 {power}</p>
+                </button>
+              );
+            })}
           </div>
         </div>
 
-        {/* Slime Selection Drawer */}
-        {isSelectingFor !== null && (
-          <div className="absolute inset-0 z-50 bg-slate-950/98 backdrop-blur-xl animate-in slide-in-from-bottom duration-300 flex flex-col">
-            <div className="p-4 px-6 flex justify-between items-center border-b border-white/5">
-              <h3 className="text-lg font-black text-white uppercase italic tracking-tight">Select Combatant <span className="text-blue-500">#{isSelectingFor + 1}</span></h3>
-              <Button variant="ghost" size="icon" onClick={() => setIsSelectingFor(null)} className="hover:bg-white/10 text-white rounded-full">
-                <X className="w-5 h-5" />
-              </Button>
-            </div>
-            <div className="flex-1 overflow-y-auto p-6 custom-scrollbar">
-              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-10">
-                {state.slimes
-                  .filter(s => !playerTeam.some(pts => pts?.id === s.id))
-                  .map(slime => {
-                    const stats = deriveBattleStats(slime);
-                    return (
-                      <button key={slime.id} onClick={() => handleSelectSlime(slime)} className="group relative bg-slate-900/50 border-2 border-slate-800 hover:border-blue-500 rounded-2xl p-4 text-left transition-all hover:scale-[1.02]">
-                        <div className="flex items-center gap-3">
-                          <div className="w-12 h-12 bg-black/40 rounded-lg flex items-center justify-center p-1 group-hover:scale-110 transition-transform">
-                            <SlimeCanvas slime={slime} size={40} animated />
-                          </div>
-                          <div className="min-w-0">
-                            <div className="text-[11px] font-black text-white truncate">{slime.name}</div>
-                            <div className="flex gap-1 mt-0.5">
-                              {slime.elements.map(el => (
-                                <span key={el} className="text-[9px]">{ELEMENT_ICONS[el]}</span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                        <div className="grid grid-cols-2 gap-x-4 gap-y-1 mt-3 pt-3 border-t border-white/5">
-                          <div className="flex items-center justify-between text-[9px]"><span className="font-black text-slate-500 uppercase">HP</span><span className="font-bold text-white">{stats.maxHp}</span></div>
-                          <div className="flex items-center justify-between text-[9px]"><span className="font-black text-slate-500 uppercase">ATK</span><span className="font-bold text-white">{stats.attack}</span></div>
-                        </div>
-                      </button>
-                    );
-                  })}
-              </div>
-            </div>
-          </div>
-        )}
+        {/* Go */}
+        <div className="flex justify-center">
+          <button
+            disabled={!isTeamReady}
+            onClick={() => onStartBattle(picked.map(toBattleSlime), opponentTeam)}
+            className={`h-14 px-10 rounded-full text-lg font-bold uppercase tracking-wide flex items-center gap-3 border-[3px] transition-all ${
+              isTeamReady ? 'text-white shadow-[0_6px_0_#8a0f55,0_10px_24px_rgba(0,0,0,0.5)] hover:scale-105 active:translate-y-1 active:shadow-[0_2px_0_#8a0f55]' : 'opacity-60 cursor-not-allowed text-white/70'
+            }`}
+            style={{ background: isTeamReady ? 'linear-gradient(#ff7eb6, #ff1493)' : '#6b5a45', borderColor: isTeamReady ? '#fff3c0' : '#3a2e22' }}
+          >
+            <Swords className="w-6 h-6" />
+            {isTeamReady ? 'Battle!' : 'Pick a slime to begin'}
+          </button>
+        </div>
       </div>
     </div>
   );
