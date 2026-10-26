@@ -201,11 +201,12 @@ const PERSONALITIES: Record<string, Personality> = {
   wind: { idle: [0.5, 1.2], jump: [0, 0], range: 30, float: true },
 };
 
-const MOOD_BUBBLES = ['💤', '🎵', '💖', '✨', '🍃'];
+const MOOD_BUBBLES = ['🎵', '💖', '✨', '🍃', '😊'];
+const POKE_BUBBLES = ['💖', '😊', '😆'];
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 
-type Mode = 'idle' | 'crouch' | 'air' | 'land' | 'glide';
+type Mode = 'idle' | 'crouch' | 'air' | 'land' | 'glide' | 'sleep' | 'carried';
 
 function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attractRef, eatNonce, onSelect, onPoke }: BouncingSlimeProps) {
   const groundRef = useRef<HTMLDivElement>(null);
@@ -213,6 +214,14 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
   const shadowRef = useRef<HTMLDivElement>(null);
   const [eating, setEating] = useState(false);
   const [bubble, setBubble] = useState<string | null>(null);
+  const [sleeping, setSleeping] = useState(false);
+  const ptr = useRef<{ x: number; y: number; t: number } | null>(null);
+  const dragInfo = useRef<{ startX: number; startY: number; moved: boolean } | null>(null);
+  const suppressClick = useRef(false);
+  const flash = (emoji: string, ms = 1500) => {
+    setBubble(emoji);
+    setTimeout(() => setBubble(b => (b === emoji ? null : b)), ms);
+  };
 
   // Latest props for the animation loop, which must not restart on every render
   const live = useRef({ selected, targeted, dragging, wantsFood });
@@ -235,15 +244,62 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
     jump: 0,
     phase: rand(0, 6),
     bubbleIn: rand(4, 10),
+    look: 0,
+    blink: 0,
+    blinkIn: rand(2.5, 6),
+    last: performance.now() / 1000,
   });
 
   // Chomp whenever fed
   useEffect(() => {
     if (!eatNonce) return;
     setEating(true);
+    flash('😋', 1600);
+    sim.current.last = performance.now() / 1000;
     const t = setTimeout(() => setEating(false), 600);
     return () => clearTimeout(t);
   }, [eatNonce]);
+
+  // Pointer: slimes look toward it, and can be picked up and carried
+  useEffect(() => {
+    const move = (e: PointerEvent) => {
+      ptr.current = { x: e.clientX, y: e.clientY, t: performance.now() };
+      const d = dragInfo.current;
+      if (d && !d.moved && Math.hypot(e.clientX - d.startX, e.clientY - d.startY) > 6) {
+        d.moved = true;
+        suppressClick.current = true;
+        sim.current.mode = 'carried';
+        setSleeping(false);
+        flash('😮', 6000);
+      }
+    };
+    const up = () => {
+      const d = dragInfo.current;
+      dragInfo.current = null;
+      if (d?.moved) {
+        const s = sim.current;
+        if (s.mode === 'carried') {
+          s.mode = 'air';
+          s.vz = 0;
+          s.vx = 0;
+          s.vy = 0;
+          s.jump = 1;
+          s.last = performance.now() / 1000;
+          flash('😄', 1600);
+        }
+        setTimeout(() => { suppressClick.current = false; }, 60);
+      }
+    };
+    window.addEventListener('pointermove', move);
+    window.addEventListener('pointerup', up);
+    window.addEventListener('pointercancel', up);
+    return () => {
+      window.removeEventListener('pointermove', move);
+      window.removeEventListener('pointerup', up);
+      window.removeEventListener('pointercancel', up);
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     const ground = groundRef.current;
@@ -299,6 +355,12 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
         }
         return;
       }
+      if (!pers.float && performance.now() / 1000 - s.last > 12 && Math.random() < 0.12) {
+        s.mode = 'sleep';
+        s.t = rand(7, 13);
+        setSleeping(true);
+        return;
+      }
       if (Math.random() < 0.18) {
         // sometimes just look around
         s.t = rand(pers.idle[0], pers.idle[1]);
@@ -315,24 +377,77 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
       const secs = now / 1000;
       s.t -= dt;
 
+      const box = body.getBoundingClientRect();
+      const cx = box.left + box.width / 2;
+      const cy = box.top + box.height / 2;
+      const p = ptr.current;
+      const pDist = p ? Math.hypot(p.x - cx, p.y - cy) : Infinity;
+      const pRecent = !!p && now - p.t < 5000;
+      if (pDist < 130 && pRecent) s.last = performance.now() / 1000;
+      // look toward a nearby pointer; ease back to neutral otherwise
+      const lookTarget = pRecent && pDist < 320 && s.mode !== 'sleep' && s.mode !== 'carried' ? clamp((p!.x - cx) / 200, -1, 1) : 0;
+      s.look += (lookTarget - s.look) * 0.12;
+
       switch (s.mode) {
         case 'idle': {
-          // breathing
-          s.sy = 1 + Math.sin(secs * 3 + s.phase) * 0.035;
+          // breathing, perking up when the pointer is close, and the odd blink-squish
+          const perk = pRecent && pDist < 150 ? 0.05 : 0;
+          s.sy = 1 + Math.sin(secs * 3 + s.phase) * 0.035 + perk;
           s.sx = 1 + (1 - s.sy) * 0.7;
-          s.tilt *= 0.85;
+          s.tilt = s.tilt * 0.85 + s.look * 5 * 0.15;
           if (pers.float) s.z = 16 + Math.sin(secs * 2.2 + s.phase) * 9;
+          s.blinkIn -= dt;
+          if (s.blinkIn <= 0) {
+            s.blink = 0.13;
+            s.blinkIn = rand(2.5, 6);
+          }
+          if (s.blink > 0) {
+            s.blink -= dt;
+            s.sy = Math.min(s.sy, 0.9);
+            s.sx = Math.max(s.sx, 1.06);
+          }
           s.bubbleIn -= dt;
           if (s.bubbleIn <= 0) {
             s.bubbleIn = rand(8, 15);
             const pick = l.wantsFood && Math.random() < 0.35 ? '🍓' : MOOD_BUBBLES[Math.floor(Math.random() * MOOD_BUBBLES.length)];
-            setBubble(pick);
-            setTimeout(() => setBubble(null), 2000);
+            flash(pick, 2000);
           }
           if (s.t <= 0) {
             decide();
             if (s.mode === 'idle') s.t = rand(pers.idle[0], pers.idle[1]);
           }
+          break;
+        }
+        case 'sleep': {
+          // slow, flattened breathing until something wakes it
+          s.sy = 0.86 + Math.sin(secs * 1.3 + s.phase) * 0.025;
+          s.sx = 1.1 + (0.86 - s.sy) * 0.8;
+          s.tilt *= 0.9;
+          s.z = 0;
+          if (s.t <= 0 || l.selected || l.targeted || l.dragging || (pRecent && pDist < 110)) {
+            s.mode = 'idle';
+            s.t = 0.35;
+            s.sy = 1.18;
+            s.sx = 0.9;
+            setSleeping(false);
+          }
+          break;
+        }
+        case 'carried': {
+          // dangling from the pointer
+          const parent = ground.parentElement;
+          const rect = parent?.getBoundingClientRect();
+          if (p && rect && rect.width > 0) {
+            const tx = clamp(((p.x - rect.left) / rect.width) * 100, BAND.minX, BAND.maxX);
+            const ty = clamp(((p.y - rect.top) / rect.height) * 100 + 10, BAND.minY, BAND.maxY);
+            const prevX = s.x;
+            s.x += (tx - s.x) * 0.35;
+            s.y += (ty - s.y) * 0.35;
+            s.tilt = clamp((s.x - prevX) * 14, -14, 14) + Math.sin(secs * 14) * 3;
+          }
+          s.z += (46 - s.z) * 0.3;
+          s.sx = 0.96;
+          s.sy = 1.07 + Math.sin(secs * 10) * 0.02;
           break;
         }
         case 'crouch': {
@@ -404,7 +519,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
       ground.style.top = `${s.y}%`;
       ground.style.zIndex = String(20 + Math.round(s.y));
       ground.style.transform = `translate(-50%, -100%) translateY(10px) scale(${scale})`;
-      body.style.transform = `translateY(${-s.z}px) rotate(${s.tilt}deg) scale(${s.sx}, ${s.sy})`;
+      body.style.transform = `translate(${s.look * 4}px, ${-s.z}px) rotate(${s.tilt}deg) scale(${s.sx}, ${s.sy})`;
       const lift = clamp(s.z / 170, 0, 1);
       shadow.style.transform = `translateX(-50%) scale(${1 - lift * 0.45}, ${1 - lift * 0.45})`;
       shadow.style.opacity = String(0.4 - lift * 0.22);
@@ -420,7 +535,10 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
   // Tapping makes it hop and squeal
   const poke = () => {
     const s = sim.current;
-    if (s.mode === 'idle' || s.mode === 'land' || s.mode === 'glide') {
+    s.last = performance.now() / 1000;
+    if (s.mode === 'sleep') setSleeping(false);
+    flash(POKE_BUBBLES[Math.floor(Math.random() * POKE_BUBBLES.length)], 1400);
+    if (s.mode === 'idle' || s.mode === 'land' || s.mode === 'glide' || s.mode === 'sleep') {
       s.mode = 'air';
       s.vz = 430;
       s.jump = 430;
@@ -459,11 +577,24 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
         ref={bodyRef}
         data-slime-id={slime.id}
         className="absolute inset-0 cursor-pointer pointer-events-auto"
-        onClick={(e) => { e.stopPropagation(); onSelect(slime.id); poke(); }}
-        style={{ transformOrigin: '50% 100%', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,0.25))' }}
+        onPointerDown={(e) => { if (e.button === 0) dragInfo.current = { startX: e.clientX, startY: e.clientY, moved: false }; }}
+        onClick={(e) => {
+          e.stopPropagation();
+          if (suppressClick.current) return;
+          onSelect(slime.id);
+          poke();
+        }}
+        style={{ transformOrigin: '50% 100%', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,0.25))', touchAction: 'none' }}
       >
-        {bubble && !selected && !targeted && (
-          <div className="absolute -top-7 left-1/2 -translate-x-1/2 z-30 pointer-events-none rounded-full bg-white/85 px-2 py-0.5 text-base shadow animate-in zoom-in-50 fade-in duration-300">
+        {sleeping && (
+          <div className="absolute -top-6 left-[62%] z-30 pointer-events-none text-xl animate-pulse">💤</div>
+        )}
+        {bubble && !sleeping && (
+          <div
+            className={`absolute z-30 pointer-events-none rounded-full bg-white/90 px-2 py-0.5 text-base shadow animate-in zoom-in-50 fade-in duration-300 ${
+              selected || targeted ? 'top-0 left-[78%]' : '-top-7 left-1/2 -translate-x-1/2'
+            }`}
+          >
             {bubble}
           </div>
         )}

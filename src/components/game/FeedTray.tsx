@@ -146,7 +146,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
   return (
     <>
       <div
-        className={`absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 select-none transition-all duration-300 ease-out ${
+        className={`absolute bottom-1 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1 select-none transition-all duration-300 ease-out ${
           open ? 'translate-y-0 opacity-100' : 'translate-y-[140%] opacity-0 pointer-events-none'
         }`}
         style={{ touchAction: 'none' }}
@@ -168,7 +168,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
 
         <div
           className="relative drop-shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
-          style={{ width: 'min(92vw, 430px)', aspectRatio: String(FRAME_ASPECT) }}
+          style={{ width: 'min(78vw, 280px)', aspectRatio: String(FRAME_ASPECT) }}
         >
           <img src={asset('ui_tray.png')} alt="" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none" style={crisp} />
 
@@ -187,7 +187,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
               style={crisp}
             />
           </button>
-          <span className="absolute text-[10px] sm:text-[11px] font-black text-[#5a3a1e] leading-none whitespace-nowrap pointer-events-none" style={labelStyle(0)}>
+          <span className="absolute text-[9px] font-black text-[#5a3a1e] leading-none whitespace-nowrap pointer-events-none" style={labelStyle(0)}>
             Food Bag
           </span>
 
@@ -222,7 +222,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
                   )}
                 </button>
                 <span
-                  className={`absolute text-[10px] sm:text-[11px] font-black leading-none whitespace-nowrap pointer-events-none ${owned > 0 ? 'text-emerald-700' : 'text-[#5a3a1e]/50'}`}
+                  className={`absolute text-[9px] font-black leading-none whitespace-nowrap pointer-events-none ${owned > 0 ? 'text-emerald-700' : 'text-[#5a3a1e]/50'}`}
                   style={labelStyle(i)}
                 >
                   {owned > 0 ? `+${info.xpValue} XP` : 'Empty'}
@@ -241,7 +241,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
           <button
             onClick={() => { audioEngine.playSfx('tap'); setOpen(true); }}
             aria-label={`Open food bag, ${total} items`}
-            className={`absolute bottom-3 left-3 z-30 w-[72px] h-[72px] rounded-full flex items-center justify-center bg-black/45 backdrop-blur-md border-2 border-white/30 shadow-[0_6px_18px_rgba(0,0,0,0.5)] hover:scale-110 transition-all duration-300 ${
+            className={`absolute bottom-2 left-3 z-30 w-[60px] h-[60px] rounded-full flex items-center justify-center bg-black/45 backdrop-blur-md border-2 border-white/30 shadow-[0_6px_18px_rgba(0,0,0,0.5)] hover:scale-110 transition-all duration-300 ${
               open ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
             }`}
           >
