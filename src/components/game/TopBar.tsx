@@ -1,5 +1,6 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useGameState } from '../../hooks/useGameState';
+import { isReady } from '../../utils/farmCore';
 import { FairySparkle } from './FairySparkle';
 import { Achievements } from './Achievements';
 
@@ -14,8 +15,14 @@ interface TopBarProps {
 }
 
 export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenBreedingDen, onOpenFarm, currentView }: TopBarProps) {
-  const { playerLevel } = useGameState();
+  const { state, playerLevel } = useGameState();
   const [showAchievements, setShowAchievements] = useState(false);
+  const [nowMs, setNowMs] = useState(() => Date.now());
+  useEffect(() => {
+    const t = setInterval(() => setNowMs(Date.now()), 5000);
+    return () => clearInterval(t);
+  }, []);
+  const readyCrops = state.farmPlots.filter(p => isReady(p, nowMs)).length;
 
   // Simple clean styling with hover effects and explicit font control
   const navStyle = "text-[14px] font-black uppercase tracking-[0.2em] transition-all duration-200 hover:text-white hover:scale-105 p-0 m-0 outline-none bg-transparent border-none flex items-start gap-1.5";
@@ -88,6 +95,13 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
                 fontSize: '16px',
                 color: '#ffcf6b'
               }}>FARM</span>
+              {readyCrops > 0 && (
+                <span
+                  aria-label={`${readyCrops} crops ready`}
+                  className="absolute -top-1 left-9 rounded-full text-white font-bold flex items-center justify-center"
+                  style={{ minWidth: 20, height: 20, padding: '0 5px', fontSize: 12, background: '#e8453c', border: '2px solid #fff', fontFamily: "'Fredoka', sans-serif" }}
+                >{readyCrops}</span>
+              )}
             </button>
           )}
 

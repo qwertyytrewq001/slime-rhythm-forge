@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useReducer, useEffect, useRef, useMemo } from 'react';
-import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType, BreedResult, FarmPlot, CROP_CONFIG, FARM_PLOT_UNLOCK_COSTS, TOTAL_FARM_PLOTS } from '@/types/slime';
+import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType, BreedResult, FarmPlot, FarmState } from '@/types/slime';
+import { FarmSlice, createFarmPlots, createFarmState, migrateFarm, plant as farmPlant, plantAll as farmPlantAll, harvest as farmHarvest, harvestAll as farmHarvestAll, water as farmWater, waterAll as farmWaterAll, rush as farmRush, unlockPlot as farmUnlock } from '@/utils/farmCore';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
@@ -105,16 +106,6 @@ function migrateSlime(s: any): Slime {
   };
 }
 
-function createDefaultFarmPlots(): FarmPlot[] {
-  return Array.from({ length: TOTAL_FARM_PLOTS }, (_, i) => ({
-    id: i,
-    unlocked: i < 2,
-    cropType: null,
-    plantedAt: null,
-    readyAt: null,
-  }));
-}
-
 function randomId(): string {
   return Math.random().toString(36).substring(2, 10) + Date.now().toString(36);
 }
@@ -173,7 +164,7 @@ function createInitialState(): GameState {
       // Food left lying on a Sanctuary floor (old drag-and-drop feeding) goes back to the bag
       inventory: returnFloorFood(saved.inventory, saved.floorFood),
       floorFood: [],
-      farmPlots: saved.farmPlots ?? createDefaultFarmPlots(),
+      ...(() => { const m = migrateFarm(saved.farmPlots, saved.farm, saved.seeds); return { farmPlots: m.plots, farm: m.farm }; })(),
       seeds: saved.seeds ?? { basic: 0, elemental: 0, royal: 0 },
       stats: { ...DEFAULT_STATS, ...(saved.stats ?? {}) },
     };
@@ -205,7 +196,8 @@ function createInitialState(): GameState {
     completedTutorialChapters: [],
     inventory: { basic: 3, elemental: 0, royal: 0 },
     floorFood: [],
-    farmPlots: createDefaultFarmPlots(),
+    farmPlots: createFarmPlots(),
+    farm: createFarmState(),
     seeds: { basic: 0, elemental: 0, royal: 0 },
     stats: { ...DEFAULT_STATS },
   };
@@ -238,6 +230,7 @@ export interface LocalGameState {
   inventory: Record<SlimeFoodType, number>;
   floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
   farmPlots: FarmPlot[];
+  farm: FarmState;
   seeds: Record<SlimeFoodType, number>;
 }
 
@@ -550,56 +543,33 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, lastLevelUp: null };
     case 'CLEAR_PLAYER_LEVEL_UP':
       return { ...state, lastPlayerLevelUp: null };
-    case 'UNLOCK_FARM_PLOT': {
-      const cost = FARM_PLOT_UNLOCK_COSTS[action.plotId] ?? Infinity;
-      if (state.goo < cost) return state;
-      const farmPlots = state.farmPlots.map(p =>
-        p.id === action.plotId ? { ...p, unlocked: true } : p
-      );
-      return { ...state, farmPlots, goo: Math.round((state.goo - cost) * 100) / 100 };
-    }
-    case 'BUY_SEED': {
-      const cost = CROP_CONFIG[action.seedType].seedCost;
-      if (state.goo < cost) return state;
-      const currentQuantity = state.seeds[action.seedType] || 0;
-      return {
-        ...state,
-        goo: Math.round((state.goo - cost) * 100) / 100,
-        seeds: { ...state.seeds, [action.seedType]: currentQuantity + 1 },
-      };
-    }
-    case 'PLANT_CROP': {
-      const plot = state.farmPlots.find(p => p.id === action.plotId);
-      if (!plot || !plot.unlocked || plot.cropType) return state;
-      const ownedSeeds = state.seeds[action.cropType] || 0;
-      if (ownedSeeds < 1) return state;
-      const config = CROP_CONFIG[action.cropType];
+    case 'UNLOCK_FARM_PLOT':
+    case 'PLANT_CROP':
+    case 'PLANT_ALL':
+    case 'HARVEST_CROP':
+    case 'HARVEST_ALL':
+    case 'WATER_PLOT':
+    case 'WATER_ALL':
+    case 'RUSH_PLOT':
+    case 'SET_AUTO_REPLANT': {
       const now = Date.now();
-      const farmPlots = state.farmPlots.map(p =>
-        p.id === action.plotId
-          ? { ...p, cropType: action.cropType, plantedAt: now, readyAt: now + config.growTimeMs }
-          : p
-      );
-      return {
-        ...state,
-        farmPlots,
-        seeds: { ...state.seeds, [action.cropType]: ownedSeeds - 1 },
+      const slice: FarmSlice = {
+        goo: state.goo, seeds: state.seeds, inventory: state.inventory, farmPlots: state.farmPlots, farm: state.farm, stats: state.stats,
       };
-    }
-    case 'HARVEST_CROP': {
-      const plot = state.farmPlots.find(p => p.id === action.plotId);
-      if (!plot || !plot.cropType || !plot.readyAt || Date.now() < plot.readyAt) return state;
-      const cropType = plot.cropType;
-      const farmPlots = state.farmPlots.map(p =>
-        p.id === action.plotId ? { ...p, cropType: null, plantedAt: null, readyAt: null } : p
-      );
-      const currentQuantity = state.inventory[cropType] || 0;
-      return {
-        ...state,
-        farmPlots,
-        inventory: { ...state.inventory, [cropType]: currentQuantity + 1 },
-        stats: { ...state.stats, harvests: state.stats.harvests + 1 },
-      };
+      let next: FarmSlice | null = null;
+      switch (action.type) {
+        case 'UNLOCK_FARM_PLOT': next = farmUnlock(slice, action.plotId); break;
+        case 'PLANT_CROP': next = farmPlant(slice, action.plotId, action.cropType, now); break;
+        case 'PLANT_ALL': { const r = farmPlantAll(slice, action.cropType, now); next = r.planted ? r.slice : null; break; }
+        case 'HARVEST_CROP': next = farmHarvest(slice, action.plotId, action.rolls ?? [0.99, 0.99], now)?.slice ?? null; break;
+        case 'HARVEST_ALL': { const r = farmHarvestAll(slice, action.rolls ?? [], now); next = r.outcomes.length ? r.slice : null; break; }
+        case 'WATER_PLOT': next = farmWater(slice, action.plotId, now); break;
+        case 'WATER_ALL': { const r = farmWaterAll(slice, now); next = r.watered ? r.slice : null; break; }
+        case 'RUSH_PLOT': next = farmRush(slice, action.plotId, now); break;
+        case 'SET_AUTO_REPLANT': next = { ...slice, farm: { ...slice.farm, autoReplant: action.value } }; break;
+      }
+      if (!next) return state;
+      return { ...state, goo: next.goo, seeds: next.seeds, inventory: next.inventory, farmPlots: next.farmPlots, farm: next.farm, stats: next.stats };
     }
     case 'COMPLETE_TUTORIAL':
       return { ...state, tutorialCompleted: true };
@@ -722,7 +692,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
         });
       }
     }
-  }, [state.slimes, state.totalBreeds, state.habitats, state.stats, state.currentLevel, state.farmPlots, state.achievements]);
+  }, [state.slimes, state.totalBreeds, state.habitats, state.stats, state.currentLevel, state.farmPlots, state.farm, state.achievements]);
 
   useEffect(() => {
     if (state.muted !== audioEngine.muted) audioEngine.toggleMute();

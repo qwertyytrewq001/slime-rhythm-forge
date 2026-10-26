@@ -111,6 +111,7 @@ export interface GameStats {
   battlesWon: number;
   bossesDefeated: number;
   harvests: number;
+  goldenHarvests: number;
   feeds: number;
 }
 
@@ -165,6 +166,7 @@ export interface GameState {
   inventory: Record<SlimeFoodType, number>;
   floorFood: Array<{ id: string; x: number; y: number; foodId: SlimeFoodType; timestamp: number }>;
   farmPlots: FarmPlot[];
+  farm: FarmState;
   seeds: Record<SlimeFoodType, number>;
   stats: GameStats;
 }
@@ -225,27 +227,15 @@ export interface FarmPlot {
   cropType: SlimeFoodType | null;
   plantedAt: number | null;
   readyAt: number | null;
+  watered?: boolean; // watered once this growth (a small speed-up)
+  lastCrop?: SlimeFoodType | null; // what Auto-replant plants again
 }
 
-export interface CropConfig {
-  seedCost: number;
-  growTimeMs: number;
+export interface FarmState {
+  level: number;
+  xp: number;
+  autoReplant: boolean;
 }
-
-export const CROP_CONFIG: Record<SlimeFoodType, CropConfig> = {
-  basic: { seedCost: 5, growTimeMs: 30 * 1000 },
-  elemental: { seedCost: 15, growTimeMs: 3 * 60 * 1000 },
-  royal: { seedCost: 30, growTimeMs: 10 * 60 * 1000 },
-};
-
-export const FARM_PLOT_UNLOCK_COSTS: Record<number, number> = {
-  2: 100,
-  3: 250,
-  4: 500,
-  5: 1000,
-};
-
-export const TOTAL_FARM_PLOTS = 6;
 
 export type GameAction =
   | { type: 'ADD_SLIME'; slime: Slime }
@@ -294,6 +284,11 @@ export type GameAction =
   | { type: 'SLIME_EAT_FOOD'; slimeId: string; foodId: string }
   | { type: 'SPEED_UP_HATCHING' }
   | { type: 'UNLOCK_FARM_PLOT'; plotId: number }
-  | { type: 'BUY_SEED'; seedType: SlimeFoodType }
   | { type: 'PLANT_CROP'; plotId: number; cropType: SlimeFoodType }
-  | { type: 'HARVEST_CROP'; plotId: number };
+  | { type: 'PLANT_ALL'; cropType: SlimeFoodType }
+  | { type: 'HARVEST_CROP'; plotId: number; rolls?: [number, number] }
+  | { type: 'HARVEST_ALL'; rolls?: Array<[number, number]> }
+  | { type: 'WATER_PLOT'; plotId: number }
+  | { type: 'WATER_ALL' }
+  | { type: 'RUSH_PLOT'; plotId: number }
+  | { type: 'SET_AUTO_REPLANT'; value: boolean };

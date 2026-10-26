@@ -1,4 +1,5 @@
 import { Achievement, GameState, GameStats } from '@/types/slime';
+import { TOTAL_PLOTS } from '@/utils/farmCore';
 
 export type AchievementCategory = 'Collection' | 'Breeding' | 'Growth' | 'Sanctuary' | 'Battle' | 'Farm';
 
@@ -22,6 +23,7 @@ export const DEFAULT_STATS: GameStats = {
   battlesWon: 0,
   bossesDefeated: 0,
   harvests: 0,
+  goldenHarvests: 0,
   feeds: 0,
 };
 
@@ -78,7 +80,11 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
   // ---- Farm ----
   { id: 'green_thumb', name: 'Green Thumb', description: 'Harvest your first crop', category: 'Farm', icon: '🌾', rewardAmount: 50, target: 1, progress: s => stat(s, 'harvests') },
   { id: 'harvest_25', name: 'Bountiful', description: 'Harvest 25 crops', category: 'Farm', icon: '🧺', rewardAmount: 200, target: 25, progress: s => stat(s, 'harvests') },
-  { id: 'farm_full', name: 'Master Farmer', description: 'Unlock every farm plot', category: 'Farm', icon: '🚜', rewardAmount: 300, target: 6, progress: s => s.farmPlots.filter(p => p.unlocked).length },
+  { id: 'harvest_100', name: 'Harvest Hero', description: 'Harvest 100 crops', category: 'Farm', icon: '🌽', rewardAmount: 600, target: 100, progress: s => stat(s, 'harvests') },
+  { id: 'farm_level_5', name: 'Seasoned Farmer', description: 'Reach Farm Level 5', category: 'Farm', icon: '🧑‍🌾', rewardAmount: 250, target: 5, progress: s => s.farm?.level ?? 1 },
+  { id: 'golden_5', name: 'Golden Touch', description: 'Harvest 5 golden crops', category: 'Farm', icon: '🌟', rewardAmount: 300, target: 5, progress: s => stat(s, 'goldenHarvests') },
+  { id: 'farm_level_10', name: 'Farm Tycoon', description: 'Reach Farm Level 10', category: 'Farm', icon: '🏡', rewardAmount: 800, target: 10, progress: s => s.farm?.level ?? 1 },
+  { id: 'farm_full', name: 'Master Farmer', description: 'Unlock every farm plot', category: 'Farm', icon: '🚜', rewardAmount: 1000, target: TOTAL_PLOTS, progress: s => s.farmPlots.filter(p => p.unlocked).length },
 ];
 
 const stateFromDef = (def: AchievementDef, saved?: Partial<Achievement>): Achievement => ({
