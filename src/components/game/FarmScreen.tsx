@@ -21,6 +21,12 @@ const bt = (f: string) => `${BASE}battle/${f}`;
 const PARCHMENT = '#f6e8c3';
 const INK = '#4a2f17';
 const GOLD = '#f2b632';
+const FARM = `${BASE}farm/`;
+
+/** Painted farm icon; the global pixelated rule would wreck these, so it is overridden here. */
+const Ico: React.FC<{ name: string; w: number; style?: React.CSSProperties }> = ({ name, w, style }) => (
+  <img src={`${FARM}${name}.png`} alt="" draggable={false} style={{ width: w, height: w, imageRendering: 'auto', display: 'inline-block', verticalAlign: 'middle', flexShrink: 0, ...style }} />
+);
 
 // The field: 4 columns by 4 rows, in perspective (back rows smaller and higher up)
 const COLS = 4;
@@ -36,7 +42,9 @@ const plotCenter = (id: number) => {
 type Fx =
   | { id: number; kind: 'pop'; x: number; y: number; text: string; color: string; size: number; label?: string }
   | { id: number; kind: 'fly'; x: number; y: number; toX: number; toY: number; img: string }
-  | { id: number; kind: 'burst'; x: number; y: number; emojis: string[]; count: number };
+  | { id: number; kind: 'burst'; x: number; y: number; emojis: string[]; count: number }
+  | { id: number; kind: 'dust'; x: number; y: number; color: string; count: number }
+  | { id: number; kind: 'gold'; x: number; y: number; crop: SlimeFoodType };
 type FxInput = Fx extends infer T ? (T extends { id: number } ? Omit<T, 'id'> : never) : never;
 
 type Picker = { mode: 'plot'; plotId: number } | { mode: 'all' } | null;
@@ -124,7 +132,9 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         kind: 'pop', x: at.x, y: at.y - sw * 0.1, text: `+${o.items} ${CROPS[o.crop].emoji}`, color: o.golden ? '#ffe14d' : '#ffffff',
         size: o.golden ? 1.7 : o.extra ? 1.3 : 1.1, label: o.golden ? `GOLDEN ×${GOLDEN_MULT}!` : o.extra ? 'BONUS!' : undefined,
       }, 1300);
-      if (o.golden) addFx({ kind: 'burst', x: at.x, y: at.y - sw * 0.04, emojis: ['🌟', '✨', '⭐'], count: 12 }, 1200);
+      if (o.golden) addFx({ kind: 'gold', x: at.x, y: at.y - sw * 0.05, crop: o.crop }, 1300);
+      else addFx({ kind: 'burst', x: at.x, y: at.y - sw * 0.04, emojis: ['✨'], count: 4 }, 900);
+      addFx({ kind: 'dust', x: at.x, y: at.y, color: '#8a5a34', count: 6 }, 700);
       if (bag && stage) addFx({ kind: 'fly', x: at.x, y: at.y - sw * 0.04, toX: bag.left + bag.width / 2 - stage.left, toY: bag.top + bag.height / 2 - stage.top, img: foodSpriteUrl(o.crop) }, 800);
       audioEngine.playSfx('collect');
     }, delay);
@@ -135,7 +145,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     const res = farmHarvest(toSlice(), plotId, rolls, Date.now());
     if (!res) return;
     celebrate(res.outcome);
-    if (res.outcome.replanted) addFx({ kind: 'burst', x: px(plotId).x, y: px(plotId).y, emojis: ['🌱'], count: 3 }, 900);
+    if (res.outcome.replanted) addFx({ kind: 'dust', x: px(plotId).x, y: px(plotId).y, color: '#8a5a34', count: 6 }, 800);
     dispatch({ type: 'HARVEST_CROP', plotId, rolls });
     if (res.outcome.levelUp) setTimeout(() => showLevelUp(res.outcome.levelUp!), 500);
   };
@@ -161,7 +171,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
       addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.06, text: cropUnlocked(crop, stateRef.current.farm.level) ? `Need ${cost} 💧` : `Farm Lv ${CROPS[crop].unlockLevel}`, color: '#ff9a9a', size: 0.9 }, 1200);
       return;
     }
-    addFx({ kind: 'burst', x: at.x, y: at.y, emojis: ['🌱', '✨'], count: 5 }, 900);
+    addFx({ kind: 'dust', x: at.x, y: at.y, color: '#8a5a34', count: 8 }, 800);
     audioEngine.playSfx('tap');
     dispatch({ type: 'PLANT_CROP', plotId, cropType: crop });
     setPicker(null);
@@ -174,7 +184,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
       return;
     }
     stateRef.current.farmPlots.filter(p => p.unlocked && !p.cropType).slice(0, res.planted).forEach((p, i) => {
-      setTimeout(() => addFx({ kind: 'burst', x: px(p.id).x, y: px(p.id).y, emojis: ['🌱', '✨'], count: 4 }, 800), i * 70);
+      setTimeout(() => addFx({ kind: 'dust', x: px(p.id).x, y: px(p.id).y, color: '#8a5a34', count: 6 }, 800), i * 70);
     });
     audioEngine.playSfx('tap');
     dispatch({ type: 'PLANT_ALL', cropType: crop });
@@ -184,7 +194,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
   const waterOne = (plotId: number) => {
     if (!farmWater(toSlice(), plotId, Date.now())) return;
     const at = px(plotId);
-    addFx({ kind: 'burst', x: at.x, y: at.y - sw * 0.03, emojis: ['💧', '💦'], count: 5 }, 900);
+    addFx({ kind: 'dust', x: at.x, y: at.y - sw * 0.03, color: '#7cc8ff', count: 8 }, 900);
     audioEngine.playSfx('tap');
     dispatch({ type: 'WATER_PLOT', plotId });
   };
@@ -192,7 +202,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     const r = farmWaterAll(toSlice(), Date.now());
     if (!r.watered) return;
     stateRef.current.farmPlots.filter(p => p.unlocked && isGrowing(p, Date.now()) && !p.watered).forEach((p, i) => {
-      setTimeout(() => addFx({ kind: 'burst', x: px(p.id).x, y: px(p.id).y - sw * 0.03, emojis: ['💧'], count: 3 }, 800), i * 60);
+      setTimeout(() => addFx({ kind: 'dust', x: px(p.id).x, y: px(p.id).y - sw * 0.03, color: '#7cc8ff', count: 6 }, 800), i * 60);
     });
     audioEngine.playSfx('tap');
     dispatch({ type: 'WATER_ALL' });
@@ -252,29 +262,6 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         <img src={`${BASE}farm_background.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(30,10,40,0.35) 100%)' }} />
 
-        {/* the field: a feathered patch of tilled soil */}
-        <div className="absolute pointer-events-none" style={{ left: '17%', right: '17%', top: '44%', bottom: '13%' }}>
-          <div
-            className="absolute inset-0"
-            style={{
-              borderRadius: '46% 46% 42% 42% / 30% 30% 46% 46%',
-              background: 'radial-gradient(ellipse at 50% 38%, #956138 0%, #77492b 62%, #5c3a22 100%)',
-              WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, #000 58%, transparent 100%)',
-              maskImage: 'radial-gradient(ellipse at 50% 50%, #000 58%, transparent 100%)',
-            }}
-          />
-          <div
-            className="absolute inset-0"
-            style={{
-              borderRadius: '46% 46% 42% 42% / 30% 30% 46% 46%',
-              backgroundImage: 'radial-gradient(circle at 20% 30%, rgba(0,0,0,0.16) 1.2px, transparent 2.4px), radial-gradient(circle at 70% 60%, rgba(255,220,170,0.14) 1.2px, transparent 2.4px)',
-              backgroundSize: '19px 17px, 13px 15px',
-              WebkitMaskImage: 'radial-gradient(ellipse at 50% 50%, #000 52%, transparent 96%)',
-              maskImage: 'radial-gradient(ellipse at 50% 50%, #000 52%, transparent 96%)',
-            }}
-          />
-        </div>
-
         {/* ambient: pollen and a couple of butterflies */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
           {SPARKS.map((p, i) => (
@@ -296,34 +283,24 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
           const canBuy = !plot.unlocked && farm.level >= rule.level;
           return (
             <div key={plot.id} className="absolute" style={{ left: `${c.x * 100}%`, top: `${c.y * 100}%`, width: w, height: h, transform: 'translate(-50%, -50%)', zIndex: 10 + c.row * 3 }}>
-              {/* soil mound, or overgrown land that is not yours yet */}
-              <div
-                className="absolute inset-0"
-                style={{
-                  borderRadius: '50%',
-                  background: plot.unlocked
-                    ? 'radial-gradient(ellipse at 50% 28%, #bf8a5c 0%, #8d5c38 58%, #6a4126 100%)'
-                    : 'radial-gradient(ellipse at 50% 35%, rgba(150,215,120,0.75), rgba(90,160,85,0.7))',
-                  boxShadow: plot.unlocked
-                    ? 'inset 0 4px 0 rgba(255,228,185,0.38), inset 0 -4px 0 rgba(0,0,0,0.28), 0 5px 0 #4a2d18, 0 9px 10px rgba(0,0,0,0.28)'
-                    : 'inset 0 0 0 2px rgba(255,255,255,0.3), 0 3px 8px rgba(0,0,0,0.2)',
-                  border: plot.unlocked ? '2px solid #4a2d18' : '2px dashed rgba(255,255,255,0.65)',
-                }}
+              {/* painted soil mound, wet when watered, or overgrown land that is not yours yet */}
+              <img
+                src={`${FARM}${!plot.unlocked ? 'farm_plot_locked' : plot.watered && growing ? 'farm_soil_wet' : 'farm_soil_bed'}.png`}
+                alt="" draggable={false}
+                className="absolute pointer-events-none"
+                style={{ left: 0, top: 0, width: '100%', height: '100%', imageRendering: 'auto', filter: !plot.unlocked && !canBuy ? 'saturate(0.55) brightness(0.9)' : undefined }}
               />
-              {plot.unlocked && <div className="absolute rounded-full" style={{ left: '22%', right: '22%', top: '24%', height: '12%', background: 'rgba(0,0,0,0.13)' }} />}
-              {!plot.unlocked && <span className="absolute" style={{ left: '8%', top: '-12%', fontSize: w * 0.2 }}>🌿</span>}
-              {!plot.unlocked && <span className="absolute" style={{ right: '6%', top: '-4%', fontSize: w * 0.16 }}>🌾</span>}
 
               {/* the plant */}
               {plot.unlocked && plot.cropType && (
-                <div className={`absolute left-1/2 ${ready ? 'farm-ripe' : 'farm-sway'}`} style={{ width: w * 0.8, height: w * 0.8, bottom: h * 0.5, transform: 'translateX(-50%)', transformOrigin: '50% 100%' }}>
+                <div className={`absolute left-1/2 ${ready ? 'farm-ripe' : 'farm-sway'}`} style={{ width: w * 1.25, height: w * 1.25, bottom: h * 0.5, transform: 'translateX(-50%)', transformOrigin: '50% 100%' }}>
                   <CropArt crop={plot.cropType} stage={stageOf(progress)} className="w-full h-full" />
                 </div>
               )}
               {ready && plot.cropType && (
                 <>
-                  <img src={foodSpriteUrl(plot.cropType)} alt="" draggable={false} className="absolute left-1/2 farm-float pointer-events-none" style={{ width: w * 0.4, top: -w * 0.62, transform: 'translateX(-50%)', imageRendering: 'auto', filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.4))' }} />
-                  <div className="absolute left-1/2 rounded-full farm-ripe-ring pointer-events-none" style={{ width: w * 1.15, height: h * 1.3, top: -h * 0.15, transform: 'translateX(-50%)', border: `3px solid ${GOLD}` }} />
+                  <img src={foodSpriteUrl(plot.cropType)} alt="" draggable={false} className="absolute left-1/2 farm-float pointer-events-none" style={{ width: w * 0.3, top: -w * 1.2, transform: 'translateX(-50%)', imageRendering: 'auto', filter: 'drop-shadow(0 4px 4px rgba(0,0,0,0.4))' }} />
+                  <div className="absolute left-1/2 rounded-full farm-ripe-ring pointer-events-none" style={{ width: w * 1.0, height: h * 1.05, top: h * 0.02, transform: 'translateX(-50%)', border: `3px solid ${GOLD}` }} />
                 </>
               )}
 
@@ -339,7 +316,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" style={{ color: '#fff', textShadow: '0 2px 3px rgba(0,0,0,0.85)' }}>
                   <Lock style={{ width: w * 0.2, height: w * 0.2, opacity: 0.85 }} />
                   <span className="font-bold leading-none" style={{ fontSize: Math.max(9, sw * 0.0105 * c.scale), marginTop: 2 }}>
-                    {canBuy ? `${rule.cost.toLocaleString()} 💧` : `Lv ${rule.level}`}
+                    {canBuy ? <>{rule.cost.toLocaleString()} <Ico name="icon_drop" w={Math.max(10, sw * 0.011 * c.scale)} /></> : `Lv ${rule.level}`}
                   </span>
                 </div>
               )}
@@ -365,7 +342,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
           return (
             <div key={`t${plot.id}`} className="absolute pointer-events-none flex flex-col items-center" style={{ left: `${c.x * 100}%`, top: `${c.y * 100}%`, transform: `translate(-50%, ${h * 0.62}px)`, zIndex: 150 }}>
               <div className="whitespace-nowrap rounded-full font-bold text-white" style={{ background: 'rgba(30,14,40,0.82)', fontSize: Math.max(9, sw * 0.0105 * c.scale), padding: `${sw * 0.0012}px ${sw * 0.006}px`, border: '1px solid rgba(255,255,255,0.35)' }}>
-                {plot.watered ? '💧 ' : ''}{formatDuration(plot.readyAt - now)}
+                {plot.watered && <Ico name="icon_drop" w={Math.max(9, sw * 0.0105 * c.scale)} style={{ marginRight: 2 }} />}{formatDuration(plot.readyAt - now)}
               </div>
               <div className="rounded-full overflow-hidden" style={{ width: w * 0.6, height: Math.max(3, sw * 0.003), marginTop: 2, background: 'rgba(0,0,0,0.5)' }}>
                 <div className="h-full" style={{ width: `${progress * 100}%`, background: 'linear-gradient(90deg,#7dff9e,#f2d94a)' }} />
@@ -394,14 +371,14 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                   className="flex-1 rounded-full font-bold border-2 hover:scale-105 transition-transform disabled:opacity-45 disabled:hover:scale-100"
                   style={{ background: '#dff1ff', borderColor: INK, fontSize: sw * 0.011, padding: `${sw * 0.003}px 0` }}
                 >
-                  💧 {infoPlot.watered ? 'Watered' : `Water -${Math.round(WATER_BONUS * 100)}%`}
+                  <Ico name="icon_water_can" w={sw * 0.016} style={{ marginRight: 3 }} />{infoPlot.watered ? 'Watered' : `Water -${Math.round(WATER_BONUS * 100)}%`}
                 </button>
                 <button
                   onClick={() => rushOne(infoPlot.id)}
                   className="flex-1 rounded-full font-bold border-2 hover:scale-105 transition-transform"
                   style={{ background: goo >= cost ? 'linear-gradient(#ffe98a,#f2b632)' : '#e8dfc9', borderColor: INK, fontSize: sw * 0.011, padding: `${sw * 0.003}px 0`, opacity: goo >= cost ? 1 : 0.6 }}
                 >
-                  ⚡ {cost.toLocaleString()} 💧
+                  <Ico name="icon_rush" w={sw * 0.016} style={{ marginRight: 3 }} />{cost.toLocaleString()} <Ico name="icon_drop" w={sw * 0.011} />
                 </button>
               </div>
             </div>
@@ -415,8 +392,9 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
 
         {/* HUD: Farm Level */}
         <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
-          <div className="relative rounded-full flex items-center justify-center font-bold shadow-xl" style={{ width: sw * 0.062, height: sw * 0.062, background: `radial-gradient(circle at 35% 30%, #fff3c0, ${GOLD})`, border: `${sw * 0.004}px solid ${INK}`, color: INK, fontSize: sw * 0.03 }}>
-            {farm.level}
+          <div className="relative flex items-center justify-center font-bold" style={{ width: sw * 0.066, height: sw * 0.066, color: '#fff', fontSize: sw * 0.026, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.45))' }}>
+            <Ico name="icon_level_badge" w={sw * 0.066} style={{ position: 'absolute', inset: 0 }} />
+            <span className="relative" style={{ WebkitTextStroke: `${sw * 0.0025}px ${INK}`, paintOrder: 'stroke fill', marginTop: sw * 0.004 }}>{farm.level}</span>
             <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full font-bold whitespace-nowrap" style={{ background: INK, color: '#ffe9a8', fontSize: sw * 0.0085, padding: `0 ${sw * 0.005}px` }}>FARM LV</span>
           </div>
           <div style={{ width: sw * 0.27 }}>
@@ -445,7 +423,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
             ))}
           </div>
           <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.004}px ${sw * 0.01}px` }}>
-            {Math.floor(goo).toLocaleString()} 💧
+            <span className="inline-flex items-center" style={{ gap: sw * 0.003 }}>{Math.floor(goo).toLocaleString()} <Ico name="icon_drop" w={sw * 0.017} /></span>
           </div>
           <button onClick={onClose} aria-label="Close farm" className="hover:scale-110 transition-transform" style={{ width: sw * 0.036, height: sw * 0.036 }}>
             <img src={bt('ui_btn_close.png')} alt="" className="w-full h-full" draggable={false} />
@@ -455,13 +433,13 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         {/* action bar */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center" style={{ bottom: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
           <ActionButton primary={readyPlots.length > 0} disabled={!readyPlots.length} onClick={harvestEverything} sw={sw} badge={readyPlots.length || undefined}>
-            🧺 Harvest All
+            <Ico name="icon_basket" w={sw * 0.022} style={{ marginRight: 4 }} />Harvest All
           </ActionButton>
           <ActionButton disabled={!emptyPlots.length} onClick={() => setPicker({ mode: 'all' })} sw={sw} badge={emptyPlots.length || undefined}>
-            🌱 Plant All
+            <Ico name="icon_seed_pouch" w={sw * 0.022} style={{ marginRight: 4 }} />Plant All
           </ActionButton>
           <ActionButton disabled={!growingUnwatered.length} onClick={waterEverything} sw={sw} badge={growingUnwatered.length || undefined}>
-            💧 Water All
+            <Ico name="icon_water_can" w={sw * 0.022} style={{ marginRight: 4 }} />Water All
           </ActionButton>
           <button
             onClick={() => dispatch({ type: 'SET_AUTO_REPLANT', value: !farm.autoReplant })}
@@ -469,7 +447,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
             className="rounded-full font-bold border-[3px] shadow-lg hover:scale-105 transition-transform whitespace-nowrap"
             style={{ background: farm.autoReplant ? 'linear-gradient(#9dffb0,#38c95a)' : PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.005}px ${sw * 0.012}px` }}
           >
-            🔁 Auto-replant {farm.autoReplant ? 'ON' : 'OFF'}
+            <Ico name="icon_autoreplant" w={sw * 0.02} style={{ marginRight: 4 }} />Auto-replant {farm.autoReplant ? 'ON' : 'OFF'}
           </button>
         </div>
 
@@ -559,7 +537,7 @@ const CropChooser: React.FC<{
                 style={{ background: '#fff7dc', borderColor: INK, padding: `${sw * 0.01}px ${sw * 0.008}px` }}
               >
                 <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full font-bold text-white" style={{ background: ROLE_COLOR[def.role], fontSize: sw * 0.0095, padding: `0 ${sw * 0.008}px`, border: '2px solid #fff' }}>{def.role}</span>
-                <img src={foodSpriteUrl(c)} alt="" draggable={false} className="mx-auto" style={{ width: sw * 0.07, filter: unlocked ? undefined : 'grayscale(1)' }} />
+                <Ico name={`seed_packet_${c}`} w={sw * 0.075} style={{ display: 'block', margin: '0 auto', filter: unlocked ? undefined : 'grayscale(1)' }} />
                 <div className="font-bold leading-tight" style={{ fontSize: sw * 0.0155 }}>{def.name}</div>
                 <div className="opacity-75 leading-tight" style={{ fontSize: sw * 0.0098, margin: `${sw * 0.003}px 0` }}>{def.blurb}</div>
                 <div className="grid grid-cols-2 gap-x-2 font-semibold" style={{ fontSize: sw * 0.0105 }}>
@@ -569,7 +547,7 @@ const CropChooser: React.FC<{
                   <span>🌾 +{def.farmXp} Farm XP</span>
                 </div>
                 <div className="font-bold" style={{ marginTop: sw * 0.005, fontSize: sw * 0.0125, color: afford ? INK : '#c0392b' }}>
-                  {!unlocked ? '' : cost === 0 ? 'Seeds ready' : `${cost.toLocaleString()} 💧`}
+                  {!unlocked ? '' : cost === 0 ? 'Seeds ready' : <>{cost.toLocaleString()} <Ico name="icon_drop" w={sw * 0.0125} /></>}
                 </div>
                 {!unlocked && (
                   <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center bg-black/55 text-white font-bold" style={{ fontSize: sw * 0.0145 }}>
@@ -596,6 +574,26 @@ const FxView: React.FC<{ fx: Fx; sw: number }> = ({ fx, sw }) => {
     );
   }
   if (fx.kind === 'fly') return <FlyingFood fx={fx} sw={sw} />;
+  if (fx.kind === 'gold') {
+    return (
+      <div className="absolute" style={{ left: fx.x, top: fx.y }}>
+        <img src={`${FARM}fx_golden_burst.png`} alt="" draggable={false} className="absolute farm-gold-burst" style={{ width: sw * 0.2, imageRendering: 'auto' }} />
+        <img src={`${FARM}crop_${fx.crop}_gold.png`} alt="" draggable={false} className="absolute farm-gold-plant" style={{ width: sw * 0.11, imageRendering: 'auto' }} />
+      </div>
+    );
+  }
+  if (fx.kind === 'dust') {
+    return (
+      <div className="absolute" style={{ left: fx.x, top: fx.y }}>
+        {Array.from({ length: fx.count }).map((_, i) => {
+          const a = (i / fx.count) * Math.PI * 2 + (fx.id % 7);
+          const d = sw * (0.018 + ((i * 29) % 20) / 1100);
+          const r = sw * (0.0035 + ((i * 13) % 5) / 1500);
+          return <span key={i} className="absolute rounded-full farm-burst" style={{ width: r * 2, height: r * 2, marginLeft: -r, marginTop: -r, background: fx.color, ['--dx' as string]: `${Math.cos(a) * d * 1.4}px`, ['--dy' as string]: `${Math.sin(a) * d * 0.8 - sw * 0.012}px`, animationDelay: `${i * 0.015}s` }} />;
+        })}
+      </div>
+    );
+  }
   return (
     <div className="absolute" style={{ left: fx.x, top: fx.y }}>
       {Array.from({ length: fx.count }).map((_, i) => {
@@ -645,6 +643,10 @@ const CSS = `
   .farm-plus { animation: farmPlus 2s ease-in-out infinite }
   .farm-spark { animation: farmSpark 8s ease-out infinite }
   .farm-butterfly { animation: farmButterfly 22s linear infinite }
+  @keyframes farmGoldBurst { 0% { transform: translate(-50%,-50%) scale(0.3) rotate(0deg); opacity: 0 } 18% { opacity: 1 } 100% { transform: translate(-50%,-50%) scale(1.25) rotate(35deg); opacity: 0 } }
+  @keyframes farmGoldPlant { 0% { transform: translate(-50%,-60%) scale(0.6); opacity: 0 } 20% { transform: translate(-50%,-70%) scale(1.15); opacity: 1 } 70% { opacity: 1 } 100% { transform: translate(-50%,-110%) scale(1); opacity: 0 } }
+  .farm-gold-burst { animation: farmGoldBurst 1.2s ease-out forwards }
+  .farm-gold-plant { animation: farmGoldPlant 1.25s ease-out forwards }
   .farm-pop { animation: farmPop 1.2s ease-out forwards }
   .farm-burst { animation: farmBurst 0.9s ease-out forwards }
   .farm-banner { animation: farmBanner 4.2s ease-out forwards }

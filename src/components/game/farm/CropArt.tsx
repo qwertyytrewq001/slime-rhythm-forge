@@ -8,7 +8,7 @@ import { SlimeFoodType } from '@/types/slime';
  * These are drawn as layered SVG so the farm looks right today. If painted art is dropped into
  * public/farm/crop_<type>_<stage>.png (see FARM_ART_PROMPTS.md), set FARM_ART_READY to true and it is used instead.
  */
-export const FARM_ART_READY = false;
+export const FARM_ART_READY = true;
 export type Stage = 0 | 1 | 2 | 3;
 
 const LINE = '#3a2150';
