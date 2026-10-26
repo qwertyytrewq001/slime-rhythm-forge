@@ -187,18 +187,18 @@ interface Personality {
   range: number; // how far a wander can go, % of the scene
   float?: boolean; // glides instead of hopping
 }
-const DEFAULT_PERSONALITY: Personality = { idle: [1.0, 2.4], jump: [320, 430], range: 22 };
+const DEFAULT_PERSONALITY: Personality = { idle: [0.7, 1.7], jump: [330, 440], range: 32 };
 const PERSONALITIES: Record<string, Personality> = {
-  fire: { idle: [0.5, 1.3], jump: [430, 560], range: 30 },
-  electric: { idle: [0.4, 1.1], jump: [450, 590], range: 34 },
-  plant: { idle: [1.6, 3.2], jump: [250, 340], range: 16 },
-  earth: { idle: [1.8, 3.6], jump: [230, 320], range: 14 },
-  metal: { idle: [1.4, 2.8], jump: [290, 380], range: 18 },
-  ice: { idle: [1.0, 2.4], jump: [320, 420], range: 22 },
-  light: { idle: [0.9, 2.0], jump: [370, 470], range: 24 },
-  shadow: { idle: [1.0, 2.4], jump: [320, 440], range: 26 },
-  water: { idle: [0.8, 1.8], jump: [0, 0], range: 20, float: true },
-  wind: { idle: [0.5, 1.2], jump: [0, 0], range: 30, float: true },
+  fire: { idle: [0.4, 1.1], jump: [430, 560], range: 38 },
+  electric: { idle: [0.3, 0.9], jump: [450, 590], range: 40 },
+  plant: { idle: [0.9, 2.0], jump: [270, 360], range: 28 },
+  earth: { idle: [1.0, 2.2], jump: [250, 340], range: 26 },
+  metal: { idle: [0.9, 2.0], jump: [300, 400], range: 28 },
+  ice: { idle: [0.7, 1.7], jump: [330, 430], range: 32 },
+  light: { idle: [0.6, 1.5], jump: [380, 480], range: 34 },
+  shadow: { idle: [0.7, 1.7], jump: [330, 450], range: 34 },
+  water: { idle: [0.6, 1.4], jump: [0, 0], range: 30, float: true },
+  wind: { idle: [0.4, 1.0], jump: [0, 0], range: 38, float: true },
 };
 
 const MOOD_BUBBLES = ['🎵', '💖', '✨', '🍃', '😊'];
@@ -336,12 +336,6 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
         startHop(s.x, s.y, 210);
         return;
       }
-      if (l.selected) {
-        // picked up: stay put but keep bouncing happily
-        startHop(s.x, s.y, 240);
-        s.t = 0; // next idle shortened below
-        return;
-      }
       if (attract && rect && rect.width > 0) {
         const px = ((attract.x - rect.left) / rect.width) * 100;
         const py = ((attract.y - rect.top) / rect.height) * 100;
@@ -361,7 +355,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
         setSleeping(true);
         return;
       }
-      if (Math.random() < 0.18) {
+      if (Math.random() < 0.1) {
         // sometimes just look around
         s.t = rand(pers.idle[0], pers.idle[1]);
         return;
@@ -486,7 +480,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
           s.tilt *= 0.7;
           if (s.t <= 0) {
             s.mode = 'idle';
-            const bounceNow = l.selected || l.targeted;
+            const bounceNow = l.targeted;
             s.t = bounceNow ? rand(0.25, 0.55) : rand(pers.idle[0], pers.idle[1]);
           }
           break;
@@ -576,7 +570,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, attract
       <div
         ref={bodyRef}
         data-slime-id={slime.id}
-        className="absolute inset-0 cursor-pointer pointer-events-auto"
+        className="absolute inset-0 cursor-pointer pointer-events-auto select-none outline-none"
         onPointerDown={(e) => { if (e.button === 0) dragInfo.current = { startX: e.clientX, startY: e.clientY, moved: false }; }}
         onClick={(e) => {
           e.stopPropagation();
@@ -859,7 +853,10 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
   const layers = ENVIRONMENT_LAYERS[habitat.element] || ENVIRONMENT_LAYERS.default;
 
   return (
-    <div className="fixed inset-0 z-[10000] flex flex-col bg-black/80" style={{ pointerEvents: 'auto' }}>
+    <div
+      className="fixed inset-0 z-[10000] flex flex-col bg-black/80 select-none"
+      style={{ pointerEvents: 'auto', WebkitUserSelect: 'none', userSelect: 'none', WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none' }}
+    >
       <div className="sticky top-0 z-40 flex-shrink-0 bg-gradient-to-b from-black/95 via-black/90 to-black/70 pt-4 pb-8 px-6 backdrop-blur-md border-b border-white/10">
         <button onClick={onClose} className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-lg transition-all">
           <ChevronLeft className="w-6 h-6 text-[#FF7EB6]" />
