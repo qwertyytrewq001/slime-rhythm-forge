@@ -1,4 +1,5 @@
 import { FarmPlot, FarmState, GameStats, SlimeFoodType, SLIME_FOODS } from '../types/slime';
+import { FarmPerks, NO_PERKS } from './sanctuaryCore';
 
 /**
  * Farm rules (pure functions, no React).
@@ -77,7 +78,10 @@ export const WATER_BONUS = 0.1; // of the full grow time, once per plant
 export const RUSH_FACTOR = 2.5; // finishing a brand new plant instantly costs this many seeds' worth of goo
 export const GOLDEN_MULT = 3;
 
-export const growMsFor = (crop: SlimeFoodType, level: number) => Math.round(CROPS[crop].growMs * growthMultiplier(level));
+export const growMsFor = (crop: SlimeFoodType, level: number, perks: FarmPerks = NO_PERKS) =>
+  Math.round(CROPS[crop].growMs * growthMultiplier(level) * (1 - perks.growthCut));
+export const seedPrice = (crop: SlimeFoodType, perks: FarmPerks = NO_PERKS) => Math.max(1, Math.round(CROPS[crop].seedCost * (1 - perks.seedDiscount)));
+export const plotCost = (rule: PlotRule, perks: FarmPerks = NO_PERKS) => Math.round(rule.cost * (1 - perks.landDiscount));
 
 // ---------------------------------------------------------------------------
 
@@ -88,6 +92,8 @@ export interface FarmSlice {
   farmPlots: FarmPlot[];
   farm: FarmState;
   stats: GameStats;
+  /** Bonuses from the player's sanctuaries; none when absent. */
+  perks?: FarmPerks;
 }
 
 const round2 = (n: number) => Math.round(n * 100) / 100;
@@ -102,8 +108,8 @@ export function cropUnlocked(crop: SlimeFoodType, level: number) {
 }
 
 /** What it costs to plant: nothing if you already own a seed, otherwise the seed price. */
-export function plantCost(s: Pick<FarmSlice, 'seeds'>, crop: SlimeFoodType) {
-  return (s.seeds[crop] || 0) > 0 ? 0 : CROPS[crop].seedCost;
+export function plantCost(s: Pick<FarmSlice, 'seeds' | 'perks'>, crop: SlimeFoodType) {
+  return (s.seeds[crop] || 0) > 0 ? 0 : seedPrice(crop, s.perks);
 }
 
 function placeCrop(s: FarmSlice, plotId: number, crop: SlimeFoodType, now: number): FarmSlice | null {
@@ -111,9 +117,9 @@ function placeCrop(s: FarmSlice, plotId: number, crop: SlimeFoodType, now: numbe
   if (!plot || !plot.unlocked || plot.cropType) return null;
   if (!cropUnlocked(crop, s.farm.level)) return null;
   const owned = s.seeds[crop] || 0;
-  const cost = owned > 0 ? 0 : CROPS[crop].seedCost;
+  const cost = owned > 0 ? 0 : seedPrice(crop, s.perks);
   if (cost > s.goo) return null;
-  const grow = growMsFor(crop, s.farm.level);
+  const grow = growMsFor(crop, s.farm.level, s.perks);
   return {
     ...s,
     goo: round2(s.goo - cost),
@@ -158,10 +164,11 @@ export function harvest(s: FarmSlice, plotId: number, rolls: [number, number], n
   const def = CROPS[crop];
   const level = s.farm.level;
 
-  const extra = rolls[0] < extraYieldChance(level);
-  const golden = rolls[1] < goldenChance(level);
+  const perks = s.perks ?? NO_PERKS;
+  const extra = rolls[0] < extraYieldChance(level) + perks.yieldChance;
+  const golden = rolls[1] < goldenChance(level) + perks.goldenChance;
   const items = (def.baseYield + (extra ? 1 : 0)) * (golden ? GOLDEN_MULT : 1);
-  const xp = def.farmXp * (golden ? 2 : 1);
+  const xp = (def.farmXp + perks.farmXpFlat) * (golden ? 2 : 1);
 
   const newXp = s.farm.xp + xp;
   const newLevel = levelForXp(newXp);
@@ -224,17 +231,17 @@ export function waterAll(s: FarmSlice, now: number): { slice: FarmSlice; watered
 }
 
 /** Goo to finish a growing plant right now: proportional to what is left. */
-export function rushCost(plot: FarmPlot, now: number): number {
+export function rushCost(plot: FarmPlot, now: number, perks: FarmPerks = NO_PERKS): number {
   if (!plot.cropType || !plot.plantedAt || !plot.readyAt || now >= plot.readyAt) return 0;
   const total = plot.readyAt - plot.plantedAt;
   const left = plot.readyAt - now;
-  return Math.max(1, Math.ceil((left / total) * CROPS[plot.cropType].seedCost * RUSH_FACTOR));
+  return Math.max(1, Math.ceil((left / total) * CROPS[plot.cropType].seedCost * RUSH_FACTOR * (1 - perks.rushDiscount)));
 }
 
 export function rush(s: FarmSlice, plotId: number, now: number): FarmSlice | null {
   const plot = s.farmPlots.find(p => p.id === plotId);
   if (!plot || !isGrowing(plot, now)) return null;
-  const cost = rushCost(plot, now);
+  const cost = rushCost(plot, now, s.perks);
   if (cost > s.goo) return null;
   return { ...s, goo: round2(s.goo - cost), farmPlots: s.farmPlots.map(p => (p.id === plotId ? { ...p, readyAt: now } : p)) };
 }
@@ -243,8 +250,9 @@ export function unlockPlot(s: FarmSlice, plotId: number): FarmSlice | null {
   const plot = s.farmPlots.find(p => p.id === plotId);
   const rule = PLOT_RULES[plotId];
   if (!plot || plot.unlocked || !rule) return null;
-  if (s.farm.level < rule.level || s.goo < rule.cost) return null;
-  return { ...s, goo: round2(s.goo - rule.cost), farmPlots: s.farmPlots.map(p => (p.id === plotId ? { ...p, unlocked: true } : p)) };
+  const cost = plotCost(rule, s.perks);
+  if (s.farm.level < rule.level || s.goo < cost) return null;
+  return { ...s, goo: round2(s.goo - cost), farmPlots: s.farmPlots.map(p => (p.id === plotId ? { ...p, unlocked: true } : p)) };
 }
 
 // ---------------------------------------------------------------------------

@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useReducer, useEffect, useRef, useMemo } from 'react';
 import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType, BreedResult, FarmPlot, FarmState } from '@/types/slime';
 import { FarmSlice, createFarmPlots, createFarmState, migrateFarm, plant as farmPlant, plantAll as farmPlantAll, harvest as farmHarvest, harvestAll as farmHarvestAll, water as farmWater, waterAll as farmWaterAll, rush as farmRush, unlockPlot as farmUnlock } from '@/utils/farmCore';
+import { SanctSlice, FEED_JOY, addJoy, collectAll, collectGift, normalizeHabitat, perksFrom, petHabitat, placeDecor, removeDecor, rollerFrom, tickHabitat, upgradeHabitat } from '@/utils/sanctuaryCore';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
@@ -153,7 +154,7 @@ function createInitialState(): GameState {
       bestRarity: saved.bestRarity ?? 0,
       discoveredModels: saved.discoveredModels ?? [],
       discoveredElements: saved.discoveredElements ?? [],
-      habitats: saved.habitats ?? [],
+      habitats: (saved.habitats ?? []).map((h: Habitat) => normalizeHabitat(h, Date.now())),
       pendingHabitatPlacement: saved.pendingHabitatPlacement ?? null,
       lastEvolution: null,
       lastLevelUp: null,
@@ -555,6 +556,7 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const now = Date.now();
       const slice: FarmSlice = {
         goo: state.goo, seeds: state.seeds, inventory: state.inventory, farmPlots: state.farmPlots, farm: state.farm, stats: state.stats,
+        perks: perksFrom(state.habitats, state.slimes),
       };
       let next: FarmSlice | null = null;
       switch (action.type) {
@@ -570,6 +572,33 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       }
       if (!next) return state;
       return { ...state, goo: next.goo, seeds: next.seeds, inventory: next.inventory, farmPlots: next.farmPlots, farm: next.farm, stats: next.stats };
+    }
+    case 'SANCT_TICK': {
+      const perks = perksFrom(state.habitats, state.slimes);
+      const next = rollerFrom(action.rolls);
+      return { ...state, habitats: state.habitats.map(h => tickHabitat(h, state.slimes, action.now, next, perks)) };
+    }
+    case 'SANCT_JOY': {
+      const perks = perksFrom(state.habitats, state.slimes);
+      const next = rollerFrom(action.rolls);
+      return {
+        ...state,
+        habitats: state.habitats.map(h => {
+          if (h.id !== action.habitatId) return h;
+          return action.source === 'pet' ? petHabitat(h, action.now, next, perks) : addJoy(h, FEED_JOY, action.now, next, perks);
+        }),
+      };
+    }
+    case 'SANCT_COLLECT':
+    case 'SANCT_UPGRADE':
+    case 'SANCT_DECOR': {
+      const slice: SanctSlice = { goo: state.goo, inventory: state.inventory, seeds: state.seeds, habitats: state.habitats };
+      let out: SanctSlice | null = null;
+      if (action.type === 'SANCT_COLLECT') out = action.habitatId && action.giftId ? collectGift(slice, action.habitatId, action.giftId)?.slice ?? null : collectAll(slice).slice;
+      else if (action.type === 'SANCT_UPGRADE') out = upgradeHabitat(slice, action.habitatId);
+      else out = action.place ? placeDecor(slice, action.habitatId, action.decorId) : removeDecor(slice, action.habitatId, action.decorId);
+      if (!out) return state;
+      return { ...state, goo: out.goo, inventory: out.inventory, seeds: out.seeds, habitats: out.habitats };
     }
     case 'COMPLETE_TUTORIAL':
       return { ...state, tutorialCompleted: true };
@@ -677,6 +706,14 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
     }, 100);
     return () => clearInterval(interval);
   }, [state.slimes, state.habitats]);
+
+  // Sanctuaries: slimes living there build Joy over time, including while the player was away.
+  useEffect(() => {
+    const tick = () => dispatch({ type: 'SANCT_TICK', now: Date.now(), rolls: Array.from({ length: 48 }, Math.random) });
+    tick();
+    const interval = setInterval(tick, 30_000);
+    return () => clearInterval(interval);
+  }, []);
 
   // Unlock achievements as soon as their requirements are met. Deliberately NOT dependent
   // on goo (it changes every 100ms); only on the state the achievements actually read.

@@ -4,8 +4,9 @@ import { FarmPlot, SLIME_FOODS, SlimeFoodType } from '@/types/slime';
 import {
   CROPS, CROP_ORDER, FARM_LEVEL_XP, FarmSlice, GOLDEN_MULT, MAX_FARM_LEVEL, PLOT_RULES, TOTAL_PLOTS, WATER_BONUS,
   cropUnlocked, extraYieldChance, goldenChance, growMsFor, growthMultiplier, harvest as farmHarvest, harvestAll as farmHarvestAll,
-  isGrowing, isReady, plant as farmPlant, plantAll as farmPlantAll, plantCost, plotsAtLevel, progressOf, rushCost, water as farmWater, waterAll as farmWaterAll, xpIntoLevel, HarvestOutcome,
+  isGrowing, isReady, plotCost, seedPrice, plant as farmPlant, plantAll as farmPlantAll, plantCost, plotsAtLevel, progressOf, rushCost, water as farmWater, waterAll as farmWaterAll, xpIntoLevel, HarvestOutcome,
 } from '@/utils/farmCore';
+import { perksFrom, activePerks } from '@/utils/sanctuaryCore';
 import { foodSpriteUrl } from '@/data/foodSprites';
 import { formatDuration } from '@/utils/timeUtils';
 import { audioEngine } from '@/utils/audioEngine';
@@ -91,11 +92,13 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
   }, []);
 
   const { farm, farmPlots, goo, inventory, seeds } = state;
+  const perks = useMemo(() => perksFrom(state.habitats, state.slimes), [state.habitats, state.slimes]);
+  const perkLines = useMemo(() => activePerks(state.habitats, state.slimes), [state.habitats, state.slimes]);
   const sh = (sw * 9) / 16; // stage height
 
   const toSlice = (): FarmSlice => {
     const s = stateRef.current;
-    return { goo: s.goo, seeds: s.seeds, inventory: s.inventory, farmPlots: s.farmPlots, farm: s.farm, stats: s.stats };
+    return { goo: s.goo, seeds: s.seeds, inventory: s.inventory, farmPlots: s.farmPlots, farm: s.farm, stats: s.stats, perks: perksFrom(s.habitats, s.slimes) };
   };
 
   const addFx = useCallback((item: FxInput, life = 1200) => {
@@ -167,7 +170,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     const next = farmPlant(toSlice(), plotId, crop, Date.now());
     const at = px(plotId);
     if (!next) {
-      const cost = plantCost(stateRef.current, crop);
+      const cost = plantCost(toSlice(), crop);
       addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.06, text: cropUnlocked(crop, stateRef.current.farm.level) ? `Need ${cost} 💧` : `Farm Lv ${CROPS[crop].unlockLevel}`, color: '#ff9a9a', size: 0.9 }, 1200);
       return;
     }
@@ -211,7 +214,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
   const rushOne = (plotId: number) => {
     const plot = stateRef.current.farmPlots.find(p => p.id === plotId);
     if (!plot) return;
-    const cost = rushCost(plot, Date.now());
+    const cost = rushCost(plot, Date.now(), perks);
     if (cost > stateRef.current.goo) {
       addFx({ kind: 'pop', x: px(plotId).x, y: px(plotId).y - sw * 0.06, text: `Need ${cost} 💧`, color: '#ff9a9a', size: 0.9 }, 1100);
       return;
@@ -229,8 +232,9 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
       addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Reach Farm Level ${rule.level} to unlock`, color: '#ffd9a0', size: 0.85 }, 1500);
       return;
     }
-    if (goo < rule.cost) {
-      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Need ${rule.cost.toLocaleString()} 💧 to buy this land`, color: '#ff9a9a', size: 0.85 }, 1500);
+    const landCost = plotCost(rule, perks);
+    if (goo < landCost) {
+      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Need ${landCost.toLocaleString()} 💧 to buy this land`, color: '#ff9a9a', size: 0.85 }, 1500);
       return;
     }
     addFx({ kind: 'burst', x: at.x, y: at.y, emojis: ['🌿', '✨'], count: 8 }, 1000);
@@ -358,7 +362,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" style={{ color: '#fff', textShadow: '0 2px 3px rgba(0,0,0,0.85)' }}>
                   <Lock style={{ width: w * 0.2, height: w * 0.2, opacity: 0.85 }} />
                   <span className="font-bold leading-none" style={{ fontSize: Math.max(9, sw * 0.0105 * c.scale), marginTop: 2 }}>
-                    {canBuy ? <>Buy {rule.cost.toLocaleString()} <Ico name="icon_drop" w={Math.max(10, sw * 0.011 * c.scale)} /></> : `Farm Lv ${rule.level}`}
+                    {canBuy ? <>Buy {plotCost(rule, perks).toLocaleString()} <Ico name="icon_drop" w={Math.max(10, sw * 0.011 * c.scale)} /></> : `Farm Lv ${rule.level}`}
                   </span>
                 </div>
               )}
@@ -394,7 +398,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         {/* info popover for a growing plot */}
         {infoPlot && infoPlot.cropType && isGrowing(infoPlot, now) && (() => {
           const c = plotCenter(infoPlot.id);
-          const cost = rushCost(infoPlot, now);
+          const cost = rushCost(infoPlot, now, perks);
           const crop = CROPS[infoPlot.cropType];
           return (
             <div
@@ -448,6 +452,15 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
               {farm.level >= MAX_FARM_LEVEL ? 'Max level' : `${xp.have} / ${xp.need} Farm XP`}
               {nextUnlocks.length > 0 && <span className="opacity-80"> · Next: {nextUnlocks[0]}</span>}
             </div>
+            {perkLines.filter(p => p.text.startsWith('Farm')).length > 0 && (
+              <div className="flex flex-wrap" style={{ gap: sw * 0.004, marginTop: sw * 0.004 }}>
+                {perkLines.filter(p => p.text.startsWith('Farm')).map(p => (
+                  <span key={p.element} title={`${p.title} (${p.element} sanctuary, level ${p.level})`} className="rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.78)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: sw * 0.0088, padding: `0 ${sw * 0.005}px` }}>
+                    ✦ {p.text.replace('Farm: ', '')}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
@@ -509,6 +522,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         {/* crop chooser */}
         {picker && (
           <CropChooser
+            perks={perks}
             sw={sw}
             mode={picker.mode}
             level={farm.level}
@@ -545,9 +559,9 @@ const ActionButton: React.FC<{ children: React.ReactNode; onClick: () => void; d
 );
 
 const CropChooser: React.FC<{
-  sw: number; mode: 'plot' | 'all'; level: number; goo: number; seeds: Record<SlimeFoodType, number>; emptyCount: number;
+  perks: ReturnType<typeof perksFrom>; sw: number; mode: 'plot' | 'all'; level: number; goo: number; seeds: Record<SlimeFoodType, number>; emptyCount: number;
   onPick: (c: SlimeFoodType) => void; onClose: () => void;
-}> = ({ sw, mode, level, goo, seeds, emptyCount, onPick, onClose }) => {
+}> = ({ perks, sw, mode, level, goo, seeds, emptyCount, onPick, onClose }) => {
   const count = mode === 'all' ? emptyCount : 1;
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-black/55 farm-fade" style={{ zIndex: 600 }} onClick={onClose}>
@@ -564,9 +578,9 @@ const CropChooser: React.FC<{
             const def = CROPS[c];
             const unlocked = cropUnlocked(c, level);
             const have = seeds[c] || 0;
-            const cost = have >= count ? 0 : (count - have) * def.seedCost;
+            const cost = have >= count ? 0 : (count - have) * seedPrice(c, perks);
             const afford = goo >= cost;
-            const grow = growMsFor(c, level);
+            const grow = growMsFor(c, level, perks);
             const yieldTxt = `${def.baseYield}${extraYieldChance(level) > 0 ? `–${def.baseYield + 1}` : ''}`;
             return (
               <button

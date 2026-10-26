@@ -11,7 +11,7 @@ import { Shop } from '@/components/game/Shop';
 import { BazaarModal } from '@/components/game/BazaarModal';
 import { Hatchery } from '@/components/game/Hatchery';
 import { HatcheryScreen } from '@/components/game/HatcheryScreen';
-import { IslandGrid } from '@/components/game/IslandGrid';
+import { SanctuaryHub } from '@/components/game/SanctuaryHub';
 import { CodexGallery } from '@/components/game/CodexGallery';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
@@ -27,7 +27,6 @@ import { BattleArena } from '@/components/game/BattleArena';
 import { BattleSlime } from '@/types/slime';
 import { LoreTutorial } from '@/components/game/LoreTutorial';
 import { LevelDialogue } from '@/components/game/LevelDialogue';
-import { Sanctuaries } from '@/components/game/Sanctuaries';
 import { FarmScreen } from '@/components/game/FarmScreen';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
@@ -270,8 +269,26 @@ function GameLayout() {
         </div>
       )}
 
+      {/* 1.8. SANCTUARY ISLES LAYER */}
+      {currentView === 'sanctuaries' && (
+        <div className="fixed inset-0 z-[95] pointer-events-auto">
+          <SanctuaryHub
+            onClose={() => setCurrentView('breeding')}
+            onOpenHabitat={setSelectedHabitatId}
+            onOpenBazaar={() => setBazaarModalOpen(true)}
+          />
+          {selectedHabitatId && (
+            <HabitatViewer
+              habitatId={selectedHabitatId}
+              onClose={() => setSelectedHabitatId(null)}
+              onOpenFarm={() => { setSelectedHabitatId(null); setCurrentView('farm'); }}
+            />
+          )}
+        </div>
+      )}
+
       {/* 2. MAIN GAME INTERFACE */}
-      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' || currentView === 'breedingDen' || currentView === 'hatchery' || currentView === 'farm' ? 'hidden' : ''}`}>
+      <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' || currentView === 'breedingDen' || currentView === 'hatchery' || currentView === 'farm' || currentView === 'sanctuaries' ? 'hidden' : ''}`}>
         
         {/* TopBar (Navigation) */}
         <div className={`pointer-events-auto relative z-[60] ${currentView === 'hatchery' ? 'hidden' : ''}`}>
@@ -292,13 +309,6 @@ function GameLayout() {
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF7EB6]/5 rounded-full blur-[100px] pointer-events-none" />
               <BreedingPod onRequestGallery={openGalleryForSlot} onNavigateToBreedingDen={() => setCurrentView('breedingDen')} />
               <Hatchery onNavigateToHatchery={() => setCurrentView('hatchery')} />
-            </div>
-          )}
-          {currentView === 'sanctuaries' && (
-            <div className="w-full h-full flex flex-col items-center justify-start pt-12 p-8 relative animate-scale-in pointer-events-auto overflow-y-auto">
-              <div className="w-full max-w-6xl">
-                <IslandGrid onHabitatClick={setSelectedHabitatId} />
-              </div>
             </div>
           )}
         </div>
@@ -366,16 +376,6 @@ function GameLayout() {
           </div>
         </div>
 
-        {/* Habitat Viewer Modal */}
-        <div className="pointer-events-auto">
-          {selectedHabitatId && (
-            <HabitatViewer
-              habitatId={selectedHabitatId}
-              onClose={() => setSelectedHabitatId(null)}
-              onOpenFarm={() => { setSelectedHabitatId(null); setCurrentView('farm'); }}
-            />
-          )}
-        </div>
       </div>
 
       {/* 3. GLOBAL POPUPS */}

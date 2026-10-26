@@ -10,6 +10,10 @@ import { FeedTray } from './FeedTray';
 import { foodSpriteUrl } from '@/data/foodSprites';
 import { audioEngine } from '@/utils/audioEngine';
 import { setSanctuaryOpen } from '@/utils/sanctuaryState';
+import { JOY_MAX } from '@/utils/sanctuaryCore';
+import { SanctuaryPanel } from './SanctuaryPanel';
+import { ArtImg, Heart, giftLabel } from './sanctuary/sanctArt';
+import { decorById } from '@/utils/sanctuaryCore';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
@@ -1026,6 +1030,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
   const [dragging, setDragging] = useState(false);
   const [eatNonce, setEatNonce] = useState<Record<string, number>>({});
   const [fx, setFx] = useState<Fx[]>([]);
+  const [manageOpen, setManageOpen] = useState(false);
   const fxId = useRef(0);
   const attractRef = useRef<{ x: number; y: number } | null>(null);
   const sceneRef = useRef<HTMLDivElement>(null);
@@ -1081,6 +1086,8 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     const c = centerOf(slimeId);
     if (c) addFx({ kind: 'burst', x: c.x, y: c.y - 24, emojis: ['💖'], count: quiet ? 2 : 3 }, 1100);
     if (!quiet) audioEngine.playSfx('tap');
+    // Petting and poking make the sanctuary happier (rate limited in the rules, so spamming does nothing extra)
+    dispatch({ type: 'SANCT_JOY', habitatId, source: 'pet', now: Date.now(), rolls: Array.from({ length: 12 }, Math.random) });
   };
 
   const handleFeed = (food: SlimeFoodType, slimeId: string, origin: { x: number; y: number }) => {
@@ -1107,6 +1114,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
       const live = stateRef.current;
       if ((live.inventory[food] || 0) < 1) return;
       dispatch({ type: 'FEED_SLIME_XP', slimeId, foodType: food });
+      dispatch({ type: 'SANCT_JOY', habitatId, source: 'feed', now: Date.now(), rolls: Array.from({ length: 12 }, Math.random) });
       setEatNonce(n => ({ ...n, [slimeId]: (n[slimeId] || 0) + 1 }));
       const at = centerOf(slimeId) ?? c;
       addFx({ kind: 'burst', x: at.x, y: at.y - 20, emojis: ['💖', '✨'], count: 6 });
@@ -1254,6 +1262,30 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           {ELEMENT_DISPLAY_NAMES[habitat.element]} Sanctuary
         </h2>
         <p className="text-center text-xs text-white/60 mt-2 font-bold tracking-wider">{theme.desc}</p>
+        <div className="absolute top-4 right-4 flex items-center gap-3">
+          <div title="Joy: fill it for a gift. Petting and feeding help." className="flex items-center gap-2">
+            <Heart size={26} />
+            <div className="rounded-full overflow-hidden" style={{ width: 120, height: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.4)' }}>
+              <div className="h-full" style={{ width: `${((habitat.joy ?? 0) / JOY_MAX) * 100}%`, background: 'linear-gradient(90deg,#ff9ac8,#ff4f9d)', transition: 'width 0.6s' }} />
+            </div>
+          </div>
+          {(habitat.gifts?.length ?? 0) > 0 && (
+            <button
+              onClick={() => {
+                (habitat.gifts ?? []).forEach((g, i) => {
+                  dispatch({ type: 'SANCT_COLLECT', habitatId, giftId: g.id });
+                  addFx({ kind: 'text', x: window.innerWidth / 2 - 80, y: 170 + i * 28, text: giftLabel(g), color: '#ffe14d' }, 1600);
+                });
+                audioEngine.playSfx('collect');
+              }}
+              className="rounded-full px-3 py-1 text-sm font-black text-white bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] hover:scale-105 transition-transform animate-pulse"
+              aria-label="Collect gifts"
+            >
+              🎁 {habitat.gifts?.length}
+            </button>
+          )}
+          <button onClick={() => setManageOpen(true)} className="rounded-full px-3 py-1 text-sm font-black text-[#4a2f17] bg-[#f6e8c3] border-2 border-[#4a2f17] hover:scale-105 transition-transform" aria-label="Manage sanctuary">⚙ Manage</button>
+        </div>
       </div>
 
       <div className="flex-1 relative overflow-hidden">
@@ -1263,6 +1295,9 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
 
         {/* Tap empty ground to deselect; slimes are handled by the pointer controller above */}
         <div ref={sceneRef} className="absolute inset-0" style={{ pointerEvents: 'auto', touchAction: 'none' }}>
+          {(habitat.decor ?? []).map((id, i) => decorById(id) && (
+            <ArtImg key={id} file={`decor_${id}.png`} className="absolute pointer-events-none" style={{ left: `${[12, 84, 28, 68][i % 4]}%`, top: `${[58, 60, 52, 54][i % 4]}%`, width: '11%', transform: 'translateX(-50%)', filter: 'drop-shadow(0 8px 6px rgba(0,0,0,0.35))', zIndex: 1 }} />
+          ))}
           {assignedSlimes.map(slime => (
             <BouncingSlime
               key={slime.id}
@@ -1361,6 +1396,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         .slime-eat { animation: slimeEat .55s ease-out; }
         .slime-target { animation: slimeTarget .5s ease-in-out infinite; filter: brightness(1.15) drop-shadow(0 0 14px rgba(124,255,178,.9)); }
       `}</style>
+      {manageOpen && habitat && <SanctuaryPanel habitat={habitat} sw={Math.min(window.innerWidth, 1100)} onClose={() => setManageOpen(false)} />}
     </div>
   );
 }

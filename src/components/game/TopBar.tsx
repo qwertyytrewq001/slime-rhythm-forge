@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { useGameState } from '../../hooks/useGameState';
 import { isReady } from '../../utils/farmCore';
+import { totalGifts } from '../../utils/sanctuaryCore';
 import { FairySparkle } from './FairySparkle';
 import { Achievements } from './Achievements';
 
@@ -22,6 +23,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
     const t = setInterval(() => setNowMs(Date.now()), 5000);
     return () => clearInterval(t);
   }, []);
+  const giftsWaiting = totalGifts(state.habitats);
   const readyCrops = state.farmPlots.filter(p => isReady(p, nowMs)).length;
 
   // Simple clean styling with hover effects and explicit font control
@@ -73,6 +75,13 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
                 fontSize: '16px',
                 color: '#c4ffb2'
               }}>SANCTUARIES</span>
+              {giftsWaiting > 0 && (
+                <span
+                  aria-label={`${giftsWaiting} gifts waiting`}
+                  className="absolute -top-1 left-12 rounded-full text-white font-bold flex items-center justify-center"
+                  style={{ minWidth: 20, height: 20, padding: '0 5px', fontSize: 12, background: '#e8453c', border: '2px solid #fff', fontFamily: "'Fredoka', sans-serif" }}
+                >{giftsWaiting}</span>
+              )}
             </button>
           )}
 

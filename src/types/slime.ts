@@ -43,6 +43,17 @@ export interface Slime {
   xp: number;
 }
 
+export type HabitatGiftKind = 'goo' | 'food' | 'seeds' | 'jackpot';
+
+/** Something a happy slime left behind, waiting to be collected. */
+export interface HabitatGift {
+  id: string;
+  kind: HabitatGiftKind;
+  amount: number;
+  crop?: SlimeFoodType;
+  at: number;
+}
+
 export interface Habitat {
   id: string;
   element: SlimeElement;
@@ -50,6 +61,13 @@ export interface Habitat {
   gridY: number;
   assignedSlimeIds: string[];
   capacity: number;
+  // Sanctuary progression. Optional so old saves load; sanctuaryCore.normalizeHabitat fills them in.
+  level?: number;
+  joy?: number;
+  gifts?: HabitatGift[];
+  decor?: string[];
+  lastTick?: number;
+  petAt?: number;
 }
 
 export interface BreedResult {
@@ -267,6 +285,11 @@ export type GameAction =
   | { type: 'START_HABITAT_PLACEMENT'; element: SlimeElement }
   | { type: 'PLACE_HABITAT_IN_SLOT'; element: SlimeElement; gridX: number; gridY: number }
   | { type: 'CANCEL_HABITAT_PLACEMENT' }
+  | { type: 'SANCT_TICK'; now: number; rolls: number[] }
+  | { type: 'SANCT_JOY'; habitatId: string; source: 'pet' | 'feed'; now: number; rolls: number[] }
+  | { type: 'SANCT_COLLECT'; habitatId?: string; giftId?: string }
+  | { type: 'SANCT_UPGRADE'; habitatId: string }
+  | { type: 'SANCT_DECOR'; habitatId: string; decorId: string; place: boolean }
   | { type: 'ASSIGN_SLIME_TO_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'REMOVE_SLIME_FROM_HABITAT'; habitatId: string; slimeId: string }
   | { type: 'FEED_SLIME_XP'; slimeId: string; foodType: SlimeFoodType }
