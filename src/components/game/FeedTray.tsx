@@ -48,6 +48,8 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
   const dragRef = useRef<Drag | null>(null);
   const hoverRef = useRef<string | null>(null);
   const [shaking, setShaking] = useState<SlimeFoodType | null>(null);
+  // Collapsed to a bag icon until tapped, so the tray doesn't cover the Sanctuary scene
+  const [open, setOpen] = useState(false);
 
   const setDragBoth = (d: Drag | null) => {
     dragRef.current = d;
@@ -143,7 +145,13 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
 
   return (
     <>
-      <div className="absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 select-none" style={{ touchAction: 'none' }}>
+      <div
+        className={`absolute bottom-3 left-1/2 -translate-x-1/2 z-30 flex flex-col items-center gap-1.5 select-none transition-all duration-300 ease-out ${
+          open ? 'translate-y-0 opacity-100' : 'translate-y-[140%] opacity-0 pointer-events-none'
+        }`}
+        style={{ touchAction: 'none' }}
+        aria-hidden={!open}
+      >
         {showHint && (
           <p className="px-3 py-1 rounded-full bg-black/60 text-white text-xs font-bold animate-pulse">Drag food onto a slime</p>
         )}
@@ -164,16 +172,21 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
         >
           <img src={asset('ui_tray.png')} alt="" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none" style={crisp} />
 
-          {/* Slot 1: the bag itself */}
-          <div className="absolute flex items-center justify-center pointer-events-none" style={slotStyle(0)}>
+          {/* Slot 1: the bag itself, tap to tuck the tray away */}
+          <button
+            onClick={() => setOpen(false)}
+            aria-label="Close food bag"
+            className="absolute flex items-center justify-center rounded-full hover:scale-105 transition-transform"
+            style={slotStyle(0)}
+          >
             <img
               src={asset('food_bag.png')}
               alt=""
               draggable={false}
-              className={`w-[88%] h-[88%] object-contain drop-shadow-lg ${selectedSlimeId && !drag ? 'animate-bounce' : ''}`}
+              className={`w-[88%] h-[88%] object-contain drop-shadow-lg pointer-events-none ${selectedSlimeId && !drag ? 'animate-bounce' : ''}`}
               style={crisp}
             />
-          </div>
+          </button>
           <span className="absolute text-[10px] sm:text-[11px] font-black text-[#5a3a1e] leading-none whitespace-nowrap pointer-events-none" style={labelStyle(0)}>
             Food Bag
           </span>
@@ -219,6 +232,37 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
           })}
         </div>
       </div>
+
+      {/* Collapsed state: just the bag. It becomes slot 1 of the tray when opened. */}
+      {(() => {
+        const total = FOODS.reduce((sum, f) => sum + (state.inventory[f] || 0), 0);
+        const firstTime = state.stats.feeds === 0;
+        return (
+          <button
+            onClick={() => { audioEngine.playSfx('tap'); setOpen(true); }}
+            aria-label={`Open food bag, ${total} items`}
+            className={`absolute bottom-3 left-3 z-30 w-[72px] h-[72px] rounded-full flex items-center justify-center bg-black/45 backdrop-blur-md border-2 border-white/30 shadow-[0_6px_18px_rgba(0,0,0,0.5)] hover:scale-110 transition-all duration-300 ${
+              open ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
+            }`}
+          >
+            <img
+              src={asset('food_bag.png')}
+              alt=""
+              draggable={false}
+              className={`w-[78%] h-[78%] object-contain drop-shadow-lg pointer-events-none ${firstTime && !open ? 'animate-bounce' : ''}`}
+              style={crisp}
+            />
+            <span className={`absolute -top-1 -right-1 min-w-[24px] h-6 px-1 rounded-full text-white text-xs font-black flex items-center justify-center border-2 border-white shadow ${total > 0 ? 'bg-[#FF1493]' : 'bg-slate-500'}`}>
+              {total}
+            </span>
+            {firstTime && (
+              <span className="absolute left-full ml-2 whitespace-nowrap rounded-full bg-black/65 px-3 py-1 text-xs font-bold text-white animate-pulse pointer-events-none">
+                Tap the bag to feed
+              </span>
+            )}
+          </button>
+        );
+      })()}
 
       {/* Food following the pointer */}
       {drag?.moved && (
