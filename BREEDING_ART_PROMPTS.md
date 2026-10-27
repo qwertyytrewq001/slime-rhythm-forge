@@ -39,3 +39,13 @@
 6. **Bazaar** with real item icons.
 
 Small habitat touches already done this round: slimes greet you when you walk in, wander to the decor you place, and tapping the ground sends sparkles in the sanctuary's own element.
+
+---
+
+# Extras (home screen and polish)
+
+## B7. `title_sheet.png` – title screen pieces
+> [MASTER STYLE] A sheet of 5 items in a loose layout, wide gaps, 3072x2048: (1) a large game logo for "RareSlime Forge": the words in chunky, rounded, glossy painted letters (soft violet and gold with a thin dark-purple outline and tiny sparkles), a small cute slime perched on the first letter, wide banner shape; (2) a big friendly "Play" button plate, glowing gold and pink stone and crystal, empty centre; (3) a round settings gear button, painted gold; (4) a round "sound on" speaker button, painted gold; (5) a round "sound off" speaker button with a small slash, painted grey-gold.
+
+## B8. `element_sparkles_sheet.png` – small effect particles (replaces emoji in sparkles and bursts)
+> [MASTER STYLE] A sheet of 10 tiny glossy particle sprites in a 5x2 grid, equal cells, wide gaps, 3840x1536, each centred and simple so it reads at a small size: (1) a flame, (2) a water droplet, (3) a green leaf, (4) a small earth pebble with a glint, (5) a wind swirl, (6) a snowflake, (7) a yellow lightning spark, (8) a silver gear, (9) a golden four-point star, (10) a violet crescent moon.
