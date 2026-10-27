@@ -12,7 +12,7 @@ import { audioEngine } from '@/utils/audioEngine';
 import { setSanctuaryOpen } from '@/utils/sanctuaryState';
 import { JOY_MAX } from '@/utils/sanctuaryCore';
 import { SanctuaryPanel } from './SanctuaryPanel';
-import { ArtImg, Heart, MOOD_ICON, giftLabel } from './sanctuary/sanctArt';
+import { ArtImg, DECOR_EMOJI, Heart, MOOD_ICON, giftLabel } from './sanctuary/sanctArt';
 import { dayPhase, decorById } from '@/utils/sanctuaryCore';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
@@ -244,6 +244,10 @@ const PERSONALITIES: Record<string, Personality> = {
 
 const CALM_BUBBLES = ['🎵', '✨', '🍃', '😊'];
 const POKE_BUBBLES = ['💖', '😊', '😆'];
+const GROUND_SPARKLE: Record<string, string[]> = {
+  fire: ['🔥', '✨'], water: ['💧', '✨'], plant: ['🍃', '🌸'], earth: ['✨', '🍂'], wind: ['🍃', '✨'],
+  ice: ['❄️', '✨'], electric: ['⚡', '✨'], metal: ['✨', '⚙️'], light: ['✨', '🌟'], shadow: ['🌙', '✨'],
+};
 const PET_BUBBLES = ['💖', '🥰', '😊'];
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
@@ -295,7 +299,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     throwPower: 0,
     dizzy: 0,
     phase: rand(0, 6),
-    bubbleIn: rand(4, 10),
+    bubbleIn: rand(0.8, 2.4), // a quick hello when you arrive; the usual chatter slows down after
     look: 0,
     blinkIn: rand(2.5, 6),
     last: performance.now() / 1000,
@@ -1195,6 +1199,12 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         }
       } else if (!pr.moved) {
         setSelectedId(null); // tapped empty ground
+        // a little puff of the sanctuary's own sparkles where you tapped
+        const pt = pointerRef.current;
+        if (pt) {
+          addFx({ kind: 'burst', x: pt.x, y: pt.y, emojis: GROUND_SPARKLE[habitat?.element ?? 'light'] ?? ['✨'], count: 5 }, 1000);
+          audioEngine.playSfx('tap');
+        }
       }
       setCursor(hoverId ? 'grab' : '');
     };
@@ -1313,7 +1323,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
               targeted={targetId === slime.id}
               dragging={dragging}
               wantsFood={hasFood && slime.level < 50}
-              landmarks={LANDMARKS[habitat.element] ?? []}
+              landmarks={[...(LANDMARKS[habitat.element] ?? []), ...(habitat.decor ?? []).map((id, i) => ({ x: [12, 84, 28, 68][i % 4], y: 70, e: DECOR_EMOJI[id] ?? '✨' }))]}
               attractRef={attractRef}
               pointerRef={pointerRef}
               histRef={histRef}
