@@ -3,14 +3,15 @@ import { useGameState } from '@/hooks/useGameState';
 import { Habitat, HabitatGift } from '@/types/slime';
 import { ELEMENT_DISPLAY_NAMES, HABITAT_THEMES } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
-import { JOY_MAX, TOTAL_SLOTS, activePerks, dayPhase, giftCap, habitatLevel, perksFrom, slotsOpen, totalGifts } from '@/utils/sanctuaryCore';
+import { MirrorBackdrop } from './MirrorBackdrop';
+import { JOY_MAX, PAGE_SIZE, activePerks, dayPhase, giftCap, habitatLevel, perksFrom, slotsOpen, totalGifts } from '@/utils/sanctuaryCore';
 import { canDeliver } from '@/utils/visitorCore';
 import { CROPS } from '@/utils/farmCore';
 import { foodSpriteUrl } from '@/data/foodSprites';
 import { formatDuration } from '@/utils/timeUtils';
 import { SlimeCanvas } from './SlimeCanvas';
 import { SanctuaryPanel } from './SanctuaryPanel';
-import { ArtImg, BASE, Emblem, Heart, giftLabel } from './sanctuary/sanctArt';
+import { ArtImg, BASE, SANCT, Emblem, Heart, giftLabel } from './sanctuary/sanctArt';
 
 interface SanctuaryHubProps {
   onClose: () => void;
@@ -21,7 +22,7 @@ interface SanctuaryHubProps {
 const PARCHMENT = '#f6e8c3';
 const INK = '#4a2f17';
 const GOLD = '#f2b632';
-const SLOTS = TOTAL_SLOTS;
+const SLOTS = PAGE_SIZE;
 // Two rows of four floating islands; the lower row is staggered so it feels like a scatter, not a table.
 const SLOT_POS = [
   { x: 0.16, y: 0.4 }, { x: 0.385, y: 0.36 }, { x: 0.615, y: 0.4 }, { x: 0.84, y: 0.36 },
@@ -39,6 +40,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
   const [day, setDay] = useState(() => dayPhase(new Date()));
   const [visitOpen, setVisitOpen] = useState(false);
   const [mascotBloop, setMascotBloop] = useState(0);
+  const [page, setPage] = useState(0);
   const popId = useRef(0);
 
   useEffect(() => {
@@ -59,6 +61,12 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
   const sh = (sw * 9) / 16;
   const { habitats, slimes, pendingHabitatPlacement, visitor } = state;
   const open = slotsOpen(habitats);
+  const pages = Math.max(1, Math.ceil(open / SLOTS));
+  const shownPage = Math.min(page, pages - 1);
+  // when a new sanctuary is waiting to be placed, show the page its site is on
+  useEffect(() => {
+    if (pendingHabitatPlacement) setPage(Math.floor(habitats.length / SLOTS));
+  }, [pendingHabitatPlacement, habitats.length]);
   const gifts = totalGifts(habitats);
   const perks = useMemo(() => perksFrom(habitats, slimes), [habitats, slimes]);
   const perkLines = useMemo(() => activePerks(habitats, slimes), [habitats, slimes]);
@@ -102,7 +110,8 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
       <div ref={stageRef} className="relative" style={{ width: 'min(100vw, calc(100vh * 16 / 9))', height: 'min(100vh, calc(100vw * 9 / 16))' }}>
         {/* painted sky if it exists, otherwise the existing backdrop */}
         <ArtImg file="sanct_hub_background.jpg" className="absolute inset-0 w-full h-full" fallback={<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${BASE}second_screen_background.png")` }}><div className="absolute inset-0 bg-black/50" /></div>} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 55%, transparent 50%, rgba(20,8,40,0.4) 100%)' }} />
+        <MirrorBackdrop src={`${SANCT}sanct_hub_background.jpg`} />
+        <div className="absolute pointer-events-none" style={{ left: '-100%', right: '-100%', top: '-100%', bottom: '-100%', background: 'radial-gradient(ellipse at 50% 55%, transparent 70%, rgba(20,8,40,0.4) 100%)' }} />
 
         {/* ambient glints */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -112,11 +121,12 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
         </div>
 
         {/* the islands */}
-        {Array.from({ length: SLOTS }).map((_, i) => {
+        {Array.from({ length: SLOTS }).map((_, k) => {
+          const i = shownPage * SLOTS + k;
           const habitat = habitats[i];
-          const pos = SLOT_POS[i];
+          const pos = SLOT_POS[k];
           return (
-            <div key={i} className="absolute" style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%`, width: island, height: island * 0.7, transform: 'translate(-50%, -50%)', zIndex: 10 + Math.floor(i / 4) * 5 }}>
+            <div key={i} className="absolute" style={{ left: `${pos.x * 100}%`, top: `${pos.y * 100}%`, width: island, height: island * 0.7, transform: 'translate(-50%, -50%)', zIndex: 10 + Math.floor(k / 4) * 5 }}>
               {habitat ? (
                 <IslandView
                   habitat={habitat}
@@ -130,9 +140,9 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
                   onCollect={() => collectFrom(habitat, { x: pos.x * sw, y: pos.y * sh - island * 0.3 })}
                 />
               ) : i >= open ? (
-                <LockedSite w={island} sw={sw} level={i - 2} />
+                <LockedSite w={island} sw={sw} label={i < SLOTS ? `Reach Sanctuary Lv ${i - 2}` : 'Fill the first page to open'} />
               ) : (
-                <EmptySite w={island} active={i === habitats.length} pending={!!pendingHabitatPlacement} onClick={() => placeHere(i)} />
+                <EmptySite w={island} active={i === habitats.length} pending={!!pendingHabitatPlacement} onClick={() => placeHere(k)} />
               )}
             </div>
           );
@@ -164,6 +174,15 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
             <div key={p.id} className="absolute whitespace-nowrap font-bold sanct-pop" style={{ left: p.x, top: p.y, fontSize: sw * (p.big ? 0.026 : 0.019), color: p.big ? '#ffe14d' : '#fff', WebkitTextStroke: `${Math.max(2, sw * 0.0028)}px #2a1408`, paintOrder: 'stroke fill', textShadow: '0 3px 0 rgba(30,12,4,0.8)' }}>{p.text}</div>
           ))}
         </div>
+
+        {/* pages of islands, once there are more than eight */}
+        {pages > 1 && (
+          <>
+            <button onClick={() => setPage(Math.max(0, shownPage - 1))} disabled={shownPage === 0} aria-label="Previous page of islands" className="absolute rounded-full font-bold border-[3px] shadow-lg hover:scale-110 transition-transform disabled:opacity-30" style={{ left: sw * 0.008, top: '50%', width: sw * 0.034, height: sw * 0.034, background: PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.022, zIndex: 320, lineHeight: 1 }}>‹</button>
+            <button onClick={() => setPage(Math.min(pages - 1, shownPage + 1))} disabled={shownPage >= pages - 1} aria-label="Next page of islands" className="absolute rounded-full font-bold border-[3px] shadow-lg hover:scale-110 transition-transform disabled:opacity-30" style={{ right: sw * 0.008, top: '50%', width: sw * 0.034, height: sw * 0.034, background: PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.022, zIndex: 320, lineHeight: 1 }}>›</button>
+            <div className="absolute left-1/2 -translate-x-1/2 rounded-full font-bold whitespace-nowrap" style={{ top: sw * 0.014, background: 'rgba(30,14,40,0.8)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: sw * 0.0115, padding: `${sw * 0.002}px ${sw * 0.01}px`, zIndex: 320 }}>Islands {shownPage + 1} / {pages}</div>
+          </>
+        )}
 
         {/* HUD */}
         <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012, gap: sw * 0.01, zIndex: 300 }}>
@@ -223,10 +242,10 @@ const Banner: React.FC<{ sw: number; children: React.ReactNode }> = ({ sw, child
   <div className="absolute left-1/2 -translate-x-1/2 rounded-2xl shadow-xl font-bold text-center sanct-rise" style={{ top: sw * 0.075, background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.006}px ${sw * 0.014}px`, zIndex: 350, maxWidth: '70%' }}>{children}</div>
 );
 
-const LockedSite: React.FC<{ w: number; sw: number; level: number }> = ({ w, sw, level }) => (
+const LockedSite: React.FC<{ w: number; sw: number; label: string }> = ({ w, sw, label }) => (
   <div className="absolute inset-0 sanct-bob pointer-events-none" style={{ animationDelay: '-2s' }}>
     <ArtImg file="island_locked.png" className="absolute inset-0 w-full h-full" style={{ objectFit: 'contain', objectPosition: 'center bottom', opacity: 0.9 }} fallback={<div className="absolute" style={{ left: '8%', right: '8%', top: '18%', height: '50%', borderRadius: '50%', background: 'rgba(120,110,150,0.55)' }} />} />
-    <div className="absolute left-1/2 -translate-x-1/2 text-center whitespace-nowrap font-bold text-white" style={{ top: '84%', fontSize: sw * 0.0105, textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>Reach Sanctuary Lv {level}</div>
+    <div className="absolute left-1/2 -translate-x-1/2 text-center whitespace-nowrap font-bold text-white" style={{ top: '84%', fontSize: sw * 0.0105, textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>{label}</div>
   </div>
 );
 

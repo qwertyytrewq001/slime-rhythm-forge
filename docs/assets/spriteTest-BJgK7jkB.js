@@ -1,1 +1,0 @@
-import{c as e,g as l}from"./index-2PO72pvG.js";function t(){const o=e("fire_slime"),i=e("water_slime"),m=e("leaf_slime");`${l(o)}`,`${l(i)}`,`${l(m)}`;const n=e("candy_slime");`${l(n)}`;const c=e("volcano_slime");`${l(c)}`}export{t as testSpriteMapping};

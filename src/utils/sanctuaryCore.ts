@@ -322,9 +322,14 @@ export function dayPhase(d: Date): DayInfo {
 }
 
 // ---- slots on the Sanctuary Isles: space opens up as the sanctuaries grow ----
-export const TOTAL_SLOTS = 8;
-/** Four sites from the start; the best sanctuary level opens one more per level above 1. */
+export const PAGE_SIZE = 8;
+export const TOTAL_SLOTS = 16; // two pages of islands
+/**
+ * Page one: four sites from the start, and the best sanctuary level opens one more per level above 1.
+ * Once page one is full, each new sanctuary opens the next site (up to the second page).
+ */
 export function slotsOpen(habitats: Habitat[]): number {
   const best = habitats.reduce((n, h) => Math.max(n, habitatLevel(h)), 1);
-  return Math.min(TOTAL_SLOTS, Math.max(habitats.length, 4 + (best - 1)));
+  if (habitats.length >= PAGE_SIZE) return Math.min(TOTAL_SLOTS, habitats.length + 1);
+  return Math.max(habitats.length, Math.min(PAGE_SIZE, 4 + (best - 1)));
 }

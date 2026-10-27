@@ -4,6 +4,7 @@ import { ChevronLeft, ChevronRight, Lock, Skull, Star, X } from 'lucide-react';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 import { getEnemyCount, getEnemyLevel, isBossLevel, MAP_SCREENS } from '@/utils/battleEngine';
 import { getSpriteIdForSlime } from '@/utils/spriteLoader';
+import { MirrorBackdrop } from './MirrorBackdrop';
 
 interface WorldMapProps {
   onSelectLevel: (level: number) => void;
@@ -107,7 +108,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
       {/* 16:9 stage: art and nodes share one box so nodes always sit on the painted path */}
       <div
         key={`stage-${screen}`}
-        className="relative animate-fade-in shadow-2xl"
+        className="relative animate-fade-in"
         style={{
           ['--sw' as string]: 'min(100vw, calc(100vh * 16 / 9))',
           width: 'min(100vw, calc(100vh * 16 / 9))',
@@ -115,7 +116,8 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
         }}
       >
         <img src={MAP_IMAGES[screen]} alt={info.name} draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at center, transparent 55%, rgba(0,0,0,0.4) 100%)' }} />
+        <MirrorBackdrop src={MAP_IMAGES[screen]} />
+        <div className="absolute pointer-events-none" style={{ left: '-100%', right: '-100%', top: '-100%', bottom: '-100%', background: 'radial-gradient(ellipse at center, transparent 70%, rgba(0,0,0,0.4) 100%)' }} />
 
         {/* Travel trail: faint dashes ahead, gold dashes where you've been */}
         <svg className="absolute inset-0 w-full h-full pointer-events-none" viewBox="0 0 100 100" preserveAspectRatio="none">

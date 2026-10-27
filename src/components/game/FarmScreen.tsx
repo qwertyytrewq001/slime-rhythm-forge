@@ -11,6 +11,7 @@ import { foodSpriteUrl } from '@/data/foodSprites';
 import { formatDuration } from '@/utils/timeUtils';
 import { audioEngine } from '@/utils/audioEngine';
 import { CropArt, stageOf } from './farm/CropArt';
+import { MirrorBackdrop } from './MirrorBackdrop';
 import { Lock } from 'lucide-react';
 
 interface FarmScreenProps {
@@ -229,7 +230,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     const rule = PLOT_RULES[plot.id];
     const at = px(plot.id);
     if (farm.level < rule.level) {
-      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Reach Farm Level ${rule.level} to unlock`, color: '#ffd9a0', size: 0.85 }, 1500);
+      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Reach Farm Level ${rule.level} to unlock (${Math.max(0, FARM_LEVEL_XP[rule.level] - farm.xp)} more Farm XP). Harvest crops to earn it!`, color: '#ffd9a0', size: 0.78 }, 2600);
       return;
     }
     const landCost = plotCost(rule, perks);
@@ -305,7 +306,8 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         onMouseMove={onStageMove}
       >
         <img src={`${BASE}farm_background.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
-        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 55%, transparent 55%, rgba(30,10,40,0.35) 100%)' }} />
+        <MirrorBackdrop src={`${BASE}farm_background.jpg`} />
+        <div className="absolute pointer-events-none" style={{ left: '-100%', right: '-100%', top: '-100%', bottom: '-100%', background: 'radial-gradient(ellipse at 50% 55%, transparent 70%, rgba(30,10,40,0.4) 100%)' }} />
 
         {/* ambient: pollen and a couple of butterflies */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden">
@@ -362,7 +364,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" style={{ color: '#fff', textShadow: '0 2px 3px rgba(0,0,0,0.85)' }}>
                   <Lock style={{ width: w * 0.2, height: w * 0.2, opacity: 0.85 }} />
                   <span className="font-bold leading-none" style={{ fontSize: Math.max(9, sw * 0.0105 * c.scale), marginTop: 2 }}>
-                    {canBuy ? <>Buy {plotCost(rule, perks).toLocaleString()} <Ico name="icon_drop" w={Math.max(10, sw * 0.011 * c.scale)} /></> : `Farm Lv ${rule.level}`}
+                    {canBuy ? <>Buy {plotCost(rule, perks).toLocaleString()} <Ico name="icon_drop" w={Math.max(10, sw * 0.011 * c.scale)} /></> : <><span className="block">Farm Lv {rule.level}</span><span className="block opacity-85" style={{ fontSize: '0.85em' }}>{plotCost(rule, perks).toLocaleString()} <Ico name="icon_drop" w={Math.max(9, sw * 0.0095 * c.scale)} /></span></>}
                   </span>
                 </div>
               )}

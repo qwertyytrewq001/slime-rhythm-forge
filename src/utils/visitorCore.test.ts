@@ -22,6 +22,9 @@ describe('island slots', () => {
     expect(slotsOpen([hab({ level: 5 })])).toBe(8);
     const six = Array.from({ length: 6 }, (_, i) => hab({ id: 'x' + i }));
     expect(slotsOpen(six)).toBe(6);
+    const eight = Array.from({ length: 8 }, (_, i) => hab({ id: 'y' + i }));
+    expect(slotsOpen(eight)).toBe(9); // page one full: the next site opens on page two
+    expect(slotsOpen(Array.from({ length: 16 }, (_, i) => hab({ id: 'z' + i })))).toBe(16);
   });
 });
 
