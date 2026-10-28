@@ -33,38 +33,38 @@ export function GlimCharacter({ expression, size = 200 }: GlimCharacterProps) {
   }, []);
 
   const getImagePath = (expression: string) => {
-    const expressionMap = {
-      explainingsomething: 'explainingsomething_glim.png',
-      exicted: 'glim_exicted.png',
-      kind: 'glim_kind.png',
-      smug: 'smug_glim.png',
-      tearfull_emotional: 'tearfull_emotional.png',
-      worried: 'worried_glim.png',
-      sad_glim: 'sad_glim.png',
-      // Use existing images for all expressions
-      shocked: 'worried_glim.png',
-      composed: 'glim_kind.png',
-      urgent: 'worried_glim.png',
-      dramatic: 'smug_glim.png',
-      excited: 'glim_exicted.png',
-      nudging: 'explainingsomething_glim.png',
-      frozen: 'worried_glim.png',
-      emotional: 'tearfull_emotional.png',
-      warm: 'glim_kind.png',
-      determined: 'smug_glim.png',
-      watching: 'explainingsomething_glim.png',
-      reverent: 'glim_kind.png',
-      serious: 'worried_glim.png',
-      gesturing: 'explainingsomething_glim.png',
-      delighted: 'glim_exicted.png',
-      surveying: 'smug_glim.png',
-      important: 'worried_glim.png',
-      smirk: 'smug_glim.png',
-      relieved: 'glim_kind.png',
-      grim: 'worried_glim.png',
-      dreadful: 'worried_glim.png'
+    // the redone Glim: every old expression name maps to one of the new painted faces (public/altar/glim_<mood>.png)
+    const expressionMap: Record<string, string> = {
+      explainingsomething: 'altar/glim_explain.png',
+      nudging: 'altar/glim_explain.png',
+      watching: 'altar/glim_explain.png',
+      gesturing: 'altar/glim_explain.png',
+      exicted: 'altar/glim_excited.png',
+      excited: 'altar/glim_excited.png',
+      delighted: 'altar/glim_excited.png',
+      kind: 'altar/glim_kind.png',
+      composed: 'altar/glim_kind.png',
+      warm: 'altar/glim_kind.png',
+      reverent: 'altar/glim_kind.png',
+      relieved: 'altar/glim_kind.png',
+      smug: 'altar/glim_smug.png',
+      dramatic: 'altar/glim_smug.png',
+      determined: 'altar/glim_smug.png',
+      surveying: 'altar/glim_smug.png',
+      smirk: 'altar/glim_smug.png',
+      worried: 'altar/glim_worried.png',
+      shocked: 'altar/glim_worried.png',
+      urgent: 'altar/glim_worried.png',
+      frozen: 'altar/glim_worried.png',
+      serious: 'altar/glim_worried.png',
+      important: 'altar/glim_worried.png',
+      grim: 'altar/glim_worried.png',
+      dreadful: 'altar/glim_worried.png',
+      sad_glim: 'altar/glim_sad.png',
+      tearfull_emotional: 'altar/glim_sad.png',
+      emotional: 'altar/glim_sad.png',
     };
-    return `${import.meta.env.BASE_URL}${expressionMap[expression] || 'glim_kind.png'}`;
+    return `${import.meta.env.BASE_URL}${expressionMap[expression] || 'altar/glim_kind.png'}`;
   };
 
   return (

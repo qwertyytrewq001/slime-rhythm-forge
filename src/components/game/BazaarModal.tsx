@@ -442,7 +442,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           }`}
                         >
                           <div className={`w-32 h-32 rounded-3xl border-4 flex items-center justify-center mb-4 ${getRarityColor(item.rarity)} ${getRarityGlow(item.rarity)} shadow-lg`}>
-                            <span className="text-5xl">{item.icon}</span>
+                            <img src={`${import.meta.env.BASE_URL}altar/bazaar_${({ mutation_juice: 'mutation', wild_food: 'meat', energy_crystal: 'crystal', lucky_charm: 'charm' } as Record<string, string>)[item.id] ?? 'mutation'}.png`} alt={item.name} draggable={false} style={{ width: 72, height: 72, objectFit: 'contain', imageRendering: 'auto' }} />
                           </div>
 
                           <div className="text-center flex-1 flex flex-col justify-end">

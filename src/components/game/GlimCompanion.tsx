@@ -2,14 +2,14 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { audioEngine } from '@/utils/audioEngine';
 import { CROPS, isReady } from '@/utils/farmCore';
-import { totalGifts } from '@/utils/sanctuaryCore';
+import { dayPhase, nowForDay, totalGifts } from '@/utils/sanctuaryCore';
 
 const BASE = import.meta.env.BASE_URL;
-type Mood = 'kind' | 'excited' | 'smug' | 'explain' | 'worried';
+type Mood = 'kind' | 'excited' | 'smug' | 'explain' | 'worried' | 'sad' | 'giggle' | 'sleepy' | 'wave';
 // trimmed to the character (public/altar/glim_<mood>.png) so he can be sized by height
-const FACE: Record<Mood, string> = {
-  kind: 'altar/glim_kind.png', excited: 'altar/glim_excited.png', smug: 'altar/glim_smug.png', explain: 'altar/glim_explain.png', worried: 'altar/glim_worried.png',
-};
+const FACE: Record<Mood, string> = Object.fromEntries(['kind', 'excited', 'smug', 'explain', 'worried', 'sad', 'giggle', 'sleepy', 'wave'].map(m => [m, `altar/glim_${m}.png`])) as Record<Mood, string>;
+/** Glim dozes off when it is night where the player is. */
+const idleMood = (): Mood => (dayPhase(nowForDay()).night ? 'sleepy' : 'kind');
 
 // Glim's own voice: a very serious guardian who is also, clearly, a little round slime.
 const CHATTER: Array<{ m: Mood; t: string }> = [
@@ -33,7 +33,7 @@ const ANCHORS = [{ l: 5, t: 40 }, { l: 85, t: 38 }, { l: 7, t: 60 }, { l: 84, t:
 export function GlimCompanion() {
   const { state } = useGameState();
   const [anchor, setAnchor] = useState(0);
-  const [mood, setMood] = useState<Mood>('kind');
+  const [mood, setMood] = useState<Mood>(idleMood);
   const [bubble, setBubble] = useState<{ t: string; id: number } | null>(null);
   const [sparks, setSparks] = useState<number[]>([]);
   const [nowMs, setNowMs] = useState(() => Date.now());
@@ -43,8 +43,15 @@ export function GlimCompanion() {
 
   useEffect(() => {
     const a = setInterval(() => setAnchor(n => (n + 1) % ANCHORS.length), 24_000);
-    const b = setInterval(() => setNowMs(Date.now()), 5000);
+    const b = setInterval(() => { setNowMs(Date.now()); setMood(m => (m === 'kind' || m === 'sleepy' ? idleMood() : m)); }, 5000);
     return () => { clearInterval(a); clearInterval(b); timers.current.forEach(clearTimeout); };
+  }, []);
+
+  // a wave hello when you arrive
+  useEffect(() => {
+    const t = window.setTimeout(() => say('wave', 'Welcome back, guardian!', 3800), 1400);
+    return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   /** The most useful thing Glim could tell you right now, or null. */
@@ -64,7 +71,7 @@ export function GlimCompanion() {
     const id = Date.now();
     setMood(m);
     setBubble({ t, id });
-    timers.current.push(window.setTimeout(() => { setBubble(b => (b && b.id === id ? null : b)); setMood('kind'); }, ms));
+    timers.current.push(window.setTimeout(() => { setBubble(b => (b && b.id === id ? null : b)); setMood(idleMood()); }, ms));
   };
 
   const onTap = () => {
@@ -75,7 +82,7 @@ export function GlimCompanion() {
       taps.current = [];
       setSparks(s => [...s, now]);
       timers.current.push(window.setTimeout(() => setSparks(s => s.filter(x => x !== now)), 1500));
-      say('excited', 'Hehe! Stop, that tickles! I am a serious guardian!', 4200);
+      say('giggle', 'Hehe! Stop, that tickles! I am a serious guardian!', 4200);
       return;
     }
     if (hint) { say(hint.m, hint.t); return; }

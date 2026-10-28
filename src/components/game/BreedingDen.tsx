@@ -148,13 +148,12 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 <>
                   {reaction === 'shy' && (
                     <>
-                      <span className="absolute pointer-events-none" style={{ left: '27%', top: '47%', width: 34, height: 18, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,110,150,0.85), rgba(255,110,150,0))', animation: 'denBlush 0.9s ease-in-out infinite' }} />
-                      <span className="absolute pointer-events-none" style={{ left: '59%', top: '47%', width: 34, height: 18, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,110,150,0.85), rgba(255,110,150,0))', animation: 'denBlush 0.9s ease-in-out infinite' }} />
-                      <img src={`${import.meta.env.BASE_URL}altar/fx_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 110, left: '50%', top: -34, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denFloat 1.3s ease-in-out infinite' }} />
+                    <img src={`${import.meta.env.BASE_URL}altar/love_blush.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 96, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denBlush 0.9s ease-in-out infinite' }} />
+                      <img src={`${import.meta.env.BASE_URL}altar/love_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 110, left: '50%', top: -34, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denFloat 1.3s ease-in-out infinite' }} />
                     </>
                   )}
                   {reaction === 'worried' && (
-                    <img src={`${import.meta.env.BASE_URL}altar/particle_water.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 28, left: '66%', top: '12%', imageRendering: 'auto', animation: 'denDrip 1.1s ease-in infinite' }} />
+                    <img src={`${import.meta.env.BASE_URL}altar/love_drop.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 28, left: '66%', top: '12%', imageRendering: 'auto', animation: 'denDrip 1.1s ease-in infinite' }} />
                   )}
                 </>
               )}
@@ -196,13 +195,12 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 <>
                   {reaction === 'shy' && (
                     <>
-                      <span className="absolute pointer-events-none" style={{ left: '27%', top: '47%', width: 34, height: 18, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,110,150,0.85), rgba(255,110,150,0))', animation: 'denBlush 0.9s ease-in-out infinite' }} />
-                      <span className="absolute pointer-events-none" style={{ left: '59%', top: '47%', width: 34, height: 18, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,110,150,0.85), rgba(255,110,150,0))', animation: 'denBlush 0.9s ease-in-out infinite' }} />
-                      <img src={`${import.meta.env.BASE_URL}altar/fx_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 110, left: '50%', top: -34, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denFloat 1.3s ease-in-out infinite' }} />
+                    <img src={`${import.meta.env.BASE_URL}altar/love_blush.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 96, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denBlush 0.9s ease-in-out infinite' }} />
+                      <img src={`${import.meta.env.BASE_URL}altar/love_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 110, left: '50%', top: -34, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denFloat 1.3s ease-in-out infinite' }} />
                     </>
                   )}
                   {reaction === 'worried' && (
-                    <img src={`${import.meta.env.BASE_URL}altar/particle_water.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 28, left: '66%', top: '12%', imageRendering: 'auto', animation: 'denDrip 1.1s ease-in infinite' }} />
+                    <img src={`${import.meta.env.BASE_URL}altar/love_drop.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 28, left: '66%', top: '12%', imageRendering: 'auto', animation: 'denDrip 1.1s ease-in infinite' }} />
                   )}
                 </>
               )}
@@ -226,9 +224,13 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
 
       
       {bothChosen && Date.now() - bondAt < 2000 && (
-        <img key={bondAt} src={`${import.meta.env.BASE_URL}altar/fx_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '400px', width: 280, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denBond 1.8s ease-out forwards', zIndex: 20 }} />
+        <img key={bondAt} src={`${import.meta.env.BASE_URL}altar/love_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '400px', width: 280, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denBond 1.8s ease-out forwards', zIndex: 20 }} />
+      )}
+      {bothChosen && !state.activeBreeding && (
+        <img src={`${import.meta.env.BASE_URL}altar/love_ribbon.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '420px', width: 'calc(100% - 700px)', minWidth: 200, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denRibbon 1.8s ease-in-out infinite', zIndex: 15 }} />
       )}
       <style>{`
+        @keyframes denRibbon { 0%,100% { opacity: 0.6 } 50% { opacity: 1 } }
         @keyframes denBlush { 0%,100% { opacity: 0.55 } 50% { opacity: 1 } }
         @keyframes denFloat { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(-10px) } }
         @keyframes denDrip { 0% { transform: translateY(-6px); opacity: 0 } 30% { opacity: 1 } 100% { transform: translateY(26px); opacity: 0 } }
