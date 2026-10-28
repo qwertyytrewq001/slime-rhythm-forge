@@ -13,6 +13,7 @@ import { Hatchery } from '@/components/game/Hatchery';
 import { HatcheryScreen } from '@/components/game/HatcheryScreen';
 import { SanctuaryHub } from '@/components/game/SanctuaryHub';
 import { TitleScreen } from '@/components/game/TitleScreen';
+import { HomeScene } from '@/components/game/HomeScene';
 import { GlimCompanion } from '@/components/game/GlimCompanion';
 import { WelcomeBack, useAwaySince } from '@/components/game/WelcomeBack';
 import { CodexGallery } from '@/components/game/CodexGallery';
@@ -227,16 +228,7 @@ function GameLayout() {
             <div className="absolute inset-0 bg-black/45" />
           </div>
         ) : (
-          <video
-            className="w-full h-full object-cover brightness-110"
-            autoPlay
-            muted
-            loop
-            playsInline
-            key="altar-video"
-          >
-            <source src={`${import.meta.env.BASE_URL}homescreen_loop.mp4`} type="video/mp4" />
-          </video>
+          <HomeScene />
         )}
       </div>
 

@@ -16,7 +16,7 @@ interface TopBarProps {
 const ART = `${import.meta.env.BASE_URL}altar/`;
 
 /** A painted wooden sign with an icon medallion; the label sits in the empty wood. */
-const NavPlate: React.FC<{ art: string; icon: string; color: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string }> = ({ art, icon, color, label, onClick, badge, badgeLabel }) => (
+export const NavPlate: React.FC<{ art: string; icon: string; color: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string }> = ({ art, icon, color, label, onClick, badge, badgeLabel }) => (
   <button
     onClick={onClick}
     aria-label={label}

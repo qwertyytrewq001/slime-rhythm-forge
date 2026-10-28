@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
+import { NavPlate } from './TopBar';
 import { Slime } from '@/types/slime';
 import { CodexSlime } from '@/data/slimeCodex';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
@@ -24,13 +25,13 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
 
   // Precise positioning coordinates for incubators (can be fine-tuned)
   const leftIncubatorPosition = {
-    left: '340px',
-    top: '420px'
+    left: '30%',
+    top: '68%'
   };
   
   const rightIncubatorPosition = {
-    right: '300px', 
-    top: '420px'
+    right: '30%',
+    top: '68%'
   };
 
   // Get current breeding slots
@@ -122,11 +123,14 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       {/* Main breeding den background image */}
       <div 
         className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{ backgroundImage: `url(${import.meta.env.BASE_URL}breeding_den.png)` }}
+        style={{ backgroundImage: `url(${import.meta.env.BASE_URL}altar/den_bg.jpg)` }}
       />
       
       {/* Dark overlay for better visibility */}
-      <div className="absolute inset-0 bg-black/30" />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 60%, transparent 55%, rgba(12,6,30,0.45) 100%)' }} />
+
+      {/* the central egg altar */}
+      <img src={`${import.meta.env.BASE_URL}altar/denp_egg_altar.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '74%', width: 'min(17vw, 230px)', transform: 'translate(-50%, -50%)', imageRendering: 'auto' }} />
 
       {/* Left incubator circle */}
       <div 
@@ -141,6 +145,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         }}
         onClick={() => handleSlotClick(1)}
       >
+        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot1Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25vw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18vw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
         {slot1Slime ? (
           <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 1 ? (reaction === 'shy' ? 'denShy 0.5s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot1Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
@@ -188,6 +194,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         }}
         onClick={() => handleSlotClick(2)}
       >
+        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot2Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25vw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18vw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
         {slot2Slime ? (
           <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 2 ? (reaction === 'shy' ? 'denShy 0.5s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot2Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
@@ -224,10 +232,10 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
 
       
       {bothChosen && Date.now() - bondAt < 2000 && (
-        <img key={bondAt} src={`${import.meta.env.BASE_URL}altar/love_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '400px', width: 280, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denBond 1.8s ease-out forwards', zIndex: 20 }} />
+        <img key={bondAt} src={`${import.meta.env.BASE_URL}altar/love_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '66%', width: 280, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denBond 1.8s ease-out forwards', zIndex: 20 }} />
       )}
       {bothChosen && !state.activeBreeding && (
-        <img src={`${import.meta.env.BASE_URL}altar/love_ribbon.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '420px', width: 'calc(100% - 700px)', minWidth: 200, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denRibbon 1.8s ease-in-out infinite', zIndex: 15 }} />
+        <img src={`${import.meta.env.BASE_URL}altar/love_ribbon.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '66%', width: '26%', minWidth: 200, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denRibbon 1.8s ease-in-out infinite', zIndex: 15 }} />
       )}
       <style>{`
         @keyframes denRibbon { 0%,100% { opacity: 0.6 } 50% { opacity: 1 } }
@@ -241,33 +249,22 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       `}</style>
 
       {/* Breeding controls */}
-      <div className="absolute top-8 left-8 flex items-center gap-4">
-        {onBackToAltar && (
-          <button
-            onClick={onBackToAltar}
-            className="px-4 py-2 bg-gradient-to-r from-gray-600 to-gray-700 hover:from-gray-500 hover:to-gray-600 text-white font-bold rounded-xl border-2 border-gray-500/50 transition-all hover:scale-105"
-          >
-            <ChevronLeft className="w-4 h-4 inline mr-2" />
-            Back
-          </button>
-        )}
+      <div className="absolute top-4 left-4">
+        {onBackToAltar && <NavPlate art="altar" icon="altar_icon.png" color="#b2ebff" label="BACK" onClick={onBackToAltar} />}
       </div>
 
-      {/* Breeding title centered at top */}
-      <div className="absolute top-8 left-1/2 -translate-x-1/2 flex items-center gap-4">
-        <div className="text-center">
-          <h1 className="text-3xl font-bold text-yellow-400 uppercase tracking-wider" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.8)' }}>
-            Breeding Den
-          </h1>
-          <p className="text-yellow-300 text-sm font-bold uppercase tracking-wider mt-2">
-            Select Parents to Breed
-          </p>
+      {/* Breeding title */}
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 text-center" style={{ width: 'min(46vw, 430px)' }}>
+        <div className="relative">
+          <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.45))' }} />
+          <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(18px, 2.4vw, 32px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Breeding Den</span>
         </div>
+        <p className="font-bold mt-1" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.1vw, 15px)', color: '#ffe9a8', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.1em' }}>SELECT PARENTS TO BREED</p>
       </div>
 
       {/* Question mark egg - centered between incubators when both parents selected */}
       {slot1Slime && slot2Slime && !state.activeBreeding && (
-        <div className="absolute" style={{ top: '380px', left: '50%', transform: 'translateX(-41.5%)' }}>
+        <div className="absolute" style={{ top: '50%', left: '50%', transform: 'translateX(-50%)' }}>
           <div className="flex flex-col items-center gap-3">
             {/* Question mark egg */}
             <button
@@ -297,7 +294,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
 
       {/* Breeding status - centered between incubators */}
       {breeding && (
-        <div className="absolute text-center" style={{ top: '380px', left: '50%', transform: 'translateX(-41.5%)' }}>
+        <div className="absolute text-center" style={{ top: '50%', left: '50%', transform: 'translateX(-50%)' }}>
           <div className="bg-gradient-to-r from-pink-100/90 to-purple-100/90 rounded-xl p-6 border-2 border-purple-300/60 backdrop-blur-sm">
             <Sparkles className="w-8 h-8 text-purple-600 animate-pulse mx-auto mb-2" />
             <p className="text-purple-800 font-bold uppercase tracking-wider" style={{ textShadow: '1px 1px 2px rgba(255,255,255,0.8)' }}>
@@ -312,7 +309,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
 
       {/* Breeding complete - centered between incubators */}
       {breedFinished && (
-        <div className="absolute text-center" style={{ top: '340px', left: '50%', transform: 'translateX(-41.5%)' }}>
+        <div className="absolute text-center" style={{ top: '46%', left: '50%', transform: 'translateX(-50%)' }}>
           <div className="bg-gradient-to-r from-pink-200/90 to-purple-200/90 rounded-xl p-4 border-2 border-purple-300/60 animate-pulse backdrop-blur-sm">
             <Heart className="w-8 h-8 text-purple-600 mx-auto mb-2" />
             <p className="text-purple-800 font-bold uppercase tracking-wider mb-3" style={{ textShadow: '1px 1px 2px rgba(255,255,255,0.8)' }}>

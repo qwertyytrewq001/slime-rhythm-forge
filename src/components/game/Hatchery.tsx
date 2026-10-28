@@ -138,6 +138,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
       )}
 
       <div className="relative w-56 h-56 cursor-pointer group pointer-events-auto" onClick={handleTap}>
+        <img src={`${import.meta.env.BASE_URL}altar/${activeHatching ? 'home_hatch_glow' : 'home_hatch'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ right: '-168px', top: '-6px', width: 170, imageRendering: 'auto', zIndex: 5 }} />
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {[...Array(20)].map((_, i) => <FairySparkle key={i} index={i} />)}
         </div>

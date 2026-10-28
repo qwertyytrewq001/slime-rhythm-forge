@@ -83,11 +83,13 @@ const RitualInscription = ({
       {[...Array(sparkles)].map((_, i) => <FairySparkle key={i} index={i} color="#FFD1DC" />)}
     </div>
     <h3 
-      className={`text-[#FFD1DC] uppercase tracking-[0.3em] font-black transition-all duration-500 ${blueGlow ? 'animate-intense-blue-inscription-glow' : 'animate-intense-inscription-glow'} group-hover:scale-[1.35] group-hover:brightness-125 group-hover:drop-shadow-[0_0_20px_#FFD1DC]`} 
+      className={`text-[#fff3d0] uppercase tracking-[0.12em] font-bold text-center leading-tight transition-all duration-500 ${blueGlow ? 'animate-intense-blue-inscription-glow' : 'animate-intense-inscription-glow'} group-hover:scale-[1.35] group-hover:brightness-125 group-hover:drop-shadow-[0_0_20px_#FFD1DC]`} 
       style={{ 
-        fontFamily: "'Press Start 2P', cursive", 
-        fontSize,
-        textShadow: '2px 2px 0 #000, -2px -2px 0 #000, 2px -2px 0 #000, -2px 2px 0 #000, 0 0 15px rgba(0,0,0,0.8)'
+        // painted-game lettering, to match the rest of the screen (the old pixel font clashed with the new art)
+        fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", 
+        fontSize: 'clamp(11px, 0.95vw, 15px)',
+        WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill',
+        textShadow: '0 2px 0 rgba(30,14,40,0.6)'
       }}
     >
       {children}
@@ -250,12 +252,12 @@ export function BreedingPod(props: BreedingPodProps) {
         @keyframes podRing { 0%,100% { opacity: 0.6; transform: scale(0.96) } 50% { opacity: 1; transform: scale(1.04) } }
         @keyframes podBeam { 0%,100% { opacity: 0.55 } 50% { opacity: 1 } }
         @keyframes podSpin { to { transform: rotate(360deg) } }
+        @keyframes podCrystal { 0%,100% { transform: translate(-50%, -50%) translateY(0) } 50% { transform: translate(-50%, -50%) translateY(-8px) } }
       `}</style>
       {/* Mystic Altar Title - Matches Ancient Hatchery style and permanently fixed */}
-      <div className="h-16 flex flex-col items-center justify-center z-20 scale-125 min-w-[200px] -translate-y-2">
-         <RitualInscription sparkles={10} blueGlow={false}>
-           Mystic Altar
-         </RitualInscription>
+      <div className="relative flex items-center justify-center z-20 -translate-y-2" style={{ width: 280 }}>
+        <img src={`${ART}ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.45))' }} />
+        <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: FRED, fontSize: 20, color: '#fff3d0', WebkitTextStroke: '4px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Mystic Altar</span>
       </div>
 
       {state.mutationJuiceActive && (
@@ -269,6 +271,7 @@ export function BreedingPod(props: BreedingPodProps) {
         {/* Glow behind the altar */}
         <div className="absolute inset-0 bg-gradient-to-r from-[#40E0D0]/5 via-transparent to-[#40E0D0]/5 rounded-full blur-3xl pointer-events-none" />
         
+        <img src={`${ART}${breeding ? 'home_crystal_glow' : 'home_crystal'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '38%', width: 190, transform: 'translate(-50%, -50%)', imageRendering: 'auto', zIndex: 5, animation: 'podCrystal 5s ease-in-out infinite' }} />
         <div className="relative w-full h-full z-10">
           {/* Slot 1 - Left Pedestal */}
           <div
@@ -278,7 +281,7 @@ export function BreedingPod(props: BreedingPodProps) {
             onClick={() => handleSlotClick(1)}
           >
             {/* Grounding shadow/base for the slime */}
-            <div className="absolute bottom-4 w-16 h-4 bg-black/40 rounded-full blur-md" />
+            <img src={`${ART}${slot1Slime ? 'home_pedestal_glow' : 'home_pedestal'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ bottom: -26, width: 150, imageRendering: 'auto' }} />
             
             {slot1Slime ? (
               <div className="relative -translate-y-14">
@@ -301,7 +304,7 @@ export function BreedingPod(props: BreedingPodProps) {
             onClick={() => handleSlotClick(2)}
           >
             {/* Grounding shadow/base for the slime */}
-            <div className="absolute bottom-4 w-16 h-4 bg-black/40 rounded-full blur-md" />
+            <img src={`${ART}${slot2Slime ? 'home_pedestal_glow' : 'home_pedestal'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ bottom: -26, width: 150, imageRendering: 'auto' }} />
 
             {slot2Slime ? (
               <div className="relative -translate-y-14">
