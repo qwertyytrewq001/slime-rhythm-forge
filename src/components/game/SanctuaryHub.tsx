@@ -4,7 +4,8 @@ import { Habitat, HabitatGift } from '@/types/slime';
 import { ELEMENT_DISPLAY_NAMES, HABITAT_THEMES } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
 import { MirrorBackdrop } from './MirrorBackdrop';
-import { JOY_MAX, PAGE_SIZE, activePerks, dayPhase, giftCap, habitatLevel, perksFrom, slotsOpen, totalGifts } from '@/utils/sanctuaryCore';
+import { ClockChip } from './sanctuary/ClockChip';
+import { JOY_MAX, PAGE_SIZE, activePerks, dayPhase, nowForDay, giftCap, habitatLevel, perksFrom, slotsOpen, totalGifts } from '@/utils/sanctuaryCore';
 import { canDeliver } from '@/utils/visitorCore';
 import { CROPS } from '@/utils/farmCore';
 import { foodSpriteUrl } from '@/data/foodSprites';
@@ -37,7 +38,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
   const [sw, setSw] = useState(1000);
   const [pops, setPops] = useState<Pop[]>([]);
   const [manage, setManage] = useState<string | null>(null);
-  const [day, setDay] = useState(() => dayPhase(new Date()));
+  const [day, setDay] = useState(() => dayPhase(nowForDay()));
   const [visitOpen, setVisitOpen] = useState(false);
   const [mascotBloop, setMascotBloop] = useState(0);
   const [page, setPage] = useState(0);
@@ -54,7 +55,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
   }, []);
 
   useEffect(() => {
-    const t = setInterval(() => setDay(dayPhase(new Date())), 60_000);
+    const t = setInterval(() => setDay(dayPhase(nowForDay())), 30_000);
     return () => clearInterval(t);
   }, []);
 
@@ -107,6 +108,8 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
     <div className="fixed inset-0 z-[95] bg-black flex items-center justify-center overflow-hidden select-none animate-in fade-in duration-300" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
       <style>{CSS}</style>
       <div className="absolute inset-0 bg-cover bg-center blur-2xl scale-110 opacity-60" style={{ backgroundImage: `url("${BASE}second_screen_background.png")` }} />
+      {/* soft light for the time of day, over the WHOLE screen (not just the stage) and under the interface */}
+      <div className="absolute inset-0 pointer-events-none" style={{ background: day.tint ?? 'transparent', opacity: day.tint ? 1 : 0, transition: 'opacity 1.5s ease', zIndex: 250 }} />
       <div ref={stageRef} className="relative" style={{ width: 'min(100vw, calc(100vh * 16 / 9))', height: 'min(100vh, calc(100vw * 9 / 16))' }}>
         {/* painted sky if it exists, otherwise the existing backdrop */}
         <ArtImg file="sanct_hub_background.jpg" className="absolute inset-0 w-full h-full" fallback={<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${BASE}second_screen_background.png")` }}><div className="absolute inset-0 bg-black/50" /></div>} />
@@ -147,8 +150,6 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
             </div>
           );
         })}
-
-        {day.tint && <div className="absolute pointer-events-none" style={{ left: '-100%', right: '-100%', top: '-100%', bottom: '-100%', background: day.tint, mixBlendMode: 'multiply', zIndex: 200 }} />}
 
         {/* a friendly mascot who lives in the corner */}
         <button
@@ -195,14 +196,21 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
           </div>
         </div>
         <div className="absolute flex items-center" style={{ right: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
+          <ClockChip day={day} sw={sw} />
           <button
             onClick={collectEverything}
             disabled={!gifts}
-            className={`relative rounded-full font-bold border-[3px] shadow-lg transition-transform whitespace-nowrap ${gifts ? 'hover:scale-105 sanct-ready' : 'opacity-60 cursor-not-allowed'}`}
-            style={{ background: gifts ? 'linear-gradient(#ff7eb6,#ff1493)' : PARCHMENT, borderColor: gifts ? '#fff3c0' : INK, color: gifts ? '#fff' : INK, fontSize: sw * 0.0135, padding: `${sw * 0.005}px ${sw * 0.014}px` }}
+            aria-label="Collect all gifts"
+            className={`relative overflow-hidden outline-none transition-transform ${gifts ? 'hover:scale-105 active:scale-95' : 'cursor-not-allowed'}`}
+            style={{ width: sw * 0.17, background: 'transparent', border: 'none', padding: 0, filter: gifts ? 'drop-shadow(0 0 10px rgba(190,120,255,0.65))' : 'none' }}
           >
-            🎁 Collect All
-            {gifts > 0 && <span className="absolute -top-2 -right-2 rounded-full font-bold text-white flex items-center justify-center" style={{ background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.021, height: sw * 0.021, fontSize: sw * 0.011, padding: '0 4px' }}>{gifts}</span>}
+            <img src={`${BASE}altar/${gifts ? 'ui_btn_begin' : 'ui_btn_begin_off'}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
+            {gifts > 0 && <span className="absolute inset-0 pointer-events-none sanct-shine" />}
+            <span className="absolute inset-0 flex items-center justify-center" style={{ gap: sw * 0.004, paddingLeft: sw * 0.036 }}>
+              <span className="font-bold whitespace-nowrap" style={{ fontSize: sw * 0.0135, color: gifts ? '#fff' : 'rgba(255,255,255,0.7)', WebkitTextStroke: `${sw * 0.0028}px ${gifts ? '#4a1d7a' : '#4a4650'}`, paintOrder: 'stroke fill', letterSpacing: '0.04em' }}>{gifts ? 'Collect All' : 'No gifts yet'}</span>
+            </span>
+            <ArtImg file="icon_gift_bubble.png" className="absolute" style={{ left: '5%', top: '50%', width: sw * 0.034, transform: 'translateY(-50%)', filter: gifts ? undefined : 'grayscale(1) opacity(0.6)' }} fallback={<span className="absolute" style={{ left: '8%', top: '30%', fontSize: sw * 0.02 }}>🎁</span>} />
+            {gifts > 0 && <span className="absolute rounded-full font-bold text-white flex items-center justify-center" style={{ right: '2%', top: '-4%', background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.021, height: sw * 0.021, fontSize: sw * 0.011, padding: '0 4px' }}>{gifts}</span>}
           </button>
           <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0135, padding: `${sw * 0.004}px ${sw * 0.012}px` }}>
             {Math.floor(state.goo).toLocaleString()} 💧
@@ -391,6 +399,8 @@ const CSS = `
   .sanct-ring { animation: sanctRing 1.5s ease-out infinite }
   .sanct-rise { animation: sanctRise 0.25s ease-out forwards }
   .sanct-ready { animation: sanctReady 1s ease-in-out infinite }
+  @keyframes sanctShine { 0% { transform: translateX(-130%) skewX(-20deg) } 55%,100% { transform: translateX(230%) skewX(-20deg) } }
+  .sanct-shine::after { content: ''; position: absolute; top: 0; bottom: 0; width: 28%; background: linear-gradient(90deg, transparent, rgba(255,255,255,0.55), transparent); animation: sanctShine 2.8s ease-in-out infinite }
   @keyframes sanctZzz { 0%,100% { transform: translateY(0); opacity: 0.8 } 50% { transform: translateY(-14%); opacity: 1 } }
   .sanct-zzz { animation: sanctZzz 2.6s ease-in-out infinite }
 `;

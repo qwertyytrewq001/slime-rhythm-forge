@@ -10,7 +10,9 @@ describe('day and night', () => {
     expect(dayPhase(new Date(2026, 0, 1, 3, 0)).night).toBe(true);
     expect(dayPhase(new Date(2026, 0, 1, 6, 0)).phase).toBe('dawn');
     expect(dayPhase(new Date(2026, 0, 1, 12, 0)).tint).toBeNull();
-    expect(dayPhase(new Date(2026, 0, 1, 19, 0)).phase).toBe('dusk');
+    expect(dayPhase(new Date(2026, 0, 1, 17, 0)).phase).toBe('afternoon');
+    expect(dayPhase(new Date(2026, 0, 1, 19, 0)).phase).toBe('sunset');
+    expect(dayPhase(new Date(2026, 0, 1, 20, 30)).phase).toBe('evening');
     expect(dayPhase(new Date(2026, 0, 1, 22, 0)).night).toBe(true);
   });
 });

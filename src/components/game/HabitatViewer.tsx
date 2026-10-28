@@ -13,7 +13,7 @@ import { setSanctuaryOpen } from '@/utils/sanctuaryState';
 import { JOY_MAX } from '@/utils/sanctuaryCore';
 import { SanctuaryPanel } from './SanctuaryPanel';
 import { ArtImg, DECOR_EMOJI, Heart, MOOD_ICON, giftLabel } from './sanctuary/sanctArt';
-import { dayPhase, decorById } from '@/utils/sanctuaryCore';
+import { dayPhase, decorById, nowForDay } from '@/utils/sanctuaryCore';
 import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 type DistributiveOmit<T, K extends keyof any> = T extends any ? Omit<T, K> : never;
@@ -1308,7 +1308,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         {!theme.bgImage && <div className="absolute bottom-0 left-0 right-0 h-1/2" style={{ background: layers.ground }} />}
 
         {/* the sanctuary follows the real clock: warm at dawn and dusk, dark and blue at night */}
-        {dayPhase(new Date()).tint && <div className="absolute inset-0 pointer-events-none" style={{ background: dayPhase(new Date()).tint ?? undefined, mixBlendMode: 'multiply', zIndex: 2 }} />}
+        {dayPhase(nowForDay()).tint && <div className="absolute inset-0 pointer-events-none" style={{ background: dayPhase(nowForDay()).tint ?? undefined, zIndex: 2 }} />}
 
         {/* Tap empty ground to deselect; slimes are handled by the pointer controller above */}
         <div ref={sceneRef} className="absolute inset-0" style={{ pointerEvents: 'auto', touchAction: 'none' }}>

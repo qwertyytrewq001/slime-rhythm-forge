@@ -306,20 +306,39 @@ export function minutesToNextGift(h: Habitat, slimes: Slime[], perks: SanctuaryP
 }
 
 // ---- time of day: the sanctuaries follow the player's real clock ----
-export type DayPhase = 'night' | 'dawn' | 'day' | 'dusk';
+export type DayPhase = 'night' | 'dawn' | 'day' | 'afternoon' | 'sunset' | 'evening';
 export interface DayInfo {
   phase: DayPhase;
-  /** A colour to multiply over the scene, or null in full daylight. */
+  label: string;
+  /** A CSS background laid over the whole screen as soft light, or null in plain daylight (the original art). */
   tint: string | null;
   night: boolean;
+  icon: 'sun' | 'moon';
 }
+const light = (bottom: string, middle: string, top: string) => `linear-gradient(to top, ${bottom}, ${middle} 55%, ${top})`;
 export function dayPhase(d: Date): DayInfo {
   const h = d.getHours() + d.getMinutes() / 60;
-  if (h >= 5 && h < 7) return { phase: 'dawn', tint: 'rgb(255,236,222)', night: false };
-  if (h >= 7 && h < 18) return { phase: 'day', tint: null, night: false };
-  if (h >= 18 && h < 20) return { phase: 'dusk', tint: 'rgb(255,226,208)', night: false };
-  return { phase: 'night', tint: 'rgb(150,160,228)', night: true };
+  if (h >= 5 && h < 7) return { phase: 'dawn', label: 'Dawn', tint: light('rgba(255,170,150,0.26)', 'rgba(255,215,190,0.10)', 'rgba(170,160,235,0.12)'), night: false, icon: 'sun' };
+  if (h >= 7 && h < 16) return { phase: 'day', label: 'Daytime', tint: null, night: false, icon: 'sun' };
+  if (h >= 16 && h < 18) return { phase: 'afternoon', label: 'Afternoon', tint: light('rgba(255,205,120,0.20)', 'rgba(255,225,160,0.07)', 'rgba(255,240,200,0.00)'), night: false, icon: 'sun' };
+  if (h >= 18 && h < 20) return { phase: 'sunset', label: 'Sunset', tint: light('rgba(255,120,80,0.32)', 'rgba(230,110,150,0.16)', 'rgba(110,90,190,0.18)'), night: false, icon: 'sun' };
+  if (h >= 20 && h < 21) return { phase: 'evening', label: 'Evening', tint: light('rgba(120,80,170,0.30)', 'rgba(70,65,150,0.26)', 'rgba(40,40,120,0.30)'), night: false, icon: 'moon' };
+  return { phase: 'night', label: 'Night', tint: 'linear-gradient(to bottom, rgba(18,24,80,0.50), rgba(40,50,120,0.40))', night: true, icon: 'moon' };
 }
+/** The clock the scenes use. Adding ?time=19 (or ?time=19:30) to the address previews any hour. */
+export function nowForDay(): Date {
+  const d = new Date();
+  try {
+    const q = new URLSearchParams(window.location.search).get('time');
+    if (q) {
+      const [hh, mm] = q.split(':');
+      const h = Number(hh);
+      if (Number.isFinite(h) && h >= 0 && h < 24) d.setHours(h, Number(mm) || 0, 0, 0);
+    }
+  } catch { /* no window: use the real time */ }
+  return d;
+}
+export const clockText = (d: Date) => `${d.getHours() % 12 || 12}:${String(d.getMinutes()).padStart(2, '0')} ${d.getHours() < 12 ? 'AM' : 'PM'}`;
 
 // ---- slots on the Sanctuary Isles: space opens up as the sanctuaries grow ----
 export const PAGE_SIZE = 8;
