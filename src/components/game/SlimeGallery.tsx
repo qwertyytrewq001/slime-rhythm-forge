@@ -122,6 +122,8 @@ export function SlimeGallery({ onSelect, filterElement }: SlimeGalleryProps = {}
                 'border-[#FF7EB6]/10 bg-white/60 hover:border-[#FF7EB6]/30 hover:bg-white hover:scale-105'
               } cursor-pointer`}
               onClick={() => handleSlimeSelect(slime.id)}
+              onMouseEnter={() => window.dispatchEvent(new CustomEvent('breedHover', { detail: { id: slime.id } }))}
+              onMouseLeave={() => window.dispatchEvent(new CustomEvent('breedHover', { detail: { id: null } }))}
             >
               <div className="relative">
                 <div className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-20 transition-opacity" 

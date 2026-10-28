@@ -14,6 +14,7 @@ import { HatcheryScreen } from '@/components/game/HatcheryScreen';
 import { SanctuaryHub } from '@/components/game/SanctuaryHub';
 import { TitleScreen } from '@/components/game/TitleScreen';
 import { GlimCompanion } from '@/components/game/GlimCompanion';
+import { WelcomeBack, useAwaySince } from '@/components/game/WelcomeBack';
 import { CodexGallery } from '@/components/game/CodexGallery';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
@@ -70,6 +71,8 @@ function GameLayout() {
 
   const [showLevelDialogue, setShowLevelDialogue] = useState(false);
   const [showTitle, setShowTitle] = useState(true);
+  const [welcomeDone, setWelcomeDone] = useState(false);
+  const awaySince = useAwaySince();
   const [dialogueLevel, setDialogueLevel] = useState(1);
   
   // Battle Flow State
@@ -386,6 +389,9 @@ function GameLayout() {
 
       {/* Title screen: the first thing the player sees, and the click that unlocks sound */}
       {showTitle && <TitleScreen onPlay={() => setShowTitle(false)} muted={state.muted} onToggleMute={handleMute} />}
+
+      {/* A short recap for players coming back after a while */}
+      {!showTitle && !welcomeDone && <WelcomeBack awaySince={awaySince} onClose={() => setWelcomeDone(true)} />}
 
       {/* 3. GLOBAL POPUPS */}
       {showAchievements && (

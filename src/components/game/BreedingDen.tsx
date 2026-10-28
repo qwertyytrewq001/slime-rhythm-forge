@@ -19,6 +19,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
   const { state, dispatch } = useGameState();
   const [possibleOutcomes, setPossibleOutcomes] = useState<CodexSlime[]>([]);
   const [showPossibleModal, setShowPossibleModal] = useState(false);
+  const [hoverId, setHoverId] = useState<string | null>(null);
+  const [bondAt, setBondAt] = useState(0);
 
   // Precise positioning coordinates for incubators (can be fine-tuned)
   const leftIncubatorPosition = {
@@ -41,6 +43,29 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
     state.slimes.find(s => s.id === (state.activeBreeding ? state.activeBreeding.parent2Id : state.breedSlot2)),
     [state.slimes, state.breedSlot2, state.activeBreeding]
   );
+
+  // The gallery tells us which slime the pointer is over while choosing a partner
+  useEffect(() => {
+    const on = (e: Event) => setHoverId((e as CustomEvent<{ id: string | null }>).detail?.id ?? null);
+    window.addEventListener('breedHover', on);
+    return () => window.removeEventListener('breedHover', on);
+  }, []);
+
+  // The parent already chosen reacts to a candidate: shy and happy if they could breed, worried if not
+  const hovered = hoverId ? state.slimes.find(s => s.id === hoverId) : undefined;
+  const waitingSlot: 1 | 2 | null = slot1Slime && !slot2Slime ? 1 : slot2Slime && !slot1Slime ? 2 : null;
+  const waiting = waitingSlot === 1 ? slot1Slime : waitingSlot === 2 ? slot2Slime : undefined;
+  const reaction: 'shy' | 'worried' | null = !waiting || !hovered || hovered.id === waiting.id
+    ? null
+    : getPossibleOutcomes(waiting.elements, hovered.elements).length > 0 ? 'shy' : 'worried';
+
+  // Both parents chosen: a little burst of hearts between them
+  const bothChosen = !!(slot1Slime && slot2Slime);
+  const wasBoth = React.useRef(false);
+  useEffect(() => {
+    if (bothChosen && !wasBoth.current) setBondAt(Date.now());
+    wasBoth.current = bothChosen;
+  }, [bothChosen]);
 
   // Calculate possible outcomes when both slots are filled
   useEffect(() => {
@@ -117,8 +142,23 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         onClick={() => handleSlotClick(1)}
       >
         {slot1Slime ? (
-          <div className="relative flex items-center justify-center">
+          <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 1 ? (reaction === 'shy' ? 'denShy 0.5s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot1Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
+              {reaction && waitingSlot === 1 && (
+                <>
+                  {reaction === 'shy' && (
+                    <>
+                      <span className="absolute pointer-events-none" style={{ left: '27%', top: '47%', width: 34, height: 18, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,110,150,0.85), rgba(255,110,150,0))', animation: 'denBlush 0.9s ease-in-out infinite' }} />
+                      <span className="absolute pointer-events-none" style={{ left: '59%', top: '47%', width: 34, height: 18, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,110,150,0.85), rgba(255,110,150,0))', animation: 'denBlush 0.9s ease-in-out infinite' }} />
+                      <img src={`${import.meta.env.BASE_URL}altar/fx_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 110, left: '50%', top: -34, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denFloat 1.3s ease-in-out infinite' }} />
+                    </>
+                  )}
+                  {reaction === 'worried' && (
+                    <img src={`${import.meta.env.BASE_URL}altar/particle_water.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 28, left: '66%', top: '12%', imageRendering: 'auto', animation: 'denDrip 1.1s ease-in infinite' }} />
+                  )}
+                </>
+              )}
+
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -150,8 +190,23 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         onClick={() => handleSlotClick(2)}
       >
         {slot2Slime ? (
-          <div className="relative flex items-center justify-center">
+          <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 2 ? (reaction === 'shy' ? 'denShy 0.5s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot2Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
+              {reaction && waitingSlot === 2 && (
+                <>
+                  {reaction === 'shy' && (
+                    <>
+                      <span className="absolute pointer-events-none" style={{ left: '27%', top: '47%', width: 34, height: 18, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,110,150,0.85), rgba(255,110,150,0))', animation: 'denBlush 0.9s ease-in-out infinite' }} />
+                      <span className="absolute pointer-events-none" style={{ left: '59%', top: '47%', width: 34, height: 18, borderRadius: '50%', background: 'radial-gradient(ellipse, rgba(255,110,150,0.85), rgba(255,110,150,0))', animation: 'denBlush 0.9s ease-in-out infinite' }} />
+                      <img src={`${import.meta.env.BASE_URL}altar/fx_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 110, left: '50%', top: -34, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denFloat 1.3s ease-in-out infinite' }} />
+                    </>
+                  )}
+                  {reaction === 'worried' && (
+                    <img src={`${import.meta.env.BASE_URL}altar/particle_water.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 28, left: '66%', top: '12%', imageRendering: 'auto', animation: 'denDrip 1.1s ease-in infinite' }} />
+                  )}
+                </>
+              )}
+
             <button
               onClick={(e) => {
                 e.stopPropagation();
@@ -170,6 +225,19 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       </div>
 
       
+      {bothChosen && Date.now() - bondAt < 2000 && (
+        <img key={bondAt} src={`${import.meta.env.BASE_URL}altar/fx_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '400px', width: 280, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denBond 1.8s ease-out forwards', zIndex: 20 }} />
+      )}
+      <style>{`
+        @keyframes denBlush { 0%,100% { opacity: 0.55 } 50% { opacity: 1 } }
+        @keyframes denFloat { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(-10px) } }
+        @keyframes denDrip { 0% { transform: translateY(-6px); opacity: 0 } 30% { opacity: 1 } 100% { transform: translateY(26px); opacity: 0 } }
+        @keyframes denShy { 0%,100% { transform: rotate(-3deg) translateX(-2px) } 50% { transform: rotate(3deg) translateX(2px) } }
+        @keyframes denWorry { 0%,100% { transform: translateY(0) } 50% { transform: translateY(2px) scale(0.98) } }
+        @keyframes denHop { 0% { transform: translateY(0) scale(1,1) } 40% { transform: translateY(-26px) scale(0.95,1.07) } 100% { transform: translateY(0) scale(1,1) } }
+        @keyframes denBond { 0% { opacity: 0; transform: translate(-50%,-30%) scale(0.5) } 25% { opacity: 1; transform: translate(-50%,-55%) scale(1.05) } 100% { opacity: 0; transform: translate(-50%,-90%) scale(1.15) } }
+      `}</style>
+
       {/* Breeding controls */}
       <div className="absolute top-8 left-8 flex items-center gap-4">
         {onBackToAltar && (
