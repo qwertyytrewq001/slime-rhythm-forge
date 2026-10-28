@@ -95,6 +95,9 @@ const RitualInscription = ({
   </div>
 );
 
+const ART = `${import.meta.env.BASE_URL}altar/`;
+const FRED = "'Fredoka', 'Trebuchet MS', sans-serif";
+
 export function BreedingPod(props: BreedingPodProps) {
   const { state, dispatch } = useGameState();
   const { onRequestGallery, onNavigateToBreedingDen } = props;
@@ -241,6 +244,13 @@ export function BreedingPod(props: BreedingPodProps) {
 
   return (
     <div className="flex flex-col items-center gap-3 p-4 relative" style={{ fontFamily: "'VT323', monospace" }}>
+      <style>{`
+        @keyframes podSlotPulse { 0%,100% { opacity: 0.75; transform: scale(1) } 50% { opacity: 1; transform: scale(1.04) } }
+        @keyframes podPulse { 0%,100% { transform: scale(1); filter: brightness(1) } 50% { transform: scale(1.06); filter: brightness(1.18) } }
+        @keyframes podRing { 0%,100% { opacity: 0.6; transform: scale(0.96) } 50% { opacity: 1; transform: scale(1.04) } }
+        @keyframes podBeam { 0%,100% { opacity: 0.55 } 50% { opacity: 1 } }
+        @keyframes podSpin { to { transform: rotate(360deg) } }
+      `}</style>
       {/* Mystic Altar Title - Matches Ancient Hatchery style and permanently fixed */}
       <div className="h-16 flex flex-col items-center justify-center z-20 scale-125 min-w-[200px] -translate-y-2">
          <RitualInscription sparkles={10} blueGlow={false}>
@@ -318,35 +328,32 @@ export function BreedingPod(props: BreedingPodProps) {
           {/* CENTRAL ACTIONS */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center mt-4">
               {breeding ? (
-                <div className="flex flex-col items-center">
-                  <Sparkles className="w-8 h-8 text-[#40E0D0] animate-pulse" />
-                  <span className="text-[10px] text-[#40E0D0] font-black mt-2 animate-pulse drop-shadow-[0_0_8px_#40E0D0]">{formatTime(state.activeBreeding!.endTime - now)}</span>
+                <div className="flex flex-col items-center relative">
+                  <img src={`${ART}fx_ring.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 230, top: '55%', imageRendering: 'auto', animation: 'podRing 3s ease-in-out infinite' }} />
+                  <img src={`${ART}fx_beam.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ height: 200, bottom: '40%', imageRendering: 'auto', mixBlendMode: 'screen', animation: 'podBeam 2.2s ease-in-out infinite' }} />
+                  <img src={`${ART}fx_swirl.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 130, top: '-20%', imageRendering: 'auto', animation: 'podSpin 7s linear infinite' }} />
+                  <span className="relative font-bold px-3 py-0.5 rounded-full" style={{ marginTop: 56, fontFamily: FRED, fontSize: 13, color: '#fff3d0', background: 'rgba(30,14,40,0.82)', border: '2px solid #f2d68a', textShadow: '0 1px 0 rgba(0,0,0,0.6)' }}>{formatTime(state.activeBreeding!.endTime - now)}</span>
                 </div>
               ) : breedFinished ? (
                 <div className="relative group cursor-pointer animate-bounce" onClick={handleHatchClick}>
+                   <img src={`${ART}fx_starburst.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ width: 190, left: '50%', top: '50%', transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'podSpin 14s linear infinite', opacity: 0.9 }} />
                    <div className="absolute inset-0 bg-[#40E0D0]/30 rounded-full blur-xl animate-pulse" />
                    <ResultEgg slime={state.activeBreeding!.resultSlime} />
+                   <img src={`${ART}gem_${state.activeBreeding!.resultSlime.rarityTier.toLowerCase()}.png`} alt={state.activeBreeding!.resultSlime.rarityTier} draggable={false} className="absolute pointer-events-none" style={{ width: 46, left: '50%', top: -58, transform: 'translateX(-50%)', imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.5))' }} />
                    <div className="absolute -top-10 left-1/2 -translate-x-1/2 whitespace-nowrap">
                       <span className="text-[8px] text-[#FF7EB6] font-black uppercase animate-inscription-glow" style={{ fontFamily: "'Press Start 2P', cursive" }}>READY!</span>
                    </div>
                 </div>
               ) : slot1Slime && slot2Slime && !state.activeHatching ? (
-                <div 
-                  className="relative flex flex-col items-center cursor-pointer group"
+                <button
                   onClick={handleBreed}
+                  aria-label="Begin the ritual"
+                  className="relative outline-none hover:scale-110 active:scale-95 transition-transform"
+                  style={{ width: 154, background: 'transparent', border: 'none', padding: 0, animation: 'podPulse 1.6s ease-in-out infinite' }}
                 >
-                  <div className="w-10 h-10 relative transition-all group-hover:scale-125 active:scale-90 animate-spin-slow">
-                    {/* Floating Mana Prism / Soul Gem */}
-                    <div className="absolute inset-0 bg-gradient-to-tr from-[#40E0D0]/80 to-[#40E0D0] shadow-[0_0_20px_#40E0D0] rotate-45 border border-white/40" />
-                    <Diamond className="absolute inset-0 m-auto w-5 h-5 text-white/90 drop-shadow-[0_0_5px_white]" />
-                    <div className="absolute inset-[-4px] border border-[#FF7EB6]/40 rounded-full animate-ping" />
-                  </div>
-                  <div className="mt-4 opacity-0 group-hover:opacity-100 transition-opacity">
-                    <RitualInscription fontSize="7px" sparkles={4}>
-                      Start the Ritual
-                    </RitualInscription>
-                  </div>
-                </div>
+                  <img src={`${ART}ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 12px rgba(190,120,255,0.75))' }} />
+                  <span className="absolute inset-0 flex items-center justify-center font-bold whitespace-nowrap" style={{ fontFamily: FRED, fontSize: 15, color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.04em' }}>Begin Ritual</span>
+                </button>
               ) : (
                 <Sparkles className="w-8 h-8 text-[#40E0D0]/20" />
               )}
