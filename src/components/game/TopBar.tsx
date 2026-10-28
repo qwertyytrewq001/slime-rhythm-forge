@@ -16,7 +16,7 @@ interface TopBarProps {
 const ART = `${import.meta.env.BASE_URL}altar/`;
 
 /** A painted wooden sign with an icon medallion; the label sits in the empty wood. */
-const NavPlate: React.FC<{ art: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string }> = ({ art, label, onClick, badge, badgeLabel }) => (
+const NavPlate: React.FC<{ art: string; icon: string; color: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string }> = ({ art, icon, color, label, onClick, badge, badgeLabel }) => (
   <button
     onClick={onClick}
     aria-label={label}
@@ -24,9 +24,12 @@ const NavPlate: React.FC<{ art: string; label: string; onClick?: () => void; bad
     style={{ width: 'clamp(170px, 17vw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
   >
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
+    {/* the old icon sits in the medallion, on a dark backing that hides the plate's own icon */}
+    <span className="absolute rounded-full" style={{ left: '8.6%', top: '50%', width: '25%', aspectRatio: '1', transform: 'translateY(-50%)', background: 'radial-gradient(circle at 40% 35%, #6b4a2c, #3a2314)', boxShadow: 'inset 0 0 0 2px rgba(0,0,0,0.35)' }} />
+    <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} className="absolute" style={{ left: '21.1%', top: '50%', height: '104%', width: 'auto', maxWidth: '38%', objectFit: 'contain', transform: 'translate(-50%, -52%)', imageRendering: 'auto', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }} />
     <span
-      className="absolute flex items-center justify-center font-bold text-center"
-      style={{ left: '31%', right: '8%', top: 0, bottom: 0, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.05vw, 16px)', color: '#fff3d0', textShadow: '0 2px 0 rgba(40,18,6,0.85), 0 0 6px rgba(0,0,0,0.5)', letterSpacing: '0.04em', lineHeight: 1.05 }}
+      className="absolute flex items-center justify-center text-center text-game-ui"
+      style={{ left: '36%', right: '5%', top: 0, bottom: 0, fontSize: 'clamp(10px, 1vw, 15px)', color, letterSpacing: '0.06em', lineHeight: 1.05 }}
     >
       {label}
     </span>
@@ -59,18 +62,18 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
       <div className="flex items-start gap-3 pointer-events-auto">
         {home ? (
           <>
-            <NavPlate art="sanctuaries" label="SANCTUARIES" onClick={onOpenSanctuaries} badge={giftsWaiting} badgeLabel={`${giftsWaiting} gifts waiting`} />
-            <NavPlate art="farm" label="FARM" onClick={onOpenFarm} badge={readyCrops} badgeLabel={`${readyCrops} crops ready`} />
+            <NavPlate art="sanctuaries" icon="habitats_icon.png" color="#c4ffb2" label="SANCTUARIES" onClick={onOpenSanctuaries} badge={giftsWaiting} badgeLabel={`${giftsWaiting} gifts waiting`} />
+            <NavPlate art="farm" icon="farm_building.png" color="#ffcf6b" label="FARM" onClick={onOpenFarm} badge={readyCrops} badgeLabel={`${readyCrops} crops ready`} />
           </>
         ) : (
-          <NavPlate art="altar" label="ALTAR" onClick={onBackToAltar} />
+          <NavPlate art="altar" icon="altar_icon.png" color="#b2ebff" label="ALTAR" onClick={onBackToAltar} />
         )}
       </div>
       <div className="flex items-start gap-3 pointer-events-auto">
         {home && (
           <>
-            <NavPlate art="den" label="BREEDING DEN" onClick={onOpenBreedingDen} />
-            <NavPlate art="battle" label="BATTLE MAP" onClick={onOpenBattle} />
+            <NavPlate art="den" icon="altar_icon.png" color="#b2ebff" label="BREEDING DEN" onClick={onOpenBreedingDen} />
+            <NavPlate art="battle" icon="battlemap_icon (1).png" color="#ffe066" label="BATTLE MAP" onClick={onOpenBattle} />
           </>
         )}
       </div>

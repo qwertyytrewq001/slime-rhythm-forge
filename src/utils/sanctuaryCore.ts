@@ -315,10 +315,10 @@ export interface DayInfo {
 }
 export function dayPhase(d: Date): DayInfo {
   const h = d.getHours() + d.getMinutes() / 60;
-  if (h >= 5 && h < 7) return { phase: 'dawn', tint: 'rgb(255,222,200)', night: false };
+  if (h >= 5 && h < 7) return { phase: 'dawn', tint: 'rgb(255,236,222)', night: false };
   if (h >= 7 && h < 18) return { phase: 'day', tint: null, night: false };
-  if (h >= 18 && h < 20) return { phase: 'dusk', tint: 'rgb(255,196,170)', night: false };
-  return { phase: 'night', tint: 'rgb(130,140,215)', night: true };
+  if (h >= 18 && h < 20) return { phase: 'dusk', tint: 'rgb(255,226,208)', night: false };
+  return { phase: 'night', tint: 'rgb(150,160,228)', night: true };
 }
 
 // ---- slots on the Sanctuary Isles: space opens up as the sanctuaries grow ----

@@ -148,7 +148,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
           );
         })}
 
-        {day.tint && <div className="absolute inset-0 pointer-events-none" style={{ background: day.tint, mixBlendMode: 'multiply', zIndex: 200 }} />}
+        {day.tint && <div className="absolute pointer-events-none" style={{ left: '-100%', right: '-100%', top: '-100%', bottom: '-100%', background: day.tint, mixBlendMode: 'multiply', zIndex: 200 }} />}
 
         {/* a friendly mascot who lives in the corner */}
         <button
