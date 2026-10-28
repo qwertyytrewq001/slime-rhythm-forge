@@ -12,6 +12,8 @@ import { BazaarModal } from '@/components/game/BazaarModal';
 import { Hatchery } from '@/components/game/Hatchery';
 import { HatcheryScreen } from '@/components/game/HatcheryScreen';
 import { SanctuaryHub } from '@/components/game/SanctuaryHub';
+import { TitleScreen } from '@/components/game/TitleScreen';
+import { GlimCompanion } from '@/components/game/GlimCompanion';
 import { CodexGallery } from '@/components/game/CodexGallery';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import { audioEngine } from '@/utils/audioEngine';
@@ -67,6 +69,7 @@ function GameLayout() {
   });
 
   const [showLevelDialogue, setShowLevelDialogue] = useState(false);
+  const [showTitle, setShowTitle] = useState(true);
   const [dialogueLevel, setDialogueLevel] = useState(1);
   
   // Battle Flow State
@@ -195,13 +198,13 @@ function GameLayout() {
 
   // Show tutorial for first-time players
   useEffect(() => {
-    if (!state.tutorialCompleted && state.slimes.length > 0) {
+    if (!state.tutorialCompleted && state.slimes.length > 0 && !showTitle) {
       const timer = setTimeout(() => {
         setShowTutorial(true);
       }, 1000);
       return () => clearTimeout(timer);
     }
-  }, [state.tutorialCompleted, state.slimes.length]);
+  }, [state.tutorialCompleted, state.slimes.length, showTitle]);
 
   const toolbarCircle = "relative bg-black/40 h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
   const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
@@ -313,6 +316,9 @@ function GameLayout() {
           )}
         </div>
 
+        {/* Glim floats around the home screen */}
+        {currentView === 'breeding' && !showTitle && <GlimCompanion />}
+
         {/* BOTTOM TOOLBAR */}
         <div className="fixed bottom-6 left-6 z-[150] flex items-center gap-4 pointer-events-auto">
           <div className="relative group">
@@ -377,6 +383,9 @@ function GameLayout() {
         </div>
 
       </div>
+
+      {/* Title screen: the first thing the player sees, and the click that unlocks sound */}
+      {showTitle && <TitleScreen onPlay={() => setShowTitle(false)} muted={state.muted} onToggleMute={handleMute} />}
 
       {/* 3. GLOBAL POPUPS */}
       {showAchievements && (

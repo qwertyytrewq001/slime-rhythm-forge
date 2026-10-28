@@ -2,8 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useGameState } from '../../hooks/useGameState';
 import { isReady } from '../../utils/farmCore';
 import { totalGifts } from '../../utils/sanctuaryCore';
-import { FairySparkle } from './FairySparkle';
-import { Achievements } from './Achievements';
 
 interface TopBarProps {
   onBackToAltar?: () => void;
@@ -15,9 +13,37 @@ interface TopBarProps {
   currentView?: 'breeding' | 'breedingDen' | 'habitats' | 'battleMap' | 'sanctuaries' | 'hatchery' | 'farm';
 }
 
+const ART = `${import.meta.env.BASE_URL}altar/`;
+
+/** A painted wooden sign with an icon medallion; the label sits in the empty wood. */
+const NavPlate: React.FC<{ art: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string }> = ({ art, label, onClick, badge, badgeLabel }) => (
+  <button
+    onClick={onClick}
+    aria-label={label}
+    className="relative transition-transform duration-150 hover:scale-105 hover:brightness-110 active:scale-95 outline-none"
+    style={{ width: 'clamp(170px, 17vw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
+  >
+    <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
+    <span
+      className="absolute flex items-center justify-center font-bold text-center"
+      style={{ left: '31%', right: '8%', top: 0, bottom: 0, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.05vw, 16px)', color: '#fff3d0', textShadow: '0 2px 0 rgba(40,18,6,0.85), 0 0 6px rgba(0,0,0,0.5)', letterSpacing: '0.04em', lineHeight: 1.05 }}
+    >
+      {label}
+    </span>
+    {badge ? (
+      <span
+        aria-label={badgeLabel}
+        className="absolute rounded-full text-white font-bold flex items-center justify-center"
+        style={{ top: -6, right: -4, minWidth: 22, height: 22, padding: '0 6px', fontSize: 12, background: '#e8453c', border: '2px solid #fff', fontFamily: "'Fredoka', sans-serif", boxShadow: '0 2px 4px rgba(0,0,0,0.4)' }}
+      >
+        {badge}
+      </span>
+    ) : null}
+  </button>
+);
+
 export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenBreedingDen, onOpenFarm, currentView }: TopBarProps) {
-  const { state, playerLevel } = useGameState();
-  const [showAchievements, setShowAchievements] = useState(false);
+  const { state } = useGameState();
   const [nowMs, setNowMs] = useState(() => Date.now());
   useEffect(() => {
     const t = setInterval(() => setNowMs(Date.now()), 5000);
@@ -26,257 +52,28 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
   const giftsWaiting = totalGifts(state.habitats) + (state.visitor && !state.visitor.done ? 1 : 0);
   const readyCrops = state.farmPlots.filter(p => isReady(p, nowMs)).length;
 
-  // Simple clean styling with hover effects and explicit font control
-  const navStyle = "text-[14px] font-black uppercase tracking-[0.2em] transition-all duration-200 hover:text-white hover:scale-105 p-0 m-0 outline-none bg-transparent border-none flex items-start gap-1.5";
-  
-  // Explicit font control to prevent conflicts
-  const textStyle: React.CSSProperties = {
-    fontFamily: "'Press Start 2P', cursive",
-    fontSize: '14px',
-    fontWeight: 'black' as const,
-    textTransform: 'uppercase' as const
-  };
-  
-  const getGlowStyle = (viewType: 'altar' | 'sanctuaries' | 'battleMap') => {
-    switch (viewType) {
-      case 'altar':
-        return 'hover:text-white hover:drop-shadow-[0_0_8px_rgba(147,51,234,0.8)]';
-      case 'sanctuaries':
-        return 'hover:text-white hover:drop-shadow-[0_0_8px_rgba(34,211,238,0.8)]';
-      case 'battleMap':
-        return 'hover:text-white hover:drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]';
-      default:
-        return '';
-    }
-  };
+  const home = currentView === 'breeding';
 
   return (
-    <>
-      <div className="flex justify-between px-4 pt-[5px] pb-[135px] bg-transparent relative z-[60] pointer-events-none">
-        
-        {/* Far top left navigation */}
-        <div className="flex items-start gap-4 pointer-events-auto">
-          {currentView === 'breeding' && (
-            <button
-              onClick={onOpenSanctuaries}
-              className={`${navStyle} ${getGlowStyle('sanctuaries')} relative group`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
-              </div>
-              <img 
-                src={`${import.meta.env.BASE_URL}habitats_icon.png`} 
-                alt="Sanctuaries" 
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{ 
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#c4ffb2'
-              }}>SANCTUARIES</span>
-              {giftsWaiting > 0 && (
-                <span
-                  aria-label={`${giftsWaiting} gifts waiting`}
-                  className="absolute -top-1 left-12 rounded-full text-white font-bold flex items-center justify-center"
-                  style={{ minWidth: 20, height: 20, padding: '0 5px', fontSize: 12, background: '#e8453c', border: '2px solid #fff', fontFamily: "'Fredoka', sans-serif" }}
-                >{giftsWaiting}</span>
-              )}
-            </button>
-          )}
-
-          {currentView === 'breeding' && (
-            <button
-              onClick={onOpenFarm}
-              className={`${navStyle} relative group`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
-              </div>
-              <img
-                src={`${import.meta.env.BASE_URL}farm_building.png`}
-                alt="Farm"
-                style={{ width: 'auto', height: '52px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#ffcf6b'
-              }}>FARM</span>
-              {readyCrops > 0 && (
-                <span
-                  aria-label={`${readyCrops} crops ready`}
-                  className="absolute -top-1 left-9 rounded-full text-white font-bold flex items-center justify-center"
-                  style={{ minWidth: 20, height: 20, padding: '0 5px', fontSize: 12, background: '#e8453c', border: '2px solid #fff', fontFamily: "'Fredoka', sans-serif" }}
-                >{readyCrops}</span>
-              )}
-            </button>
-          )}
-
-          {currentView === 'farm' && (
-            <button
-              onClick={onBackToAltar}
-              className={`${navStyle} ${getGlowStyle('altar')}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <img
-                src={`${import.meta.env.BASE_URL}altar_icon.png`}
-                alt="Back to Altar"
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#b2ebff'
-              }}>ALTAR</span>
-            </button>
-          )}
-
-          {currentView === 'sanctuaries' && (
-            <button
-              onClick={onBackToAltar}
-              className={`${navStyle} ${getGlowStyle('altar')}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <img 
-                src={`${import.meta.env.BASE_URL}altar_icon.png`} 
-                alt="Altar" 
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{ 
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#b2ebff'
-              }}>ALTAR</span>
-            </button>
-          )}
-          
-          {currentView === 'battleMap' && (
-            <button
-              onClick={onBackToAltar}
-              className={`${navStyle} ${getGlowStyle('altar')}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <img 
-                src={`${import.meta.env.BASE_URL}altar_icon.png`} 
-                alt="Altar" 
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{ 
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#b2ebff'
-              }}>ALTAR</span>
-            </button>
-          )}
-        </div>
-
-        {/* Far top right navigation */}
-        <div className="flex items-start gap-1 pointer-events-auto">
-          {currentView === 'breeding' && (
-            <button
-              onClick={onOpenBreedingDen}
-              className={`${navStyle} ${getGlowStyle('altar')}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <img 
-                src={`${import.meta.env.BASE_URL}altar_icon.png`} 
-                alt="Breeding Den" 
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{ 
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#b2ebff'
-              }}>BREEDING DEN</span>
-            </button>
-          )}
-          
-          {currentView === 'breedingDen' && (
-            <button
-              onClick={onBackToAltar}
-              className={`${navStyle} ${getGlowStyle('altar')}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <img 
-                src={`${import.meta.env.BASE_URL}altar_icon.png`} 
-                alt="Back to Altar" 
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{ 
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#b2ebff'
-              }}>ALTAR</span>
-            </button>
-          )}
-          
-          {currentView === 'breeding' && (
-            <button
-              onClick={onOpenBattle}
-              className={`${navStyle} ${getGlowStyle('battleMap')}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <img 
-                src={`${import.meta.env.BASE_URL}battlemap_icon (1).png`} 
-                alt="Battle Map" 
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{ 
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#ffe066'
-              }}>BATTLE MAP</span>
-            </button>
-          )}
-          
-          {currentView === 'sanctuaries' && (
-            <button
-              onClick={onOpenBattle}
-              className={`${navStyle} ${getGlowStyle('battleMap')}`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <img 
-                src={`${import.meta.env.BASE_URL}battlemap_icon (1).png`} 
-                alt="Battle Map" 
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{ 
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#ffe066'
-              }}>BATTLE MAP</span>
-            </button>
-          )}
-          
-          {currentView === 'battleMap' && (
-            <button
-              onClick={onOpenSanctuaries}
-              className={`${navStyle} ${getGlowStyle('sanctuaries')} relative group`}
-              style={{ display: 'flex', alignItems: 'center', gap: '1px' }}
-            >
-              <div className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
-                {[...Array(6)].map((_, i) => <FairySparkle key={i} index={i} />)}
-              </div>
-              <img 
-                src={`${import.meta.env.BASE_URL}habitats_icon.png`} 
-                alt="Sanctuaries" 
-                style={{ width: 'auto', height: '64px', objectFit: 'contain' }}
-              />
-              <span className="text-game-ui" style={{ 
-                fontFamily: "'Fredoka', 'Comic Sans MS', cursive, sans-serif",
-                fontSize: '16px',
-                color: '#c4ffb2'
-              }}>SANCTUARIES</span>
-            </button>
-          )}
-        </div>
+    <div className="flex justify-between px-4 pt-2 pb-[135px] bg-transparent relative z-[60] pointer-events-none">
+      <div className="flex items-start gap-3 pointer-events-auto">
+        {home ? (
+          <>
+            <NavPlate art="sanctuaries" label="SANCTUARIES" onClick={onOpenSanctuaries} badge={giftsWaiting} badgeLabel={`${giftsWaiting} gifts waiting`} />
+            <NavPlate art="farm" label="FARM" onClick={onOpenFarm} badge={readyCrops} badgeLabel={`${readyCrops} crops ready`} />
+          </>
+        ) : (
+          <NavPlate art="altar" label="ALTAR" onClick={onBackToAltar} />
+        )}
       </div>
-
-      {showAchievements && (
-        <Achievements onClose={() => setShowAchievements(false)} />
-      )}
-    </>
+      <div className="flex items-start gap-3 pointer-events-auto">
+        {home && (
+          <>
+            <NavPlate art="den" label="BREEDING DEN" onClick={onOpenBreedingDen} />
+            <NavPlate art="battle" label="BATTLE MAP" onClick={onOpenBattle} />
+          </>
+        )}
+      </div>
+    </div>
   );
 }

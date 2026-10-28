@@ -244,10 +244,10 @@ const PERSONALITIES: Record<string, Personality> = {
 
 const CALM_BUBBLES = ['🎵', '✨', '🍃', '😊'];
 const POKE_BUBBLES = ['💖', '😊', '😆'];
-const GROUND_SPARKLE: Record<string, string[]> = {
-  fire: ['🔥', '✨'], water: ['💧', '✨'], plant: ['🍃', '🌸'], earth: ['✨', '🍂'], wind: ['🍃', '✨'],
-  ice: ['❄️', '✨'], electric: ['⚡', '✨'], metal: ['✨', '⚙️'], light: ['✨', '🌟'], shadow: ['🌙', '✨'],
-};
+// 'p:name' draws the painted particle from public/altar/particle_<name>.png instead of an emoji
+const GROUND_SPARKLE: Record<string, string[]> = Object.fromEntries(
+  ['fire', 'water', 'plant', 'earth', 'wind', 'ice', 'electric', 'metal', 'light', 'shadow'].map(e => [e, [`p:${e}`, 'p:light']]),
+);
 const PET_BUBBLES = ['💖', '🥰', '😊'];
 const rand = (a: number, b: number) => a + Math.random() * (b - a);
 const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
@@ -1002,7 +1002,7 @@ function FxLayer({ items }: { items: Fx[] }) {
                         animation: `fxBurst 1s ease-out ${i * 0.03}s forwards`,
                       }}
                     >
-                      {fx.emojis[i % fx.emojis.length]}
+                      {(() => { const e = fx.emojis[i % fx.emojis.length]; return e.startsWith('p:') ? <img src={`${import.meta.env.BASE_URL}altar/particle_${e.slice(2)}.png`} alt="" draggable={false} style={{ width: 28, height: 28, imageRendering: 'auto' }} /> : e; })()}
                     </span>
                   );
                 })}
