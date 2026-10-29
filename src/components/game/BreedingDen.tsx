@@ -243,12 +243,14 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         <img key={bondAt} src={`${import.meta.env.BASE_URL}altar/love_hearts.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '66%', width: 280, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denBond 1.8s ease-out forwards', zIndex: 20 }} />
       )}
       {bothChosen && !state.activeBreeding && (
-        <img src={`${import.meta.env.BASE_URL}altar/love_ribbon.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '66%', width: '26%', minWidth: 200, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denRibbon 1.8s ease-in-out infinite', zIndex: 15 }} />
+        <img src={`${import.meta.env.BASE_URL}altar/love_ribbon.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '27%', width: '40%', minWidth: 240, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denRibbon 1.8s ease-in-out infinite', zIndex: 2, opacity: 0.85 }} />
       )}
       <style>{`
         @keyframes denTitle { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
         @keyframes denCool { 0%,100% { transform: rotate(-1.5deg) } 50% { transform: rotate(1.5deg) translateY(-3px) } }
         @keyframes denDrop { from { transform: translateX(-50%) translateY(-30px); opacity: 0 } to { transform: translateX(-50%) translateY(0); opacity: 1 } }
+        @keyframes denEggBob { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(-8px) } }
+        @keyframes denBeginPulse { 0%,100% { transform: translateX(-50%) scale(1) } 50% { transform: translateX(-50%) scale(1.05) } }
         @keyframes denRibbon { 0%,100% { opacity: 0.6 } 50% { opacity: 1 } }
         @keyframes denBlush { 0%,100% { opacity: 0.55 } 50% { opacity: 1 } }
         @keyframes denFloat { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(-10px) } }
@@ -273,34 +275,32 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         <p className="font-bold mt-1" style={{ animation: 'denTitle 3s ease-in-out infinite', fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.1vw, 15px)', color: '#ffe9a8', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.1em' }}>SELECT PARENTS TO BREED</p>
       </div>
 
-      {/* Question mark egg - centered between incubators when both parents selected */}
+      {/* The mystery egg floats above the altar; tap it to see what this pair could make */}
       {slot1Slime && slot2Slime && !state.activeBreeding && (
-        <div className="absolute" style={{ top: '50%', left: '50%', transform: 'translateX(-50%)' }}>
-          <div className="flex flex-col items-center gap-3">
-            {/* Question mark egg */}
-            <button
-              onClick={() => setShowPossibleModal(true)}
-              className="relative group cursor-pointer transition-all hover:scale-110"
-            >
-              <div className="w-16 h-20 bg-gradient-to-br from-yellow-200/80 to-amber-300/80 rounded-full border-2 border-yellow-400/60 shadow-lg backdrop-blur-sm flex items-center justify-center">
-                <HelpCircle className="w-8 h-8 text-yellow-700" />
-              </div>
-              <div className="absolute -bottom-2 left-1/2 -translate-x-1/2 bg-purple-900/90 text-white text-xs font-bold px-2 py-1 rounded-full border border-purple-400/60">
-                Possible Slimes
-              </div>
-            </button>
-            
-            {/* Start breeding button */}
-            <button
-              onClick={handleStartBreeding}
-              className="px-8 py-4 bg-gradient-to-r from-pink-200/80 to-purple-200/80 hover:from-pink-100/80 hover:to-purple-100/80 text-purple-900 font-bold rounded-xl border-2 border-purple-300/60 transition-all hover:scale-105 shadow-lg backdrop-blur-sm"
-              style={{ textShadow: '1px 1px 2px rgba(255,255,255,0.8)' }}
-            >
-              <Heart className="w-5 h-5 inline mr-2" />
-              Begin Breeding
-            </button>
-          </div>
-        </div>
+        <>
+          <button
+            onClick={() => setShowPossibleModal(true)}
+            aria-label="Possible slimes"
+            className="absolute flex flex-col items-center outline-none hover:scale-110 active:scale-95 transition-transform"
+            style={{ left: '50%', top: '33%', width: 'min(9vw, 120px)', transform: 'translateX(-50%)', background: 'transparent', border: 'none', padding: 0, zIndex: 12, animation: 'denEggBob 2.6s ease-in-out infinite' }}
+          >
+            <img src={`${import.meta.env.BASE_URL}ui/mystery_egg.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 14px rgba(190,140,255,0.8)) drop-shadow(0 6px 6px rgba(0,0,0,0.45))' }} />
+            <span className="relative" style={{ width: '170%', marginTop: -6 }}>
+              <img src={`${import.meta.env.BASE_URL}ui/baz_tab.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
+              <span className="absolute inset-0 flex items-center justify-center font-bold whitespace-nowrap" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(10px, 1.05vw, 14px)', color: '#ffe9a8', textShadow: '0 2px 0 rgba(30,12,4,0.85)', letterSpacing: '0.05em' }}>Possible Slimes</span>
+            </span>
+          </button>
+
+          <button
+            onClick={handleStartBreeding}
+            aria-label="Begin breeding"
+            className="absolute outline-none hover:scale-110 active:scale-95 transition-transform"
+            style={{ left: '50%', bottom: '3%', width: 'min(17vw, 230px)', transform: 'translateX(-50%)', background: 'transparent', border: 'none', padding: 0, zIndex: 12, animation: 'denBeginPulse 1.6s ease-in-out infinite' }}
+          >
+            <img src={`${import.meta.env.BASE_URL}ui/../altar/ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 12px rgba(190,120,255,0.75))' }} />
+            <span className="absolute inset-0 flex items-center justify-center font-bold whitespace-nowrap" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(13px, 1.5vw, 20px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.04em' }}>Begin Breeding</span>
+          </button>
+        </>
       )}
 
       {/* Breeding status - centered between incubators */}
@@ -398,31 +398,26 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
     {/* Possible Slimes Modal - Outside main container */}
     {showPossibleModal && (
       <div 
-        className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+        className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 p-4"
         onClick={() => setShowPossibleModal(false)}
       >
         <div 
-          className="bg-gradient-to-br from-pink-100 via-white to-amber-100 rounded-3xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto border-4 border-pink-300/50 shadow-2xl backdrop-blur-sm relative"
+          className="bg-[#f6e8c3] rounded-3xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto border-4 border-[#4a2f17] shadow-2xl backdrop-blur-sm relative"
           onClick={(e) => e.stopPropagation()}
         >
-          {/* Decorative corner elements */}
-          <div className="absolute top-0 left-0 w-20 h-20 bg-gradient-to-br from-pink-300/30 to-transparent rounded-full blur-xl" />
-          <div className="absolute top-0 right-0 w-24 h-24 bg-gradient-to-bl from-amber-300/30 to-transparent rounded-full blur-xl" />
-          <div className="absolute bottom-0 left-0 w-24 h-24 bg-gradient-to-tr from-pink-300/30 to-transparent rounded-full blur-xl" />
-          <div className="absolute bottom-0 right-0 w-20 h-20 bg-gradient-to-tl from-amber-300/30 to-transparent rounded-full blur-xl" />
           {/* Modal Header */}
           <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-bold text-gray-800 uppercase tracking-wider" style={{ fontFamily: "'Press Start 2P', cursive", textShadow: '2px 2px 4px rgba(255,126,182,0.5)' }}>
-              Possible Breeding Outcomes
-            </h2>
+            <div className="text-3xl font-bold text-[#4a2f17] tracking-wide" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
+              Possible Slimes
+            </div>
             <button
               onClick={(e) => {
                 e.stopPropagation();
                 setShowPossibleModal(false);
               }}
-              className="p-2 rounded-lg bg-gradient-to-br from-pink-400 to-amber-500 hover:from-pink-300 hover:to-amber-400 transition-colors border-2 border-white/50 relative z-10"
+              className="relative z-10 hover:scale-110 active:scale-95 transition-transform"
             >
-              <X className="w-5 h-5 text-white" />
+              <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" className="w-12 h-12" style={{ imageRendering: 'auto' }} />
             </button>
           </div>
 
@@ -433,7 +428,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
               {possibleOutcomes.map((slime) => (
                 <div
                   key={slime.id}
-                  className="p-3 transition-all hover:scale-105 bg-white/30 rounded-2xl border-2 border-pink-300/30"
+                  className="p-3 transition-all hover:scale-105 bg-white/55 rounded-2xl border-[3px] border-[#4a2f17]/40"
                 >
                   <div className="w-full h-24 flex items-center justify-center mb-3">
                     <SlimeCanvas
@@ -447,13 +442,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                     {slime.name}
                   </p>
                   <div className="flex justify-center mt-2">
-                    <span 
-                      className="text-xs font-bold px-2 py-1 rounded-full"
-                      style={{ 
-                        backgroundColor: '#FFB3D1',
-                        color: '#FF7EB6'
-                      }}
-                    >
+                    <span className="inline-flex items-center gap-1 text-xs font-bold text-[#4a2f17]" style={{ fontFamily: "'Fredoka', sans-serif" }}>
+                      <img src={`${import.meta.env.BASE_URL}altar/gem_${slime.rarityTier.toLowerCase()}.png`} alt="" draggable={false} style={{ width: 22, height: 22, objectFit: 'contain', imageRendering: 'auto' }} />
                       {slime.rarityTier}
                     </span>
                   </div>

@@ -101,13 +101,13 @@ export function DenPeekers() {
       `}</style>
       {ALCOVES.map((a, i) => {
         const p = out[i];
-        const size = Math.max(54, Math.round(vw * (a.w / 100) * 2.0));
-        const lift = !p ? 108 : p.phase === 'in' || p.phase === 'out' ? 108 : p.mode === 'peek' || p.mode === 'shy' ? 40 : 6;
+        const size = Math.max(54, Math.round(vw * (a.w / 100) * 1.3));
+        const lift = !p ? 108 : p.phase === 'in' || p.phase === 'out' ? 108 : p.mode === 'peek' || p.mode === 'shy' ? 28 : 4;
         const anim = !p ? undefined : p.giggle ? 'peekGiggle 0.35s ease-in-out infinite'
           : p.phase !== 'show' ? undefined
           : p.mode === 'peek' ? 'peekWiggle 1.1s ease-in-out infinite' : p.mode === 'wave' ? 'peekWave 0.9s ease-in-out infinite' : p.mode === 'pop' ? 'peekPop 0.8s ease-in-out infinite' : 'peekShy 1.2s ease-in-out infinite';
         return (
-          <div key={i} className="absolute" style={{ left: `${a.x}%`, top: `${a.b - a.h}%`, width: `${a.w}%`, height: `${a.h}%`, transform: 'translateX(-50%)', overflow: 'hidden', borderRadius: '45% 45% 6% 6% / 26% 26% 4% 4%', zIndex: 3 }}>
+          <div key={i} className="absolute" style={{ left: `${a.x}%`, top: `${a.b - a.h}%`, width: `${a.w}%`, height: `${a.h}%`, transform: 'translateX(-50%)', clipPath: 'inset(0 -35% 0 -35%)', zIndex: 3 }}>
             {p && (
               <button
                 key={p.key}
