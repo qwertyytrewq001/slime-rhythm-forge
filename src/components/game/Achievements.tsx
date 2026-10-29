@@ -35,7 +35,7 @@ export function Achievements({ onClose }: { onClose: () => void }) {
           <div className="flex items-center gap-3">
             <img src={`${U}tool_achievements.png`} alt="" draggable={false} className="w-16 h-16" style={{ imageRendering: 'auto' }} />
             <div>
-              <h2 className="text-3xl font-bold leading-none" style={{ letterSpacing: '0.05em', WebkitTextStroke: '4px #2a1238', paintOrder: 'stroke fill' }}>Achievements</h2>
+              <div className="text-3xl font-bold leading-none" style={{ letterSpacing: '0.05em', WebkitTextStroke: '4px #2a1238', paintOrder: 'stroke fill' }}>Achievements</div>
               <p className="text-sm font-semibold opacity-90 mt-1">
                 {unlockedCount} / {state.achievements.length} unlocked{claimable.length > 0 && ` · ${claimable.length} ready to claim`}
               </p>
@@ -61,7 +61,7 @@ export function Achievements({ onClose }: { onClose: () => void }) {
             return (
               <section key={category}>
                 <div className="flex items-center justify-between mb-1 px-2" style={{ color: INK }}>
-                  <h3 className="text-base font-bold uppercase tracking-widest">{category}</h3>
+                  <div className="text-base font-bold uppercase tracking-widest">{category}</div>
                   <span className="text-sm font-bold opacity-70">{done}/{defs.length}</span>
                 </div>
                 <div className="grid gap-2">
@@ -72,14 +72,13 @@ export function Achievements({ onClose }: { onClose: () => void }) {
                     const pct = Math.round((current / def.target) * 100);
                     const card = ach.claimed ? 'ach_row' : ach.unlocked ? 'ach_row_ready' : 'ach_row_locked';
                     return (
-                      <div key={def.id} className="relative" style={{ minHeight: 74 }}>
-                        <img src={`${U}${card}.png`} alt="" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none" style={{ imageRendering: 'auto', objectFit: 'fill' }} />
-                        <div className="relative flex items-center gap-3 px-4 py-2" style={{ color: INK }}>
-                          <div className="relative shrink-0" style={{ width: 52, height: 52 }}>
+                      <div key={def.id} className="relative" style={{ minHeight: 82, borderStyle: 'solid', borderWidth: '15px 64px', borderImageSource: `url(${U}${card}.png)`, borderImageSlice: '45 192 fill', borderImageRepeat: 'stretch', boxSizing: 'border-box' }}>
+                        <div className="relative flex items-center gap-3" style={{ color: INK, margin: '-15px -64px', padding: '10px 70px 10px 78px', minHeight: 82 }}>
+                          <div className="absolute" style={{ left: 11, top: '50%', width: 47, height: 47, transform: 'translateY(-50%)' }}>
                             {ach.unlocked ? (
                               <img src={`${U}ach_medal_${medalFor(def.rewardAmount)}.png`} alt="" draggable={false} className="w-full h-full" style={{ imageRendering: 'auto' }} />
                             ) : (
-                              <img src={`${U}ach_lock.png`} alt="" draggable={false} className="w-full h-full" style={{ imageRendering: 'auto', opacity: 0.8 }} />
+                              <img src={`${U}ach_lock.png`} alt="" draggable={false} className="w-full h-full" style={{ imageRendering: 'auto', opacity: 0.85 }} />
                             )}
                           </div>
                           <div className="flex-1 min-w-0">

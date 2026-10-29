@@ -26,7 +26,7 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
     {/* the old icon sits fully inside the medallion: a clipped circle that hides the plate's own icon */}
     <span className="absolute rounded-full overflow-hidden flex items-center justify-center" style={{ left: '8.8%', top: '50%', width: '25.6%', aspectRatio: '1', transform: 'translateY(-50%)', background: 'radial-gradient(circle at 40% 35%, #fbefcf, #d9bf8a)', boxShadow: 'inset 0 0 0 2px rgba(90,60,20,0.35), inset 0 -4px 8px rgba(90,60,20,0.25)' }}>
-      <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} style={{ width: '122%', height: '122%', maxWidth: 'none', objectFit: 'contain', imageRendering: 'auto' }} />
+      <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} style={{ width: '78%', height: '78%', objectFit: 'contain', imageRendering: 'auto' }} />
     </span>
     <span
       className="absolute flex items-center justify-center text-center text-game-ui"
@@ -63,18 +63,18 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
       <div className="flex items-start gap-3 pointer-events-auto">
         {home ? (
           <>
-            <NavPlate art="sanctuaries" icon="habitats_icon.png" color="#c4ffb2" label="SANCTUARIES" onClick={onOpenSanctuaries} badge={giftsWaiting} badgeLabel={`${giftsWaiting} gifts waiting`} />
-            <NavPlate art="farm" icon="farm_building.png" color="#ffcf6b" label="FARM" onClick={onOpenFarm} badge={readyCrops} badgeLabel={`${readyCrops} crops ready`} />
+            <NavPlate art="sanctuaries" icon="ui/navicon_habitats.png" color="#c4ffb2" label="SANCTUARIES" onClick={onOpenSanctuaries} badge={giftsWaiting} badgeLabel={`${giftsWaiting} gifts waiting`} />
+            <NavPlate art="farm" icon="ui/navicon_farm.png" color="#ffcf6b" label="FARM" onClick={onOpenFarm} badge={readyCrops} badgeLabel={`${readyCrops} crops ready`} />
           </>
         ) : (
-          <NavPlate art="altar" icon="altar_icon.png" color="#b2ebff" label="ALTAR" onClick={onBackToAltar} />
+          <NavPlate art="altar" icon="ui/navicon_altar.png" color="#b2ebff" label="ALTAR" onClick={onBackToAltar} />
         )}
       </div>
       <div className="flex items-start gap-3 pointer-events-auto">
         {home && (
           <>
-            <NavPlate art="den" icon="altar_icon.png" color="#b2ebff" label="BREEDING DEN" onClick={onOpenBreedingDen} />
-            <NavPlate art="battle" icon="battlemap_icon (1).png" color="#ffe066" label="BATTLE MAP" onClick={onOpenBattle} />
+            <NavPlate art="den" icon="ui/navicon_altar.png" color="#b2ebff" label="BREEDING DEN" onClick={onOpenBreedingDen} />
+            <NavPlate art="battle" icon="ui/navicon_battle.png" color="#ffe066" label="BATTLE MAP" onClick={onOpenBattle} />
           </>
         )}
       </div>

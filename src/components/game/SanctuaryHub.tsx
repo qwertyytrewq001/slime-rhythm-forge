@@ -206,10 +206,10 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
           >
             <img src={`${BASE}altar/${gifts ? 'ui_btn_begin' : 'ui_btn_begin_off'}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
             {gifts > 0 && <span className="absolute inset-0 pointer-events-none sanct-shine" />}
-            <span className="absolute inset-0 flex items-center justify-center" style={{ gap: sw * 0.004, paddingLeft: sw * 0.036 }}>
+            <span className="absolute inset-0 flex items-center justify-center" style={{ gap: sw * 0.004, paddingLeft: sw * 0.04 }}>
               <span className="font-bold whitespace-nowrap" style={{ fontSize: sw * 0.0135, color: gifts ? '#fff' : 'rgba(255,255,255,0.7)', WebkitTextStroke: `${sw * 0.0028}px ${gifts ? '#4a1d7a' : '#4a4650'}`, paintOrder: 'stroke fill', letterSpacing: '0.04em' }}>{gifts ? 'Collect All' : 'No gifts yet'}</span>
             </span>
-            <ArtImg file="icon_gift_bubble.png" className="absolute" style={{ left: '5%', top: '50%', width: sw * 0.034, transform: 'translateY(-50%)', filter: gifts ? undefined : 'grayscale(1) opacity(0.6)' }} fallback={<span className="absolute" style={{ left: '8%', top: '30%', fontSize: sw * 0.02 }}>🎁</span>} />
+            <ArtImg file="icon_gift_bubble.png" className="absolute" style={{ left: '11%', top: '50%', width: sw * 0.03, transform: 'translateY(-50%)', filter: gifts ? undefined : 'grayscale(1) opacity(0.6)' }} fallback={<span className="absolute" style={{ left: '8%', top: '30%', fontSize: sw * 0.02 }}>🎁</span>} />
             {gifts > 0 && <span className="absolute rounded-full font-bold text-white flex items-center justify-center" style={{ right: '2%', top: '-4%', background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.021, height: sw * 0.021, fontSize: sw * 0.011, padding: '0 4px' }}>{gifts}</span>}
           </button>
           <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0135, padding: `${sw * 0.004}px ${sw * 0.012}px` }}>

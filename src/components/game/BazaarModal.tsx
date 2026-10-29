@@ -260,10 +260,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
             <div className="flex items-center gap-4">
               <img src={`${import.meta.env.BASE_URL}ui/tool_bazaar.png`} alt="" draggable={false} className="w-20 h-20" style={{ imageRendering: 'auto' }} />
               <div>
-                <h1 className="text-4xl font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", letterSpacing: '0.06em', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill' }}>
+                <div className="text-4xl font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", letterSpacing: '0.06em', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill' }}>
                   MYSTIC BAZAAR
-                </h1>
-                <p className="text-lg opacity-90 font-semibold text-[#ffe9a8]">Treasures from slime world...</p>
+                </div>
+                <div className="text-lg opacity-90 font-semibold text-[#ffe9a8] [font-family:Fredoka,sans-serif]">Treasures from slime world...</div>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -294,10 +294,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                   className={`p-4 rounded-full transition-all ${
                     currentPage === 0 
                       ? 'bg-gray-200 cursor-not-allowed opacity-50' 
-                      : 'bg-pink-200 hover:bg-pink-300 cursor-pointer'
+                      : 'bg-[#f6e8c3] hover:bg-white cursor-pointer border-[3px] border-[#4a2f17]'
                   }`}
                 >
-                  <ChevronLeft className="w-6 h-6 text-pink-700" />
+                  <ChevronLeft className="w-6 h-6 text-[#4a2f17]" />
                 </button>
 
                 {/* Items Container */}
@@ -333,14 +333,14 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           
                           {/* Description Underneath */}
                           <div className="text-center flex-1 flex flex-col justify-end">
-                            <h3 className="text-lg font-black text-[#4a2f17] uppercase tracking-wider mb-2 transition-colors" 
+                            <div className="[font-family:Fredoka,sans-serif] text-lg font-black text-[#4a2f17] uppercase tracking-wider mb-2 transition-colors" 
                                 style={{
                                   '--hover-color': ELEMENT_COLORS[elem]?.[0] || '#FF7EB6'
                                 } as React.CSSProperties}>
                               <span className="group-hover:[color:var(--hover-color)]">
                                 {ELEMENT_DISPLAY_NAMES[elem]} Egg
                               </span>
-                            </h3>
+                            </div>
                             <p className="text-xs font-semibold text-[#6b4a2c] mb-3 max-w-xs">
                               A mysterious {ELEMENT_DISPLAY_NAMES[elem].toLowerCase()} egg waiting to be hatched.
                             </p>
@@ -400,15 +400,15 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           
                           {/* Description Underneath - No Card Background */}
                           <div className="text-center flex-1 flex flex-col justify-end">
-                            <h3 className="text-xl font-black text-[#4a2f17] uppercase tracking-wider mb-3 transition-colors" 
+                            <div className="[font-family:Fredoka,sans-serif] text-xl font-black text-[#4a2f17] uppercase tracking-wider mb-3 transition-colors" 
                                 style={{
                                   '--hover-color': ELEMENT_COLORS[elem]?.[0] || '#FF7EB6'
                                 } as React.CSSProperties}>
                               <span className="group-hover:[color:var(--hover-color)]">
                                 {ELEMENT_DISPLAY_NAMES[elem]} Sanctum
                               </span>
-                            </h3>
-                            <p className="text-sm text-slate-500 mb-4 max-w-sm leading-relaxed font-bold italic">
+                            </div>
+                            <p className="text-sm text-[#6b4a2c] mb-4 max-w-sm leading-relaxed font-semibold">
                               {theme.desc}
                             </p>
                             
@@ -421,8 +421,8 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                               }}
                               className={`flex items-center justify-center gap-1 px-4 py-2 rounded-full border-2 cursor-pointer transition-all transform active:scale-95 mt-4 ${
                                 state.goo >= cost 
-                                  ? 'bg-[#FF7EB6] text-white border-[#FF7EB6] hover:bg-[#FF1493] hover:border-[#FF1493] shadow-lg' 
-                                  : 'bg-white/60 text-[#FF7EB6] border-[#FF7EB6]/30 cursor-not-allowed'
+                                  ? 'bg-gradient-to-r from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[#4a2f17] hover:brightness-110 shadow-lg' 
+                                  : 'bg-[#e8dfc9] text-[#6b4a2c] border-[#9a8460] cursor-not-allowed'
                               }`}
                             >
                               <span className="text-sm font-bold">{cost}g</span>
@@ -449,9 +449,9 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           </div>
 
                           <div className="text-center flex-1 flex flex-col justify-end">
-                            <h3 className="text-lg font-black text-[#4a2f17] uppercase tracking-wider mb-2">
+                            <div className="[font-family:Fredoka,sans-serif] text-lg font-black text-[#4a2f17] uppercase tracking-wider mb-2">
                               {item.name}
-                            </h3>
+                            </div>
                             <p className="text-xs font-semibold text-[#6b4a2c] mb-3 max-w-xs">
                               {item.desc}
                             </p>
@@ -482,10 +482,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                   className={`p-4 rounded-full transition-all ${
                     currentPage >= getTotalPages() - 1 
                       ? 'bg-gray-200 cursor-not-allowed opacity-50' 
-                      : 'bg-pink-200 hover:bg-pink-300 cursor-pointer'
+                      : 'bg-[#f6e8c3] hover:bg-white cursor-pointer border-[3px] border-[#4a2f17]'
                   }`}
                 >
-                  <ChevronRight className="w-6 h-6 text-pink-700" />
+                  <ChevronRight className="w-6 h-6 text-[#4a2f17]" />
                 </button>
               </div>
 
@@ -497,8 +497,8 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                     onClick={() => setCurrentPage(index)}
                     className={`w-3 h-3 rounded-full transition-all ${
                       index === currentPage 
-                        ? 'bg-[#FF7EB6] scale-125' 
-                        : 'bg-pink-300 hover:bg-pink-400'
+                        ? 'bg-[#ffe98a] scale-125 border-2 border-[#4a2f17]' 
+                        : 'bg-[#c9a24a]/70 hover:bg-[#ffe98a]'
                     }`}
                   />
                 ))}
@@ -508,14 +508,14 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         </div>
 
         {/* Category Navigation - Bottom */}
-        <div className="bg-white/90 p-6 border-t-2 border-[#FF7EB6]/20">
+        <div className="bg-[#2a1238]/85 p-4 border-t-4 border-[#f2d68a]/60">
           <div className="flex gap-4 justify-center">
             <button
               onClick={() => setSelectedCategory('eggs')}
               className={`px-8 py-4 rounded-2xl font-bold transition-all ${
                 selectedCategory === 'eggs' 
-                  ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-white shadow-lg scale-105' 
-                  : 'bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700'
+                  ? 'bg-gradient-to-b from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[3px] border-[#4a2f17] shadow-lg scale-105' 
+                  : 'bg-[#5a3a22] text-[#ffe9a8] border-[3px] border-[#2a1238] hover:bg-[#6b4a2c]'
               }`}
             >
               <Egg className="w-6 h-6 inline mr-2" />
@@ -525,8 +525,8 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
               onClick={() => setSelectedCategory('habitats')}
               className={`px-8 py-4 rounded-2xl font-bold transition-all ${
                 selectedCategory === 'habitats' 
-                  ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-white shadow-lg scale-105' 
-                  : 'bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700'
+                  ? 'bg-gradient-to-b from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[3px] border-[#4a2f17] shadow-lg scale-105' 
+                  : 'bg-[#5a3a22] text-[#ffe9a8] border-[3px] border-[#2a1238] hover:bg-[#6b4a2c]'
               }`}
             >
               <Home className="w-6 h-6 inline mr-2" />
@@ -536,8 +536,8 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
               onClick={() => setSelectedCategory('items')}
               className={`px-8 py-4 rounded-2xl font-bold transition-all ${
                 selectedCategory === 'items'
-                  ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-white shadow-lg scale-105'
-                  : 'bg-pink-50 text-pink-600 hover:bg-pink-100 hover:text-pink-700'
+                  ? 'bg-gradient-to-b from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[3px] border-[#4a2f17] shadow-lg scale-105'
+                  : 'bg-[#5a3a22] text-[#ffe9a8] border-[3px] border-[#2a1238] hover:bg-[#6b4a2c]'
               }`}
             >
               <Sparkles className="w-6 h-6 inline mr-2" />

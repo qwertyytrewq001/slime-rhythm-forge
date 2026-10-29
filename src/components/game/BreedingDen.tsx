@@ -257,7 +257,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
 
       {/* Breeding controls */}
       <div className="absolute top-4 left-4">
-        {onBackToAltar && <NavPlate art="altar" icon="altar_icon.png" color="#b2ebff" label="BACK" onClick={onBackToAltar} />}
+        {onBackToAltar && <NavPlate art="altar" icon="ui/navicon_altar.png" color="#b2ebff" label="BACK" onClick={onBackToAltar} />}
       </div>
 
       {/* Breeding title */}
