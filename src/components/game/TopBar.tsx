@@ -21,7 +21,7 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
     onClick={onClick}
     aria-label={label}
     className="relative transition-transform duration-150 hover:scale-105 hover:brightness-110 active:scale-95 outline-none"
-    style={{ width: 'clamp(170px, 17vw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
+    style={{ width: 'clamp(150px, 17vw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
   >
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
     {/* the old icon sits fully inside the medallion: a clipped circle that hides the plate's own icon */}
@@ -59,8 +59,8 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
   const home = currentView === 'breeding';
 
   return (
-    <div className="flex justify-between px-4 pt-2 pb-[135px] bg-transparent relative z-[60] pointer-events-none">
-      <div className="flex items-start gap-3 pointer-events-auto">
+    <div className="flex justify-between px-4 pt-2 pb-[135px] sm:pb-[135px] bg-transparent relative z-[60] pointer-events-none">
+      <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 pointer-events-auto">
         {home ? (
           <>
             <NavPlate art="sanctuaries" icon="ui/navicon_habitats.png" color="#c4ffb2" label="SANCTUARIES" onClick={onOpenSanctuaries} badge={giftsWaiting} badgeLabel={`${giftsWaiting} gifts waiting`} />
@@ -70,7 +70,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
           <NavPlate art="altar" icon="ui/navicon_altar.png" color="#b2ebff" label="ALTAR" onClick={onBackToAltar} />
         )}
       </div>
-      <div className="flex items-start gap-3 pointer-events-auto">
+      <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 pointer-events-auto">
         {home && (
           <>
             <NavPlate art="den" icon="ui/navicon_altar.png" color="#b2ebff" label="BREEDING DEN" onClick={onOpenBreedingDen} />

@@ -31,7 +31,7 @@ export function Achievements({ onClose }: { onClose: () => void }) {
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(30,16,10,0.05), rgba(30,16,10,0.5))' }} />
 
       <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()} style={{ background: 'rgba(246,232,195,0.88)', border: '4px solid #4a2f17', boxShadow: '0 20px 60px rgba(0,0,0,0.55)' }}>
-        <div className="flex items-center justify-between gap-4 p-4" style={{ background: 'linear-gradient(#5a3a7a,#3f2757)', borderBottom: '4px solid #f2d68a', color: '#fff3d0' }}>
+        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 p-3 sm:p-4" style={{ background: 'linear-gradient(#5a3a7a,#3f2757)', borderBottom: '4px solid #f2d68a', color: '#fff3d0' }}>
           <div className="flex items-center gap-3">
             <img src={`${U}tool_achievements.png`} alt="" draggable={false} className="w-16 h-16" style={{ imageRendering: 'auto' }} />
             <div>
@@ -74,7 +74,7 @@ export function Achievements({ onClose }: { onClose: () => void }) {
                     return (
                       <div key={def.id} className="relative" style={{ minHeight: 82, borderStyle: 'solid', borderWidth: '15px 64px', borderImageSource: `url(${U}${card}.png)`, borderImageSlice: '45 192 fill', borderImageRepeat: 'stretch', boxSizing: 'border-box' }}>
                         <div className="relative flex items-center gap-3" style={{ color: INK, margin: '-15px -64px', padding: '10px 70px 10px 78px', minHeight: 82 }}>
-                          <div className="absolute" style={{ left: 11, top: '50%', width: 47, height: 47, transform: 'translateY(-50%)' }}>
+                          <div className="absolute" style={{ left: 15, top: '50%', width: 47, height: 47, transform: 'translateY(-50%)' }}>
                             {ach.unlocked ? (
                               <img src={`${U}ach_medal_${medalFor(def.rewardAmount)}.png`} alt="" draggable={false} className="w-full h-full" style={{ imageRendering: 'auto' }} />
                             ) : (

@@ -247,13 +247,13 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
 }
 
 const Banner: React.FC<{ sw: number; children: React.ReactNode }> = ({ sw, children }) => (
-  <div className="absolute left-1/2 -translate-x-1/2 rounded-2xl shadow-xl font-bold text-center sanct-rise" style={{ top: sw * 0.075, background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.006}px ${sw * 0.014}px`, zIndex: 350, maxWidth: '70%' }}>{children}</div>
+  <div className="absolute left-1/2 -translate-x-1/2 rounded-2xl shadow-xl font-bold text-center sanct-rise" style={{ bottom: sw * 0.07, background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.006}px ${sw * 0.014}px`, zIndex: 350, maxWidth: '70%' }}>{children}</div>
 );
 
 const LockedSite: React.FC<{ w: number; sw: number; label: string }> = ({ w, sw, label }) => (
   <div className="absolute inset-0 sanct-bob pointer-events-none" style={{ animationDelay: '-2s' }}>
     <ArtImg file="island_locked.png" className="absolute inset-0 w-full h-full" style={{ objectFit: 'contain', objectPosition: 'center bottom', opacity: 0.9 }} fallback={<div className="absolute" style={{ left: '8%', right: '8%', top: '18%', height: '50%', borderRadius: '50%', background: 'rgba(120,110,150,0.55)' }} />} />
-    <div className="absolute left-1/2 -translate-x-1/2 text-center whitespace-nowrap font-bold text-white" style={{ top: '84%', fontSize: sw * 0.0105, textShadow: '0 2px 4px rgba(0,0,0,0.9)' }}>{label}</div>
+    <div className="absolute left-1/2 -translate-x-1/2 text-center whitespace-nowrap font-bold text-white" style={{ top: '84%', fontSize: sw * 0.0115, WebkitTextStroke: sw * 0.0025 + 'px #2a1238', paintOrder: 'stroke fill', textShadow: '0 2px 3px rgba(0,0,0,0.7)' }}>{label}</div>
   </div>
 );
 
