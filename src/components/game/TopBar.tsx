@@ -15,6 +15,15 @@ interface TopBarProps {
 
 const ART = `${import.meta.env.BASE_URL}altar/`;
 
+/** Where each plate's medallion is (percent of the plate): measured from the images. h is the plate image height at 520 px wide. */
+const PLATE: Record<string, { cx: number; cy: number; d: number; h: number }> = {
+  sanctuaries: { cx: 22.31, cy: 46.26, d: 25.31, h: 227 },
+  farm: { cx: 22.31, cy: 46.26, d: 25.31, h: 227 },
+  den: { cx: 22.5, cy: 46.64, d: 24.92, h: 223 },
+  battle: { cx: 23.27, cy: 46.15, d: 25.69, h: 234 },
+  altar: { cx: 23.08, cy: 46.15, d: 25.69, h: 234 },
+};
+
 /** A painted wooden sign with an icon medallion; the label sits in the empty wood. */
 export const NavPlate: React.FC<{ art: string; icon: string; color: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string }> = ({ art, icon, color, label, onClick, badge, badgeLabel }) => (
   <button
@@ -24,10 +33,8 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
     style={{ width: 'clamp(150px, 17vw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
   >
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
-    {/* the old icon sits fully inside the medallion: a clipped circle that hides the plate's own icon */}
-    <span className="absolute rounded-full overflow-hidden flex items-center justify-center" style={{ left: '9%', top: '46%', width: '26.4%', aspectRatio: '1', transform: 'translateY(-50%)', background: 'radial-gradient(circle at 40% 35%, #fbefcf, #d9bf8a)', boxShadow: 'inset 0 0 0 2px rgba(90,60,20,0.35), inset 0 -4px 8px rgba(90,60,20,0.25)' }}>
-      <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} style={{ width: '78%', height: '78%', objectFit: 'contain', imageRendering: 'auto' }} />
-    </span>
+    {/* the plate image already has a clean cream medallion (measured centre and size below); only the icon goes on top */}
+    <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: `${PLATE[art].cx}%`, top: `${PLATE[art].cy}%`, width: `${PLATE[art].d * 0.84}%`, height: `${PLATE[art].d * 0.84 * (520 / PLATE[art].h)}%`, objectFit: 'contain', transform: 'translate(-50%, -50%)', imageRendering: 'auto' }} />
     <span
       className="absolute flex items-center justify-center text-center text-game-ui"
       style={{ left: '36%', right: '5%', top: 0, bottom: 0, fontSize: 'clamp(10px, 1vw, 15px)', color, letterSpacing: '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}

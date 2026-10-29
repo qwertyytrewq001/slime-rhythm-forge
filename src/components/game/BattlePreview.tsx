@@ -107,10 +107,9 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
           <button
             onClick={onClose}
             aria-label="Close"
-            className="w-11 h-11 rounded-full flex items-center justify-center border-[3px] shadow-lg hover:scale-110 transition-transform"
-            style={{ background: PARCHMENT, borderColor: INK, color: INK }}
+            className="hover:scale-110 transition-transform" style={{ background: 'transparent' }}
           >
-            <X className="w-6 h-6" strokeWidth={3} />
+            <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 46, height: 46, maxWidth: 'none', imageRendering: 'auto' }} />
           </button>
         </div>
 

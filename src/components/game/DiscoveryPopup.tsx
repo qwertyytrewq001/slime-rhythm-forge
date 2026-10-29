@@ -96,9 +96,9 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
         {/* Close button */}
         <button 
           onClick={onClose}
-          className="absolute top-3 right-3 w-8 h-8 bg-gradient-to-br from-pink-400 to-amber-500 text-white rounded-full flex items-center justify-center shadow-lg hover:scale-110 active:scale-90 transition-all z-[1010] border-2 border-white/50"
+          className="absolute top-3 right-3 hover:scale-110 active:scale-90 transition-transform z-10"
         >
-          <X className="w-4 h-4" />
+          <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 38, height: 38, maxWidth: 'none', imageRendering: 'auto' }} />
         </button>
 
         {/* TOP DECORATIVE BANNER */}

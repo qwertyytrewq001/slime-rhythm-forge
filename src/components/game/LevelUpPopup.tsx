@@ -60,9 +60,9 @@ export function LevelUpPopup() {
           <button
             onClick={(e) => { e.stopPropagation(); handleClose(); }}
             aria-label="Close"
-            className="absolute top-2 right-2 w-6 h-6 bg-white/80 hover:bg-white rounded-full flex items-center justify-center shadow-lg transition-all hover:scale-110 z-10"
+            className="absolute top-2 right-2 hover:scale-110 transition-transform z-10"
           >
-            <X className="w-3 h-3 text-gray-600" />
+            <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 32, height: 32, maxWidth: 'none', imageRendering: 'auto' }} />
           </button>
 
           {/* Sparkles Decoration */}

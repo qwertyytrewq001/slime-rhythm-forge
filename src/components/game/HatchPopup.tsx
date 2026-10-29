@@ -49,9 +49,9 @@ export function HatchPopup({ slime, onClose }: HatchPopupProps) {
         {/* Close button */}
         <button
           onClick={onClose}
-          className="absolute top-4 right-4 z-20 w-10 h-10 rounded-full bg-red-500 hover:bg-red-600 flex items-center justify-center transition-all hover:scale-110 shadow-lg border-2 border-red-400"
+          className="absolute top-4 right-4 z-20 hover:scale-110 transition-transform"
         >
-          <X className="w-5 h-5 text-white stroke-[3px]" />
+          <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 44, height: 44, maxWidth: 'none', imageRendering: 'auto' }} />
         </button>
 
         {/* Rarity glow accent */}

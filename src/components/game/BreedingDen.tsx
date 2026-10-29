@@ -175,9 +175,9 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 e.stopPropagation();
                 handleRemoveSlime(1);
               }}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-all"
+              className="absolute -top-3 -right-3 hover:scale-110 active:scale-90 transition-transform z-10"
             >
-              <X className="w-3 h-3" />
+              <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Remove" draggable={false} style={{ width: 30, height: 30, imageRendering: 'auto' }} />
             </button>
           </div>
         ) : (
@@ -226,9 +226,9 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 e.stopPropagation();
                 handleRemoveSlime(2);
               }}
-              className="absolute -top-2 -right-2 w-6 h-6 bg-red-500 text-white rounded-full flex items-center justify-center hover:bg-red-600 transition-all"
+              className="absolute -top-3 -right-3 hover:scale-110 active:scale-90 transition-transform z-10"
             >
-              <X className="w-3 h-3" />
+              <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Remove" draggable={false} style={{ width: 30, height: 30, imageRendering: 'auto' }} />
             </button>
           </div>
         ) : (

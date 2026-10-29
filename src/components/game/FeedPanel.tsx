@@ -70,9 +70,9 @@ export function FeedPanel({ slimeId }: FeedPanelProps) {
           <button
             onClick={() => setLevelNote(null)}
             aria-label="Dismiss"
-            className="ml-auto shrink-0 w-6 h-6 rounded-full bg-white border border-slate-300 flex items-center justify-center hover:bg-slate-100"
+            className="ml-auto shrink-0 hover:scale-110 transition-transform"
           >
-            <X className="w-3 h-3 text-slate-500" />
+            <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 28, height: 28, maxWidth: 'none', imageRendering: 'auto' }} />
           </button>
         </div>
       )}
