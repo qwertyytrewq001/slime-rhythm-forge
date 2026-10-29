@@ -2,6 +2,7 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { NavPlate } from './TopBar';
+import { DenPeekers } from './DenPeekers';
 import { Slime } from '@/types/slime';
 import { CodexSlime } from '@/data/slimeCodex';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
@@ -128,6 +129,9 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       
       {/* Dark overlay for better visibility */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 60%, transparent 55%, rgba(12,6,30,0.45) 100%)' }} />
+
+      {/* discovered slimes play peek-a-boo in the wall alcoves */}
+      <DenPeekers />
 
       {/* the central egg altar */}
       <img src={`${import.meta.env.BASE_URL}altar/denp_egg_altar.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '74%', width: 'min(17vw, 230px)', transform: 'translate(-50%, -50%)', imageRendering: 'auto' }} />
