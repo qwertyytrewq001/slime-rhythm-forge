@@ -210,6 +210,8 @@ function GameLayout() {
     }
   }, [state.tutorialCompleted, state.slimes.length, showTitle]);
 
+  const toolbarArt = "relative h-[68px] w-[68px] transition-transform duration-150 hover:scale-110 active:scale-95 group pointer-events-auto";
+  const toolIcon = (n: string) => <img src={`${import.meta.env.BASE_URL}ui/tool_${n}.png`} alt="" draggable={false} className="w-full h-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />;
   const toolbarCircle = "relative bg-black/40 h-14 w-14 flex items-center justify-center transition-all hover:scale-110 border border-[#FF7EB6]/40 rounded-full hover:border-[#FF7EB6] shadow-2xl group pointer-events-auto";
   const toolbarIcon = "w-8 h-8 text-[#FF7EB6] stroke-[2.5px]";
   const toolbarLabel = "absolute bottom-[130%] left-1/2 -translate-x-1/2 px-3 py-1 bg-[#FFB3D1] rounded border border-[#FF7EB6]/40 text-[10px] uppercase font-white tracking-widest opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap shadow-[0_0_15px_rgba(0,0,0,0.5)]";
@@ -317,8 +319,8 @@ function GameLayout() {
         {/* BOTTOM TOOLBAR */}
         <div className="fixed bottom-6 left-6 z-[150] flex items-center gap-4 pointer-events-auto">
           <div className="relative group">
-            <button onClick={handleMute} className={toolbarCircle}>
-              {state.muted ? <VolumeX className={`${toolbarIcon} opacity-40`} /> : <Volume2 className={toolbarIcon} />}
+            <button onClick={handleMute} className={toolbarArt} aria-label={state.muted ? 'Unmute' : 'Mute'}>
+              {toolIcon(state.muted ? 'sound_off' : 'sound_on')}
               <span className={toolbarLabel}>{state.muted ? 'Unmute' : 'Mute'}</span>
             </button>
           </div>
@@ -327,8 +329,8 @@ function GameLayout() {
             <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
               <SheetTrigger asChild>
                 <div className="relative group">
-                  <button data-testid="gallery-button" className={toolbarCircle}>
-                    <Images className={toolbarIcon} />
+                  <button data-testid="gallery-button" className={toolbarArt}>
+                    {toolIcon('collection')}
                     <span className={toolbarLabel}>Gallery</span>
                   </button>
                 </div>
@@ -352,21 +354,21 @@ function GameLayout() {
           <div className="relative group">
             <button 
               onClick={() => setBazaarModalOpen(true)}
-              className={toolbarCircle}
+              className={toolbarArt}
             >
-              <ShoppingBag className={toolbarIcon} />
+              {toolIcon('bazaar')}
               <span className={toolbarLabel}>Bazaar</span>
             </button>
           </div>
 
-          <button onClick={() => setCodexGalleryOpen(true)} className={toolbarCircle}>
-              <BookOpen className={toolbarIcon} />
+          <button onClick={() => setCodexGalleryOpen(true)} className={toolbarArt}>
+              {toolIcon('codex')}
               <span className={toolbarLabel}>Codex</span>
             </button>
 
           <div className="relative group">
-            <button onClick={() => setShowAchievements(true)} className={toolbarCircle}>
-              <Trophy className={toolbarIcon} />
+            <button onClick={() => setShowAchievements(true)} className={toolbarArt}>
+              {toolIcon('achievements')}
               <span className={toolbarLabel}>Achievements</span>
               {claimableAchievements > 0 && (
                 <span className="absolute -top-1 -right-1 min-w-[22px] h-[22px] px-1 rounded-full bg-[#FF1493] text-white text-[11px] font-black flex items-center justify-center border-2 border-white shadow-lg animate-pulse">

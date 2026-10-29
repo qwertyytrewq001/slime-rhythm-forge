@@ -24,12 +24,13 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
     style={{ width: 'clamp(170px, 17vw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
   >
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
-    {/* the old icon sits in the medallion, on a dark backing that hides the plate's own icon */}
-    <span className="absolute rounded-full" style={{ left: '8.6%', top: '50%', width: '25%', aspectRatio: '1', transform: 'translateY(-50%)', background: 'radial-gradient(circle at 40% 35%, #fbefcf, #d9bf8a)', boxShadow: 'inset 0 0 0 2px rgba(90,60,20,0.35), inset 0 -4px 8px rgba(90,60,20,0.25)' }} />
-    <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} className="absolute" style={{ left: '21.1%', top: '50%', height: '104%', width: 'auto', maxWidth: '38%', objectFit: 'contain', transform: 'translate(-50%, -52%)', imageRendering: 'auto', filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.5))' }} />
+    {/* the old icon sits fully inside the medallion: a clipped circle that hides the plate's own icon */}
+    <span className="absolute rounded-full overflow-hidden flex items-center justify-center" style={{ left: '8.8%', top: '50%', width: '25.6%', aspectRatio: '1', transform: 'translateY(-50%)', background: 'radial-gradient(circle at 40% 35%, #fbefcf, #d9bf8a)', boxShadow: 'inset 0 0 0 2px rgba(90,60,20,0.35), inset 0 -4px 8px rgba(90,60,20,0.25)' }}>
+      <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} style={{ width: '122%', height: '122%', maxWidth: 'none', objectFit: 'contain', imageRendering: 'auto' }} />
+    </span>
     <span
       className="absolute flex items-center justify-center text-center text-game-ui"
-      style={{ left: '36%', right: '5%', top: 0, bottom: 0, fontSize: 'clamp(10px, 1vw, 15px)', color, letterSpacing: '0.06em', lineHeight: 1.05 }}
+      style={{ left: '36%', right: '5%', top: 0, bottom: 0, fontSize: 'clamp(10px, 1vw, 15px)', color, letterSpacing: '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}
     >
       {label}
     </span>

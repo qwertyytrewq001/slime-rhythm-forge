@@ -1,7 +1,13 @@
 import { useGameState } from '@/hooks/useGameState';
 import { ACHIEVEMENT_CATEGORIES, ACHIEVEMENT_DEFS } from '@/data/achievements';
 import { audioEngine } from '@/utils/audioEngine';
-import { Trophy, X, Check } from 'lucide-react';
+
+const U = `${import.meta.env.BASE_URL}ui/`;
+const FRED = "'Fredoka', 'Trebuchet MS', sans-serif";
+const INK = '#4a2f17';
+
+/** Bronze, silver or gold medal by how big the reward is. */
+const medalFor = (reward: number) => (reward >= 500 ? 'gold' : reward >= 200 ? 'silver' : 'bronze');
 
 export function Achievements({ onClose }: { onClose: () => void }) {
   const { state, dispatch } = useGameState();
@@ -14,60 +20,49 @@ export function Achievements({ onClose }: { onClose: () => void }) {
     dispatch({ type: 'CLAIM_ACHIEVEMENT', id });
     audioEngine.playSfx('achievement');
   };
-
   const claimAll = () => {
     claimable.forEach(a => dispatch({ type: 'CLAIM_ACHIEVEMENT', id: a.id }));
     audioEngine.playSfx('achievement');
   };
 
   return (
-    <div
-      className="fixed inset-0 z-[260] bg-black/70 backdrop-blur-md flex items-center justify-center p-4"
-      onClick={onClose}
-    >
-      <div
-        className="bg-gradient-to-br from-pink-50 via-white to-purple-50 rounded-3xl border-4 border-[#FF7EB6] shadow-2xl w-full max-w-3xl max-h-[88vh] overflow-hidden flex flex-col"
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] p-5 text-white flex items-center justify-between gap-4">
+    <div className="fixed inset-0 z-[260] bg-[#1a0f24] flex items-center justify-center" onClick={onClose} style={{ fontFamily: FRED }}>
+      <img src={`${U}ach_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(30,16,10,0.05), rgba(30,16,10,0.5))' }} />
+
+      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()} style={{ background: 'rgba(246,232,195,0.88)', border: '4px solid #4a2f17', boxShadow: '0 20px 60px rgba(0,0,0,0.55)' }}>
+        <div className="flex items-center justify-between gap-4 p-4" style={{ background: 'linear-gradient(#5a3a7a,#3f2757)', borderBottom: '4px solid #f2d68a', color: '#fff3d0' }}>
           <div className="flex items-center gap-3">
-            <div className="p-2 bg-white/20 rounded-full">
-              <Trophy className="w-6 h-6" />
-            </div>
+            <img src={`${U}tool_achievements.png`} alt="" draggable={false} className="w-16 h-16" style={{ imageRendering: 'auto' }} />
             <div>
-              <h2 className="text-xl font-black" style={{ fontFamily: "'Press Start 2P', cursive" }}>Achievements</h2>
-              <p className="text-sm opacity-90">
-                {unlockedCount} / {state.achievements.length} unlocked
-                {claimable.length > 0 && ` · ${claimable.length} ready to claim`}
+              <h2 className="text-3xl font-bold leading-none" style={{ letterSpacing: '0.05em', WebkitTextStroke: '4px #2a1238', paintOrder: 'stroke fill' }}>Achievements</h2>
+              <p className="text-sm font-semibold opacity-90 mt-1">
+                {unlockedCount} / {state.achievements.length} unlocked{claimable.length > 0 && ` · ${claimable.length} ready to claim`}
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             {claimable.length > 0 && (
-              <button
-                onClick={claimAll}
-                className="px-4 py-2 rounded-full bg-white text-[#FF1493] font-black text-sm hover:scale-105 transition-transform shadow-lg"
-              >
-                Claim all · {claimableGoo} 💧
+              <button onClick={claimAll} className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: 190 }}>
+                <img src={`${U}ach_claim.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
+                <span className="absolute inset-0 flex items-center justify-center font-bold text-white whitespace-nowrap" style={{ fontSize: 15, WebkitTextStroke: '3px #1f4a1a', paintOrder: 'stroke fill' }}>Claim all · {claimableGoo}</span>
               </button>
             )}
-            <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors">
-              <X className="w-6 h-6" />
+            <button onClick={onClose} aria-label="Close" className="hover:scale-110 active:scale-95 transition-transform">
+              <img src={`${U}baz_close.png`} alt="" draggable={false} className="w-12 h-12" style={{ imageRendering: 'auto' }} />
             </button>
           </div>
         </div>
 
-        {/* List */}
-        <div className="overflow-y-auto p-5 space-y-6">
+        <div className="overflow-y-auto p-4 space-y-5">
           {ACHIEVEMENT_CATEGORIES.map(category => {
             const defs = ACHIEVEMENT_DEFS.filter(d => d.category === category);
             const done = defs.filter(d => state.achievements.find(a => a.id === d.id)?.unlocked).length;
             return (
               <section key={category}>
-                <div className="flex items-center justify-between mb-2 px-1">
-                  <h3 className="text-sm font-black text-[#FF1493] uppercase tracking-widest">{category}</h3>
-                  <span className="text-xs font-bold text-gray-400">{done}/{defs.length}</span>
+                <div className="flex items-center justify-between mb-1 px-2" style={{ color: INK }}>
+                  <h3 className="text-base font-bold uppercase tracking-widest">{category}</h3>
+                  <span className="text-sm font-bold opacity-70">{done}/{defs.length}</span>
                 </div>
                 <div className="grid gap-2">
                   {defs.map(def => {
@@ -75,56 +70,42 @@ export function Achievements({ onClose }: { onClose: () => void }) {
                     if (!ach) return null;
                     const current = Math.min(def.progress(state), def.target);
                     const pct = Math.round((current / def.target) * 100);
+                    const card = ach.claimed ? 'ach_row' : ach.unlocked ? 'ach_row_ready' : 'ach_row_locked';
                     return (
-                      <div
-                        key={def.id}
-                        className={`flex items-center gap-3 p-3 rounded-2xl border-2 transition-all ${
-                          ach.claimed
-                            ? 'border-green-300 bg-green-50/70'
-                            : ach.unlocked
-                              ? 'border-[#FF7EB6] bg-pink-50 shadow-md'
-                              : 'border-gray-200 bg-white/70'
-                        }`}
-                      >
-                        <div
-                          className={`w-12 h-12 shrink-0 rounded-xl flex items-center justify-center text-2xl border-2 ${
-                            ach.unlocked ? 'border-[#FF7EB6]/60 bg-white' : 'border-gray-200 bg-gray-100 grayscale opacity-60'
-                          }`}
-                        >
-                          {def.icon}
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-black text-gray-800 leading-tight">{def.name}</p>
-                          <p className="text-xs text-gray-500 leading-snug">{def.description}</p>
-                          {!ach.unlocked && (
-                            <div className="mt-1.5 flex items-center gap-2">
-                              <div className="flex-1 h-1.5 bg-gray-200 rounded-full overflow-hidden">
-                                <div
-                                  className="h-full bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] transition-all"
-                                  style={{ width: `${pct}%` }}
-                                />
+                      <div key={def.id} className="relative" style={{ minHeight: 74 }}>
+                        <img src={`${U}${card}.png`} alt="" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none" style={{ imageRendering: 'auto', objectFit: 'fill' }} />
+                        <div className="relative flex items-center gap-3 px-4 py-2" style={{ color: INK }}>
+                          <div className="relative shrink-0" style={{ width: 52, height: 52 }}>
+                            {ach.unlocked ? (
+                              <img src={`${U}ach_medal_${medalFor(def.rewardAmount)}.png`} alt="" draggable={false} className="w-full h-full" style={{ imageRendering: 'auto' }} />
+                            ) : (
+                              <img src={`${U}ach_lock.png`} alt="" draggable={false} className="w-full h-full" style={{ imageRendering: 'auto', opacity: 0.8 }} />
+                            )}
+                          </div>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-base font-bold leading-tight">{def.name}</p>
+                            <p className="text-xs font-semibold opacity-75 leading-snug">{def.description}</p>
+                            {!ach.unlocked && (
+                              <div className="mt-1 flex items-center gap-2">
+                                <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ background: 'rgba(60,35,15,0.35)' }}>
+                                  <div className="h-full" style={{ width: `${pct}%`, background: 'linear-gradient(90deg,#ffe98a,#f2b632)' }} />
+                                </div>
+                                <span className="text-[11px] font-bold tabular-nums opacity-70">{Math.min(current, def.target)}/{def.target}</span>
                               </div>
-                              <span className="text-[10px] font-bold text-gray-400 tabular-nums">
-                                {Math.min(current, def.target)}/{def.target}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                        <div className="shrink-0">
-                          {ach.claimed ? (
-                            <span className="flex items-center gap-1 text-xs font-black text-green-600">
-                              <Check className="w-4 h-4" /> Claimed
-                            </span>
-                          ) : ach.unlocked ? (
-                            <button
-                              onClick={() => claim(def.id)}
-                              className="px-4 py-2 rounded-full bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] text-white text-xs font-black hover:scale-105 transition-transform shadow-lg"
-                            >
-                              Claim {def.rewardAmount} 💧
-                            </button>
-                          ) : (
-                            <span className="text-xs font-bold text-gray-400">{def.rewardAmount} 💧</span>
-                          )}
+                            )}
+                          </div>
+                          <div className="shrink-0">
+                            {ach.claimed ? (
+                              <span className="text-sm font-bold" style={{ color: '#2f7a2a' }}>✓ Claimed</span>
+                            ) : ach.unlocked ? (
+                              <button onClick={() => claim(def.id)} className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: 130 }}>
+                                <img src={`${U}ach_claim.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
+                                <span className="absolute inset-0 flex items-center justify-center font-bold text-white whitespace-nowrap" style={{ fontSize: 13, WebkitTextStroke: '3px #1f4a1a', paintOrder: 'stroke fill' }}>Claim {def.rewardAmount}</span>
+                              </button>
+                            ) : (
+                              <span className="text-sm font-bold opacity-70">{def.rewardAmount} 💧</span>
+                            )}
+                          </div>
                         </div>
                       </div>
                     );

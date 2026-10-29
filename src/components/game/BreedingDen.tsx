@@ -56,9 +56,9 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
   const hovered = hoverId ? state.slimes.find(s => s.id === hoverId) : undefined;
   const waitingSlot: 1 | 2 | null = slot1Slime && !slot2Slime ? 1 : slot2Slime && !slot1Slime ? 2 : null;
   const waiting = waitingSlot === 1 ? slot1Slime : waitingSlot === 2 ? slot2Slime : undefined;
-  const reaction: 'shy' | 'worried' | null = !waiting || !hovered || hovered.id === waiting.id
+  const reaction: 'shy' | 'cool' | 'smitten' | 'worried' | null = !waiting || !hovered || hovered.id === waiting.id
     ? null
-    : getPossibleOutcomes(waiting.elements, hovered.elements).length > 0 ? 'shy' : 'worried';
+    : getPossibleOutcomes(waiting.elements, hovered.elements).length > 0 ? (['shy', 'cool', 'smitten'] as const)[(waiting.id.length + hovered.id.charCodeAt(hovered.id.length - 1)) % 3] : 'worried';
 
   // Both parents chosen: a little burst of hearts between them
   const bothChosen = !!(slot1Slime && slot2Slime);
@@ -152,6 +152,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
             <SlimeCanvas slime={slot1Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
               {reaction && waitingSlot === 1 && (
                 <>
+                  {reaction === 'cool' && <img src={`${import.meta.env.BASE_URL}ui/react_sunglasses.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 78, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denDrop 0.4s ease-out' }} />}
+                  {reaction === 'smitten' && <img src={`${import.meta.env.BASE_URL}ui/react_hearteyes.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 74, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denBlush 0.7s ease-in-out infinite' }} />}
                   {reaction === 'shy' && (
                     <>
                     <img src={`${import.meta.env.BASE_URL}altar/love_blush.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 96, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denBlush 0.9s ease-in-out infinite' }} />
@@ -197,10 +199,12 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         <img src={`${import.meta.env.BASE_URL}altar/denp_${slot2Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25vw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
         <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18vw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
         {slot2Slime ? (
-          <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 2 ? (reaction === 'shy' ? 'denShy 0.5s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
+          <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 2 ? (reaction === 'shy' || reaction === 'smitten' ? 'denShy 0.5s ease-in-out infinite' : reaction === 'cool' ? 'denCool 1.4s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot2Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
               {reaction && waitingSlot === 2 && (
                 <>
+                  {reaction === 'cool' && <img src={`${import.meta.env.BASE_URL}ui/react_sunglasses.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 78, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denDrop 0.4s ease-out' }} />}
+                  {reaction === 'smitten' && <img src={`${import.meta.env.BASE_URL}ui/react_hearteyes.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 74, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denBlush 0.7s ease-in-out infinite' }} />}
                   {reaction === 'shy' && (
                     <>
                     <img src={`${import.meta.env.BASE_URL}altar/love_blush.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 96, transform: 'translateX(-50%)', imageRendering: 'auto', animation: 'denBlush 0.9s ease-in-out infinite' }} />
@@ -238,6 +242,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         <img src={`${import.meta.env.BASE_URL}altar/love_ribbon.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '66%', width: '26%', minWidth: 200, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denRibbon 1.8s ease-in-out infinite', zIndex: 15 }} />
       )}
       <style>{`
+        @keyframes denCool { 0%,100% { transform: rotate(-1.5deg) } 50% { transform: rotate(1.5deg) translateY(-3px) } }
+        @keyframes denDrop { from { transform: translateX(-50%) translateY(-30px); opacity: 0 } to { transform: translateX(-50%) translateY(0); opacity: 1 } }
         @keyframes denRibbon { 0%,100% { opacity: 0.6 } 50% { opacity: 1 } }
         @keyframes denBlush { 0%,100% { opacity: 0.55 } 50% { opacity: 1 } }
         @keyframes denFloat { 0%,100% { transform: translateX(-50%) translateY(0) } 50% { transform: translateX(-50%) translateY(-10px) } }

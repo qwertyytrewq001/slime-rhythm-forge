@@ -202,7 +202,10 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
   };
 
   return (
-    <div className="flex h-full bg-rose-50/90 text-slate-900 border-l-4 border-[#FF7EB6]/20 custom-scrollbar">
+    <div className="relative flex h-full bg-[#1d1630] text-slate-900 border-l-4 border-[#FF7EB6]/20 custom-scrollbar">
+      {/* painted library behind the panels; the rose wash on top keeps the original look and readability */}
+      <img src={`${import.meta.env.BASE_URL}ui/codex_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'rgba(255,241,245,0.84)' }} />
       {/* Left Sidebar - Family Navigation */}
       <div className="w-64 bg-black/40 border-r border-[#FF7EB6]/10 flex flex-col">
         {/* Sidebar Header */}

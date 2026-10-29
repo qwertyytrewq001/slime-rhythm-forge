@@ -87,6 +87,7 @@ export function GlimCharacter({ expression, size = 200 }: GlimCharacterProps) {
         className="w-full h-full object-contain"
         style={{
           filter: 'drop-shadow(0 0 20px rgba(255, 215, 0, 0.3))',
+          transform: 'scale(0.72)', transformOrigin: '50% 100%',
           background: 'transparent',
           backgroundColor: 'transparent'
         }}

@@ -248,31 +248,33 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
 
   return (
     <div className="fixed inset-0 z-[250] p-0">
+      <style>{`.baz-card { background: url(${import.meta.env.BASE_URL}ui/baz_card.png) center / 100% 100% no-repeat; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }`}</style>
       {/* Main Content - Transparent Background */}
-      <div className="relative w-full h-full bg-white/20 backdrop-blur-sm rounded-3xl border-4 border-[#FF7EB6]/30 shadow-2xl overflow-hidden">
+      <div className="relative w-full h-full bg-[#2a1238] rounded-3xl border-4 border-[#f2d68a]/70 shadow-2xl overflow-hidden">
+        <img src={`${import.meta.env.BASE_URL}ui/bazaar_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
+        <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(20,8,30,0.10), rgba(20,8,30,0.45))' }} />
         {/* Header */}
-        <div className="relative bg-gradient-to-r from-pink-200 to-pink-300 p-6 text-pink-800 border-b-4 border-pink-300/50">
+        <div className="relative bg-[#2a1238]/80 backdrop-blur-sm p-6 text-[#fff3d0] border-b-4 border-[#f2d68a]/60">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <div className="w-16 h-16 rounded-2xl bg-white/60 flex items-center justify-center border-2 border-pink-300">
-                <ShoppingBag className="w-10 h-10 text-pink-600" />
-              </div>
+              <img src={`${import.meta.env.BASE_URL}ui/tool_bazaar.png`} alt="" draggable={false} className="w-20 h-20" style={{ imageRendering: 'auto' }} />
               <div>
-                <h1 className="text-3xl font-black" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+                <h1 className="text-4xl font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", letterSpacing: '0.06em', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill' }}>
                   MYSTIC BAZAAR
                 </h1>
-                <p className="text-lg opacity-90 font-bold text-pink-700">Treasures from slime world...</p>
+                <p className="text-lg opacity-90 font-semibold text-[#ffe9a8]">Treasures from slime world...</p>
               </div>
             </div>
             <div className="flex items-center gap-4">
-              <div className="bg-white/60 px-6 py-3 rounded-2xl border-2 border-pink-300">
-                <span className="text-2xl font-bold text-pink-700">{Math.floor(state.goo)}g</span>
+              <div className="flex items-center gap-2 px-5 py-2 rounded-full bg-[#2a1238] border-[3px] border-[#f2d68a]">
+                <img src={`${import.meta.env.BASE_URL}ui/baz_coin.png`} alt="" className="w-8 h-8" style={{ imageRendering: 'auto' }} />
+                <span className="text-2xl font-bold text-[#fff3d0]" style={{ fontFamily: "'Fredoka', sans-serif" }}>{Math.floor(state.goo).toLocaleString()}</span>
               </div>
               <button
                 onClick={onClose}
-                className="p-3 bg-white/60 hover:bg-white/80 rounded-2xl transition-colors border-2 border-pink-300"
+                className="hover:scale-110 active:scale-95 transition-transform"
               >
-                <X className="w-6 h-6 text-pink-600" />
+                <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" className="w-12 h-12" style={{ imageRendering: 'auto' }} />
               </button>
             </div>
           </div>
@@ -305,7 +307,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                         <div
                           key={elem}
                           onClick={() => handleBuyEgg(elem)}
-                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-48 h-80 ${
+                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-80 baz-card px-5 pt-6 pb-4 ${
                             state.goo >= STARTER_EGG_COST 
                               ? 'hover:scale-105' 
                               : 'opacity-40 grayscale'
@@ -330,7 +332,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           
                           {/* Description Underneath */}
                           <div className="text-center flex-1 flex flex-col justify-end">
-                            <h3 className="text-lg font-black text-slate-700 uppercase tracking-widest mb-2 transition-colors" 
+                            <h3 className="text-lg font-black text-[#4a2f17] uppercase tracking-wider mb-2 transition-colors" 
                                 style={{
                                   '--hover-color': ELEMENT_COLORS[elem]?.[0] || '#FF7EB6'
                                 } as React.CSSProperties}>
@@ -338,7 +340,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                 {ELEMENT_DISPLAY_NAMES[elem]} Egg
                               </span>
                             </h3>
-                            <p className="text-xs text-pink-600 mb-3 max-w-xs">
+                            <p className="text-xs font-semibold text-[#6b4a2c] mb-3 max-w-xs">
                               A mysterious {ELEMENT_DISPLAY_NAMES[elem].toLowerCase()} egg waiting to be hatched.
                             </p>
                             <div 
@@ -350,8 +352,8 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                               }}
                               className={`flex items-center justify-center gap-1 px-3 py-2 rounded-full border-2 cursor-pointer transition-all transform active:scale-95 mt-4 ${
                                 state.goo >= STARTER_EGG_COST 
-                                  ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-white border-pink-400 hover:from-pink-400 hover:to-pink-500 shadow-lg' 
-                                  : 'bg-pink-100 text-pink-700 border-pink-300 cursor-not-allowed'
+                                  ? 'bg-gradient-to-r from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[#4a2f17] hover:brightness-110 shadow-lg' 
+                                  : 'bg-[#e8dfc9] text-[#6b4a2c] border-[#9a8460] cursor-not-allowed'
                               }`}
                             >
                               <span className="text-sm font-bold">{STARTER_EGG_COST}g</span>
@@ -370,7 +372,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                         <div
                           key={elem}
                           onClick={() => state.goo >= cost && handleBuyHabitat(elem, cost)}
-                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-48 h-80 ${
+                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-80 baz-card px-5 pt-6 pb-4 ${
                             state.goo >= cost 
                               ? 'hover:scale-105' 
                               : 'opacity-40 grayscale'
@@ -397,7 +399,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           
                           {/* Description Underneath - No Card Background */}
                           <div className="text-center flex-1 flex flex-col justify-end">
-                            <h3 className="text-xl font-black text-slate-700 uppercase tracking-widest mb-3 transition-colors" 
+                            <h3 className="text-xl font-black text-[#4a2f17] uppercase tracking-wider mb-3 transition-colors" 
                                 style={{
                                   '--hover-color': ELEMENT_COLORS[elem]?.[0] || '#FF7EB6'
                                 } as React.CSSProperties}>
@@ -437,7 +439,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                         <div
                           key={item.id}
                           onClick={() => canAfford && handleBuyItem(item.id, item.cost)}
-                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-48 h-80 ${
+                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-80 baz-card px-5 pt-6 pb-4 ${
                             canAfford ? 'hover:scale-105' : 'opacity-40 grayscale'
                           }`}
                         >
@@ -446,10 +448,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           </div>
 
                           <div className="text-center flex-1 flex flex-col justify-end">
-                            <h3 className="text-lg font-black text-slate-700 uppercase tracking-widest mb-2">
+                            <h3 className="text-lg font-black text-[#4a2f17] uppercase tracking-wider mb-2">
                               {item.name}
                             </h3>
-                            <p className="text-xs text-pink-600 mb-3 max-w-xs">
+                            <p className="text-xs font-semibold text-[#6b4a2c] mb-3 max-w-xs">
                               {item.desc}
                             </p>
                             <div
@@ -459,8 +461,8 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                               }}
                               className={`flex items-center justify-center gap-1 px-3 py-2 rounded-full border-2 cursor-pointer transition-all transform active:scale-95 mt-4 ${
                                 canAfford
-                                  ? 'bg-gradient-to-r from-pink-300 to-pink-400 text-white border-pink-400 hover:from-pink-400 hover:to-pink-500 shadow-lg'
-                                  : 'bg-pink-100 text-pink-700 border-pink-300 cursor-not-allowed'
+                                  ? 'bg-gradient-to-r from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[#4a2f17] hover:brightness-110 shadow-lg'
+                                  : 'bg-[#e8dfc9] text-[#6b4a2c] border-[#9a8460] cursor-not-allowed'
                               }`}
                             >
                               <span className="text-sm font-bold">{item.cost}g</span>
