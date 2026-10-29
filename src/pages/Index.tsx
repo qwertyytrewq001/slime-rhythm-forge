@@ -13,6 +13,7 @@ import { Hatchery } from '@/components/game/Hatchery';
 import { HatcheryScreen } from '@/components/game/HatcheryScreen';
 import { SanctuaryHub } from '@/components/game/SanctuaryHub';
 import { TitleScreen } from '@/components/game/TitleScreen';
+import { FirstVisitTip } from '@/components/game/FirstVisitTip';
 import { soundtrack, trackFor } from '@/utils/soundtrack';
 import { dayPhase, nowForDay } from '@/utils/sanctuaryCore';
 import { HomeScene } from '@/components/game/HomeScene';
@@ -393,6 +394,12 @@ function GameLayout() {
 
       {/* Title screen: the first thing the player sees, and the click that unlocks sound */}
       {showTitle && <TitleScreen onPlay={() => setShowTitle(false)} muted={state.muted} onToggleMute={handleMute} />}
+
+      {/* one-time Glim tips for the newer systems, shown once the intro tutorial is done */}
+      <FirstVisitTip
+        ready={state.tutorialCompleted && !showTitle && welcomeDone}
+        when={state.visitor && !state.visitor.done ? 'visitor' : currentView === 'farm' ? 'farm' : currentView === 'sanctuaries' ? 'sanctuaries' : currentView === 'breedingDen' ? 'den' : null}
+      />
 
       {/* A short recap for players coming back after a while */}
       {!showTitle && !welcomeDone && <WelcomeBack awaySince={awaySince} onClose={() => setWelcomeDone(true)} />}
