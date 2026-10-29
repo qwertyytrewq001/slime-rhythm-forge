@@ -25,7 +25,7 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
   >
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
     {/* the old icon sits fully inside the medallion: a clipped circle that hides the plate's own icon */}
-    <span className="absolute rounded-full overflow-hidden flex items-center justify-center" style={{ left: '8.8%', top: '50%', width: '25.6%', aspectRatio: '1', transform: 'translateY(-50%)', background: 'radial-gradient(circle at 40% 35%, #fbefcf, #d9bf8a)', boxShadow: 'inset 0 0 0 2px rgba(90,60,20,0.35), inset 0 -4px 8px rgba(90,60,20,0.25)' }}>
+    <span className="absolute rounded-full overflow-hidden flex items-center justify-center" style={{ left: '9%', top: '46%', width: '26.4%', aspectRatio: '1', transform: 'translateY(-50%)', background: 'radial-gradient(circle at 40% 35%, #fbefcf, #d9bf8a)', boxShadow: 'inset 0 0 0 2px rgba(90,60,20,0.35), inset 0 -4px 8px rgba(90,60,20,0.25)' }}>
       <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} style={{ width: '78%', height: '78%', objectFit: 'contain', imageRendering: 'auto' }} />
     </span>
     <span
@@ -38,7 +38,7 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
       <span
         aria-label={badgeLabel}
         className="absolute rounded-full text-white font-bold flex items-center justify-center"
-        style={{ top: -6, right: -4, minWidth: 22, height: 22, padding: '0 6px', fontSize: 12, background: '#e8453c', border: '2px solid #fff', fontFamily: "'Fredoka', sans-serif", boxShadow: '0 2px 4px rgba(0,0,0,0.4)' }}
+        style={{ top: 2, right: 2, minWidth: 22, height: 22, padding: '0 6px', fontSize: 12, background: '#e8453c', border: '2px solid #fff', fontFamily: "'Fredoka', sans-serif", boxShadow: '0 2px 4px rgba(0,0,0,0.4)' }}
       >
         {badge}
       </span>
@@ -59,7 +59,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
   const home = currentView === 'breeding';
 
   return (
-    <div className="flex justify-between px-4 pt-2 pb-[135px] sm:pb-[135px] bg-transparent relative z-[60] pointer-events-none">
+    <div className="flex justify-between px-4 pt-3 pb-[135px] sm:pb-[135px] bg-transparent relative z-[60] pointer-events-none">
       <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 pointer-events-auto">
         {home ? (
           <>

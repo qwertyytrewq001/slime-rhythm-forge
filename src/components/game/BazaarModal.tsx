@@ -249,13 +249,13 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
 
   return (
     <div className="fixed inset-0 z-[250] p-0">
-      <style>{`.baz-card { background: url(${import.meta.env.BASE_URL}ui/baz_card.png) center / 100% 100% no-repeat; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }`}</style>
+      <style>{`.baz-tag-pill { position: relative; background: url(${import.meta.env.BASE_URL}ui/baz_tag.png) center / 100% 100% no-repeat; min-height: 46px; width: 100%; display: flex; align-items: center; justify-content: flex-end; padding: 0 14% 0 0; color: #fff3d0; font-family: Fredoka, sans-serif; text-shadow: 0 2px 0 rgba(30,12,4,0.8); } .baz-tag-pill::before { content: ""; position: absolute; left: 6%; top: 50%; width: 30px; height: 30px; transform: translateY(-50%); background: url(${import.meta.env.BASE_URL}ui/baz_coin.png) center / contain no-repeat; } .baz-card { background: url(${import.meta.env.BASE_URL}ui/baz_card.png) center / 100% 100% no-repeat; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }`}</style>
       {/* Main Content - Transparent Background */}
-      <div className="relative w-full h-full bg-[#2a1238] rounded-3xl border-4 border-[#f2d68a]/70 shadow-2xl overflow-hidden">
+      <div className="relative flex flex-col w-full h-full bg-[#2a1238] rounded-3xl border-4 border-[#f2d68a]/70 shadow-2xl overflow-hidden">
         <img src={`${import.meta.env.BASE_URL}ui/bazaar_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(20,8,30,0.10), rgba(20,8,30,0.45))' }} />
         {/* Header */}
-        <div className="relative bg-[#2a1238]/80 backdrop-blur-sm p-6 text-[#fff3d0] border-b-4 border-[#f2d68a]/60">
+        <div className="relative shrink-0 bg-[#2a1238]/80 backdrop-blur-sm p-4 text-[#fff3d0] border-b-4 border-[#f2d68a]/60">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
               <img src={`${import.meta.env.BASE_URL}ui/tool_bazaar.png`} alt="" draggable={false} className="w-20 h-20" style={{ imageRendering: 'auto' }} />
@@ -282,22 +282,20 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 flex flex-col max-h-[calc(100vh-200px)]">
+        <div className="flex-1 min-h-0 flex flex-col">
           {/* Items Display - Horizontal Layout */}
-          <div className="flex-1 flex items-center justify-center p-8 overflow-hidden">
+          <div className="flex-1 min-h-0 flex items-center justify-center px-8 py-4 overflow-hidden">
             <div className="w-full max-w-6xl">
               <div className="flex items-center justify-center gap-8">
                 {/* Previous Arrow */}
                 <button
                   onClick={handlePrevPage}
                   disabled={currentPage === 0}
-                  className={`p-4 rounded-full transition-all ${
-                    currentPage === 0 
-                      ? 'bg-gray-200 cursor-not-allowed opacity-50' 
-                      : 'bg-[#f6e8c3] hover:bg-white cursor-pointer border-[3px] border-[#4a2f17]'
-                  }`}
+                  aria-label="Previous page"
+                  className="shrink-0 transition-transform hover:scale-110 active:scale-95 disabled:opacity-25 disabled:hover:scale-100"
+                  style={{ width: 64, background: 'transparent', border: 'none', padding: 0 }}
                 >
-                  <ChevronLeft className="w-6 h-6 text-[#4a2f17]" />
+                  <img src={`${import.meta.env.BASE_URL}ui/dlg_next.png`} alt="" draggable={false} style={{ width: '100%', imageRendering: 'auto', transform: 'scaleX(-1)', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.5))' }} />
                 </button>
 
                 {/* Items Container */}
@@ -351,10 +349,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   handleBuyEgg(elem);
                                 }
                               }}
-                              className={`flex items-center justify-center gap-1 px-3 py-2 rounded-full border-2 cursor-pointer transition-all transform active:scale-95 mt-4 ${
+                              className={`cursor-pointer transition-all transform active:scale-95 mt-4 ${
                                 state.goo >= STARTER_EGG_COST 
-                                  ? 'bg-gradient-to-r from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[#4a2f17] hover:brightness-110 shadow-lg' 
-                                  : 'bg-[#e8dfc9] text-[#6b4a2c] border-[#9a8460] cursor-not-allowed'
+                                  ? 'baz-tag-pill hover:brightness-110' 
+                                  : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
                               <span className="text-sm font-bold">{STARTER_EGG_COST}g</span>
@@ -380,7 +378,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           }`}
                         >
                           {/* Habitat Preview - Original Sanctuaries Style */}
-                          <div className="w-40 h-40 rounded-[2.5rem] border-[6px] p-2 flex items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-110 group shadow-[0_20px_50px_rgba(0,0,0,0.8)] mb-2"
+                          <div className="w-28 h-28 rounded-full border-[5px] p-2 flex items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-110 group shadow-[0_20px_50px_rgba(0,0,0,0.8)] mb-2"
                                style={{
                                  borderColor: theme.accent + '99',
                                  backgroundColor: theme.bgImage ? 'transparent' : theme.bg + 'CC',
@@ -388,7 +386,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                  backgroundSize: 'cover',
                                  backgroundPosition: 'center',
                                  boxShadow: `0 15px 40px rgba(0,0,0,0.7), inset 0 0 30px ${theme.accent}30`,
-                                 transform: 'perspective(1000px) rotateX(5deg) rotateY(-5deg)'
+                                 transform: 'none'
                                }}
                           >
                             {/* Inner glow effect from sanctuaries */}
@@ -419,10 +417,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   handleBuyHabitat(elem, cost);
                                 }
                               }}
-                              className={`flex items-center justify-center gap-1 px-4 py-2 rounded-full border-2 cursor-pointer transition-all transform active:scale-95 mt-4 ${
+                              className={`cursor-pointer transition-all transform active:scale-95 mt-4 ${
                                 state.goo >= cost 
-                                  ? 'bg-gradient-to-r from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[#4a2f17] hover:brightness-110 shadow-lg' 
-                                  : 'bg-[#e8dfc9] text-[#6b4a2c] border-[#9a8460] cursor-not-allowed'
+                                  ? 'baz-tag-pill hover:brightness-110' 
+                                  : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
                               <span className="text-sm font-bold">{cost}g</span>
@@ -444,7 +442,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                             canAfford ? 'hover:scale-105' : 'opacity-40 grayscale'
                           }`}
                         >
-                          <div className={`w-32 h-32 rounded-3xl border-4 flex items-center justify-center mb-4 ${getRarityColor(item.rarity)} ${getRarityGlow(item.rarity)} shadow-lg`}>
+                          <div className={`w-28 h-28 flex items-center justify-center mb-3 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8),rgba(255,233,168,0.35)_58%,transparent_72%)]`}>
                             <img src={`${import.meta.env.BASE_URL}altar/bazaar_${({ mutation_juice: 'mutation', wild_food: 'meat', energy_crystal: 'crystal', lucky_charm: 'charm' } as Record<string, string>)[item.id] ?? 'mutation'}.png`} alt={item.name} draggable={false} style={{ width: 72, height: 72, objectFit: 'contain', imageRendering: 'auto' }} />
                           </div>
 
@@ -460,10 +458,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                 e.stopPropagation();
                                 if (canAfford) handleBuyItem(item.id, item.cost);
                               }}
-                              className={`flex items-center justify-center gap-1 px-3 py-2 rounded-full border-2 cursor-pointer transition-all transform active:scale-95 mt-4 ${
+                              className={`cursor-pointer transition-all transform active:scale-95 mt-4 ${
                                 canAfford
-                                  ? 'bg-gradient-to-r from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[#4a2f17] hover:brightness-110 shadow-lg'
-                                  : 'bg-[#e8dfc9] text-[#6b4a2c] border-[#9a8460] cursor-not-allowed'
+                                  ? 'baz-tag-pill hover:brightness-110'
+                                  : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
                               <span className="text-sm font-bold">{item.cost}g</span>
@@ -479,13 +477,11 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                 <button
                   onClick={handleNextPage}
                   disabled={currentPage >= getTotalPages() - 1}
-                  className={`p-4 rounded-full transition-all ${
-                    currentPage >= getTotalPages() - 1 
-                      ? 'bg-gray-200 cursor-not-allowed opacity-50' 
-                      : 'bg-[#f6e8c3] hover:bg-white cursor-pointer border-[3px] border-[#4a2f17]'
-                  }`}
+                  aria-label="Next page"
+                  className="shrink-0 transition-transform hover:scale-110 active:scale-95 disabled:opacity-25 disabled:hover:scale-100"
+                  style={{ width: 64, background: 'transparent', border: 'none', padding: 0 }}
                 >
-                  <ChevronRight className="w-6 h-6 text-[#4a2f17]" />
+                  <img src={`${import.meta.env.BASE_URL}ui/dlg_next.png`} alt="" draggable={false} style={{ width: '100%', imageRendering: 'auto', transform: 'none', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.5))' }} />
                 </button>
               </div>
 
@@ -508,41 +504,20 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         </div>
 
         {/* Category Navigation - Bottom */}
-        <div className="bg-[#2a1238]/85 p-4 border-t-4 border-[#f2d68a]/60">
-          <div className="flex gap-4 justify-center">
-            <button
-              onClick={() => setSelectedCategory('eggs')}
-              className={`px-8 py-4 rounded-2xl font-bold transition-all ${
-                selectedCategory === 'eggs' 
-                  ? 'bg-gradient-to-b from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[3px] border-[#4a2f17] shadow-lg scale-105' 
-                  : 'bg-[#5a3a22] text-[#ffe9a8] border-[3px] border-[#2a1238] hover:bg-[#6b4a2c]'
-              }`}
-            >
-              <Egg className="w-6 h-6 inline mr-2" />
-              EGGS
-            </button>
-            <button
-              onClick={() => setSelectedCategory('habitats')}
-              className={`px-8 py-4 rounded-2xl font-bold transition-all ${
-                selectedCategory === 'habitats' 
-                  ? 'bg-gradient-to-b from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[3px] border-[#4a2f17] shadow-lg scale-105' 
-                  : 'bg-[#5a3a22] text-[#ffe9a8] border-[3px] border-[#2a1238] hover:bg-[#6b4a2c]'
-              }`}
-            >
-              <Home className="w-6 h-6 inline mr-2" />
-              SANCTUMS
-            </button>
-            <button
-              onClick={() => setSelectedCategory('items')}
-              className={`px-8 py-4 rounded-2xl font-bold transition-all ${
-                selectedCategory === 'items'
-                  ? 'bg-gradient-to-b from-[#ffe98a] to-[#f2b632] text-[#4a2f17] border-[3px] border-[#4a2f17] shadow-lg scale-105'
-                  : 'bg-[#5a3a22] text-[#ffe9a8] border-[3px] border-[#2a1238] hover:bg-[#6b4a2c]'
-              }`}
-            >
-              <Sparkles className="w-6 h-6 inline mr-2" />
-              ITEMS
-            </button>
+        <div className="shrink-0 bg-[#2a1238]/85 px-4 py-3 border-t-4 border-[#f2d68a]/60">
+          <div className="flex gap-3 justify-center items-center">
+            {([['eggs', 'EGGS'], ['habitats', 'SANCTUMS'], ['items', 'ITEMS']] as const).map(([key, label]) => (
+              <button
+                key={key}
+                onClick={() => setSelectedCategory(key)}
+                aria-label={label}
+                className="relative transition-transform hover:scale-105 active:scale-95"
+                style={{ width: 'clamp(120px, 20vw, 190px)', background: 'transparent', border: 'none', padding: 0, transform: selectedCategory === key ? 'scale(1.08)' : undefined }}
+              >
+                <img src={`${import.meta.env.BASE_URL}ui/${selectedCategory === key ? 'baz_tab_on' : 'baz_tab'}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
+                <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(13px, 1.5vw, 18px)', letterSpacing: '0.08em', color: selectedCategory === key ? '#4a2f17' : '#ffe9a8', textShadow: selectedCategory === key ? '0 1px 0 rgba(255,255,255,0.5)' : '0 2px 0 rgba(30,12,4,0.85)' }}>{label}</span>
+              </button>
+            ))}
           </div>
         </div>
       </div>
