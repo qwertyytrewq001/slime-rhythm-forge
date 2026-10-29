@@ -48,6 +48,17 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
       {/* 1. BEAUTIFUL GRADIENT OVERLAY (Light Pinkish Whitish Theme) */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-100/90 via-white/80 to-amber-100/90 backdrop-blur-sm" onClick={onClose} />
       
+      {/* painted celebration: ribbon banner, rarity gem and confetti */}
+      <div className="absolute left-1/2 pointer-events-none" style={{ top: '5%', transform: 'translateX(-50%)', width: 'min(86vw, 520px)', zIndex: 5 }}>
+        <style>{`@keyframes discBanner { 0% { opacity: 0; transform: translateY(-30px) scale(0.7) } 60% { transform: translateY(4px) scale(1.04) } 100% { opacity: 1; transform: none } } @keyframes discConfetti { 0% { opacity: 0; transform: translate(-50%,-30%) scale(0.5) } 30% { opacity: 1 } 100% { opacity: 0; transform: translate(-50%,40%) scale(1.3) } }`}</style>
+        <div className="relative" style={{ animation: 'discBanner 0.6s ease-out both' }}>
+          <img src={`${import.meta.env.BASE_URL}altar/love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.35))' }} />
+          <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(20px, 4vw, 34px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>NEW SLIME!</span>
+        </div>
+        <img src={`${import.meta.env.BASE_URL}altar/love_confetti.png`} alt="" draggable={false} className="absolute" style={{ left: '50%', top: '50%', width: '90%', imageRendering: 'auto', animation: 'discConfetti 1.8s ease-out 0.4s both' }} />
+        <img src={`${import.meta.env.BASE_URL}altar/gem_${slime.rarityTier.toLowerCase()}.png`} alt={slime.rarityTier} draggable={false} className="mx-auto block" style={{ width: 64, marginTop: 6, imageRendering: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.4))' }} />
+      </div>
+
       {/* 2. MAGICAL BACKGROUND EFFECTS */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Magical sparkles */}

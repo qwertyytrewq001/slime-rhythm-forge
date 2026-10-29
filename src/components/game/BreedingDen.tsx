@@ -242,6 +242,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         <img src={`${import.meta.env.BASE_URL}altar/love_ribbon.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '66%', width: '26%', minWidth: 200, transform: 'translate(-50%,-50%)', imageRendering: 'auto', animation: 'denRibbon 1.8s ease-in-out infinite', zIndex: 15 }} />
       )}
       <style>{`
+        @keyframes denTitle { 0%,100% { transform: translateY(0) } 50% { transform: translateY(-5px) } }
         @keyframes denCool { 0%,100% { transform: rotate(-1.5deg) } 50% { transform: rotate(1.5deg) translateY(-3px) } }
         @keyframes denDrop { from { transform: translateX(-50%) translateY(-30px); opacity: 0 } to { transform: translateX(-50%) translateY(0); opacity: 1 } }
         @keyframes denRibbon { 0%,100% { opacity: 0.6 } 50% { opacity: 1 } }
@@ -265,7 +266,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
           <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.45))' }} />
           <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(18px, 2.4vw, 32px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Breeding Den</span>
         </div>
-        <p className="font-bold mt-1" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.1vw, 15px)', color: '#ffe9a8', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.1em' }}>SELECT PARENTS TO BREED</p>
+        <p className="font-bold mt-1" style={{ animation: 'denTitle 3s ease-in-out infinite', fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.1vw, 15px)', color: '#ffe9a8', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.1em' }}>SELECT PARENTS TO BREED</p>
       </div>
 
       {/* Question mark egg - centered between incubators when both parents selected */}
