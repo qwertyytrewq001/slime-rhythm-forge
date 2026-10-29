@@ -129,7 +129,7 @@ export function SlimeGallery({ onSelect, filterElement }: SlimeGalleryProps = {}
                 <div className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-20 transition-opacity" 
                      style={{ backgroundColor: RARITY_TIER_COLORS[slime.rarityTier] }} />
                 <SlimeCanvas slime={slime} size={100} animated sizeMultiplier={2.0} animationStyle="calm" />
-                <span className="absolute -top-3 -left-4 flex items-center justify-center font-black text-white rounded-full" style={{ minWidth: 34, height: 34, padding: '0 6px', fontSize: 13, background: 'radial-gradient(circle at 35% 30%, #ffe98a, #e09a1a)', border: '3px solid #4a2f17', boxShadow: '0 2px 4px rgba(0,0,0,0.35)', WebkitTextStroke: '2px #4a2f17', paintOrder: 'stroke fill' }} title={`Level ${slime.level}`}>{slime.level}</span>
+                <span className="absolute -top-2 left-0 flex items-center justify-center font-black text-white rounded-full" style={{ minWidth: 34, height: 34, padding: '0 6px', fontSize: 13, background: 'radial-gradient(circle at 35% 30%, #ffe98a, #e09a1a)', border: '3px solid #4a2f17', boxShadow: '0 2px 4px rgba(0,0,0,0.35)', WebkitTextStroke: '2px #4a2f17', paintOrder: 'stroke fill' }} title={`Level ${slime.level}`}>{slime.level}</span>
               </div>
               <div className="mt-4 w-full text-center">
                 <p className="text-base font-black text-slate-700 uppercase leading-none mb-1 break-words px-1">{slime.name}</p>
