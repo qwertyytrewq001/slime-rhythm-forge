@@ -3,6 +3,7 @@ import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvoluti
 import { FarmSlice, createFarmPlots, createFarmState, migrateFarm, plant as farmPlant, plantAll as farmPlantAll, harvest as farmHarvest, harvestAll as farmHarvestAll, water as farmWater, waterAll as farmWaterAll, rush as farmRush, unlockPlot as farmUnlock } from '@/utils/farmCore';
 import { SanctSlice, FEED_JOY, addJoy, collectAll, collectGift, normalizeHabitat, perksFrom, petHabitat, placeDecor, removeDecor, rollerFrom, tickHabitat, upgradeHabitat } from '@/utils/sanctuaryCore';
 import { visitorTick, deliver as visitorDeliver } from '@/utils/visitorCore';
+import { GOO_RATE } from '@/utils/gooEconomy';
 import { createStarterSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
@@ -704,7 +705,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
       let gooPerTick = (state.slimes.reduce((sum, s) => {
         const levelMult = 1 + (s.level - 1) * 0.1;
         return sum + (s.rarityScore * 0.1 * levelMult);
-      }, 0) / 10) * 0.2;
+      }, 0) / 10) * GOO_RATE;
 
       // Habitat bonus: element-matched slimes produce 2x, also cut to 20%
       for (const habitat of state.habitats) {
@@ -712,7 +713,7 @@ export function GameProvider({ children }: { children: React.ReactNode }) {
           const slime = state.slimes.find(s => s.id === slimeId);
           if (slime && slime.elements.includes(habitat.element)) {
             const levelMult = 1 + (slime.level - 1) * 0.1;
-            gooPerTick += ((slime.rarityScore * 0.1 * levelMult) / 10) * 0.2; // Double their contribution
+            gooPerTick += ((slime.rarityScore * 0.1 * levelMult) / 10) * GOO_RATE; // Double their contribution
           }
         }
       }

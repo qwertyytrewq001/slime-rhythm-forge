@@ -170,9 +170,9 @@ export function getElementTierForLevel(level: number): number {
 
 // Habitat costs per element - Updated for 10 core elements
 export const HABITAT_COSTS: Record<SlimeElement, number> = {
-  fire: 100, water: 100, plant: 100, earth: 100,
-  wind: 150, ice: 200, electric: 200,
-  light: 300, shadow: 300, metal: 250,
+  fire: 200, water: 200, plant: 200, earth: 200,
+  wind: 300, ice: 400, electric: 400,
+  light: 600, shadow: 600, metal: 500,
 };
 
 // Habitat visual themes - Updated for 10 core elements

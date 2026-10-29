@@ -1,3 +1,8 @@
+import { soundtrack } from './soundtrack';
+
+/** Sound-effect file names (public/audio/sfx/<name>.mp3) for each built-in effect; the synthesised sound plays if the file is missing. */
+const SFX_FILE: Record<string, string> = { breed: 'ritual_start', collect: 'gift_collect', purchase: 'purchase', achievement: 'achievement', tap: 'ui_click', hatch: 'egg_hatch', discovery: 'new_slime' };
+
 class AudioEngine {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
@@ -21,6 +26,7 @@ class AudioEngine {
 
   toggleMute() {
     this._muted = !this._muted;
+    soundtrack.setMuted(this._muted);
     if (this.masterGain && this.ctx) {
       this.masterGain.gain.setTargetAtTime(this._muted ? 0 : 0.3, this.ctx.currentTime, 0.1);
     }
@@ -125,6 +131,12 @@ class AudioEngine {
   }
 
   playSfx(type: 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
+    if (this._muted) return;
+    // a real file wins when it exists; otherwise fall through to the synthesised sound
+    void soundtrack.sfx(SFX_FILE[type] ?? type).then(played => { if (!played) this.synthSfx(type); });
+  }
+
+  private synthSfx(type: 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
     this.init();
     if (!this.ctx || !this.masterGain || this._muted) return;
 
@@ -250,6 +262,7 @@ class AudioEngine {
   }
 
   resume() {
+    soundtrack.unlock();
     this.ctx?.resume();
   }
 }

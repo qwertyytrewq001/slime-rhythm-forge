@@ -13,6 +13,8 @@ import { Hatchery } from '@/components/game/Hatchery';
 import { HatcheryScreen } from '@/components/game/HatcheryScreen';
 import { SanctuaryHub } from '@/components/game/SanctuaryHub';
 import { TitleScreen } from '@/components/game/TitleScreen';
+import { soundtrack, trackFor } from '@/utils/soundtrack';
+import { dayPhase, nowForDay } from '@/utils/sanctuaryCore';
 import { HomeScene } from '@/components/game/HomeScene';
 import { GlimCompanion } from '@/components/game/GlimCompanion';
 import { WelcomeBack, useAwaySince } from '@/components/game/WelcomeBack';
@@ -209,6 +211,14 @@ function GameLayout() {
       return () => clearTimeout(timer);
     }
   }, [state.tutorialCompleted, state.slimes.length, showTitle]);
+
+  // music follows the screen
+  useEffect(() => {
+    soundtrack.setMuted(state.muted);
+  }, [state.muted]);
+  useEffect(() => {
+    soundtrack.play(trackFor({ title: showTitle, view: currentView, night: dayPhase(nowForDay()).night, inBattle: !!battleTeam, bazaar: bazaarModalOpen, library: codexGalleryOpen || showAchievements }));
+  }, [showTitle, currentView, battleTeam, bazaarModalOpen, codexGalleryOpen, showAchievements]);
 
   const toolbarArt = "relative h-[68px] w-[68px] transition-transform duration-150 hover:scale-110 active:scale-95 group pointer-events-auto";
   const toolIcon = (n: string) => <img src={`${import.meta.env.BASE_URL}ui/tool_${n}.png`} alt="" draggable={false} className="w-full h-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />;

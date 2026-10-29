@@ -1,3 +1,4 @@
+import { HATCH_BONUS } from '@/utils/gooEconomy';
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { formatTime } from '@/utils/timeUtils';
@@ -105,7 +106,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
     // Add slime to state immediately
     const newSlime = activeHatching.slime;
     dispatch({ type: 'ADD_SLIME', slime: newSlime });
-    dispatch({ type: 'ADD_GOO', amount: 500 });
+    dispatch({ type: 'ADD_GOO', amount: HATCH_BONUS });
     
     setTimeout(() => {
       setDiscoveredSlime(newSlime);

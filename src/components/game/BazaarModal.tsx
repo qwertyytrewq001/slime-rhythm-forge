@@ -1,3 +1,4 @@
+import { EGG_COST } from '@/utils/gooEconomy';
 import React, { useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { createElementSlime } from '@/utils/slimeGenerator';
@@ -24,13 +25,13 @@ const ELEMENT_EGG_IMAGE: Record<SlimeElement, string> = {
 };
 
 const ITEM_SHOP = [
-  { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Next breed: 50% mutation rate', cost: 30, icon: '🧪', category: 'breeding', rarity: 'rare' },
-  { id: 'wild_food', name: 'Wild Food', desc: 'Boost a random trait on selected slime', cost: 20, icon: '🥩', category: 'boosts', rarity: 'common' },
-  { id: 'energy_crystal', name: 'Energy Crystal', desc: 'Instantly complete hatching', cost: 50, icon: '💎', category: 'time', rarity: 'epic' },
+  { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Next breed: 50% mutation rate', cost: 60, icon: '🧪', category: 'breeding', rarity: 'rare' },
+  { id: 'wild_food', name: 'Wild Food', desc: 'Boost a random trait on selected slime', cost: 80, icon: '🥩', category: 'boosts', rarity: 'common' },
+  { id: 'energy_crystal', name: 'Energy Crystal', desc: 'Instantly complete hatching', cost: 100, icon: '💎', category: 'time', rarity: 'epic' },
   { id: 'lucky_charm', name: 'Lucky Charm', desc: 'Higher chance of rare offspring', cost: 40, icon: '🍀', category: 'breeding', rarity: 'rare' },
 ];
 
-const STARTER_EGG_COST = 50;
+const STARTER_EGG_COST = EGG_COST;
 const SHOP_EGG_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 const SHOP_HABITAT_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 

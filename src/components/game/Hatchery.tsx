@@ -1,3 +1,4 @@
+import { HATCH_BONUS } from '@/utils/gooEconomy';
 import React, { useState, useEffect, useRef } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { formatTime } from '@/utils/timeUtils';
@@ -112,7 +113,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
     dispatch({ type: 'ADD_SLIME', slime: newSlime });
     // Don't change global selection when adding hatched slime
     // dispatch({ type: 'SET_BEST_RARITY', score: newSlime.rarityScore });
-    dispatch({ type: 'ADD_GOO', amount: 500 });
+    dispatch({ type: 'ADD_GOO', amount: HATCH_BONUS });
     // dispatch({ type: 'SELECT_SLIME', id: newSlime.id });
     
     setTimeout(() => {
