@@ -96,7 +96,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
         </button>
 
         <h3 className="text-xl text-center text-[#FF7EB6] font-black uppercase tracking-[0.4em] drop-shadow-[0_2px_10px_#FF7EB660]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-          Mystic Sanctuaries ({currentPage + 1}/{totalPages})
+          Mystic Habitats ({currentPage + 1}/{totalPages})
         </h3>
 
         <button 

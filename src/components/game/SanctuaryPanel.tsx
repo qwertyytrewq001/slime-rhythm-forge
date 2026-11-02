@@ -50,7 +50,7 @@ export function SanctuaryPanel({ habitat: habitatProp, sw = 1000, onClose }: Pan
           <div className="flex items-center" style={{ gap: 10 * f }}>
             <Emblem element={habitat.element} size={52 * f} />
             <div>
-              <div className="font-bold leading-none" style={{ fontSize: 24 * f }}>{ELEMENT_DISPLAY_NAMES[habitat.element]} Sanctuary</div>
+              <div className="font-bold leading-none" style={{ fontSize: 24 * f }}>{ELEMENT_DISPLAY_NAMES[habitat.element]} Habitat</div>
               <div className="font-semibold opacity-70" style={{ fontSize: 12 * f }}>Level {level} of {MAX_SANCT_LEVEL} · {habitat.assignedSlimeIds.length}/{habitatCapacity(habitat)} slimes</div>
             </div>
           </div>

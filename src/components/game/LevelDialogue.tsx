@@ -48,7 +48,7 @@ const LEVEL_DIALOGUES = {
       "I've been collecting.",
       "A golden slime. I haven't seen one of those in… quite some time.",
       "I'm not doing anything. Just observing.",
-      "You've done well so far. The breeding, the Sanctuaries — competent work. You should go home and enjoy it.",
+      "You've done well so far. The breeding, the Habitats — competent work. You should go home and enjoy it.",
       "The further paths are no place for a Forger."
     ]
   },

@@ -143,7 +143,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
                   onCollect={() => collectFrom(habitat, { x: pos.x * sw, y: pos.y * sh - island * 0.3 })}
                 />
               ) : i >= open ? (
-                <LockedSite w={island} sw={sw} label={i < SLOTS ? `Reach Sanctuary Lv ${i - 2}` : 'Fill the first page to open'} />
+                <LockedSite w={island} sw={sw} label={i < SLOTS ? `Reach Habitat Lv ${i - 2}` : 'Fill the first page to open'} />
               ) : (
                 <EmptySite w={island} active={i === habitats.length} pending={!!pendingHabitatPlacement} onClick={() => placeHere(k)} />
               )}
@@ -191,7 +191,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
             ← Altar
           </button>
           <div>
-            <div className="font-bold leading-none text-white" style={{ fontSize: sw * 0.026, WebkitTextStroke: `${sw * 0.003}px #2a1408`, paintOrder: 'stroke fill', letterSpacing: '0.02em' }}>Sanctuary Isles</div>
+            <div className="font-bold leading-none text-white" style={{ fontSize: sw * 0.026, WebkitTextStroke: `${sw * 0.003}px #2a1408`, paintOrder: 'stroke fill', letterSpacing: '0.02em' }}>Habitat Isles</div>
             <div className="font-semibold text-white/90" style={{ fontSize: sw * 0.0105, textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>Happy slimes leave gifts. Tap an island to visit.</div>
           </div>
         </div>
@@ -230,11 +230,11 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
 
         {/* placement banner / first-time nudge */}
         {pendingHabitatPlacement ? (
-          <Banner sw={sw}>Place your {ELEMENT_DISPLAY_NAMES[pendingHabitatPlacement.element]} Sanctuary: tap a glowing site.
+          <Banner sw={sw}>Place your {ELEMENT_DISPLAY_NAMES[pendingHabitatPlacement.element]} Habitat: tap a glowing site.
             <button onClick={() => dispatch({ type: 'CANCEL_HABITAT_PLACEMENT' })} className="ml-3 rounded-full border-2 font-bold" style={{ borderColor: INK, background: '#fff7dc', padding: `0 ${sw * 0.008}px`, fontSize: sw * 0.011 }}>Cancel</button>
           </Banner>
         ) : habitats.length === 0 ? (
-          <Banner sw={sw}><ArtImg file="mascot_cap.png" className="inline-block align-middle mr-2" style={{ width: sw * 0.045 }} fallback={null} />No sanctuaries yet. Build one in the Bazaar and your slimes will have a home.
+          <Banner sw={sw}><ArtImg file="mascot_cap.png" className="inline-block align-middle mr-2" style={{ width: sw * 0.045 }} fallback={null} />No habitats yet. Build one in the Bazaar and your slimes will have a home.
             <button onClick={onOpenBazaar} className="ml-3 rounded-full border-2 font-bold" style={{ borderColor: INK, background: 'linear-gradient(#ffe98a,#f2b632)', padding: `0 ${sw * 0.008}px`, fontSize: sw * 0.011 }}>Open Bazaar</button>
           </Banner>
         ) : null}
@@ -258,7 +258,7 @@ const LockedSite: React.FC<{ w: number; sw: number; label: string }> = ({ w, sw,
 );
 
 const EmptySite: React.FC<{ w: number; active: boolean; pending: boolean; onClick: () => void }> = ({ w, active, pending, onClick }) => (
-  <button onClick={onClick} disabled={!active} className="absolute inset-0 sanct-bob" style={{ animationDelay: '-1s', opacity: active ? 1 : 0.55, cursor: active ? 'pointer' : 'default' }} aria-label={pending ? 'Place sanctuary here' : 'Empty sanctuary site'}>
+  <button onClick={onClick} disabled={!active} className="absolute inset-0 sanct-bob" style={{ animationDelay: '-1s', opacity: active ? 1 : 0.55, cursor: active ? 'pointer' : 'default' }} aria-label={pending ? 'Place habitat here' : 'Empty habitat site'}>
     <ArtImg
       file="island_empty.png"
       className="absolute inset-0 w-full h-full"
@@ -284,7 +284,7 @@ const IslandView: React.FC<{
   const joy = (habitat.joy ?? 0) / JOY_MAX;
   return (
     <div className="absolute inset-0 sanct-bob" style={{ animationDelay: `${-index * 0.9}s` }}>
-      <div className="absolute inset-0 cursor-pointer" onClick={onOpen} role="button" aria-label={`${ELEMENT_DISPLAY_NAMES[habitat.element]} sanctuary`}>
+      <div className="absolute inset-0 cursor-pointer" onClick={onOpen} role="button" aria-label={`${ELEMENT_DISPLAY_NAMES[habitat.element]} habitat`}>
         <ArtImg
           file={`island_${habitat.element}.png`}
           className="absolute inset-0 w-full h-full"
@@ -329,7 +329,7 @@ const IslandView: React.FC<{
         </button>
       )}
 
-      <button onClick={e => { e.stopPropagation(); onManage(); }} className="absolute rounded-full font-bold border-2 hover:scale-110 transition-transform" style={{ right: '4%', top: '4%', background: PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.0095, padding: `0 ${sw * 0.006}px`, zIndex: 5 }} aria-label="Manage sanctuary">⚙ Manage</button>
+      <button onClick={e => { e.stopPropagation(); onManage(); }} className="absolute rounded-full font-bold border-2 hover:scale-110 transition-transform" style={{ right: '4%', top: '4%', background: PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.0095, padding: `0 ${sw * 0.006}px`, zIndex: 5 }} aria-label="Manage habitat">⚙ Manage</button>
     </div>
   );
 };
@@ -369,7 +369,7 @@ const VisitorDialog: React.FC<{ sw: number; onClose: () => void }> = ({ sw, onCl
                   <img src={foodSpriteUrl(v.crop)} alt="" draggable={false} style={{ width: 26 * f, imageRendering: 'auto' }} /> {have} / {v.qty}
                 </span>
                 <span className="font-bold" style={{ fontSize: 13 * f }}>Reward: {v.rewardGoo.toLocaleString()} 💧</span>
-                <span className="font-bold inline-flex items-center" style={{ fontSize: 13 * f, gap: 3 * f }}>and <Heart size={18 * f} /> +{v.rewardJoy} Joy in every sanctuary</span>
+                <span className="font-bold inline-flex items-center" style={{ fontSize: 13 * f, gap: 3 * f }}>and <Heart size={18 * f} /> +{v.rewardJoy} Joy in every habitat</span>
               </div>
               <button onClick={give} disabled={!ok} className={`rounded-full font-bold border-[3px] shadow-lg transition-transform ${ok ? 'hover:scale-105 active:scale-95' : 'opacity-55 cursor-not-allowed'}`} style={{ marginTop: 10 * f, background: ok ? 'linear-gradient(#ffe98a,#f2b632)' : '#e8dfc9', borderColor: INK, fontSize: 15 * f, padding: `${5 * f}px ${18 * f}px` }}>
                 {ok ? 'Hand it over' : 'Grow some on the farm first!'}

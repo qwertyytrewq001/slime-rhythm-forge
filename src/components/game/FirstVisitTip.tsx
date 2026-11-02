@@ -17,11 +17,11 @@ const TIPS: Record<TipKey, { face: string; title: string; lines: string[] }> = {
   },
   sanctuaries: {
     face: 'kind',
-    title: 'Sanctuary Isles',
+    title: 'Habitat Isles',
     lines: [
       'Slimes of the matching element are happiest here. Visit one, pet it, feed it. Joy fills up on its own too.',
       'A full Joy meter leaves a gift bubble. Tap it to collect goo, food and seeds. Gifts stop piling up when the island is full, so check back!',
-      'Each sanctuary also helps your farm or your goo. Upgrade it in Manage to unlock more room.',
+      'Each habitat also helps your farm or your goo. Upgrade it in Manage to unlock more room.',
     ],
   },
   den: {
@@ -37,7 +37,7 @@ const TIPS: Record<TipKey, { face: string; title: string; lines: string[] }> = {
     title: 'A visitor!',
     lines: [
       'That is Wicks the Wanderer, a travelling merchant. He asks for a little farm food and pays well in goo.',
-      'Hand it over and every sanctuary gets a Joy boost. He only stays a short while, so be quick!',
+      'Hand it over and every habitat gets a Joy boost. He only stays a short while, so be quick!',
     ],
   },
 };

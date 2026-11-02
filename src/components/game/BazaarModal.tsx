@@ -366,7 +366,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                 {ELEMENT_DISPLAY_NAMES[elem]} Egg
                               </span>
                             </div>
-                            <p className="text-xs font-semibold text-[#6b4a2c] mb-3 max-w-xs">
+                            <p className="[font-family:Fredoka,sans-serif] text-[13px] leading-snug font-semibold text-[#6b4a2c] mb-3 mx-auto text-center" style={{ maxWidth: "88%" }}>
                               A mysterious {ELEMENT_DISPLAY_NAMES[elem].toLowerCase()} egg waiting to be hatched.
                             </p>
                             <div 
@@ -430,10 +430,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   '--hover-color': ELEMENT_COLORS[elem]?.[0] || '#FF7EB6'
                                 } as React.CSSProperties}>
                               <span className="group-hover:[color:var(--hover-color)]">
-                                {ELEMENT_DISPLAY_NAMES[elem]} Sanctum
+                                {ELEMENT_DISPLAY_NAMES[elem]} Habitat
                               </span>
                             </div>
-                            <p className="text-sm text-[#6b4a2c] mb-4 max-w-sm leading-relaxed font-semibold">
+                            <p className="[font-family:Fredoka,sans-serif] text-[13px] text-[#6b4a2c] mb-4 mx-auto text-center leading-snug font-semibold" style={{ maxWidth: "88%" }}>
                               {theme.desc}
                             </p>
                             
@@ -477,7 +477,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                             <div className="[font-family:Fredoka,sans-serif] text-lg font-black text-[#4a2f17] uppercase tracking-wider mb-2">
                               {item.name}
                             </div>
-                            <p className="text-xs font-semibold text-[#6b4a2c] mb-3 max-w-xs">
+                            <p className="[font-family:Fredoka,sans-serif] text-[13px] leading-snug font-semibold text-[#6b4a2c] mb-3 mx-auto text-center" style={{ maxWidth: "88%" }}>
                               {item.desc}
                             </p>
                             <div
@@ -533,7 +533,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         {/* Category Navigation - Bottom */}
         <div className="shrink-0 bg-[#2a1238]/85 px-4 py-3 border-t-4 border-[#f2d68a]/60">
           <div className="flex gap-3 justify-center items-center">
-            {([['eggs', 'EGGS'], ['habitats', 'SANCTUMS'], ['items', 'ITEMS']] as const).map(([key, label]) => (
+            {([['eggs', 'EGGS'], ['habitats', 'HABITATS'], ['items', 'ITEMS']] as const).map(([key, label]) => (
               <button
                 key={key}
                 onClick={() => setSelectedCategory(key)}

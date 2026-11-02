@@ -14,16 +14,16 @@ const idleMood = (): Mood => (dayPhase(nowForDay()).night ? 'sleepy' : 'kind');
 // Glim's own voice: a very serious guardian who is also, clearly, a little round slime.
 const CHATTER: Array<{ m: Mood; t: string }> = [
   { m: 'smug', t: 'I am not "a slime". I am a GUARDIAN. A very round one.' },
-  { m: 'explain', t: 'Slimes living in a sanctuary of their own element make double goo. Cozy and profitable.' },
+  { m: 'explain', t: 'Slimes living in a habitat of their own element make double goo. Cozy and profitable.' },
   { m: 'explain', t: 'Golden crops give triple the food and double the Farm XP. Water your plants for a head start!' },
-  { m: 'kind', t: 'Pet your slimes in the sanctuaries. Happy slimes leave gifts. I checked.' },
+  { m: 'kind', t: 'Pet your slimes in the habitats. Happy slimes leave gifts. I checked.' },
   { m: 'smug', t: 'Fun fact: I have never lost a staring contest. Want to try?' },
-  { m: 'explain', t: 'Upgrading a sanctuary opens more island space and makes its element perk stronger.' },
+  { m: 'explain', t: 'Upgrading a habitat opens more island space and makes its element perk stronger.' },
   { m: 'kind', t: 'Take your time here. The forge has nowhere to be.' },
   { m: 'explain', t: 'Only Adults (Lv 10+) can take part in the breeding ritual. Feed them up!' },
   { m: 'smug', t: 'Between us, the visitor Wicks pays very well for Moonpetals.' },
   { m: 'kind', t: 'Auto-replant is on the farm bar. A lazy guardian is a wise guardian.' },
-  { m: 'explain', t: 'Night falls in the sanctuaries when it does in your world. Slimes sleep. Do not poke them. Poke them a little.' },
+  { m: 'explain', t: 'Night falls in the habitats when it does in your world. Slimes sleep. Do not poke them. Poke them a little.' },
   { m: 'smug', t: 'Tap me again. Go on. I dare you.' },
 ];
 
@@ -75,11 +75,11 @@ export function GlimCompanion() {
   /** The most useful thing Glim could tell you right now, or null. */
   const hint = useMemo((): { m: Mood; t: string } | null => {
     const v = state.visitor;
-    if (v && !v.done) return { m: 'excited', t: `Wicks the Wanderer is visiting the Sanctuary Isles! He is after ${v.qty} ${CROPS[v.crop].name}.` };
+    if (v && !v.done) return { m: 'excited', t: `Wicks the Wanderer is visiting the Habitat Isles! He is after ${v.qty} ${CROPS[v.crop].name}.` };
     const ripe = state.farmPlots.filter(p => p.unlocked && isReady(p, nowMs)).length;
     if (ripe > 0) return { m: 'excited', t: `${ripe} crop${ripe === 1 ? ' is' : 's are'} ripe on the farm. Go pick ${ripe === 1 ? 'it' : 'them'}!` };
     const gifts = totalGifts(state.habitats);
-    if (gifts > 0) return { m: 'kind', t: `Your slimes left ${gifts} gift${gifts === 1 ? '' : 's'} in the sanctuaries. How thoughtful.` };
+    if (gifts > 0) return { m: 'kind', t: `Your slimes left ${gifts} gift${gifts === 1 ? '' : 's'} in the habitats. How thoughtful.` };
     if (state.activeBreeding && nowMs >= state.activeBreeding.endTime) return { m: 'excited', t: 'The ritual is finished! Something is waiting at the altar.' };
     if (state.activeHatching) return { m: 'explain', t: 'There is an egg waiting to hatch. Tap it, gently. Or not gently.' };
     return null;

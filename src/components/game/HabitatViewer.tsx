@@ -175,7 +175,7 @@ interface Landmark {
   e: string; // what the slime thinks about it
 }
 
-// Things worth visiting in each Sanctuary backdrop (placed from the painted art; slimes stand in the lower band)
+// Things worth visiting in each Habitat backdrop (placed from the painted art; slimes stand in the lower band)
 const LANDMARKS: Record<string, Landmark[]> = {
   fire: [{ x: 38, y: 66, e: '🌋' }, { x: 20, y: 70, e: '💎' }, { x: 60, y: 76, e: '🔥' }, { x: 82, y: 68, e: '🌿' }],
   water: [{ x: 24, y: 78, e: '🪷' }, { x: 68, y: 72, e: '💧' }, { x: 12, y: 66, e: '🗿' }, { x: 84, y: 65, e: '🏛️' }, { x: 47, y: 63, e: '🌊' }],
@@ -349,7 +349,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     cb.current.onPoke(slime.id);
   };
 
-  // What the Sanctuary's pointer controller can do to this slime
+  // What the Habitat's pointer controller can do to this slime
   useEffect(() => {
     const api: SlimeApi = {
       poke,
@@ -866,7 +866,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
   const pct = maxed ? 100 : Math.min(100, (slime.xp / needed) * 100);
   const start = sim.current;
 
-  // No pointer handlers here: the Sanctuary's controller finds slimes by geometry (see HabitatViewer)
+  // No pointer handlers here: the Habitat's controller finds slimes by geometry (see HabitatViewer)
   return (
     <div
       ref={groundRef}
@@ -1273,7 +1273,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           <ChevronLeft className="w-6 h-6 text-[#FF7EB6]" />
         </button>
         <h2 className="text-center text-2xl font-black uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive", color: theme.accent }}>
-          {ELEMENT_DISPLAY_NAMES[habitat.element]} Sanctuary
+          {ELEMENT_DISPLAY_NAMES[habitat.element]} Habitat
         </h2>
         <p className="text-center text-xs text-white/60 mt-2 font-bold tracking-wider">{theme.desc}</p>
         <div className="absolute top-4 right-4 flex items-center gap-3">
@@ -1298,7 +1298,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
               🎁 {habitat.gifts?.length}
             </button>
           )}
-          <button onClick={() => setManageOpen(true)} className="rounded-full px-3 py-1 text-sm font-black text-[#4a2f17] bg-[#f6e8c3] border-2 border-[#4a2f17] hover:scale-105 transition-transform" aria-label="Manage sanctuary">⚙ Manage</button>
+          <button onClick={() => setManageOpen(true)} className="rounded-full px-3 py-1 text-sm font-black text-[#4a2f17] bg-[#f6e8c3] border-2 border-[#4a2f17] hover:scale-105 transition-transform" aria-label="Manage habitat">⚙ Manage</button>
         </div>
       </div>
 

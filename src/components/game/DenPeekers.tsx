@@ -3,6 +3,7 @@ import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { Slime } from '@/types/slime';
 import { audioEngine } from '@/utils/audioEngine';
+import { getStage } from '@/utils/slimeRenderer';
 
 /** The eight lit alcoves painted into the Den background (measured from the image), as percentages of the PICTURE: centre x, bottom y, width, height. They are mapped onto the screen with the same cover-fit the painting uses. */
 const IMG_W = 1376, IMG_H = 768;
@@ -26,6 +27,7 @@ export function DenPeekers() {
   const { state } = useGameState();
   const [out, setOut] = useState<Record<number, Peeker>>({});
   const [view, setView] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
+  const root = useRef<HTMLDivElement>(null);
   const alive = useRef(true);
   const timers = useRef<number[]>([]);
   const outRef = useRef(out);
@@ -39,9 +41,14 @@ export function DenPeekers() {
   }, [state.slimes]);
 
   useEffect(() => {
-    const on = () => setView({ w: window.innerWidth, h: window.innerHeight });
-    window.addEventListener('resize', on);
-    return () => window.removeEventListener('resize', on);
+    // measure the box the painting actually fills (not the window), so alcoves always line up with the picture
+    const el = root.current;
+    if (!el) return;
+    const on = () => { const r = el.getBoundingClientRect(); if (r.width && r.height) setView({ w: r.width, h: r.height }); };
+    on();
+    const ro = new ResizeObserver(on);
+    ro.observe(el);
+    return () => ro.disconnect();
   }, []);
 
   const later = (fn: () => void, ms: number) => {
@@ -71,6 +78,13 @@ export function DenPeekers() {
   useEffect(() => {
     alive.current = true;
     if (!cast.length) return;
+    // preview switch for checking every alcove at once: add ?den=all to the address
+    if (new URLSearchParams(window.location.search).get('den') === 'all') {
+      const all: Record<number, Peeker> = {};
+      ALCOVES.forEach((_, k) => { all[k] = { slime: cast[k % cast.length], mode: (['peek', 'wave', 'pop', 'shy'] as Mode[])[k % 4], phase: 'show', key: ++keyN.current }; });
+      setOut(all);
+      return;
+    }
     const loop = () => {
       const free = ALCOVES.map((_, k) => k).filter(k => !outRef.current[k]);
       if (free.length && Object.keys(outRef.current).length < 2) perform(pick(free), pick(cast), 0);
@@ -91,7 +105,7 @@ export function DenPeekers() {
   };
 
   return (
-    <>
+    <div ref={root} className="absolute inset-0 pointer-events-none" style={{ zIndex: 3 }}>
       <style>{`
         @keyframes peekWiggle { 0%,100% { transform: rotate(-4deg) } 50% { transform: rotate(4deg) } }
         @keyframes peekWave { 0%,100% { transform: translateX(0) rotate(0) } 25% { transform: translateX(-5%) rotate(-7deg) } 75% { transform: translateX(5%) rotate(7deg) } }
@@ -108,13 +122,13 @@ export function DenPeekers() {
         const aw = (a.w / 100) * IMG_W * k, ah = (a.h / 100) * IMG_H * k;
         const left = ox + (a.x / 100) * IMG_W * k - aw / 2, top = oy + (a.b / 100) * IMG_H * k - ah;
         // the slime art only fills about half of its square canvas, so the canvas is larger than the opening and the arch clips it
-        const size = Math.round(Math.min(aw * 1.05, ah * 0.62));
+        const size = Math.round(Math.min(aw * 1.45, ah * 0.8));
         const lift = !p ? 120 : p.phase === 'in' || p.phase === 'out' ? 120 : p.mode === 'peek' || p.mode === 'shy' ? 14 : 2;
         const anim = !p ? undefined : p.giggle ? 'peekGiggle 0.35s ease-in-out infinite'
           : p.phase !== 'show' ? undefined
           : p.mode === 'peek' ? 'peekWiggle 1.1s ease-in-out infinite' : p.mode === 'wave' ? 'peekWave 0.9s ease-in-out infinite' : p.mode === 'pop' ? 'peekPop 0.8s ease-in-out infinite' : 'peekShy 1.2s ease-in-out infinite';
         return (
-          <div key={i} className="absolute pointer-events-none" style={{ left, top, width: aw, height: ah, clipPath: 'inset(-40% -12% 0 -12%)', zIndex: 3 }}>
+          <div key={i} className="absolute pointer-events-none" style={{ left, top, width: aw, height: ah, clipPath: `inset(0 4% 0 4% round ${Math.round(aw / 2)}px ${Math.round(aw / 2)}px 0 0)`, zIndex: 3 }}>
             {p && (
               <button
                 key={p.key}
@@ -123,8 +137,11 @@ export function DenPeekers() {
                 className="absolute outline-none pointer-events-auto"
                 style={{ left: '50%', bottom: 0, width: size, height: size, marginLeft: -size / 2, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', transform: `translateY(${lift}%)`, transition: 'transform 0.55s cubic-bezier(.3,1.5,.5,1)' }}
               >
-                <div style={{ width: '100%', height: '100%', animation: anim, transformOrigin: '50% 100%' }}>
-                  <SlimeCanvas slime={p.slime} size={size} sizeMultiplier={2.4} animated animationStyle="playful" />
+                <div className="flex items-end justify-center" style={{ width: '100%', height: '100%', animation: anim, transformOrigin: '50% 100%' }}>
+                  {/* SlimeCanvas draws at size x multiplier x growth stage; ask for exactly the width we want, centred, with the art sitting on the floor */}
+                  <div style={{ marginBottom: -size * 0.2 }}>
+                    <SlimeCanvas slime={p.slime} size={size / (getStage(p.slime.level || 1) === 'baby' ? 0.6 : getStage(p.slime.level || 1) === 'teen' ? 0.85 : 1)} sizeMultiplier={1} animated animationStyle="playful" />
+                  </div>
                 </div>
               </button>
             )}
@@ -146,6 +163,6 @@ export function DenPeekers() {
           </React.Fragment>
         );
       })}
-    </>
+    </div>
   );
 }

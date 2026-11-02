@@ -88,7 +88,7 @@ const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
     expression: 'glim_kind',
-    text: "This world — Sanctuaries, Goo, slimes — it's dying."
+    text: "This world — Habitats, Goo, slimes — it's dying."
   },
   {
     id: 'firstLaunch',
@@ -103,7 +103,7 @@ const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
     expression: 'sad_glim',
-    text: "Breed slimes. Build Sanctuaries. Restore the Goo."
+    text: "Breed slimes. Build Habitats. Restore the Goo."
   },
   {
     id: 'firstLaunch',
@@ -167,7 +167,7 @@ const FIRST_HATCH_DIALOGUE = [
   {
     id: 'firstHatch',
     expression: 'emotional',
-    text: "Now — it needs a home. Build it a Sanctuary."
+    text: "Now — it needs a home. Build it a Habitat."
   }
 ];
 
@@ -185,7 +185,7 @@ const FIRST_HABITAT_DIALOGUE = [
   {
     id: 'firstHabitatBuilt',
     expression: 'warm',
-    text: "Each Sanctuary you build restores Goo to the world and calms the slimes that have been out there fighting."
+    text: "Each Habitat you build restores Goo to the world and calms the slimes that have been out there fighting."
   },
   {
     id: 'firstHabitatBuilt',
@@ -272,7 +272,7 @@ const FIRST_BATTLE_DIALOGUE = [
   {
     id: 'firstBattleMapOpen',
     expression: 'sad_glim',
-    text: "These are the Verdant Lowlands. People used to stroll between Sanctuaries here with a picnic and no weapons."
+    text: "These are the Verdant Lowlands. People used to stroll between Habitats here with a picnic and no weapons."
   },
   {
     id: 'firstBattleMapOpen',
@@ -325,13 +325,13 @@ const LEVEL_DIALOGUE = {
     { expression: 'grim', text: "Right. We need to move faster from here." }
   ],
   20: [
-    { expression: 'urgent', text: "Voss is heading for the Murkmire Swamp. The shadow slimes there are older than the Sanctuaries." },
+    { expression: 'urgent', text: "Voss is heading for the Murkmire Swamp. The shadow slimes there are older than the Habitats." },
     { expression: 'urgent', text: "If he drains them, the Goo could stay out of balance for good." },
     { expression: 'urgent', text: "We have to get there before he does." }
   ],
   25: [
     { expression: 'holding', text: "One of the slimes dropped this. It's Voss's badge." },
-    { expression: 'holding', text: "He's been making slimes angry on purpose by taking their Goo. If everyone's busy fighting, nobody is guarding the Sanctuaries." },
+    { expression: 'holding', text: "He's been making slimes angry on purpose by taking their Goo. If everyone's busy fighting, nobody is guarding the Habitats." },
     { expression: 'holding', text: "So he's not just greedy, he has a plan. That's worse." }
   ],
   30: [
@@ -348,7 +348,7 @@ const LEVEL_DIALOGUE = {
   ],
   40: [
     { expression: 'serious', text: "We're close now. I can see the castle from here." },
-    { expression: 'serious', text: "Everything you've bred and every Sanctuary you've rebuilt got us this far." },
+    { expression: 'serious', text: "Everything you've bred and every Habitat you've rebuilt got us this far." },
     { expression: 'serious', text: "Voss takes Goo. We make slimes. Let's show him which one works better." }
   ],
   45: [
@@ -360,7 +360,7 @@ const LEVEL_DIALOGUE = {
   ],
   50: [
     { expression: 'determined', text: "This is it." },
-    { expression: 'determined', text: "Every slime you've bred and every Sanctuary you've restored led us here." },
+    { expression: 'determined', text: "Every slime you've bred and every Habitat you've restored led us here." },
     { expression: 'determined', text: "Voss takes Goo. We make slimes. Go and show him." }
   ]
 };

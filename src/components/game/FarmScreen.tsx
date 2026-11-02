@@ -457,7 +457,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
             {perkLines.filter(p => p.text.startsWith('Farm')).length > 0 && (
               <div className="flex flex-wrap" style={{ gap: sw * 0.004, marginTop: sw * 0.004 }}>
                 {perkLines.filter(p => p.text.startsWith('Farm')).map(p => (
-                  <span key={p.element} title={`${p.title} (${p.element} sanctuary, level ${p.level})`} className="rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.78)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: sw * 0.0088, padding: `0 ${sw * 0.005}px` }}>
+                  <span key={p.element} title={`${p.title} (${p.element} habitat, level ${p.level})`} className="rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.78)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: sw * 0.0088, padding: `0 ${sw * 0.005}px` }}>
                     ✦ {p.text.replace('Farm: ', '')}
                   </span>
                 ))}

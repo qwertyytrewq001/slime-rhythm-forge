@@ -30,7 +30,7 @@ export const ClockChip: React.FC<{ day: DayInfo; sw: number }> = ({ day, sw }) =
   return (
     <div
       className="flex items-center rounded-full shadow-lg"
-      title={`${day.label}. The sanctuaries follow your own clock.`}
+      title={`${day.label}. The habitats follow your own clock.`}
       style={{ background: 'rgba(30,14,40,0.82)', border: '3px solid #f2d68a', color: '#fff3d0', gap: sw * 0.006, padding: `${sw * 0.003}px ${sw * 0.014}px ${sw * 0.003}px ${sw * 0.004}px`, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}
     >
       <div className="relative flex-shrink-0" style={{ width: size, height: size }}>

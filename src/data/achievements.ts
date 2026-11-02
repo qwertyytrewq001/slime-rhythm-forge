@@ -1,10 +1,10 @@
 import { Achievement, GameState, GameStats } from '@/types/slime';
 import { TOTAL_PLOTS } from '@/utils/farmCore';
 
-export type AchievementCategory = 'Collection' | 'Breeding' | 'Growth' | 'Sanctuary' | 'Battle' | 'Farm';
+export type AchievementCategory = 'Collection' | 'Breeding' | 'Growth' | 'Habitat' | 'Battle' | 'Farm';
 
 export const ACHIEVEMENT_CATEGORIES: AchievementCategory[] = [
-  'Collection', 'Breeding', 'Growth', 'Sanctuary', 'Battle', 'Farm',
+  'Collection', 'Breeding', 'Growth', 'Habitat', 'Battle', 'Farm',
 ];
 
 export interface AchievementDef {
@@ -62,10 +62,10 @@ export const ACHIEVEMENT_DEFS: AchievementDef[] = [
   { id: 'well_fed', name: 'Well Fed', description: 'Feed your slimes 10 times', category: 'Growth', icon: '🍓', rewardAmount: 50, target: 10, progress: s => stat(s, 'feeds') },
   { id: 'master_chef', name: 'Master Chef', description: 'Feed your slimes 100 times', category: 'Growth', icon: '🍯', rewardAmount: 250, target: 100, progress: s => stat(s, 'feeds') },
 
-  // ---- Sanctuary ----
-  { id: 'first_sanctuary', name: 'Home Sweet Home', description: 'Build your first Sanctuary', category: 'Sanctuary', icon: '🏡', rewardAmount: 75, target: 1, progress: s => s.habitats.length },
-  { id: 'sanctuary_4', name: 'Little Village', description: 'Build 4 Sanctuaries', category: 'Sanctuary', icon: '🏘️', rewardAmount: 200, target: 4, progress: s => s.habitats.length },
-  { id: 'sanctuary_8', name: 'Haven', description: 'Build 8 Sanctuaries', category: 'Sanctuary', icon: '🏞️', rewardAmount: 500, target: 8, progress: s => s.habitats.length },
+  // ---- Habitat ----
+  { id: 'first_sanctuary', name: 'Home Sweet Home', description: 'Build your first Habitat', category: 'Habitat', icon: '🏡', rewardAmount: 75, target: 1, progress: s => s.habitats.length },
+  { id: 'sanctuary_4', name: 'Little Village', description: 'Build 4 Habitats', category: 'Habitat', icon: '🏘️', rewardAmount: 200, target: 4, progress: s => s.habitats.length },
+  { id: 'sanctuary_8', name: 'Haven', description: 'Build 8 Habitats', category: 'Habitat', icon: '🏞️', rewardAmount: 500, target: 8, progress: s => s.habitats.length },
 
   // ---- Battle ----
   { id: 'first_blood', name: 'First Blood', description: 'Win your first battle', category: 'Battle', icon: '⚔️', rewardAmount: 50, target: 1, progress: s => stat(s, 'battlesWon') },
