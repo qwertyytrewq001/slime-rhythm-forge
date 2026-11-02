@@ -159,7 +159,7 @@ export function DenPeekers() {
         return (
           <React.Fragment key={`fx${i}-${p.key}`}>
             {p.phase === 'in' && <img src={`${import.meta.env.BASE_URL}altar/particle_light.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: cx - 18, top: top + 6, width: 36, imageRendering: 'auto', animation: 'peekBub 0.5s ease-out', zIndex: 4 }} />}
-            {label && <span className="absolute font-bold pointer-events-none" style={{ left: cx + 6, top: top - 10, fontSize: 15, color: '#fff', WebkitTextStroke: '3.5px #3a2150', paintOrder: 'stroke fill', animation: 'peekBub 0.25s ease-out', zIndex: 4, fontFamily: "'Fredoka', sans-serif" }}>{label}</span>}
+            {label && <span className="absolute font-bold pointer-events-none" style={{ left: Math.min(cx + 6, view.w - 44), top: top - 10, fontSize: 15, color: '#fff', WebkitTextStroke: '3.5px #3a2150', paintOrder: 'stroke fill', animation: 'peekBub 0.25s ease-out', zIndex: 4, fontFamily: "'Fredoka', sans-serif" }}>{label}</span>}
           </React.Fragment>
         );
       })}
