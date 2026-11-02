@@ -4,10 +4,11 @@ import { SlimeCanvas } from './SlimeCanvas';
 import { Slime } from '@/types/slime';
 import { audioEngine } from '@/utils/audioEngine';
 
-/** The eight lit alcoves painted into the Den background (measured from the image), as percentages of the screen: centre x, bottom y, width, height. */
+/** The eight lit alcoves painted into the Den background (measured from the image), as percentages of the PICTURE: centre x, bottom y, width, height. They are mapped onto the screen with the same cover-fit the painting uses. */
+const IMG_W = 1376, IMG_H = 768;
 const ALCOVES = [
-  { x: 7.9, b: 50, w: 7, h: 27.6 }, { x: 8.1, b: 79.2, w: 5.8, h: 18.8 }, { x: 17.85, b: 49, w: 5.5, h: 17.2 }, { x: 18.05, b: 72.4, w: 4.7, h: 16.7 },
-  { x: 93, b: 49.5, w: 7, h: 20.3 }, { x: 92.7, b: 80.2, w: 5.8, h: 20.3 }, { x: 82.8, b: 49, w: 5.2, h: 16.7 }, { x: 82.5, b: 72.9, w: 5.2, h: 17.2 },
+  { x: 8.25, b: 50.4, w: 8.3, h: 28.5 }, { x: 8.5, b: 79.7, w: 7.0, h: 26.2 }, { x: 18.05, b: 49.6, w: 6.5, h: 23.4 }, { x: 18.45, b: 72.7, w: 5.9, h: 21.5 },
+  { x: 82.25, b: 72.7, w: 6.3, h: 22.3 }, { x: 82.65, b: 49.6, w: 6.5, h: 23.0 }, { x: 92.35, b: 50.0, w: 8.5, h: 27.7 }, { x: 92.2, b: 81.3, w: 7.0, h: 26.6 },
 ];
 
 type Mode = 'peek' | 'wave' | 'pop' | 'shy';
@@ -24,7 +25,7 @@ const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 export function DenPeekers() {
   const { state } = useGameState();
   const [out, setOut] = useState<Record<number, Peeker>>({});
-  const [vw, setVw] = useState(() => window.innerWidth);
+  const [view, setView] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
   const alive = useRef(true);
   const timers = useRef<number[]>([]);
   const outRef = useRef(out);
@@ -38,7 +39,7 @@ export function DenPeekers() {
   }, [state.slimes]);
 
   useEffect(() => {
-    const on = () => setVw(window.innerWidth);
+    const on = () => setView({ w: window.innerWidth, h: window.innerHeight });
     window.addEventListener('resize', on);
     return () => window.removeEventListener('resize', on);
   }, []);
@@ -101,30 +102,48 @@ export function DenPeekers() {
       `}</style>
       {ALCOVES.map((a, i) => {
         const p = out[i];
-        const size = Math.max(54, Math.round(vw * (a.w / 100) * 1.3));
-        const lift = !p ? 108 : p.phase === 'in' || p.phase === 'out' ? 108 : p.mode === 'peek' || p.mode === 'shy' ? 28 : 4;
+        // where the painting really is on screen (it is scaled to cover the window and centred)
+        const k = Math.max(view.w / IMG_W, view.h / IMG_H);
+        const ox = (view.w - IMG_W * k) / 2, oy = (view.h - IMG_H * k) / 2;
+        const aw = (a.w / 100) * IMG_W * k, ah = (a.h / 100) * IMG_H * k;
+        const left = ox + (a.x / 100) * IMG_W * k - aw / 2, top = oy + (a.b / 100) * IMG_H * k - ah;
+        // the slime art only fills about half of its square canvas, so the canvas is larger than the opening and the arch clips it
+        const size = Math.round(Math.min(aw * 1.75, ah * 1.3));
+        const lift = !p ? 112 : p.phase === 'in' || p.phase === 'out' ? 112 : p.mode === 'peek' || p.mode === 'shy' ? 34 : 4;
         const anim = !p ? undefined : p.giggle ? 'peekGiggle 0.35s ease-in-out infinite'
           : p.phase !== 'show' ? undefined
           : p.mode === 'peek' ? 'peekWiggle 1.1s ease-in-out infinite' : p.mode === 'wave' ? 'peekWave 0.9s ease-in-out infinite' : p.mode === 'pop' ? 'peekPop 0.8s ease-in-out infinite' : 'peekShy 1.2s ease-in-out infinite';
         return (
-          <div key={i} className="absolute" style={{ left: `${a.x}%`, top: `${a.b - a.h}%`, width: `${a.w}%`, height: `${a.h}%`, transform: 'translateX(-50%)', clipPath: 'inset(0 -35% 0 -35%)', zIndex: 3 }}>
+          <div key={i} className="absolute pointer-events-none" style={{ left, top, width: aw, height: ah, clipPath: 'inset(0 round 46% 46% 4% 4% / 24% 24% 3% 3%)', zIndex: 3 }}>
             {p && (
               <button
                 key={p.key}
                 onClick={() => tap(i)}
                 aria-label={`${p.slime.name} peeking`}
-                className="absolute outline-none"
+                className="absolute outline-none pointer-events-auto"
                 style={{ left: '50%', bottom: 0, width: size, height: size, marginLeft: -size / 2, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', transform: `translateY(${lift}%)`, transition: 'transform 0.55s cubic-bezier(.3,1.5,.5,1)' }}
               >
                 <div style={{ width: '100%', height: '100%', animation: anim, transformOrigin: '50% 100%' }}>
                   <SlimeCanvas slime={p.slime} size={size} animated animationStyle="playful" />
                 </div>
-                {p.phase === 'show' && (p.mode === 'wave' || p.giggle) && (
-                  <span className="absolute font-bold" style={{ right: '4%', top: '2%', fontSize: Math.max(11, size * 0.2), color: '#fff', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill', animation: 'peekBub 0.25s ease-out' }}>{p.giggle ? 'hehe!' : 'hi!'}</span>
-                )}
               </button>
             )}
           </div>
+        );
+      })}
+      {/* speech bubbles and sparkle puffs live outside the clipped alcoves so they are never cut off */}
+      {ALCOVES.map((a, i) => {
+        const p = out[i];
+        if (!p) return null;
+        const k = Math.max(view.w / IMG_W, view.h / IMG_H);
+        const ox = (view.w - IMG_W * k) / 2, oy = (view.h - IMG_H * k) / 2;
+        const cx = ox + (a.x / 100) * IMG_W * k, top = oy + ((a.b - a.h) / 100) * IMG_H * k;
+        const label = p.giggle ? 'hehe!' : p.mode === 'wave' && p.phase === 'show' ? 'hi!' : null;
+        return (
+          <React.Fragment key={`fx${i}-${p.key}`}>
+            {p.phase === 'in' && <img src={`${import.meta.env.BASE_URL}altar/particle_light.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: cx - 18, top: top + 6, width: 36, imageRendering: 'auto', animation: 'peekBub 0.5s ease-out', zIndex: 4 }} />}
+            {label && <span className="absolute font-bold pointer-events-none" style={{ left: cx + 6, top: top - 10, fontSize: 15, color: '#fff', WebkitTextStroke: '3.5px #3a2150', paintOrder: 'stroke fill', animation: 'peekBub 0.25s ease-out', zIndex: 4, fontFamily: "'Fredoka', sans-serif" }}>{label}</span>}
+          </React.Fragment>
         );
       })}
     </>

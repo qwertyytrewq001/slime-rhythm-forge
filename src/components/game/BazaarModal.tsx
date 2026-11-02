@@ -371,21 +371,21 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                         <div
                           key={elem}
                           onClick={() => state.goo >= cost && handleBuyHabitat(elem, cost)}
-                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-80 baz-card px-5 pt-6 pb-4 ${
+                          className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-[21rem] baz-card px-5 pt-6 pb-4 ${
                             state.goo >= cost 
                               ? 'hover:scale-105' 
                               : 'opacity-40 grayscale'
                           }`}
                         >
                           {/* Habitat Preview - Original Sanctuaries Style */}
-                          <div className="w-28 h-28 rounded-full border-[5px] p-2 flex items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-110 group shadow-[0_20px_50px_rgba(0,0,0,0.8)] mb-2"
+                          <div className="w-full h-[7.4rem] rounded-2xl border-[4px] p-2 flex items-center justify-center relative overflow-hidden cursor-pointer transition-all hover:scale-110 group shadow-[0_20px_50px_rgba(0,0,0,0.8)] mb-2"
                                style={{
                                  borderColor: theme.accent + '99',
                                  backgroundColor: theme.bgImage ? 'transparent' : theme.bg + 'CC',
                                  backgroundImage: theme.bgImage ? `url("${theme.bgImage}")` : 'none',
-                                 backgroundSize: 'cover',
-                                 backgroundPosition: 'center',
-                                 boxShadow: `0 15px 40px rgba(0,0,0,0.7), inset 0 0 30px ${theme.accent}30`,
+                                 backgroundSize: '135%',
+                                 backgroundPosition: 'center 55%',
+                                 boxShadow: `0 6px 10px rgba(0,0,0,0.45), inset 0 0 18px rgba(0,0,0,0.35)`,
                                  transform: 'none'
                                }}
                           >
