@@ -209,11 +209,12 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
       {/* Left Sidebar - Family Navigation */}
       <div className="w-64 bg-black/40 border-r border-[#FF7EB6]/10 flex flex-col">
         {/* Sidebar Header */}
-        <div className="p-4 border-b border-[#FF7EB6]/10">
-          <h2 className="text-sm font-bold text-[#FF7EB6] uppercase tracking-wider mb-2" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-            Collections
-          </h2>
-          <div className="text-xs text-gray-300">
+        <div className="p-3 border-b border-[#4a2f17]/20">
+          <div className="relative mx-auto mb-1" style={{ width: '92%' }}>
+            <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.35))' }} />
+            <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 17, color: '#fff3d0', WebkitTextStroke: '3.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>Collections</div>
+          </div>
+          <div className="text-xs font-bold text-center text-[#4a2f17] [font-family:Fredoka,sans-serif]">
             {familyOptions.filter(f => familyStats.get(f)?.discovered! > 0).length} / {familyOptions.length} Discovered
           </div>
         </div>
@@ -230,10 +231,11 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
         <div className="p-6 border-b-2 border-[#FF7EB6]/10 bg-white/40 backdrop-blur-md">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <h1 className="text-base font-black text-[#FF7EB6] uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-                Slime Codex
-              </h1>
-              <div className="text-sm font-bold text-gray-600 mt-1 capitalize">
+              <div className="relative" style={{ width: 300, maxWidth: '60vw' }}>
+                <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.35))' }} />
+                <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 26, color: '#fff3d0', WebkitTextStroke: '4.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.07em' }}>Slime Codex</div>
+              </div>
+              <div className="text-sm font-bold text-[#6b4a2c] mt-1 capitalize [font-family:Fredoka,sans-serif]">
                 {selectedFamily.replace(/-/g, ' ')}
               </div>
             </div>

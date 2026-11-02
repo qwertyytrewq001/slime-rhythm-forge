@@ -48,17 +48,6 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
       {/* 1. BEAUTIFUL GRADIENT OVERLAY (Light Pinkish Whitish Theme) */}
       <div className="absolute inset-0 bg-gradient-to-br from-pink-100/90 via-white/80 to-amber-100/90 backdrop-blur-sm" onClick={onClose} />
       
-      {/* painted celebration: ribbon banner, rarity gem and confetti */}
-      <div className="absolute left-1/2 pointer-events-none" style={{ top: '5%', transform: 'translateX(-50%)', width: 'min(86vw, 520px)', zIndex: 5 }}>
-        <style>{`@keyframes discBanner { 0% { opacity: 0; transform: translateY(-30px) scale(0.7) } 60% { transform: translateY(4px) scale(1.04) } 100% { opacity: 1; transform: none } } @keyframes discConfetti { 0% { opacity: 0; transform: translate(-50%,-30%) scale(0.5) } 30% { opacity: 1 } 100% { opacity: 0; transform: translate(-50%,40%) scale(1.3) } }`}</style>
-        <div className="relative" style={{ animation: 'discBanner 0.6s ease-out both' }}>
-          <img src={`${import.meta.env.BASE_URL}altar/love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.35))' }} />
-          <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(20px, 4vw, 34px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>NEW SLIME!</span>
-        </div>
-        <img src={`${import.meta.env.BASE_URL}altar/love_confetti.png`} alt="" draggable={false} className="absolute" style={{ left: '50%', top: '50%', width: '90%', imageRendering: 'auto', animation: 'discConfetti 1.8s ease-out 0.4s both' }} />
-        <img src={`${import.meta.env.BASE_URL}altar/gem_${slime.rarityTier.toLowerCase()}.png`} alt={slime.rarityTier} draggable={false} className="mx-auto block" style={{ width: 64, marginTop: 6, imageRendering: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.4))' }} />
-      </div>
-
       {/* 2. MAGICAL BACKGROUND EFFECTS */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {/* Magical sparkles */}
@@ -87,11 +76,11 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
 
       {/* 3. BEAUTIFUL MAIN CARD (Light Pinkish Whitish Theme) */}
       <div 
-        className={`relative w-full max-w-2xl lg:max-w-3xl bg-gradient-to-br from-pink-100 via-white to-amber-100 border-4 border-pink-300/50 rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-1000 transform ${animate ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}
+        className={`relative w-full max-w-2xl lg:max-w-3xl bg-[#f6e8c3] border-[5px] border-[#4a2f17] rounded-2xl shadow-2xl flex flex-col overflow-hidden transition-all duration-1000 transform ${animate ? 'scale-100 translate-y-0' : 'scale-95 translate-y-4'}`}
         onClick={(e) => e.stopPropagation()} 
       >
         {/* Decorative border glow */}
-        <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-pink-300/20 via-transparent to-amber-300/20 animate-pulse" />
+        <div className="absolute inset-0 rounded-2xl bg-transparent" />
         
         {/* Close button */}
         <button 
@@ -101,19 +90,20 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
           <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 38, height: 38, maxWidth: 'none', imageRendering: 'auto' }} />
         </button>
 
-        {/* TOP DECORATIVE BANNER */}
-        <div className="bg-gradient-to-r from-pink-300/30 to-amber-300/30 p-3 border-b-2 border-pink-400/50">
-          <div className="text-center">
-            <span className="text-lg font-bold text-white uppercase tracking-wider drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(0,0,0,0.5)' }}>
-              ✨ NEW DISCOVERY ✨
-            </span>
+        {/* painted ribbon, in the flow of the card so it never covers the name */}
+        <div className="relative flex flex-col items-center pt-4 pb-1">
+          <style>{`@keyframes discBanner { 0% { opacity: 0; transform: translateY(-24px) scale(0.7) } 60% { transform: translateY(3px) scale(1.04) } 100% { opacity: 1; transform: none } } @keyframes discConfetti { 0% { opacity: 0; transform: translate(-50%,-30%) scale(0.5) } 30% { opacity: 1 } 100% { opacity: 0; transform: translate(-50%,40%) scale(1.3) } }`}</style>
+          <div className="relative" style={{ width: 'min(70vw, 340px)', animation: 'discBanner 0.6s ease-out both' }}>
+            <img src={`${import.meta.env.BASE_URL}altar/love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 5px 6px rgba(0,0,0,0.3))' }} />
+            <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(18px, 3.4vw, 26px)', color: '#fff3d0', WebkitTextStroke: '4px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>NEW SLIME!</span>
           </div>
+          <img src={`${import.meta.env.BASE_URL}altar/love_confetti.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: '70%', imageRendering: 'auto', animation: 'discConfetti 1.8s ease-out 0.4s both' }} />
         </div>
 
         {/* CONTENT AREA */}
         <div className="flex flex-col lg:flex-row">
           {/* LEFT PANEL: SLIME SHOWCASE */}
-          <div className="w-full lg:w-1/3 bg-gradient-to-br from-pink-100/50 to-amber-100/50 p-4 flex flex-col items-center justify-center relative">
+          <div className="w-full lg:w-1/3 bg-transparent p-4 flex flex-col items-center justify-center relative">
             {/* Magical glow background */}
             <div className="absolute inset-0 rounded-full bg-gradient-to-r from-pink-300/20 to-amber-300/20 blur-xl animate-pulse" />
             
@@ -124,43 +114,43 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
             </div>
 
             {/* Discovery badge */}
-            <div className="mt-4 px-3 py-1 bg-gradient-to-r from-pink-400 to-amber-500 rounded-xl border-2 border-white/50 shadow-lg animate-bounce">
-              <span className="text-xs font-bold text-white uppercase tracking-wider" style={{ textShadow: '1px 1px 2px rgba(0,0,0,0.5)' }}>
+            <div className="mt-4 px-3 py-1 bg-gradient-to-b from-[#ffe98a] to-[#f2b632] rounded-full border-[3px] border-[#4a2f17] shadow-lg animate-bounce">
+              <span className="text-xs font-bold text-[#4a2f17] uppercase tracking-wider [font-family:Fredoka,sans-serif]">
                 NEW SPIRIT!
               </span>
             </div>
           </div>
 
           {/* RIGHT PANEL: DETAILS */}
-          <div className="w-full lg:w-2/3 p-6 bg-gradient-to-br from-pink-200/50 to-amber-200/50">
+          <div className="w-full lg:w-2/3 p-6 bg-transparent">
             <div className="text-center mb-4">
-              <p className="text-sm font-bold text-pink-600 uppercase tracking-wider mb-2" style={{ textShadow: '1px 1px 2px rgba(255,126,182,0.5)' }}>
+              <p className="text-sm font-bold text-[#b8660e] uppercase tracking-wider mb-1 [font-family:Fredoka,sans-serif]">
                 SPECIES UNLOCKED!
               </p>
               
-              <h2 className="text-2xl font-bold text-gray-800 mb-4 drop-shadow-lg" style={{ textShadow: '2px 2px 4px rgba(255,126,182,0.5)' }}>
+              <h2 className="text-3xl font-bold text-[#4a2f17] mb-3 [font-family:Fredoka,sans-serif]">
                 {slime.name}
               </h2>
             </div>
 
             {/* Slime details */}
-            <div className="bg-white/30 rounded-xl p-4 mb-4 border border-pink-300/30">
+            <div className="bg-white/55 rounded-2xl p-4 mb-4 border-2 border-[#4a2f17]/30">
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-pink-600">Rarity:</span>
+                <span className="text-sm font-bold text-[#6b4a2c] [font-family:Fredoka,sans-serif]">Rarity:</span>
                 <span className="text-sm font-bold text-gray-800 capitalize" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
                   {slime.rarityTier}
                 </span>
               </div>
               
               <div className="flex items-center justify-between mb-2">
-                <span className="text-sm font-semibold text-pink-600">Element:</span>
+                <span className="text-sm font-bold text-[#6b4a2c] [font-family:Fredoka,sans-serif]">Element:</span>
                 <span className="text-sm font-bold text-gray-800 capitalize">
                   {ELEMENT_DISPLAY_NAMES[slime.element]}
                 </span>
               </div>
               
               <div className="flex items-center justify-between">
-                <span className="text-sm font-semibold text-pink-600">Stars:</span>
+                <span className="text-sm font-bold text-[#6b4a2c] [font-family:Fredoka,sans-serif]">Stars:</span>
                 <div className="flex gap-1">
                   {[...Array(slime.rarityStars || 1)].map((_, i) => (
                     <Star key={i} className="w-4 h-4 text-pink-600 fill-current" />
@@ -170,7 +160,7 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
             </div>
 
             {/* Lore */}
-            <div className="bg-white/30 rounded-xl p-4 mb-4 border border-pink-300/30">
+            <div className="bg-white/55 rounded-2xl p-4 mb-4 border-2 border-[#4a2f17]/30">
               <p className="text-sm font-medium text-gray-700 italic leading-relaxed" style={{ textShadow: '1px 1px 2px rgba(255,126,182,0.3)' }}>
                 "{getCodexSlime(slime)?.description || 'A mysterious slime with unknown origins.'}"
               </p>

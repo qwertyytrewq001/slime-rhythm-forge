@@ -49,6 +49,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
   const { state, dispatch, playerLevel } = useGameState();
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<'eggs' | 'habitats' | 'items'>('eggs');
+  const [boughtEgg, setBoughtEgg] = useState<SlimeElement | null>(null);
   const [selectedItem, setSelectedItem] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(0);
 
@@ -100,10 +101,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
 
     const newSlime = createElementSlime(element);
     dispatch({ type: 'START_HATCHING', slime: newSlime, duration: 10000 });
-    toast({
-      title: "Egg Purchased!",
-      description: `${ELEMENT_DISPLAY_NAMES[element]} Egg is now on the Hatchery Bench.`,
-    });
+    setBoughtEgg(element); // a proper "you got an egg" moment instead of a toast
   };
 
   const handleBuyItem = (itemId: string, cost: number) => {
@@ -249,7 +247,36 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
 
   return (
     <div className="fixed inset-0 z-[250] p-0">
-      <style>{`.baz-tag-pill { position: relative; background: url(${import.meta.env.BASE_URL}ui/baz_tag.png) center / 100% 100% no-repeat; min-height: 46px; width: 100%; display: flex; align-items: center; justify-content: flex-end; padding: 0 14% 0 0; color: #fff3d0; font-family: Fredoka, sans-serif; text-shadow: 0 2px 0 rgba(30,12,4,0.8); } .baz-tag-pill::before { content: ""; position: absolute; left: 6%; top: 50%; width: 30px; height: 30px; transform: translateY(-50%); background: url(${import.meta.env.BASE_URL}ui/baz_coin.png) center / contain no-repeat; } .baz-card { background: url(${import.meta.env.BASE_URL}ui/baz_card.png) center / 100% 100% no-repeat; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }`}</style>
+      {boughtEgg && (
+        <div className="absolute inset-0 z-[300] flex items-center justify-center bg-black/65" onClick={() => setBoughtEgg(null)} style={{ fontFamily: "'Fredoka', sans-serif" }}>
+          <style>{`@keyframes eggPopIn { 0% { opacity: 0; transform: scale(0.6) translateY(30px) } 65% { transform: scale(1.05) } 100% { opacity: 1; transform: none } } @keyframes eggBounce { 0%,100% { transform: translateY(0) rotate(-3deg) } 50% { transform: translateY(-12px) rotate(3deg) } } @keyframes eggSpin { to { transform: translate(-50%,-50%) rotate(360deg) } }`}</style>
+          <div className="relative text-center" onClick={e => e.stopPropagation()} style={{ width: 'min(92vw, 440px)', animation: 'eggPopIn 0.45s ease-out both' }}>
+            <div className="relative mx-auto pointer-events-none" style={{ width: '88%', marginBottom: -26, zIndex: 3 }}>
+              <img src={`${import.meta.env.BASE_URL}altar/love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.4))' }} />
+              <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 'clamp(20px, 4.4vw, 28px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>You got an egg!</span>
+            </div>
+            <div className="relative rounded-[28px] overflow-hidden" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '5px solid #4a2f17', padding: '44px 24px 22px', color: '#4a2f17', boxShadow: '0 20px 50px rgba(0,0,0,0.55)' }}>
+              <div className="relative mx-auto" style={{ width: 150, height: 160 }}>
+                <img src={`${import.meta.env.BASE_URL}altar/fx_starburst.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '50%', width: 210, transform: 'translate(-50%,-50%)', opacity: 0.8, imageRendering: 'auto', animation: 'eggSpin 14s linear infinite' }} />
+                <img src={`${import.meta.env.BASE_URL}${ELEMENT_EGG_IMAGE[boughtEgg]}`} alt={`${ELEMENT_DISPLAY_NAMES[boughtEgg]} Egg`} draggable={false} className="relative mx-auto" style={{ height: 150, imageRendering: 'auto', filter: 'drop-shadow(0 8px 8px rgba(0,0,0,0.35))', animation: 'eggBounce 1.6s ease-in-out infinite' }} />
+              </div>
+              <div className="font-bold" style={{ fontSize: 26, marginTop: 6 }}>{ELEMENT_DISPLAY_NAMES[boughtEgg]} Egg</div>
+              <div className="font-semibold" style={{ fontSize: 15, opacity: 0.85, margin: '4px 0 14px', lineHeight: 1.35 }}>It is warming in the glass jar on the home screen. Tap the jar when it is ready to hatch!</div>
+              <div className="flex items-center justify-center gap-3">
+                <button onClick={() => setBoughtEgg(null)} className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: 150, background: 'transparent', border: 'none', padding: 0 }}>
+                  <img src={`${import.meta.env.BASE_URL}ui/dlg_choice.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
+                  <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 15 }}>Keep shopping</span>
+                </button>
+                <button onClick={() => { setBoughtEgg(null); onClose(); }} className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: 150, background: 'transparent', border: 'none', padding: 0 }}>
+                  <img src={`${import.meta.env.BASE_URL}ui/dlg_choice_glow.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
+                  <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 15 }}>See the jar</span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      <style>{`.baz-tag-pill { position: relative; background: url(${import.meta.env.BASE_URL}ui/baz_tag.png) center / 100% 100% no-repeat; min-height: 46px; width: 100%; display: flex; align-items: center; justify-content: center; padding: 0 9% 0 38%; font-size: 17px; font-weight: 700; color: #fff3d0; font-family: Fredoka, sans-serif; text-shadow: 0 2px 0 rgba(30,12,4,0.8); } .baz-tag-pill::before { content: ""; position: absolute; left: 6%; top: 50%; width: 30px; height: 30px; transform: translateY(-50%); background: url(${import.meta.env.BASE_URL}ui/baz_coin.png) center / contain no-repeat; } .baz-card { background: url(${import.meta.env.BASE_URL}ui/baz_card.png) center / 100% 100% no-repeat; filter: drop-shadow(0 6px 8px rgba(0,0,0,0.45)); }`}</style>
       {/* Main Content - Transparent Background */}
       <div className="relative flex flex-col w-full h-full bg-[#2a1238] rounded-3xl border-4 border-[#f2d68a]/70 shadow-2xl overflow-hidden">
         <img src={`${import.meta.env.BASE_URL}ui/bazaar_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />

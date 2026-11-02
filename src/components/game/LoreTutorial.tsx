@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { X, ChevronRight, ChevronLeft, SkipForward } from 'lucide-react';
 import { useGameState } from '@/hooks/useGameState';
-import { GlimCharacter } from './GlimCharacter';
+import { PaintedDialogue } from './PaintedDialogue';
 import { triggerDialogue, clearDialogueTrigger, useDialogueTrigger, getDialogueTrigger } from '@/utils/dialogueTriggers';
 
 // Define the actual trigger types that match the triggerDialogue function
@@ -672,108 +672,28 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       // The main container for dialogue should not be styled itself
       // but should act as a portal root for its children.
     >
-      {/* Glim Character - positioned based on context */}
-      <div 
-        className="absolute pointer-events-none z-10 transition-all duration-500"
-        style={{
-          bottom: '16px', // Same level as dialogue box
-          left: '20px', // Left side of screen, next to dialogue box
-          height: '500px',
-          width: '400px',
-          background: 'none',
-          border: 'none',
-          boxShadow: 'none'
-        }}
-      >
-        <GlimCharacter 
-          expression={currentCard?.expression ?? 'shocked'}
-          size={500}
-        />
-      </div>
-
-      {/* Dialogue Box */}
-      <div 
-        className="absolute shadow-2xl relative pointer-events-auto transition-all duration-500"
-        style={{
-          position: 'fixed',
-          bottom: '32px',
-          left: '50%',
-          transform: 'translateX(-50%)',
-          width: '640px',
-          maxWidth: '85vw',
-          background: 'rgba(255, 255, 255, 0.95)',
-          borderRadius: '24px',
-          border: '4px solid #FF7EB6',
-          padding: '16px 24px',
-          zIndex: 9999,
-          boxShadow: '0 20px 50px rgba(255, 126, 182, 0.2)'
-        }}
-      >
-        {/* Using a separate inner div for content padding */}
-        <div className="h-full flex flex-col">
-          {/* Character Name */}
-          <div className="mb-3">
-            <h3 className="text-[#FF7EB6] font-black text-xl uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>Glim</h3>
-          </div>
-
-          {/* Dialogue Text */}
-          <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '50px'}}>
-            <p className="text-slate-800 text-2xl leading-relaxed font-bold italic" style={{ fontFamily: "'VT323', monospace" }}>
-              {/* Ensure displayedText is always a string */}
-              "{displayedText ?? ''}"
-              {isTyping && <span className="animate-pulse ml-1" style={{color: '#FF7EB6'}}>|</span>}
-            </p>
-            
-            {/* Add Select Parents button for breeding dialogue */}
-            {currentDialogue === FIRST_ALTAR_DIALOGUE && displayedText?.includes('Select two slimes as parents') && (
-              <button
-                onClick={() => {
-                  // Create and dispatch a custom event to open breeding gallery
-                  console.log('🖼️ Select Parents button clicked - opening breeding gallery');
-                  const event = new CustomEvent('openBreedingGallery', { detail: { slot: 1 } });
-                  window.dispatchEvent(event);
-                }}
-                className="mt-3 px-4 py-2 rounded-full bg-[#FF7EB6] hover:bg-[#ff6eb4]/80 text-white font-medium transition-all text-sm"
-              >
-                Select Parents
-              </button>
-            )}
-          </div>
-
-          {/* Navigation Controls */}
-          <div className="flex items-center justify-between mt-4">
-            <div className="flex gap-2">
-              <button
-                onClick={handlePrevious}
-                disabled={currentDialogueIndex === 0}
-                className="p-1.5 rounded-full bg-black/30 hover:bg-black/50 disabled:opacity-30 disabled:cursor-not-allowed transition-all"
-                aria-label="Previous"
-              >
-                <ChevronLeft className="w-4 h-4 text-white" />
-              </button>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <button
-                onClick={handleNext}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all text-xs"
-              >
-                <ChevronRight className="w-3 h-3" />
-                {currentDialogueIndex < currentDialogue.length - 1 ? 'Next' : 'Got it'}
-              </button>
-
-              <button
-                onClick={handleSkip}
-                className="flex items-center gap-1.5 px-3 py-2 rounded-full bg-black/30 hover:bg-black/50 text-white/80 hover:text-white transition-all text-xs"
-                aria-label="Skip dialogue"
-              >
-                <SkipForward className="w-3 h-3" />
-                Skip
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PaintedDialogue
+        speaker="Glim"
+        expression={currentCard?.expression ?? 'shocked'}
+        text={displayedText ?? ''}
+        isTyping={isTyping}
+        onNext={handleNext}
+        onPrev={handlePrevious}
+        canGoBack={currentDialogueIndex > 0}
+        onSkip={handleSkip}
+        index={currentDialogueIndex}
+        total={currentDialogue.length}
+        extra={currentDialogue === FIRST_ALTAR_DIALOGUE && displayedText?.includes('Select two slimes as parents') ? (
+          <button
+            onClick={() => window.dispatchEvent(new CustomEvent('openBreedingGallery', { detail: { slot: 1 } }))}
+            className="mt-2 relative hover:scale-105 active:scale-95 transition-transform"
+            style={{ width: 150, background: 'transparent', border: 'none', padding: 0 }}
+          >
+            <img src={`${import.meta.env.BASE_URL}ui/dlg_choice_glow.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
+            <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 15, color: '#4a2f17' }}>Select Parents</span>
+          </button>
+        ) : null}
+      />
     </div>
   );
 }

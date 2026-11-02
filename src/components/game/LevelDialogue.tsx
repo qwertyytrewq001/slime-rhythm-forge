@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
-import { GlimCharacter } from './GlimCharacter';
+import { PaintedDialogue } from './PaintedDialogue';
 
 interface LevelDialogueProps {
   isOpen: boolean;
@@ -122,76 +122,16 @@ export function LevelDialogue({ isOpen, onClose, level, onVossEncounter }: Level
 
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
-      {/* Dragon Mania Legends Style Dialogue Bar */}
-      <div className="absolute bottom-0 left-0 right-0 h-[220px] pointer-events-auto">
-        
-        {/* Character Portrait - Life size, positioned for engagement */}
-        <div 
-          className="absolute pointer-events-none z-10"
-          style={{
-            bottom: '160px', // Positioned above dialogue
-            left: '20px',
-            height: '350px', // Life size - much larger
-            width: '300px', // Life size proportions
-            background: 'none !important',
-            backgroundColor: 'transparent !important',
-            border: 'none',
-            boxShadow: 'none'
-          }}
-        >
-          {isVoss ? (
-            <div className="text-8xl flex items-center justify-center h-full">🌑</div>
-          ) : (
-            <GlimCharacter 
-              expression={dialogueData.expression}
-              size={350} // Life size
-            />
-          )}
-        </div>
-
-        {/* Speech Bubble - Much wider for better engagement */}
-        <div 
-          className="absolute bottom-4 left-4 right-8 rounded-2xl shadow-lg relative"
-          style={{
-            width: 'calc(100vw - 48px)', // Full width minus more margin
-            maxWidth: '1200px', // Much wider maximum
-            height: '120px',
-            background: 'rgba(255, 255, 255, 0.9)', // White transparent
-            border: '2px solid #ff6eb4', // Keep pink borders
-            margin: '0 auto' // Center the wider box
-          }}
-        >
-          
-          {/* Bubble Content */}
-          <div className="p-4 pl-6 h-full flex flex-col">
-            {/* Character Name */}
-            <div className="mb-3">
-              <h3 className="text-[#FF7EB6] font-bold text-lg">
-                {isVoss ? 'Voss' : 'Glim'}
-              </h3>
-            </div>
-
-            {/* Dialogue Text - Much larger display area */}
-            <div className="flex-1 overflow-y-auto pr-2" style={{maxWidth: '100%', minHeight: '100px'}}>
-              <p className="text-gray-800 text-2xl leading-relaxed font-medium" style={{wordWrap: 'break-word', overflowWrap: 'break-word', textShadow: '1px 1px 2px rgba(255,255,255,0.8)', color: '#1a1a1a'}}>
-                {displayedText}
-                {isTyping && <span className="animate-pulse" style={{color: '#FF7EB6'}}>|</span>}
-              </p>
-            </div>
-
-            {/* Navigation */}
-            <div className="flex justify-end mt-3">
-              <button
-                onClick={handleNext}
-                className="px-3 py-1.5 rounded-full bg-[#FF7EB6] hover:bg-[#FF69B4] text-black font-bold text-sm transition-all hover:scale-105"
-              >
-                {isTyping ? 'Skip' : 
-                 currentDialogueIndex < dialogueData.dialogue.length - 1 ? 'Continue' : 'Close'}
-              </button>
-            </div>
-          </div>
-        </div>
-      </div>
+      <PaintedDialogue
+        speaker={isVoss ? 'Voss' : 'Glim'}
+        expression={dialogueData.expression}
+        portrait={isVoss ? <div className="text-8xl flex items-center justify-center h-full">🌑</div> : undefined}
+        text={displayedText}
+        isTyping={isTyping}
+        onNext={handleNext}
+        index={currentDialogueIndex}
+        total={dialogueData.dialogue.length}
+      />
     </div>
   );
 }

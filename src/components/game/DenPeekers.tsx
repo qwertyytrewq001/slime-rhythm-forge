@@ -108,13 +108,13 @@ export function DenPeekers() {
         const aw = (a.w / 100) * IMG_W * k, ah = (a.h / 100) * IMG_H * k;
         const left = ox + (a.x / 100) * IMG_W * k - aw / 2, top = oy + (a.b / 100) * IMG_H * k - ah;
         // the slime art only fills about half of its square canvas, so the canvas is larger than the opening and the arch clips it
-        const size = Math.round(Math.min(aw * 1.75, ah * 1.3));
-        const lift = !p ? 112 : p.phase === 'in' || p.phase === 'out' ? 112 : p.mode === 'peek' || p.mode === 'shy' ? 34 : 4;
+        const size = Math.round(Math.min(aw * 1.05, ah * 0.62));
+        const lift = !p ? 120 : p.phase === 'in' || p.phase === 'out' ? 120 : p.mode === 'peek' || p.mode === 'shy' ? 14 : 2;
         const anim = !p ? undefined : p.giggle ? 'peekGiggle 0.35s ease-in-out infinite'
           : p.phase !== 'show' ? undefined
           : p.mode === 'peek' ? 'peekWiggle 1.1s ease-in-out infinite' : p.mode === 'wave' ? 'peekWave 0.9s ease-in-out infinite' : p.mode === 'pop' ? 'peekPop 0.8s ease-in-out infinite' : 'peekShy 1.2s ease-in-out infinite';
         return (
-          <div key={i} className="absolute pointer-events-none" style={{ left, top, width: aw, height: ah, clipPath: 'inset(0 round 46% 46% 4% 4% / 24% 24% 3% 3%)', zIndex: 3 }}>
+          <div key={i} className="absolute pointer-events-none" style={{ left, top, width: aw, height: ah, clipPath: 'inset(-40% -12% 0 -12%)', zIndex: 3 }}>
             {p && (
               <button
                 key={p.key}
@@ -124,7 +124,7 @@ export function DenPeekers() {
                 style={{ left: '50%', bottom: 0, width: size, height: size, marginLeft: -size / 2, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', transform: `translateY(${lift}%)`, transition: 'transform 0.55s cubic-bezier(.3,1.5,.5,1)' }}
               >
                 <div style={{ width: '100%', height: '100%', animation: anim, transformOrigin: '50% 100%' }}>
-                  <SlimeCanvas slime={p.slime} size={size} animated animationStyle="playful" />
+                  <SlimeCanvas slime={p.slime} size={size} sizeMultiplier={2.4} animated animationStyle="playful" />
                 </div>
               </button>
             )}

@@ -1,9 +1,17 @@
 import { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
-import { Trophy, Star, Sparkles, ChevronRight, Lock, Unlock, LayoutGrid, Egg } from 'lucide-react';
 import { audioEngine } from '@/utils/audioEngine';
-import { FairySparkle } from './FairySparkle';
 import { ELEMENT_TIERS, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
+import { Emblem } from './sanctuary/sanctArt';
+
+const U = `${import.meta.env.BASE_URL}ui/`;
+const A = `${import.meta.env.BASE_URL}altar/`;
+const FRED = "'Fredoka', 'Trebuchet MS', sans-serif";
+const INK = '#4a2f17';
+
+const LevelBadge = ({ n, big }: { n: number; big?: boolean }) => (
+  <div className="flex items-center justify-center font-bold text-white rounded-full" style={{ width: big ? 92 : 64, height: big ? 92 : 64, fontSize: big ? 44 : 30, background: big ? 'radial-gradient(circle at 35% 30%, #ffe98a, #e09a1a)' : 'radial-gradient(circle at 35% 30%, #e8dcc0, #b9a57a)', border: `${big ? 5 : 4}px solid ${INK}`, boxShadow: big ? '0 0 22px rgba(255,214,90,0.75), 0 6px 10px rgba(0,0,0,0.35)' : '0 4px 8px rgba(0,0,0,0.3)', WebkitTextStroke: `${big ? 5 : 4}px ${INK}`, paintOrder: 'stroke fill', fontFamily: FRED }}>{n}</div>
+);
 
 export function PlayerLevelUpPopup() {
   const { state, dispatch } = useGameState();
@@ -15,8 +23,7 @@ export function PlayerLevelUpPopup() {
       setLocalLevelUp(state.lastPlayerLevelUp);
       setIsVisible(true);
       audioEngine.playSfx('achievement');
-      
-      // Keep it open until they click "Continue Journey"
+      // Keep it open until they click "Continue"
     }
   }, [state.lastPlayerLevelUp]);
 
@@ -31,137 +38,51 @@ export function PlayerLevelUpPopup() {
   if (!localLevelUp && !isVisible) return null;
 
   const level = localLevelUp?.level || 0;
-  
-  // Determine what was unlocked
   const unlockedElements = level === 6 ? ELEMENT_TIERS[2] : level === 11 ? ELEMENT_TIERS[3] : [];
   const hasUnlocks = unlockedElements.length > 0;
 
   return (
-    <div className={`fixed inset-0 z-[10100] flex items-center justify-center transition-all duration-700 ${
-      isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'
-    }`}>
-      {/* Backdrop */}
-      <div className="absolute inset-0 bg-[#F8F5F2]/80 backdrop-blur-md" onClick={handleClose} />
+    <div className={`fixed inset-0 z-[10100] flex items-center justify-center transition-all duration-700 ${isVisible ? 'opacity-100 pointer-events-auto' : 'opacity-0 pointer-events-none'}`} style={{ fontFamily: FRED }}>
+      <style>{`@keyframes lvlBanner { 0% { opacity: 0; transform: translateY(-30px) scale(0.7) } 60% { transform: translateY(4px) scale(1.04) } 100% { opacity: 1; transform: none } } @keyframes lvlPop { 0% { transform: scale(0.4) } 60% { transform: scale(1.18) } 100% { transform: scale(1) } }`}</style>
+      <div className="absolute inset-0 bg-[#1d1235]/70 backdrop-blur-sm" onClick={handleClose} />
 
-      {/* Main Content Card */}
-      <div className={`relative max-w-lg w-full mx-4 transition-all duration-700 transform ${
-        isVisible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-12'
-      }`}>
-        {/* Decorative Background Elements */}
-        <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-64 h-64 bg-gradient-to-b from-[#FF7EB6]/30 to-transparent blur-3xl animate-pulse" />
-        
-        <div className="relative bg-white border-[6px] border-[#4A5D45] rounded-[40px] shadow-[0_20px_50px_rgba(74,93,69,0.2)] overflow-hidden">
-          {/* Header Section */}
-          <div className="bg-[#4A5D45] px-8 py-10 text-center relative overflow-hidden">
-            {/* Animated Sparkles in Header */}
-            <div className="absolute inset-0 opacity-20">
-              {[...Array(8)].map((_, i) => (
-                <Sparkles 
-                  key={i} 
-                  className="absolute animate-pulse text-white"
-                  style={{
-                    top: `${Math.random() * 100}%`,
-                    left: `${Math.random() * 100}%`,
-                    width: `${Math.random() * 20 + 10}px`,
-                    animationDelay: `${i * 0.3}s`
-                  }}
-                />
-              ))}
-            </div>
+      <div className={`relative w-full mx-4 transition-all duration-700 transform ${isVisible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-12'}`} style={{ maxWidth: 520, maxHeight: '94vh' }}>
+        {/* ribbon straddling the top of the card */}
+        <div className="relative mx-auto pointer-events-none" style={{ width: 'min(92%, 470px)', marginBottom: -34, zIndex: 3, animation: 'lvlBanner 0.6s ease-out both' }}>
+          <img src={`${A}love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.35))' }} />
+          <span className="absolute inset-0 flex items-center justify-center font-bold text-center px-10" style={{ fontSize: 'clamp(18px, 4vw, 27px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em', lineHeight: 1.05 }}>Resonance Increased!</span>
+        </div>
 
-            <div className="relative z-10">
-              <div className="inline-flex items-center justify-center w-20 h-20 bg-white rounded-3xl shadow-lg mb-6 rotate-3 group-hover:rotate-0 transition-transform duration-500">
-                <Trophy className="w-10 h-10 text-[#FFD700] fill-current" />
-              </div>
-              <h2 className="text-white text-3xl font-black uppercase tracking-widest leading-none mb-2">
-                Resonance Increased!
-              </h2>
-              <p className="text-[#F8F5F2]/80 text-sm font-bold uppercase tracking-[0.3em]">
-                Your spirit has deepened
-              </p>
-            </div>
+        <div className="relative rounded-[28px] overflow-hidden text-center" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: `5px solid ${INK}`, boxShadow: '0 22px 50px rgba(0,0,0,0.5)', color: INK, padding: '52px 28px 24px' }}>
+          <div className="font-semibold opacity-75" style={{ fontSize: 15, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 10 }}>Your spirit has deepened</div>
+
+          <div className="flex items-center justify-center gap-5 mb-4">
+            <div className="flex flex-col items-center"><span className="text-xs font-bold opacity-60 mb-1 tracking-widest">OLD</span><LevelBadge n={level - 1} /></div>
+            <img src={`${U}dlg_next.png`} alt="" draggable={false} style={{ width: 46, imageRendering: 'auto' }} />
+            <div className="flex flex-col items-center"><span className="text-xs font-bold mb-1 tracking-widest" style={{ color: '#b8660e' }}>NEW</span><div style={{ animation: 'lvlPop 0.6s ease-out 0.3s both' }}><LevelBadge n={level} big /></div></div>
           </div>
 
-          {/* Body Section */}
-          <div className="px-10 py-10 flex flex-col items-center text-center">
-            {/* Level Display */}
-            <div className="flex items-center gap-6 mb-10">
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Old</span>
-                <div className="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center border-2 border-slate-200">
-                  <span className="text-xl font-black text-slate-400">{level - 1}</span>
-                </div>
-              </div>
-
-              <ChevronRight className="w-8 h-8 text-[#4A5D45] animate-pulse" />
-
-              <div className="flex flex-col items-center">
-                <span className="text-[10px] font-black text-[#FF7EB6] uppercase tracking-widest mb-1 animate-bounce">New</span>
-                <div className="w-20 h-20 rounded-3xl bg-[#FF7EB6] flex items-center justify-center border-4 border-[#FF7EB6] shadow-[0_10px_20px_rgba(255,126,182,0.3)] scale-110">
-                  <span className="text-3xl font-black text-white leading-none">{level}</span>
-                </div>
+          {hasUnlocks ? (
+            <div className="rounded-2xl text-left" style={{ background: 'rgba(255,255,255,0.5)', border: `2px solid ${INK}33`, padding: '12px 14px' }}>
+              <div className="font-bold text-center mb-2" style={{ fontSize: 16 }}>New eggs and sanctums unlocked!</div>
+              <div className="flex flex-wrap justify-center gap-2">
+                {unlockedElements.map(e => (
+                  <span key={e} className="inline-flex items-center gap-1 font-bold rounded-full" style={{ background: '#fff7dc', border: `2px solid ${INK}`, padding: '2px 10px 2px 4px', fontSize: 13 }}>
+                    <Emblem element={e} size={26} />{ELEMENT_DISPLAY_NAMES[e]}
+                  </span>
+                ))}
               </div>
             </div>
+          ) : (
+            <div className="rounded-2xl" style={{ background: 'rgba(255,255,255,0.5)', border: `2px solid ${INK}33`, padding: '12px 16px', fontSize: 15, fontWeight: 600, lineHeight: 1.35 }}>
+              Your resonance grows with every discovery. Keep breeding to unlock deeper mysteries of the forge.
+            </div>
+          )}
 
-            {/* Unlocks Section */}
-            {hasUnlocks ? (
-              <div className="w-full space-y-6 animate-in fade-in slide-in-from-bottom-4 duration-1000 delay-300">
-                <div className="flex items-center gap-3 justify-center">
-                  <Unlock className="w-5 h-5 text-[#4A5D45]" />
-                  <h4 className="text-sm font-black text-[#4A5D45] uppercase tracking-widest">New Unlocks Discovered!</h4>
-                </div>
-                
-                <div className="grid grid-cols-2 gap-4">
-                  <div className="bg-[#F8F5F2] p-4 rounded-3xl border-2 border-[#4A5D45]/10 flex flex-col items-center">
-                    <Egg className="w-6 h-6 text-[#FF7EB6] mb-2" />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">New Eggs</span>
-                    <div className="flex flex-wrap justify-center gap-1">
-                      {unlockedElements.slice(0, 3).map(e => (
-                        <span key={e} className="text-[9px] font-black text-[#4A5D45] bg-white px-2 py-0.5 rounded-full border border-[#4A5D45]/20">
-                          {ELEMENT_DISPLAY_NAMES[e]}
-                        </span>
-                      ))}
-                      {unlockedElements.length > 3 && <span className="text-[9px] font-black text-slate-400">+{unlockedElements.length - 3}</span>}
-                    </div>
-                  </div>
-
-                  <div className="bg-[#F8F5F2] p-4 rounded-3xl border-2 border-[#4A5D45]/10 flex flex-col items-center">
-                    <LayoutGrid className="w-6 h-6 text-[#40E0D0] mb-2" />
-                    <span className="text-[10px] font-bold text-slate-500 uppercase tracking-wider mb-1">New Habitats</span>
-                    <div className="flex flex-wrap justify-center gap-1">
-                      {unlockedElements.slice(0, 3).map(e => (
-                        <span key={e} className="text-[9px] font-black text-[#4A5D45] bg-white px-2 py-0.5 rounded-full border border-[#4A5D45]/20">
-                          {ELEMENT_DISPLAY_NAMES[e]}
-                        </span>
-                      ))}
-                      {unlockedElements.length > 3 && <span className="text-[9px] font-black text-slate-400">+{unlockedElements.length - 3}</span>}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            ) : (
-              <div className="bg-[#F8F5F2] p-6 rounded-[30px] border-2 border-[#4A5D45]/10 max-w-sm">
-                <p className="text-slate-600 text-sm leading-relaxed italic">
-                  "Your resonance strengthens with every discovery. Continue your rituals to unlock deeper mysteries of the forge."
-                </p>
-              </div>
-            )}
-
-            {/* Action Button */}
-            <button
-              onClick={handleClose}
-              className="mt-10 w-full bg-[#4A5D45] text-white py-6 rounded-[25px] font-black uppercase tracking-[0.25em] shadow-[0_10px_25px_rgba(74,93,69,0.3)] transition-all hover:scale-[1.02] active:scale-[0.98] hover:shadow-[0_15px_30px_rgba(74,93,69,0.4)]"
-            >
-              Continue Journey
-            </button>
-          </div>
-
-          {/* Sparkles Background Effect */}
-          <div className="absolute inset-0 pointer-events-none opacity-50">
-            {[...Array(15)].map((_, i) => (
-              <FairySparkle key={i} index={i} color={i % 2 === 0 ? "#FF7EB6" : "#4A5D45"} />
-            ))}
-          </div>
+          <button onClick={handleClose} className="relative mt-4 mx-auto block hover:scale-105 active:scale-95 transition-transform" style={{ width: 'min(100%, 270px)', background: 'transparent', border: 'none', padding: 0 }}>
+            <img src={`${A}ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 10px rgba(190,120,255,0.7))' }} />
+            <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 20, color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>Continue</span>
+          </button>
         </div>
       </div>
     </div>
