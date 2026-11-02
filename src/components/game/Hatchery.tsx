@@ -35,7 +35,7 @@ function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackPro
       ref={canvasRef} 
       width={120} 
       height={120} 
-      className={`w-24 h-24 pixel-art transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`}
+      className={`w-[5.4rem] h-[5.4rem] pixel-art transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`}
     />
   );
 }
@@ -139,7 +139,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
       )}
 
       <div className="relative w-56 h-56 cursor-pointer group pointer-events-auto" onClick={handleTap}>
-        <style>{`@keyframes hatchSpin { to { transform: translate(-50%,-50%) rotate(360deg) } }`}</style>
+        <style>{`@keyframes hatchGlow { 0%,100% { opacity: 0.5 } 50% { opacity: 1 } }`}</style>
         <img src={`${import.meta.env.BASE_URL}altar/${activeHatching ? 'home_hatch_glow' : 'home_hatch'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ right: '-168px', top: '-6px', width: 170, imageRendering: 'auto', zIndex: 5 }} />
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {[...Array(20)].map((_, i) => <FairySparkle key={i} index={i} />)}
@@ -148,10 +148,10 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
           <div className="flex flex-col items-center gap-2 translate-y-6"><div className="w-1 h-1" /></div>
         ) : (
           <div className="relative flex flex-col">
-            <div className="absolute z-10" style={{ right: '-131px', top: '18px' }}>
+            <div className="absolute z-10" style={{ right: '-126px', top: '29px' }}>
               <HatchingEgg slime={activeHatching.slime} crackProgress={crackProgress} shaking={isRecentlyTapped || isHatching} />
               {isFinished && !isHatching && (
-                <img src={`${import.meta.env.BASE_URL}altar/fx_starburst.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '50%', width: 120, transform: 'translate(-50%,-50%)', opacity: 0.55, imageRendering: 'auto', animation: 'hatchSpin 12s linear infinite' }} />
+                <div className="absolute pointer-events-none rounded-full" style={{ left: '50%', top: '50%', width: 110, height: 110, transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle, rgba(255,240,170,0.75), rgba(255,240,170,0) 68%)', animation: 'hatchGlow 1.8s ease-in-out infinite' }} />
               )}
               {crackProgress > 0 && <img src={`${import.meta.env.BASE_URL}altar/hatch_cracks_${Math.min(3, Math.max(1, Math.ceil(crackProgress * 3)))}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '50%', width: 62, transform: 'translate(-50%,-50%)', imageRendering: 'auto' }} />}
               <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 text-center pointer-events-none">

@@ -27,12 +27,13 @@ const CHATTER: Array<{ m: Mood; t: string }> = [
   { m: 'smug', t: 'Tap me again. Go on. I dare you.' },
 ];
 
-const ANCHORS = [{ l: 5, t: 40 }, { l: 85, t: 38 }, { l: 7, t: 60 }, { l: 84, t: 58 }];
-
-/** Glim, floating around the home screen: tap him for hints, tips, and the occasional giggle. */
+/**
+ * Glim lives at the left edge of the home screen, peeking in. He slides out when he has something to tell you
+ * (something is waiting, or every minute or so with a tip), then tucks away again. Tap him any time.
+ */
 export function GlimCompanion() {
   const { state } = useGameState();
-  const [anchor, setAnchor] = useState(0);
+  const [out, setOut] = useState(false);
   const [mood, setMood] = useState<Mood>(idleMood);
   const [bubble, setBubble] = useState<{ t: string; id: number } | null>(null);
   const [sparks, setSparks] = useState<number[]>([]);
@@ -42,15 +43,32 @@ export function GlimCompanion() {
   const timers = useRef<number[]>([]);
 
   useEffect(() => {
-    const a = setInterval(() => setAnchor(n => (n + 1) % ANCHORS.length), 24_000);
     const b = setInterval(() => { setNowMs(Date.now()); setMood(m => (m === 'kind' || m === 'sleepy' ? idleMood() : m)); }, 5000);
-    return () => { clearInterval(a); clearInterval(b); timers.current.forEach(clearTimeout); };
+    return () => { clearInterval(b); timers.current.forEach(clearTimeout); };
   }, []);
 
   // a wave hello when you arrive
   useEffect(() => {
-    const t = window.setTimeout(() => say('wave', 'Welcome back, guardian!', 3800), 1400);
+    const t = window.setTimeout(() => say('wave', 'Welcome back, guardian!', 3600), 1800);
     return () => clearTimeout(t);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // every minute or so, if nothing is waiting, he pops out with a tip; when something new is waiting he points it out
+  const lastHint = useRef<string | null>(null);
+  useEffect(() => {
+    const t = window.setInterval(() => {
+      if (document.hidden) return;
+      setBubble(b => {
+        if (!b) {
+          const c = CHATTER[chatIdx.current % CHATTER.length];
+          chatIdx.current += 3 + Math.floor(Math.random() * 3);
+          say(c.m, c.t, 7000);
+        }
+        return b;
+      });
+    }, 70_000);
+    return () => clearInterval(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
@@ -67,11 +85,24 @@ export function GlimCompanion() {
     return null;
   }, [state.visitor, state.farmPlots, state.habitats, state.activeBreeding, state.activeHatching, nowMs]);
 
+  useEffect(() => {
+    const key = hint ? hint.t : null;
+    if (key && key !== lastHint.current) {
+      lastHint.current = key;
+      const w = window.setTimeout(() => say(hint!.m, hint!.t, 8000), 2600);
+      timers.current.push(w);
+    }
+    if (!key) lastHint.current = null;
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hint]);
+
+  const latest = useRef(0);
   const say = (m: Mood, t: string, ms = 6500) => {
-    const id = Date.now();
+    const id = ++latest.current;
     setMood(m);
     setBubble({ t, id });
-    timers.current.push(window.setTimeout(() => { setBubble(b => (b && b.id === id ? null : b)); setMood(idleMood()); }, ms));
+    setOut(true);
+    timers.current.push(window.setTimeout(() => { if (latest.current !== id) return; setBubble(null); setMood(idleMood()); setOut(false); }, ms));
   };
 
   const onTap = () => {
@@ -91,41 +122,42 @@ export function GlimCompanion() {
     say(c.m, c.t);
   };
 
-  const a = ANCHORS[anchor];
-  const left = a.l < 50;
-
+  const H = 'clamp(74px, 8.2vw, 112px)';
+  const peeking = hint && !out;
   return (
-    <div className="fixed pointer-events-none" style={{ left: `${a.l}%`, top: `${a.t}%`, zIndex: 55, transition: 'left 7s ease-in-out, top 7s ease-in-out' }}>
+    <div className="fixed pointer-events-none" style={{ left: 0, top: '41%', zIndex: 55 }}>
       <style>{`
-        @keyframes glimBob { 0%,100% { transform: translateY(0) rotate(-1.5deg) } 50% { transform: translateY(-14px) rotate(1.5deg) } }
-        @keyframes glimHop { 0% { transform: translateY(0) scale(1,1) } 30% { transform: translateY(-34px) scale(0.94,1.08) } 60% { transform: translateY(0) scale(1.08,0.92) } 100% { transform: translateY(0) scale(1,1) } }
+        @keyframes glimBreathe { 0%,100% { transform: scale(1,1) } 50% { transform: scale(1.025,0.975) } }
+        @keyframes glimArrive { 0% { transform: scale(0.9,1.1) } 40% { transform: scale(1.1,0.9) } 70% { transform: scale(0.97,1.04) } 100% { transform: scale(1,1) } }
         @keyframes glimSpark { 0% { transform: translate(0,0) scale(0.4); opacity: 1 } 100% { transform: translate(var(--dx), var(--dy)) scale(1); opacity: 0 } }
-        @keyframes glimBubble { 0% { opacity: 0; transform: translateY(8px) scale(0.9) } 100% { opacity: 1; transform: translateY(0) scale(1) } }
-        @keyframes glimBadge { 0%,100% { transform: scale(1) } 50% { transform: scale(1.18) } }
+        @keyframes glimBubble { 0% { opacity: 0; transform: translateY(6px) scale(0.92) } 100% { opacity: 1; transform: none } }
+        @keyframes glimBadge { 0%,100% { transform: scale(1) } 50% { transform: scale(1.15) } }
       `}</style>
 
-      {bubble && (
-        <div
-          key={bubble.id}
-          className="absolute rounded-2xl font-semibold shadow-xl"
-          style={{ top: '-8%', [left ? 'left' : 'right']: '96%', width: 'clamp(170px, 19vw, 260px)', background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '3px solid #4a2f17', color: '#4a2f17', padding: '8px 12px', fontSize: 'clamp(11px, 1.05vw, 14px)', lineHeight: 1.25, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", animation: 'glimBubble 0.25s ease-out forwards' }}
-        >
-          {bubble.t}
-        </div>
-      )}
+      <div style={{ transform: out ? 'translateX(2px)' : 'translateX(-66%)', transition: 'transform 0.6s cubic-bezier(.3,1.45,.5,1)' }}>
+        <button onClick={onTap} aria-label="Glim" className="pointer-events-auto relative block outline-none" style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}>
+          <div key={out ? 'out' : 'in'} style={{ animation: out ? 'glimArrive 0.55s ease-out, glimBreathe 4s ease-in-out 0.6s infinite' : 'glimBreathe 5s ease-in-out infinite', transformOrigin: '50% 100%' }}>
+            <img src={`${BASE}${FACE[mood]}`} alt="" draggable={false} className="block" style={{ height: H, width: 'auto', imageRendering: 'auto', filter: 'drop-shadow(0 5px 6px rgba(0,0,0,0.4))' }} />
+          </div>
+          {peeking && (
+            <span className="absolute rounded-full text-white font-bold flex items-center justify-center" style={{ right: '-6%', top: '0%', width: 22, height: 22, background: '#e8344c', border: '2px solid #fff', fontSize: 13, animation: 'glimBadge 1s ease-in-out infinite' }}>!</span>
+          )}
+          {sparks.map(id => Array.from({ length: 8 }).map((_, i) => {
+            const ang = (i / 8) * Math.PI * 2;
+            return <img key={`${id}-${i}`} src={`${BASE}altar/particle_light.png`} alt="" className="absolute" style={{ left: '45%', top: '40%', width: 20, imageRendering: 'auto', ['--dx' as string]: `${Math.cos(ang) * 60}px`, ['--dy' as string]: `${Math.sin(ang) * 60 - 18}px`, animation: `glimSpark 1.1s ease-out ${i * 0.03}s forwards` }} />;
+          }))}
+        </button>
 
-      <button onClick={onTap} aria-label="Glim" className="pointer-events-auto relative block outline-none" style={{ background: 'transparent', border: 'none', padding: 0, cursor: 'pointer' }}>
-        <div key={bubble ? bubble.id : 'idle'} style={{ animation: bubble ? 'glimHop 0.6s ease-out' : 'glimBob 3.6s ease-in-out infinite' }}>
-          <img src={`${BASE}${FACE[mood]}`} alt="" draggable={false} className="block" style={{ height: 'clamp(96px, 11vw, 150px)', width: 'auto', imageRendering: 'auto', filter: 'drop-shadow(0 8px 10px rgba(0,0,0,0.4))' }} />
-        </div>
-        {hint && !bubble && (
-          <span className="absolute rounded-full text-white font-bold flex items-center justify-center" style={{ right: '4%', top: '2%', width: 26, height: 26, background: '#e8344c', border: '2px solid #fff', fontSize: 15, animation: 'glimBadge 1s ease-in-out infinite' }}>!</span>
+        {bubble && (
+          <div
+            key={bubble.id}
+            className="absolute font-semibold"
+            style={{ left: '100%', top: '4%', marginLeft: 6, width: 'clamp(180px, 20vw, 270px)', background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '3px solid #4a2f17', borderRadius: 18, boxShadow: '0 6px 14px rgba(0,0,0,0.35)', color: '#4a2f17', padding: '8px 12px', fontSize: 'clamp(11px, 1.05vw, 14px)', lineHeight: 1.25, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", animation: 'glimBubble 0.25s ease-out 0.25s both' }}
+          >
+            {bubble.t}
+          </div>
         )}
-        {sparks.map(id => Array.from({ length: 8 }).map((_, i) => {
-          const ang = (i / 8) * Math.PI * 2;
-          return <img key={`${id}-${i}`} src={`${BASE}altar/particle_light.png`} alt="" className="absolute" style={{ left: '45%', top: '40%', width: 22, imageRendering: 'auto', ['--dx' as string]: `${Math.cos(ang) * 70}px`, ['--dy' as string]: `${Math.sin(ang) * 70 - 20}px`, animation: `glimSpark 1.1s ease-out ${i * 0.03}s forwards` }} />;
-        }))}
-      </button>
+      </div>
     </div>
   );
 }

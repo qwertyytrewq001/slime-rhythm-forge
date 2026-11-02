@@ -37,10 +37,10 @@ export const PaintedDialogue: React.FC<PaintedDialogueProps> = ({ speaker, expre
           className="absolute inset-0"
           style={{ borderStyle: 'solid', borderWidth: '34px 36px', borderImageSource: `url(${U}dlg_box.png)`, borderImageSlice: '75 78 75 78 fill', borderImageRepeat: 'stretch', filter: 'drop-shadow(0 8px 14px rgba(0,0,0,0.4))' }}
         />
-        <div className="relative flex flex-col" style={{ padding: '26px 38px 18px 40px', minHeight: 150, color: '#4a2f17' }}>
-          <div className="relative self-start" style={{ marginTop: -44, marginLeft: -10, marginBottom: 6, width: 150 }}>
+        <div className="relative flex flex-col" style={{ padding: '38px 38px 18px 40px', minHeight: 150, color: '#4a2f17' }}>
+          <div className="absolute pointer-events-none" style={{ top: -22, left: '50%', width: 170, transform: 'translateX(-50%)', zIndex: 3 }}>
             <img src={`${U}dlg_name.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
-            <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 19, color: '#fff3d0', WebkitTextStroke: '4px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>{speaker}</span>
+            <span className="absolute flex items-center justify-center font-bold" style={{ left: '17%', right: '17%', top: 0, bottom: '8%', fontSize: 20, color: '#fff3d0', WebkitTextStroke: '4px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>{speaker}</span>
           </div>
 
           <div className="flex-1 overflow-y-auto" style={{ maxHeight: '28vh', minHeight: 54 }}>

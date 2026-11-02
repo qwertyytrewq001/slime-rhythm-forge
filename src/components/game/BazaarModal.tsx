@@ -256,9 +256,9 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
               <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 'clamp(20px, 4.4vw, 28px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>You got an egg!</span>
             </div>
             <div className="relative rounded-[28px] overflow-hidden" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '5px solid #4a2f17', padding: '44px 24px 22px', color: '#4a2f17', boxShadow: '0 20px 50px rgba(0,0,0,0.55)' }}>
-              <div className="relative mx-auto" style={{ width: 150, height: 160 }}>
+              <div className="relative mx-auto flex items-center justify-center" style={{ width: 190, height: 170 }}>
                 <img src={`${import.meta.env.BASE_URL}altar/fx_starburst.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '50%', width: 210, transform: 'translate(-50%,-50%)', opacity: 0.8, imageRendering: 'auto', animation: 'eggSpin 14s linear infinite' }} />
-                <img src={`${import.meta.env.BASE_URL}${ELEMENT_EGG_IMAGE[boughtEgg]}`} alt={`${ELEMENT_DISPLAY_NAMES[boughtEgg]} Egg`} draggable={false} className="relative mx-auto" style={{ height: 150, imageRendering: 'auto', filter: 'drop-shadow(0 8px 8px rgba(0,0,0,0.35))', animation: 'eggBounce 1.6s ease-in-out infinite' }} />
+                <img src={`${import.meta.env.BASE_URL}ui/eggc_${boughtEgg}.png`} alt={`${ELEMENT_DISPLAY_NAMES[boughtEgg]} Egg`} draggable={false} className="relative block" style={{ height: 150, width: 'auto', maxWidth: 160, imageRendering: 'auto', filter: 'drop-shadow(0 8px 8px rgba(0,0,0,0.35))', animation: 'eggBounce 1.6s ease-in-out infinite' }} />
               </div>
               <div className="font-bold" style={{ fontSize: 26, marginTop: 6 }}>{ELEMENT_DISPLAY_NAMES[boughtEgg]} Egg</div>
               <div className="font-semibold" style={{ fontSize: 15, opacity: 0.85, margin: '4px 0 14px', lineHeight: 1.35 }}>It is warming in the glass jar on the home screen. Tap the jar when it is ready to hatch!</div>
@@ -348,7 +348,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                               }}
                             >
                               <img
-                                src={`${import.meta.env.BASE_URL}${ELEMENT_EGG_IMAGE[elem]}`}
+                                src={`${import.meta.env.BASE_URL}ui/eggc_${elem}.png`}
                                 alt={`${ELEMENT_DISPLAY_NAMES[elem]} Egg`}
                                 className="w-20 h-20 object-contain drop-shadow-lg hover:scale-110 transition-transform cursor-pointer"
                                 style={{ imageRendering: 'auto' }}
