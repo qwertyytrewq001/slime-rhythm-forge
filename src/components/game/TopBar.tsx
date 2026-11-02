@@ -46,7 +46,7 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
     <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: `${PLATE[art].cx}%`, top: `${PLATE[art].cy}%`, width: `${PLATE[art].d * 0.84}%`, height: `${PLATE[art].d * 0.84 * (520 / PLATE[art].h)}%`, objectFit: 'contain', transform: `translate(calc(-50% + ${ICON_BALANCE[art].ox * Math.min(1, ICON_BALANCE[art].aspect) * 100}%), calc(-50% + ${ICON_BALANCE[art].oy * Math.min(1, 1 / ICON_BALANCE[art].aspect) * 100}%))`, imageRendering: 'auto' }} />
     <span
       className="absolute flex items-center justify-center text-center text-game-ui"
-      style={{ left: '36%', right: '6%', top: 0, bottom: 0, whiteSpace: 'nowrap', fontSize: `calc(clamp(9px, 0.95vw, 15px) * ${label.length > 10 ? 0.84 : 1})`, color, letterSpacing: label.length > 10 ? '0.02em' : '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}
+      style={{ left: '36%', right: '6%', top: 0, bottom: 0, whiteSpace: 'nowrap', fontSize: 'clamp(11px, 1.15vw, 17px)', color, letterSpacing: '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}
     >
       {label}
     </span>
@@ -79,7 +79,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
       <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 pointer-events-auto">
         {home ? (
           <>
-            <NavPlate art="sanctuaries" icon="ui/navicon_habitats.png" color="#c4ffb2" label="SANCTUARIES" onClick={onOpenSanctuaries} badge={giftsWaiting} badgeLabel={`${giftsWaiting} gifts waiting`} />
+            <NavPlate art="sanctuaries" icon="ui/navicon_habitats.png" color="#c4ffb2" label="HABITATS" onClick={onOpenSanctuaries} badge={giftsWaiting} badgeLabel={`${giftsWaiting} gifts waiting`} />
             <NavPlate art="farm" icon="ui/navicon_farm.png" color="#ffcf6b" label="FARM" onClick={onOpenFarm} badge={readyCrops} badgeLabel={`${readyCrops} crops ready`} />
           </>
         ) : (
@@ -89,7 +89,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
       <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 pointer-events-auto">
         {home && (
           <>
-            <NavPlate art="den" icon="ui/navicon_altar.png" color="#b2ebff" label="BREEDING DEN" onClick={onOpenBreedingDen} />
+            <NavPlate art="den" icon="ui/navicon_altar.png" color="#b2ebff" label="BREEDING" onClick={onOpenBreedingDen} />
             <NavPlate art="battle" icon="ui/navicon_battle.png" color="#ffe066" label="BATTLE MAP" onClick={onOpenBattle} />
           </>
         )}
