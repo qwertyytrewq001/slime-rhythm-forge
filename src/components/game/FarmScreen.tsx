@@ -140,7 +140,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
       else addFx({ kind: 'burst', x: at.x, y: at.y - sw * 0.04, emojis: ['✨'], count: 4 }, 900);
       addFx({ kind: 'dust', x: at.x, y: at.y, color: '#8a5a34', count: 6 }, 700);
       if (bag && stage) addFx({ kind: 'fly', x: at.x, y: at.y - sw * 0.04, toX: bag.left + bag.width / 2 - stage.left, toY: bag.top + bag.height / 2 - stage.top, img: foodSpriteUrl(o.crop) }, 800);
-      audioEngine.playSfx('collect');
+      audioEngine.playSfx('harvest');
     }, delay);
   };
 
@@ -176,7 +176,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
       return;
     }
     addFx({ kind: 'dust', x: at.x, y: at.y, color: '#8a5a34', count: 8 }, 800);
-    audioEngine.playSfx('tap');
+    audioEngine.playSfx('dig');
     dispatch({ type: 'PLANT_CROP', plotId, cropType: crop });
     setPicker(null);
   };
@@ -190,7 +190,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     stateRef.current.farmPlots.filter(p => p.unlocked && !p.cropType).slice(0, res.planted).forEach((p, i) => {
       setTimeout(() => addFx({ kind: 'dust', x: px(p.id).x, y: px(p.id).y, color: '#8a5a34', count: 6 }, 800), i * 70);
     });
-    audioEngine.playSfx('tap');
+    audioEngine.playSfx('dig');
     dispatch({ type: 'PLANT_ALL', cropType: crop });
     setPicker(null);
   };
@@ -199,7 +199,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     if (!farmWater(toSlice(), plotId, Date.now())) return;
     const at = px(plotId);
     addFx({ kind: 'dust', x: at.x, y: at.y - sw * 0.03, color: '#7cc8ff', count: 8 }, 900);
-    audioEngine.playSfx('tap');
+    audioEngine.playSfx('water');
     dispatch({ type: 'WATER_PLOT', plotId });
   };
   const waterEverything = () => {
@@ -208,7 +208,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     stateRef.current.farmPlots.filter(p => p.unlocked && isGrowing(p, Date.now()) && !p.watered).forEach((p, i) => {
       setTimeout(() => addFx({ kind: 'dust', x: px(p.id).x, y: px(p.id).y - sw * 0.03, color: '#7cc8ff', count: 6 }, 800), i * 60);
     });
-    audioEngine.playSfx('tap');
+    audioEngine.playSfx('water');
     dispatch({ type: 'WATER_ALL' });
   };
 

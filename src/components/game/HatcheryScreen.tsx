@@ -87,7 +87,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
     
     setCrackProgress(newProgress);
     setLastTapTime(Date.now());
-    audioEngine.playSfx('tap');
+    audioEngine.playSfx('crack', Math.min(3, Math.max(1, Math.ceil(newProgress * 3))));
     
     if (newProgress >= 0.85) {
       console.log('🎉 HatcheryScreen: Egg ready to hatch!');

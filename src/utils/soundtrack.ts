@@ -34,7 +34,7 @@ function exists(url: string): Promise<boolean> {
 const EXTS = ['ogg', 'mp3', 'wav'];
 const resolved = new Map<string, string | null>();
 /** First existing file for a name, trying each audio extension; remembered so each name is probed once. */
-async function resolveUrl(kind: 'music' | 'sfx', name: string): Promise<string | null> {
+async function resolveUrl(kind: 'music' | 'sfx' | 'ambience', name: string): Promise<string | null> {
   const key = `${kind}/${name}`;
   if (resolved.has(key)) return resolved.get(key) ?? null;
   for (const ext of EXTS) {
@@ -59,21 +59,27 @@ class Soundtrack {
   /** Browsers only allow sound after a click; the title screen's Play button calls unlock(). */
   private unlocked = false;
   private ducked = false;
+  /** A quiet looping background bed (birds, wind) under the music. */
+  private bed: { name: string; el: HTMLAudioElement } | null = null;
+  private bedWanted: string | null = null;
   /** The file being fetched right now, so two quick play() calls for one track start only one player. */
   private loading: string | null = null;
 
   unlock() {
     this.unlocked = true;
     if (this.wanted) void this.play(this.wanted);
+    if (this.bedWanted) void this.ambience(this.bedWanted);
   }
 
   setMuted(m: boolean) {
     this.muted = m;
     if (this.current) this.current.el.volume = this.target();
+    if (this.bed) this.bed.el.volume = this.bedTarget();
   }
 
   setMusicVolume(v: number) {
     this.musicVolume = v;
+    if (this.bed) this.bed.el.volume = this.bedTarget();
     try { localStorage.setItem(MUSIC_VOL_KEY, String(v)); } catch { /* private mode */ }
     if (this.current) this.current.el.volume = this.target();
   }
@@ -87,6 +93,27 @@ class Soundtrack {
   duck(on: boolean) {
     this.ducked = on;
     if (this.current) this.current.el.volume = this.target();
+  }
+
+  private bedTarget() { return this.muted ? 0 : this.musicVolume * 0.7; }
+
+  /** Start or stop the background bed; null fades it out. */
+  async ambience(name: string | null) {
+    this.bedWanted = name;
+    if (!this.unlocked) return;
+    if (name === (this.bed?.name ?? null)) return;
+    const old = this.bed;
+    this.bed = null;
+    if (old) this.fade(old.el, 0, () => { old.el.pause(); old.el.src = ''; });
+    if (!name) return;
+    const url = await resolveUrl('ambience', name);
+    if (!url || this.bedWanted !== name) return;
+    const el = new Audio(url);
+    el.loop = true;
+    el.volume = 0;
+    this.bed = { name, el };
+    try { await el.play(); } catch { this.bed = null; return; }
+    this.fade(el, this.bedTarget());
   }
 
   private target() {

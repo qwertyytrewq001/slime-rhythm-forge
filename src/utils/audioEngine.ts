@@ -1,7 +1,7 @@
 import { soundtrack } from './soundtrack';
 
 /** Sound-effect file names (public/audio/sfx/<name>.mp3) for each built-in effect; the synthesised sound plays if the file is missing. */
-const SFX_FILE: Record<string, string> = { squish: 'slime_tap', breed: 'ritual_start', collect: 'gift_collect', purchase: 'purchase', achievement: 'achievement', tap: 'ui_click', hatch: 'egg_hatch', discovery: 'new_slime' };
+const SFX_FILE: Record<string, string> = { squish: 'slime_tap', crack: 'egg_crack', dig: 'plant_dig', water: 'water_splash', harvest: 'harvest_pop', breed: 'ritual_start', collect: 'gift_collect', purchase: 'purchase', achievement: 'achievement', tap: 'ui_click', hatch: 'egg_hatch', discovery: 'new_slime' };
 
 class AudioEngine {
   private ctx: AudioContext | null = null;
@@ -130,13 +130,13 @@ class AudioEngine {
     this.lfoNode = null;
   }
 
-  playSfx(type: 'squish' | 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
+  playSfx(type: 'squish' | 'crack' | 'dig' | 'water' | 'harvest' | 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery', variant?: number) {
     if (this._muted) return;
     // a real file wins when it exists; otherwise fall through to the synthesised sound
-    void soundtrack.sfx(SFX_FILE[type] ?? type).then(played => { if (!played) this.synthSfx(type); });
+    void soundtrack.sfx((SFX_FILE[type] ?? type) + (variant ? `_${variant}` : '')).then(played => { if (!played) this.synthSfx(type); });
   }
 
-  private synthSfx(type: 'squish' | 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
+  private synthSfx(type: 'squish' | 'crack' | 'dig' | 'water' | 'harvest' | 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
     this.init();
     if (!this.ctx || !this.masterGain || this._muted) return;
 
@@ -249,6 +249,10 @@ class AudioEngine {
         aOsc.start(); aOsc.stop(this.ctx.currentTime + 0.5);
         break;
       case 'squish':
+      case 'crack':
+      case 'dig':
+      case 'water':
+      case 'harvest':
       case 'tap':
         const tOsc = this.ctx.createOscillator();
         const tGain = this.ctx.createGain();

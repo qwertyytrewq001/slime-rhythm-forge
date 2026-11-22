@@ -184,8 +184,8 @@ function GameLayout() {
 
   useEffect(() => {
     const startAudio = () => {
+      // resume only: the old synthesised drone (startLofi) was a constant hum under the real music
       audioEngine.resume();
-      audioEngine.startLofi(2);
       document.removeEventListener('click', startAudio);
     };
     document.addEventListener('click', startAudio);
@@ -219,6 +219,7 @@ function GameLayout() {
   }, [state.muted]);
   useEffect(() => {
     soundtrack.play(trackFor({ title: showTitle, view: currentView, night: dayPhase(nowForDay()).night, inBattle: !!battleTeam, bazaar: bazaarModalOpen, library: codexGalleryOpen || showAchievements }));
+    soundtrack.ambience(currentView === 'farm' || (currentView === 'sanctuaries' && !dayPhase(nowForDay()).night) ? 'garden' : null);
   }, [showTitle, currentView, battleTeam, bazaarModalOpen, codexGalleryOpen, showAchievements]);
 
   const toolbarArt = "relative h-[68px] w-[68px] transition-transform duration-150 hover:scale-110 active:scale-95 group pointer-events-auto";
