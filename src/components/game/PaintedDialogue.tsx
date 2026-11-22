@@ -1,5 +1,9 @@
 import React from 'react';
 import { GlimCharacter } from './GlimCharacter';
+import { soundtrack } from '@/utils/soundtrack';
+
+/** A quick page-turn each time the dialogue moves on, back or is skipped. */
+const turn = (fn?: () => void) => () => { void soundtrack.sfx('page_turn'); fn?.(); };
 
 const U = `${import.meta.env.BASE_URL}ui/`;
 const FRED = "'Fredoka', 'Trebuchet MS', sans-serif";
@@ -55,12 +59,12 @@ export const PaintedDialogue: React.FC<PaintedDialogueProps> = ({ speaker, expre
             <span className="text-xs font-bold opacity-55">{total ? `${(index ?? 0) + 1} / ${total}` : ''}</span>
             <div className="flex items-center gap-2">
               {onPrev && canGoBack && (
-                <button onClick={onPrev} aria-label="Previous" className="hover:scale-110 active:scale-90 transition-transform"><img src={`${U}dlg_next.png`} alt="" draggable={false} style={{ width: 38, transform: 'scaleX(-1)', imageRendering: 'auto' }} /></button>
+                <button onClick={turn(onPrev)} aria-label="Previous" className="hover:scale-110 active:scale-90 transition-transform"><img src={`${U}dlg_next.png`} alt="" draggable={false} style={{ width: 38, transform: 'scaleX(-1)', imageRendering: 'auto' }} /></button>
               )}
               {onSkip && (
-                <button onClick={onSkip} aria-label="Skip dialogue" className="hover:scale-110 active:scale-90 transition-transform"><img src={`${U}dlg_skip.png`} alt="" draggable={false} style={{ width: 38, imageRendering: 'auto' }} /></button>
+                <button onClick={turn(onSkip)} aria-label="Skip dialogue" className="hover:scale-110 active:scale-90 transition-transform"><img src={`${U}dlg_skip.png`} alt="" draggable={false} style={{ width: 38, imageRendering: 'auto' }} /></button>
               )}
-              <button onClick={onNext} aria-label="Next" className="hover:scale-110 active:scale-90 transition-transform"><img src={`${U}dlg_next.png`} alt="" draggable={false} style={{ width: 46, imageRendering: 'auto' }} /></button>
+              <button onClick={turn(onNext)} aria-label="Next" className="hover:scale-110 active:scale-90 transition-transform"><img src={`${U}dlg_next.png`} alt="" draggable={false} style={{ width: 46, imageRendering: 'auto' }} /></button>
             </div>
           </div>
         </div>

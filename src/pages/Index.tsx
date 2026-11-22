@@ -225,13 +225,18 @@ function GameLayout() {
     return () => document.removeEventListener('click', onClick);
   }, []);
 
-  // a whoosh when a screen or popup opens
-  const openedOnce = useRef(false);
+  // a swoosh when you travel to another screen, a softer open sound for popups
+  const viewSeen = useRef(currentView);
   useEffect(() => {
-    if (!openedOnce.current) { openedOnce.current = true; return; }
-    if (showTitle) return;
-    void soundtrack.sfx('ui_open');
-  }, [currentView, bazaarModalOpen, codexGalleryOpen, showAchievements]);
+    if (viewSeen.current === currentView) return;
+    viewSeen.current = currentView;
+    if (!showTitle) void soundtrack.sfx('screen_change');
+  }, [currentView]);
+  const popupsSeen = useRef(false);
+  useEffect(() => {
+    if (!popupsSeen.current) { popupsSeen.current = true; return; }
+    if ((bazaarModalOpen || codexGalleryOpen || showAchievements) && !showTitle) void soundtrack.sfx('ui_open');
+  }, [bazaarModalOpen, codexGalleryOpen, showAchievements]);
 
   // music follows the screen
   useEffect(() => {
