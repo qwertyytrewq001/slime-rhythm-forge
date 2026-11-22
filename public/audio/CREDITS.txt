@@ -5,7 +5,7 @@ Kenney (kenney.nl): Interface Sounds, UI Audio, Music Jingles. CC0 (public domai
 Mixkit (mixkit.co): Mixkit Sound Effects Free License (commercial use, no credit).
   sfx: gift_collect (fairy magic sparkle 871), ritual_start (magic sparkle whoosh 2350), bond_chime (page forward single chime 1107)
 Music, source and licence TO CONFIRM from the download pages:
-  home.mp3 ("cute lofi" by zephiramusic), farm.mp3 ("lofi pop" by zephiramusic), lofi_loop.mp3 ("lofi loop" by zephiramusic): Pixabay, licence to confirm
+  home.mp3 ("cute lofi" by zephiramusic): Breeding Den; lofi_loop.mp3 ("lofi loop" by zephiramusic): altar, title, Codex; farm.mp3 ("lofi pop" by zephiramusic). Pixabay, licence to confirm
   battle_map.mp3 ("fantasy" by atlasaudio), sanctuary_day.mp3 ("magic fantasy fairy tale" by andriih), battle.ogg ("acción"), medieval.ogg: source and licence to confirm
 Kenney Impact Sounds (CC0): egg_crack_1..3, plant_dig, water_splash, harvest_pop, buy_land, decor_place
 Ambience: garden.mp3 ("garden outdoor ambience" by alex_jauk, Pixabay), licence to confirm; plays on the Farm and the Habitat Isles by day

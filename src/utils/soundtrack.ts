@@ -65,7 +65,7 @@ async function resolveUrl(kind: Kind, name: string): Promise<string | null> {
 
 /** Screens that do not have a track of their own yet borrow one (the files are only loaded once). */
 const MUSIC_ALIAS: Record<string, string> = {
-  title: 'lofi_loop', library: 'lofi_loop', den: 'home', sanctuary_night: 'sanctuary_day', bazaar: 'medieval',
+  home: 'lofi_loop', title: 'lofi_loop', library: 'lofi_loop', den: 'home', sanctuary_night: 'sanctuary_day', bazaar: 'medieval',
 };
 
 class Soundtrack {
