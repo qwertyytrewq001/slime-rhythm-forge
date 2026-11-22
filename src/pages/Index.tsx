@@ -230,7 +230,7 @@ function GameLayout() {
   useEffect(() => {
     if (viewSeen.current === currentView) return;
     viewSeen.current = currentView;
-    if (!showTitle) void soundtrack.sfx('screen_change');
+    if (!showTitle) void soundtrack.sfx('ui_open');
   }, [currentView]);
   const popupsSeen = useRef(false);
   useEffect(() => {

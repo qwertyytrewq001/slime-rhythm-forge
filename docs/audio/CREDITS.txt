@@ -9,3 +9,4 @@ Music, source and licence TO CONFIRM from the download pages:
   battle_map.mp3 ("fantasy" by atlasaudio), sanctuary_day.mp3 ("magic fantasy fairy tale" by andriih), battle.ogg ("acción"), medieval.ogg: source and licence to confirm
 Kenney Impact Sounds (CC0): egg_crack_1..3, plant_dig, water_splash, harvest_pop, buy_land, decor_place
 Ambience: garden.mp3 ("garden outdoor ambience" by alex_jauk, Pixabay), licence to confirm; plays on the Farm and the Habitat Isles by day
+  page_turn (page turn single 1104, Mixkit): dialogue boxes
