@@ -17,20 +17,20 @@ const ART = `${import.meta.env.BASE_URL}altar/`;
 
 /** Where each plate's medallion is (percent of the plate): measured from the images. h is the plate image height at 520 px wide. */
 const PLATE: Record<string, { cx: number; cy: number; d: number; h: number }> = {
-  sanctuaries: { cx: 22.31, cy: 46.26, d: 25.31, h: 227 },
-  farm: { cx: 22.31, cy: 46.26, d: 25.31, h: 227 },
-  den: { cx: 22.5, cy: 46.64, d: 24.92, h: 223 },
-  battle: { cx: 23.27, cy: 46.15, d: 25.69, h: 234 },
-  altar: { cx: 23.08, cy: 46.15, d: 25.69, h: 234 },
+  sanctuaries: { cx: 22.35, cy: 46.61, d: 25.31, h: 227 },
+  farm: { cx: 22.27, cy: 46.52, d: 25.31, h: 227 },
+  den: { cx: 22.62, cy: 46.86, d: 24.92, h: 223 },
+  battle: { cx: 23.25, cy: 47.09, d: 25.69, h: 234 },
+  altar: { cx: 23.08, cy: 46.92, d: 25.69, h: 234 },
 };
 
 /** Each icon's centre of mass vs its box (ox, oy as fractions of the picture) and aspect ratio, so the visual weight, not the box, is centred in the medallion. */
-const ICON_BALANCE: Record<string, { ox: number; oy: number; aspect: number }> = {
-  sanctuaries: { ox: 0.003, oy: 0.011, aspect: 1.148 },
-  farm: { ox: -0.024, oy: -0.031, aspect: 1.089 },
-  den: { ox: 0.002, oy: -0.073, aspect: 0.996 },
-  battle: { ox: 0.064, oy: -0.012, aspect: 1.48 },
-  altar: { ox: 0.002, oy: -0.073, aspect: 0.996 },
+const ICON_BALANCE: Record<string, { ox: number; oy: number; aspect: number; s: number }> = {
+  sanctuaries: { ox: 0.003, oy: 0.011, aspect: 1.148, s: 0.91 },
+  farm: { ox: -0.024, oy: -0.031, aspect: 1.089, s: 1.08 },
+  den: { ox: 0.002, oy: -0.073, aspect: 0.996, s: 1 },
+  battle: { ox: 0.064, oy: -0.012, aspect: 1.48, s: 1 },
+  altar: { ox: 0.002, oy: -0.073, aspect: 0.996, s: 1 },
 };
 
 /** A painted wooden sign with an icon medallion; the label sits in the empty wood. */
@@ -43,10 +43,10 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
   >
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
     {/* the plate image already has a clean cream medallion (measured centre and size below); only the icon goes on top */}
-    <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: `${PLATE[art].cx}%`, top: `${PLATE[art].cy}%`, width: `${PLATE[art].d * 0.84}%`, height: `${PLATE[art].d * 0.84 * (520 / PLATE[art].h)}%`, objectFit: 'contain', transform: `translate(calc(-50% + ${ICON_BALANCE[art].ox * Math.min(1, ICON_BALANCE[art].aspect) * 100}%), calc(-50% + ${ICON_BALANCE[art].oy * Math.min(1, 1 / ICON_BALANCE[art].aspect) * 100}%))`, imageRendering: 'auto' }} />
+    <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: `${PLATE[art].cx}%`, top: `${PLATE[art].cy}%`, width: `${PLATE[art].d * 0.84 * ICON_BALANCE[art].s}%`, height: `${PLATE[art].d * 0.84 * ICON_BALANCE[art].s * (520 / PLATE[art].h)}%`, objectFit: 'contain', transform: `translate(calc(-50% + ${ICON_BALANCE[art].ox * Math.min(1, ICON_BALANCE[art].aspect) * 100}%), calc(-50% + ${ICON_BALANCE[art].oy * Math.min(1, 1 / ICON_BALANCE[art].aspect) * 100}%))`, imageRendering: 'auto' }} />
     <span
       className="absolute flex items-center justify-center text-center text-game-ui"
-      style={{ left: '36%', right: '6%', top: 0, bottom: 0, whiteSpace: 'nowrap', fontSize: 'clamp(11px, 1.15vw, 17px)', color, letterSpacing: '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}
+      style={{ left: '38%', right: '3%', top: 0, bottom: 0, whiteSpace: 'nowrap', fontSize: 'clamp(11px, 1.15vw, 17px)', color, letterSpacing: '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}
     >
       {label}
     </span>

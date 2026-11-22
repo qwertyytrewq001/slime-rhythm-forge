@@ -95,7 +95,7 @@ class Soundtrack {
     if (this.current) this.current.el.volume = this.target();
   }
 
-  private bedTarget() { return this.muted ? 0 : this.musicVolume * 0.7; }
+  private bedTarget() { return this.muted ? 0 : Math.min(1, this.musicVolume * 1.1); }
 
   /** Start or stop the background bed; null fades it out. */
   async ambience(name: string | null) {
