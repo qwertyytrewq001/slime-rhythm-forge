@@ -1,0 +1,10 @@
+Audio credits and licences (keep this file up to date)
+
+Kenney (kenney.nl): Interface Sounds, UI Audio, Music Jingles. CC0 (public domain), no credit required.
+  sfx: ui_click, ui_back, ui_hover, ui_open, ui_error, ui_toggle, purchase, coin, claim, new_slime, achievement, egg_hatch
+Mixkit (mixkit.co): Mixkit Sound Effects Free License (commercial use, no credit).
+  sfx: gift_collect (magic sparkle whoosh 2350), ritual_start (fairy magic sparkle 871), bond_chime (page forward single chime 1107)
+Music, source and licence TO CONFIRM from the download pages:
+  title.ogg  ("a new beginning")
+  home.mp3   ("lofi loop" by zephiramusic, Pixabay)
+  medieval.ogg ("medieval")

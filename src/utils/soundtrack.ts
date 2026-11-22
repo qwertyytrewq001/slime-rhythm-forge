@@ -3,7 +3,7 @@
  * synthesised sounds when they exist. Everything is optional: a missing file is detected once and the old
  * synthesised sound (or silence, for music) is used instead, so files can be added one at a time.
  *
- * Files live in public/audio/music/<name>.mp3 and public/audio/sfx/<name>.mp3 (see AUDIO_SPEC.md).
+ * Files live in public/audio/music/<name> and public/audio/sfx/<name> as .ogg, .mp3 or .wav (see AUDIO_SPEC.md).
  */
 const BASE = import.meta.env.BASE_URL;
 const MUSIC_VOL_KEY = 'rs_music_vol';
@@ -31,6 +31,26 @@ function exists(url: string): Promise<boolean> {
   return p;
 }
 
+const EXTS = ['ogg', 'mp3', 'wav'];
+const resolved = new Map<string, string | null>();
+/** First existing file for a name, trying each audio extension; remembered so each name is probed once. */
+async function resolveUrl(kind: 'music' | 'sfx', name: string): Promise<string | null> {
+  const key = `${kind}/${name}`;
+  if (resolved.has(key)) return resolved.get(key) ?? null;
+  for (const ext of EXTS) {
+    const url = `${BASE}audio/${key}.${ext}`;
+    if (await exists(url)) { resolved.set(key, url); return url; }
+  }
+  resolved.set(key, null);
+  return null;
+}
+
+/** Screens that do not have a track of their own yet borrow one (the files are only loaded once). */
+const MUSIC_ALIAS: Record<string, string> = {
+  library: 'home', den: 'home', sanctuary_day: 'home', sanctuary_night: 'home',
+  farm: 'medieval', bazaar: 'medieval', battle_map: 'medieval',
+};
+
 class Soundtrack {
   private current: { name: string; el: HTMLAudioElement } | null = null;
   private wanted: string | null = null;
@@ -40,6 +60,8 @@ class Soundtrack {
   /** Browsers only allow sound after a click; the title screen's Play button calls unlock(). */
   private unlocked = false;
   private ducked = false;
+  /** The file being fetched right now, so two quick play() calls for one track start only one player. */
+  private loading: string | null = null;
 
   unlock() {
     this.unlocked = true;
@@ -87,17 +109,20 @@ class Soundtrack {
   async play(name: string | null) {
     this.wanted = name;
     if (!this.unlocked) return;
-    if (name === (this.current?.name ?? null)) return;
+    const file = name ? (MUSIC_ALIAS[name] ?? name) : null;
+    if (file === (this.current?.name ?? null) || (file && file === this.loading)) return;
     const old = this.current;
     this.current = null;
     if (old) this.fade(old.el, 0, () => { old.el.pause(); old.el.src = ''; });
     if (!name) return;
-    const url = `${BASE}audio/music/${name}.mp3`;
-    if (!(await exists(url)) || this.wanted !== name) return;
+    this.loading = file;
+    const url = await resolveUrl('music', file!);
+    if (this.loading === file) this.loading = null;
+    if (!url || this.wanted !== name) return;
     const el = new Audio(url);
     el.loop = true;
     el.volume = 0;
-    this.current = { name, el };
+    this.current = { name: file!, el };
     try { await el.play(); } catch { this.current = null; return; }
     this.fade(el, this.target());
   }
@@ -105,9 +130,8 @@ class Soundtrack {
   /** Play a sound-effect file; resolves false if it does not exist so the caller can use the synthesised sound. */
   async sfx(name: string): Promise<boolean> {
     if (this.muted || !this.unlocked) return false;
-    const url = `${BASE}audio/sfx/${name}.mp3`;
-    if (known.get(url) === false) return false;
-    if (!(await exists(url))) return false;
+    const url = await resolveUrl('sfx', name);
+    if (!url) return false;
     const el = new Audio(url);
     el.volume = this.sfxVolume;
     try { await el.play(); return true; } catch { return false; }
