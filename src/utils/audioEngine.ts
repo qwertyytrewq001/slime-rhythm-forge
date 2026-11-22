@@ -1,7 +1,7 @@
 import { soundtrack } from './soundtrack';
 
 /** Sound-effect file names (public/audio/sfx/<name>.mp3) for each built-in effect; the synthesised sound plays if the file is missing. */
-const SFX_FILE: Record<string, string> = { breed: 'ritual_start', collect: 'gift_collect', purchase: 'purchase', achievement: 'achievement', tap: 'ui_click', hatch: 'egg_hatch', discovery: 'new_slime' };
+const SFX_FILE: Record<string, string> = { squish: 'slime_tap', breed: 'ritual_start', collect: 'gift_collect', purchase: 'purchase', achievement: 'achievement', tap: 'ui_click', hatch: 'egg_hatch', discovery: 'new_slime' };
 
 class AudioEngine {
   private ctx: AudioContext | null = null;
@@ -130,13 +130,13 @@ class AudioEngine {
     this.lfoNode = null;
   }
 
-  playSfx(type: 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
+  playSfx(type: 'squish' | 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
     if (this._muted) return;
     // a real file wins when it exists; otherwise fall through to the synthesised sound
     void soundtrack.sfx(SFX_FILE[type] ?? type).then(played => { if (!played) this.synthSfx(type); });
   }
 
-  private synthSfx(type: 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
+  private synthSfx(type: 'squish' | 'breed' | 'collect' | 'purchase' | 'achievement' | 'tap' | 'hatch' | 'discovery') {
     this.init();
     if (!this.ctx || !this.masterGain || this._muted) return;
 
@@ -248,6 +248,7 @@ class AudioEngine {
         aOsc.connect(aGain); aGain.connect(this.masterGain);
         aOsc.start(); aOsc.stop(this.ctx.currentTime + 0.5);
         break;
+      case 'squish':
       case 'tap':
         const tOsc = this.ctx.createOscillator();
         const tGain = this.ctx.createGain();

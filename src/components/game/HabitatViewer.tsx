@@ -1093,7 +1093,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
   const handlePoke = (slimeId: string, quiet = false) => {
     const c = centerOf(slimeId);
     if (c) addFx({ kind: 'burst', x: c.x, y: c.y - 24, emojis: ['💖'], count: quiet ? 2 : 3 }, 1100);
-    if (!quiet) audioEngine.playSfx('tap');
+    if (!quiet) audioEngine.playSfx('squish');
     // Petting and poking make the sanctuary happier (rate limited in the rules, so spamming does nothing extra)
     dispatch({ type: 'SANCT_JOY', habitatId, source: 'pet', now: Date.now(), rolls: Array.from({ length: 12 }, Math.random) });
   };
@@ -1203,7 +1203,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         const pt = pointerRef.current;
         if (pt) {
           addFx({ kind: 'burst', x: pt.x, y: pt.y, emojis: GROUND_SPARKLE[habitat?.element ?? 'light'] ?? ['✨'], count: 5 }, 1000);
-          audioEngine.playSfx('tap');
+          audioEngine.playSfx('squish');
         }
       }
       setCursor(hoverId ? 'grab' : '');

@@ -98,7 +98,7 @@ export function DenPeekers() {
   const tap = (i: number) => {
     const p = outRef.current[i];
     if (!p || p.giggle) return;
-    audioEngine.playSfx('tap');
+    audioEngine.playSfx('squish');
     set(i, { ...p, giggle: true, phase: 'show' });
     later(() => set(i, { ...p, giggle: true, phase: 'out' }), 900);
     later(() => set(i, null), 1500);
