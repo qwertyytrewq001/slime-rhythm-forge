@@ -148,7 +148,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
           <div className="flex flex-col items-center gap-2 translate-y-6"><div className="w-1 h-1" /></div>
         ) : (
           <div className="relative flex flex-col">
-            <div className="absolute z-10" style={{ right: '-126px', top: '29px' }}>
+            <div className="absolute z-10" style={{ right: '-126px', top: '46px' }}>
               <HatchingEgg slime={activeHatching.slime} crackProgress={crackProgress} shaking={isRecentlyTapped || isHatching} />
               {isFinished && !isHatching && (
                 <div className="absolute pointer-events-none rounded-full" style={{ left: '50%', top: '50%', width: 110, height: 110, transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle, rgba(255,240,170,0.75), rgba(255,240,170,0) 68%)', animation: 'hatchGlow 1.8s ease-in-out infinite' }} />

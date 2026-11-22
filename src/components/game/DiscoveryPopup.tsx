@@ -20,6 +20,10 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
   const { state, dispatch } = useGameState();
   const [mounted, setMounted] = useState(false);
   const [animate, setAnimate] = useState(false);
+  // short windows get a smaller stage so the name, chips and buttons stay in view (the card also scrolls)
+  const [vh, setVh] = useState(() => window.innerHeight);
+  useEffect(() => { const on = () => setVh(window.innerHeight); window.addEventListener('resize', on); return () => window.removeEventListener('resize', on); }, []);
+  const stageZoom = Math.min(1, Math.max(0.5, (vh - 330) / 270));
 
   useEffect(() => {
     setMounted(true);
@@ -66,13 +70,13 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
           <span className="absolute flex items-center justify-center font-bold" style={{ left: '16%', right: '16%', top: 0, bottom: '6%', fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(20px, 4.4vw, 30px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>NEW SLIME!</span>
         </div>
 
-        <div className="relative w-full overflow-hidden text-center" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '5px solid #4a2f17', borderRadius: 28, boxShadow: '0 22px 50px rgba(0,0,0,0.55)', color: '#4a2f17', padding: '46px 26px 22px' }}>
+        <div className="relative w-full overflow-x-hidden overflow-y-auto text-center" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '5px solid #4a2f17', borderRadius: 28, boxShadow: '0 22px 50px rgba(0,0,0,0.55)', color: '#4a2f17', padding: "46px 26px 22px", maxHeight: "calc(96vh - 60px)", overscrollBehavior: "contain" }}>
           <button onClick={onClose} aria-label="Close" className="absolute top-3 right-3 hover:scale-110 active:scale-90 transition-transform z-10">
             <img src={`${BASE}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 40, height: 40, imageRendering: 'auto' }} />
           </button>
 
           {/* stage: glow, confetti, a gold plate, and a big slime in the middle of all three */}
-          <div className="relative mx-auto" style={{ width: 300, height: 270 }}>
+          <div className="relative mx-auto" style={{ width: 300, height: 270, zoom: stageZoom }}>
             <div className="absolute rounded-full pointer-events-none" style={{ left: '50%', top: '50%', width: 270, height: 270, background: 'radial-gradient(circle, rgba(255,226,130,0.9), rgba(255,226,130,0) 68%)', animation: 'discGlow 2.4s ease-in-out infinite' }} />
             <img src={`${BASE}altar/love_confetti.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '40%', width: 300, imageRendering: 'auto', animation: 'discConfetti 1.8s ease-out 0.4s both' }} />
             <img src={`${BASE}altar/denp_plate.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: 4, width: 190, transform: 'translateX(-50%)', imageRendering: 'auto' }} />
