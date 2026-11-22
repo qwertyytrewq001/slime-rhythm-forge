@@ -87,6 +87,8 @@ class Soundtrack {
   private buffers = new Map<string, { buf: AudioBuffer; gain: number } | null>();
   private bufLoading = new Map<string, Promise<void>>();
   private preloadStarted = false;
+  /** When an effect last played, so the catch-all button click does not stack on top of a specific sound. */
+  lastSfxAt = 0;
 
   unlock() {
     if (this.unlocked) return;
@@ -271,6 +273,7 @@ class Soundtrack {
     const entry = this.buffers.get(name);
     const ctx = this.ctx;
     if (!entry || !ctx) return false;
+    this.lastSfxAt = performance.now();
     if (ctx.state === 'suspended') void ctx.resume();
     const src = ctx.createBufferSource();
     src.buffer = entry.buf;

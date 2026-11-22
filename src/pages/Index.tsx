@@ -1,5 +1,5 @@
 import type React from 'react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { GameProvider, useGameState, getStage } from '@/hooks/useGameState';
 import { TopBar } from '@/components/game/TopBar';
 import { SlimeGallery } from '@/components/game/SlimeGallery';
@@ -212,6 +212,26 @@ function GameLayout() {
       return () => clearTimeout(timer);
     }
   }, [state.tutorialCompleted, state.slimes.length, showTitle]);
+
+  // every button press gets a click, unless the button already plays a sound of its own a moment earlier
+  useEffect(() => {
+    const onClick = (e: MouseEvent) => {
+      const el = (e.target as Element | null)?.closest?.('button, [role="button"], a, [data-sfx]') as HTMLButtonElement | null;
+      if (!el || el.disabled || el.closest('[data-nosfx]')) return;
+      if (performance.now() - soundtrack.lastSfxAt < 120) return;
+      void soundtrack.sfx('ui_click');
+    };
+    document.addEventListener('click', onClick);
+    return () => document.removeEventListener('click', onClick);
+  }, []);
+
+  // a whoosh when a screen or popup opens
+  const openedOnce = useRef(false);
+  useEffect(() => {
+    if (!openedOnce.current) { openedOnce.current = true; return; }
+    if (showTitle) return;
+    void soundtrack.sfx('ui_open');
+  }, [currentView, bazaarModalOpen, codexGalleryOpen, showAchievements]);
 
   // music follows the screen
   useEffect(() => {
