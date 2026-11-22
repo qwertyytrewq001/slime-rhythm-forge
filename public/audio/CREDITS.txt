@@ -5,5 +5,5 @@ Kenney (kenney.nl): Interface Sounds, UI Audio, Music Jingles. CC0 (public domai
 Mixkit (mixkit.co): Mixkit Sound Effects Free License (commercial use, no credit).
   sfx: gift_collect (fairy magic sparkle 871), ritual_start (magic sparkle whoosh 2350), bond_chime (page forward single chime 1107)
 Music, source and licence TO CONFIRM from the download pages:
-  home.mp3 ("lofi loop" by zephiramusic, Pixabay): title, home, habitats, den, Codex
-  medieval.ogg ("medieval"): farm, bazaar, battle map
+  home.mp3 ("cute lofi" by zephiramusic), farm.mp3 ("lofi pop" by zephiramusic), lofi_loop.mp3 ("lofi loop" by zephiramusic): Pixabay, licence to confirm
+  battle_map.mp3 ("fantasy" by atlasaudio), sanctuary_day.mp3 ("magic fantasy fairy tale" by andriih), battle.ogg ("acción"), medieval.ogg: source and licence to confirm
