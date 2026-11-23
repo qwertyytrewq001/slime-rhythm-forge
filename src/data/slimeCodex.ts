@@ -149,7 +149,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['water', 'fire'],
     rarityTier: 'Common',
     weight: 100,
-    description: "Prefers sparkling water over still because 'the bubbles tickle its soul'.",
+    description: "Runs hot, holds grudges, and has never once been asked to calm down, which is why it hasn't.",
     family: 'elemental-foundations',
     spriteId: 'lava_slime'
   },
@@ -253,7 +253,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['earth', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: "Can sleep for three years without waking up, and often does.",
+    description: "Has a hole in the middle and refuses to talk about it.",
     family: 'sweet-confections',
     spriteId: 'donut_slime'
   },
@@ -407,7 +407,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['earth', 'fire'],
     rarityTier: 'Rare',
     weight: 25,
-    description: "Was once a lightning bolt that got stuck in a jar of jelly.",
+    description: "Fell out of the sky onto a very surprised picnic and has been apologizing badly ever since.",
     family: 'elemental-foundations',
     spriteId: 'meteor_slime'
   }
