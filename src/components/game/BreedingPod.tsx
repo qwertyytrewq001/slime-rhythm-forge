@@ -8,6 +8,7 @@ import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Slime } from '@/types/slime';
 import { Sparkles, Diamond, AlertCircle } from 'lucide-react';
 import { drawEnhancedEgg } from '@/utils/eggRenderer';
+import { breedMs, hatchMs } from '@/utils/gooEconomy';
 import { FairySparkle } from './FairySparkle';
 import { getStage } from '@/utils/slimeRenderer';
 import { toast } from '@/hooks/use-toast';
@@ -181,8 +182,7 @@ export function BreedingPod(props: BreedingPodProps) {
     audioEngine.playSfx('breed');
 
     const resultSlime = breedSlimes(slot1Slime, slot2Slime, state.mutationJuiceActive, state.luckyCharmActive);
-    const isEpicOrBetter = ['Epic', 'Legendary', 'Divine', 'Ancient'].includes(resultSlime.rarityTier);
-    const duration = isEpicOrBetter ? 30000 : 10000;
+    const duration = breedMs(resultSlime.rarityTier, state.totalBreeds === 0);
 
     dispatch({ 
       type: 'START_BREEDING', 
@@ -222,7 +222,7 @@ export function BreedingPod(props: BreedingPodProps) {
       return;
     }
 
-    dispatch({ type: 'START_HATCHING', slime: child, duration: 30000 });
+    dispatch({ type: 'START_HATCHING', slime: child, duration: hatchMs(child.rarityTier, state.totalBreeds === 0) });
     dispatch({ type: 'ADD_BREED_HISTORY', result: {
       parent1Id: state.activeBreeding.parent1Id,
       parent2Id: state.activeBreeding.parent2Id,

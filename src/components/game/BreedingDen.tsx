@@ -10,6 +10,7 @@ import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { X, Heart, Sparkles, Plus, ChevronLeft, HelpCircle } from 'lucide-react';
 import { calculateBreedingResult, getPossibleOutcomes } from '@/utils/breedingCalculator';
 import { breedSlimes, createCodexSlime } from '@/utils/slimeGenerator';
+import { breedMs, hatchMs } from '@/utils/gooEconomy';
 
 interface BreedingDenProps {
   onRequestGallery?: (slot: 1 | 2) => void;
@@ -104,7 +105,6 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
   const handleStartBreeding = () => {
     if (slot1Slime && slot2Slime && !state.activeBreeding) {
       // Create breeding ritual object
-      const breedingTime = 30000; // 30 seconds
       // the baby is decided now (with any Mutation Juice / Lucky Charm), so a finished ritual always has a slime to hatch
       const resultSlime = breedSlimes(slot1Slime, slot2Slime, state.mutationJuiceActive, state.luckyCharmActive);
       if (state.mutationJuiceActive) dispatch({ type: 'DEACTIVATE_MUTATION_JUICE' });
@@ -112,7 +112,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       const ritual = {
         parent1Id: slot1Slime.id,
         parent2Id: slot2Slime.id,
-        endTime: Date.now() + breedingTime,
+        endTime: Date.now() + breedMs(resultSlime.rarityTier, state.totalBreeds === 0),
         resultSlime,
       };
       dispatch({ type: 'START_BREEDING', ritual });
@@ -347,7 +347,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 // the egg that was decided when the ritual started goes to the hatchery
                 const ritual = state.activeBreeding;
                 if (ritual?.resultSlime) {
-                  dispatch({ type: 'START_HATCHING', slime: ritual.resultSlime, duration: 45000 });
+                  dispatch({ type: 'START_HATCHING', slime: ritual.resultSlime, duration: hatchMs(ritual.resultSlime.rarityTier, state.totalBreeds === 0) });
                   dispatch({ type: 'ADD_BREED_HISTORY', result: { parent1Id: ritual.parent1Id, parent2Id: ritual.parent2Id, childId: ritual.resultSlime.id, timestamp: Date.now() } });
                   dispatch({ type: 'INCREMENT_BREEDS' });
                 }

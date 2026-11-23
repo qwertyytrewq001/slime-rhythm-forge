@@ -1,4 +1,4 @@
-import { eggCost } from '@/utils/gooEconomy';
+import { eggCost, hatchMs } from '@/utils/gooEconomy';
 import React, { useState } from 'react';
 import { useGameState, xpToNextLevel } from '@/hooks/useGameState';
 import { createElementSlime } from '@/utils/slimeGenerator';
@@ -99,7 +99,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
     }
 
     const newSlime = createElementSlime(element);
-    dispatch({ type: 'START_HATCHING', slime: newSlime, duration: 10000 });
+    dispatch({ type: 'START_HATCHING', slime: newSlime, duration: hatchMs('Common', state.totalBreeds === 0 && state.slimes.length <= 3) });
     setBoughtEgg(element); // a proper "you got an egg" moment instead of a toast
   };
 

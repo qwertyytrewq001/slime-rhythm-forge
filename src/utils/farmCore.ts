@@ -75,7 +75,7 @@ export const extraYieldChance = (level: number) => Math.min(0.35, 0.03 * (level 
 export const goldenChance = (level: number) => Math.min(0.12, 0.03 + 0.0075 * (level - 1));
 export const growthMultiplier = (level: number) => 1 - Math.min(0.2, 0.015 * (level - 1));
 export const WATER_BONUS = 0.1; // of the full grow time, once per plant
-export const RUSH_FACTOR = 2.5; // finishing a brand new plant instantly costs this many seeds' worth of goo
+export const RUSH_FACTOR = 9; // finishing a brand new plant instantly costs this many seeds' worth of goo (was 2.5, which made waiting pointless)
 export const GOLDEN_MULT = 3;
 
 export const growMsFor = (crop: SlimeFoodType, level: number, perks: FarmPerks = NO_PERKS) =>
