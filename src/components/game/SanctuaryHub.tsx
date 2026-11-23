@@ -185,18 +185,20 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
           </>
         )}
 
-        {/* HUD */}
-        <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012, gap: sw * 0.01, zIndex: 300 }}>
-          <button onClick={onClose} className="rounded-full font-bold border-[3px] shadow-lg hover:scale-105 transition-transform whitespace-nowrap" style={{ background: PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.0135, padding: `${sw * 0.005}px ${sw * 0.014}px` }}>
-            ← Altar
-          </button>
-          <div>
+        {/* HUD: clock and goo on the left, the title in the middle, Collect All and the close cross on the right, so the bar balances */}
+        <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
+          <ClockChip day={day} sw={sw} />
+          <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0135, padding: `${sw * 0.004}px ${sw * 0.012}px`, minWidth: sw * 0.09, textAlign: 'center' }}>
+            {Math.floor(state.goo).toLocaleString()} 💧
+          </div>
+        </div>
+        <div className="absolute flex items-center justify-center pointer-events-none" style={{ left: '50%', top: sw * 0.014, transform: 'translateX(-50%)', zIndex: 300 }}>
+          <div className="text-center">
             <div className="font-bold leading-none text-white" style={{ fontSize: sw * 0.026, WebkitTextStroke: `${sw * 0.003}px #2a1408`, paintOrder: 'stroke fill', letterSpacing: '0.02em' }}>Habitat Isles</div>
             <div className="font-semibold text-white/90" style={{ fontSize: sw * 0.0105, textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>Happy slimes leave gifts. Tap an island to visit.</div>
           </div>
         </div>
         <div className="absolute flex items-center" style={{ right: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
-          <ClockChip day={day} sw={sw} />
           <button
             onClick={collectEverything}
             disabled={!gifts}
@@ -212,9 +214,9 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
             </span>
             {gifts > 0 && <span className="absolute rounded-full font-bold text-white flex items-center justify-center" style={{ right: '2%', top: '-4%', background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.021, height: sw * 0.021, fontSize: sw * 0.011, padding: '0 4px' }}>{gifts}</span>}
           </button>
-          <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0135, padding: `${sw * 0.004}px ${sw * 0.012}px` }}>
-            {Math.floor(state.goo).toLocaleString()} 💧
-          </div>
+          <button onClick={onClose} aria-label="Close" className="hover:scale-110 active:scale-90 transition-transform" style={{ background: 'transparent', border: 'none', padding: 0, width: sw * 0.044 }}>
+            <img src={`${BASE}ui/baz_close.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.45))' }} />
+          </button>
         </div>
 
         {/* active perks */}

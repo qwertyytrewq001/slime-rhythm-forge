@@ -263,8 +263,12 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
 
       {/* Breeding controls */}
       <div className="absolute top-4 left-4">
-        {onBackToAltar && <NavPlate art="altar" icon="ui/navicon_altar.png" color="#b2ebff" label="BACK" onClick={onBackToAltar} />}
       </div>
+      {onBackToAltar && (
+        <button onClick={onBackToAltar} aria-label="Close" className="absolute top-4 right-4 hover:scale-110 active:scale-90 transition-transform" style={{ width: 'clamp(44px, 4.2vw, 62px)', background: 'transparent', border: 'none', padding: 0, zIndex: 20 }}>
+          <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.45))' }} />
+        </button>
+      )}
 
       {/* Breeding title */}
       <div className="absolute top-4 left-1/2 -translate-x-1/2 text-center" style={{ width: 'min(46vw, 430px)' }}>
