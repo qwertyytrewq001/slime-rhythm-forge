@@ -268,7 +268,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
           <div className="relative text-center" onClick={e => e.stopPropagation()} style={{ width: 'min(92vw, 440px)', animation: 'eggPopIn 0.45s ease-out both' }}>
             <div className="relative mx-auto pointer-events-none" style={{ width: '88%', marginBottom: -26, zIndex: 3 }}>
               <img src={`${import.meta.env.BASE_URL}altar/love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.4))' }} />
-              <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 'clamp(20px, 4.4vw, 28px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>You got an egg!</span>
+              <span className="absolute flex items-center justify-center font-bold" style={{ left: 0, right: 0, top: 0, bottom: '30%', fontSize: 'clamp(20px, 4.4vw, 28px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>You got an egg!</span>
             </div>
             <div className="relative rounded-[28px] overflow-hidden" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '5px solid #4a2f17', padding: '44px 24px 22px', color: '#4a2f17', boxShadow: '0 20px 50px rgba(0,0,0,0.55)' }}>
               <div className="relative mx-auto flex items-center justify-center" style={{ width: 190, height: 170 }}>

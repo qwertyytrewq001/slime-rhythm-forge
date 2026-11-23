@@ -50,7 +50,7 @@ export function PlayerLevelUpPopup() {
         {/* ribbon straddling the top of the card */}
         <div className="relative mx-auto pointer-events-none" style={{ width: 'min(92%, 470px)', marginBottom: -34, zIndex: 3, animation: 'lvlBanner 0.6s ease-out both' }}>
           <img src={`${A}love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.35))' }} />
-          <span className="absolute inset-0 flex items-center justify-center font-bold text-center px-10" style={{ fontSize: 'clamp(18px, 4vw, 27px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em', lineHeight: 1.05 }}>Resonance Increased!</span>
+          <span className="absolute flex items-center justify-center font-bold text-center px-10" style={{ left: 0, right: 0, top: 0, bottom: '30%', fontSize: 'clamp(18px, 4vw, 27px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em', lineHeight: 1.05 }}>Resonance Increased!</span>
         </div>
 
         <div className="relative rounded-[28px] overflow-hidden text-center" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: `5px solid ${INK}`, boxShadow: '0 22px 50px rgba(0,0,0,0.5)', color: INK, padding: '52px 28px 24px' }}>
