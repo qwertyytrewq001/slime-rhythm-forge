@@ -225,12 +225,7 @@ function GameLayout() {
     return () => document.removeEventListener('click', onClick);
   }, []);
 
-  // popups get an open sound; changing screens stays silent (each screen has its own music)
-  const popupsSeen = useRef(false);
-  useEffect(() => {
-    if (!popupsSeen.current) { popupsSeen.current = true; return; }
-    if ((bazaarModalOpen || codexGalleryOpen || showAchievements) && !showTitle) void soundtrack.sfx('ui_open');
-  }, [bazaarModalOpen, codexGalleryOpen, showAchievements]);
+  // opening and closing share the one button click above, so no separate open sound
 
   // music follows the screen
   useEffect(() => {

@@ -38,7 +38,6 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
   <button
     onClick={onClick}
     aria-label={label}
-    data-nosfx
     className="relative transition-transform duration-150 hover:scale-105 hover:brightness-110 active:scale-95 outline-none"
     style={{ width: 'clamp(150px, 17vw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
   >
