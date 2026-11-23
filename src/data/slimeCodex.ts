@@ -313,7 +313,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: "Can eat its own weight in pixels every hour.",
+    description: "Bounces back from everything, and has been told that is not a personality.",
     family: 'sweet-confections',
     spriteId: 'gummybear_slime'
   }
@@ -471,7 +471,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['plant', 'earth', 'water'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: "It grows a miniature world on its back, and charges rent to the inhabitants. It's the living heart of the world tree that Voss seeks to sever, remembering when nine worlds were one.",
+    description: "Grows a miniature world on its back, and charges rent to the inhabitants.",
     family: 'ancient-mysteries',
     spriteId: 'yggdrasil_slime'
   },
