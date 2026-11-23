@@ -15,9 +15,11 @@ interface SlimeGalleryProps {
   filterElement?: SlimeElement;
   /** Breeding only takes adults, so the breeding picker shows nothing else. */
   adultsOnly?: boolean;
+  /** Put the picked slime in the first free breeding slot. The breeding picker turns this off because it already knows which pedestal was tapped. */
+  autoPlace?: boolean;
 }
 
-export function SlimeGallery({ onSelect, filterElement, adultsOnly }: SlimeGalleryProps = {}) {
+export function SlimeGallery({ onSelect, filterElement, adultsOnly, autoPlace = true }: SlimeGalleryProps = {}) {
   const { state, dispatch } = useGameState();
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortMode>('newest');
@@ -67,6 +69,10 @@ export function SlimeGallery({ onSelect, filterElement, adultsOnly }: SlimeGalle
     }
     
     // Also place it on the first available breeding slot (only for adult slimes)
+    if (!autoPlace) {
+      if (onSelect) onSelect(slimeId);
+      return;
+    }
     if (!state.breedSlot1) {
       dispatch({ type: 'SET_BREED_SLOT', slot: 1, id: slimeId });
     } else if (!state.breedSlot2) {

@@ -6,7 +6,7 @@ import { SlimeElement, Slime } from '@/types/slime';
 import { ELEMENT_COLORS, ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Sparkles, Zap, Wand2, MousePointer2, Trophy, X, ShoppingCart } from 'lucide-react';
 import { audioEngine } from '@/utils/audioEngine';
-import { PaintedEgg } from './PaintedEgg';
+import { PaintedEgg, eggElementFor } from './PaintedEgg';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DiscoveryPopup } from './DiscoveryPopup';
@@ -151,7 +151,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
             </div>
             {!isFinished && (
               <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap translate-x-12">
-                <p className="font-bold tracking-wide" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 13, color: '#fff3d0', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill' }}>{ELEMENT_DISPLAY_NAMES[activeHatching.slime.elements?.[0] ?? activeHatching.slime.element]} Egg</p>
+                <p className="font-bold tracking-wide" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 13, color: '#fff3d0', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill' }}>{ELEMENT_DISPLAY_NAMES[eggElementFor(activeHatching.slime) as keyof typeof ELEMENT_DISPLAY_NAMES]} Egg</p>
               </div>
             )}
           </div>

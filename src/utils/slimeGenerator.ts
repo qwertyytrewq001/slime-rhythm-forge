@@ -117,8 +117,9 @@ export function createStarterSlimes(): Slime[] {
 
 // Create a slime with a specific element (for starter eggs in shop)
 export function createElementSlime(element: SlimeElement): Slime {
-  // Find the first slime in Codex that has this element as primary
-  const matchingSlime = ALL_CODEX_SLIMES.find(slime => slime.elements[0] === element);
+  // Starter eggs are fixed: the core slime that has exactly this one element (Electric gives Spark Slime, not a dual-element species)
+  const matchingSlime = ALL_CODEX_SLIMES.find(slime => slime.elements.length === 1 && slime.elements[0] === element)
+    ?? ALL_CODEX_SLIMES.find(slime => slime.elements[0] === element);
   
   if (matchingSlime) {
     return createCodexSlime(matchingSlime.id, undefined);

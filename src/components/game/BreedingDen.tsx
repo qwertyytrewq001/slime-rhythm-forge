@@ -302,12 +302,12 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
 
           <button
             onClick={handleStartBreeding}
-            aria-label="Begin breeding"
+            aria-label="Start breeding"
             className="absolute outline-none hover:scale-110 active:scale-95 transition-transform"
             style={{ left: '50%', bottom: '3%', width: 'min(17vw, 230px)', transform: 'translateX(-50%)', background: 'transparent', border: 'none', padding: 0, zIndex: 12, animation: 'denBeginPulse 1.6s ease-in-out infinite' }}
           >
             <img src={`${import.meta.env.BASE_URL}ui/../altar/ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 12px rgba(190,120,255,0.75))' }} />
-            <span className="absolute inset-0 flex items-center justify-center font-bold whitespace-nowrap" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(13px, 1.5vw, 20px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.04em' }}>Begin Breeding</span>
+            <span className="absolute flex items-center justify-center font-bold whitespace-nowrap" style={{ left: '22%', right: '22%', top: 0, bottom: 0, fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(15px, 1.8vw, 22px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>Start</span>
           </button>
         </>
       )}

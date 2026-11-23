@@ -356,7 +356,7 @@ export function BreedingPod(props: BreedingPodProps) {
                   style={{ width: 154, background: 'transparent', border: 'none', padding: 0, animation: 'podPulse 1.6s ease-in-out infinite' }}
                 >
                   <img src={`${ART}ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 12px rgba(190,120,255,0.75))' }} />
-                  <span className="absolute inset-0 flex items-center justify-center font-bold whitespace-nowrap" style={{ fontFamily: FRED, fontSize: 15, color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.04em' }}>Begin Ritual</span>
+                  <span className="absolute flex items-center justify-center font-bold whitespace-nowrap" style={{ left: '22%', right: '22%', top: 0, bottom: 0, fontFamily: FRED, fontSize: 17, color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>Start</span>
                 </button>
               ) : (
                 <Sparkles className="w-8 h-8 text-[#40E0D0]/20" />

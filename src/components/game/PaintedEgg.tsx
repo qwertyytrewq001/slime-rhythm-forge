@@ -4,6 +4,18 @@ import { drawEnhancedEgg } from '@/utils/eggRenderer';
 
 const BASE = import.meta.env.BASE_URL;
 
+/** The ten elements we have painted eggs for. */
+const EGG_ELEMENTS = ['fire', 'water', 'plant', 'earth', 'wind', 'ice', 'electric', 'metal', 'light', 'shadow'];
+
+/** Core single-element slimes use their element's egg. Species without their own egg art get one of the ten, always the same one for the same species. */
+export function eggElementFor(slime: Slime): string {
+  if (slime.elements?.length === 1) return slime.elements[0];
+  const key = slime.codexId ?? slime.name;
+  let h = 0;
+  for (let i = 0; i < key.length; i++) h = (h * 31 + key.charCodeAt(i)) >>> 0;
+  return EGG_ELEMENTS[h % EGG_ELEMENTS.length];
+}
+
 interface PaintedEggProps {
   slime: Slime;
   crackProgress: number;
@@ -19,7 +31,7 @@ interface PaintedEggProps {
  * with a crack overlay while it breaks. If there is no picture for the element it falls back to the old drawn egg.
  */
 export function PaintedEgg({ slime, crackProgress, shaking, boxClass, fallbackSize = 120 }: PaintedEggProps) {
-  const element = slime.elements?.[0] ?? slime.element;
+  const element = eggElementFor(slime);
   const [missing, setMissing] = useState(false);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const motion = `transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`;
