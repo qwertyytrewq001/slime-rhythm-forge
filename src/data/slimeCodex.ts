@@ -19,7 +19,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['fire'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Thinks it invented fire, but actually just discovered it. It carries the warmth of the first sunrise from the Crystal Peaks, where ancient forges still burn.',
+    description: "Thinks it invented fire, but actually just discovered it.",
     family: 'elemental-foundations',
     spriteId: 'fire_slime'
   },
@@ -29,7 +29,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['water'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Claims to be 99% water and 1% existential dread. It remembers the currents that once flowed through the Sunken Harbor before the waters turned dark.',
+    description: "Claims to be 99% water and 1% existential dread.",
     family: 'aquatic-worlds',
     spriteId: 'water_slime'
   },
@@ -39,7 +39,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['plant'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Secretly believes it\'s a mighty oak, despite being cabbage-sized. It guards the seeds of the Forgotten Garden, where flowers bloom in colors that no longer exist.',
+    description: "Secretly believes it's a mighty oak, despite being cabbage-sized.",
     family: 'natures-garden',
     spriteId: 'leaf_slime'
   },
@@ -49,7 +49,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['earth'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Takes three years to win a staring contest against a boulder. It knows where the ancient pillars of the Deep Mines still stand, waiting for someone strong enough to restore them.',
+    description: "Takes three years to win a staring contest against a boulder.",
     family: 'elemental-foundations',
     spriteId: 'rock_slime'
   },
@@ -59,7 +59,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['wind'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Carries a heavy heart (literally) to avoid drifting away. It whispers warnings through the winds of the Whispering Peaks, where ancient secrets still travel on the breeze.',
+    description: "Carries a heavy heart (literally) to avoid drifting away.",
     family: 'elemental-foundations',
     spriteId: 'wind_slime'
   },
@@ -69,7 +69,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['ice'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Once froze time for exactly 0.0001 seconds and won\'t let anyone forget it. It preserves the echoes of laughter from the Frozen Peaks, where festivals still echo through eternal winter.',
+    description: "Once froze time for exactly 0.0001 seconds and won't let anyone forget it.",
     family: 'frozen-realms',
     spriteId: 'snow_slime'
   },
@@ -79,7 +79,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['fire', 'wind'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Can power a small village for a week, but mostly just uses its energy to vibrate dramatically. It remembers the Storm Sanctuaries of the Thunder Peaks, where weather itself was once harnessed as a weapon.',
+    description: "Can power a small village for a week, but mostly just uses its energy to vibrate dramatically.",
     family: 'storm-forces',
     spriteId: 'bolt_slime'
   },
@@ -89,7 +89,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['metal'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Surprisingly magnetic, often found covered in lost spoons and paperclips it never borrowed. Its internal organs are actually just a very complex set of clockwork gears from the Iron Foundry.',
+    description: "Surprisingly magnetic, often found covered in lost spoons and paperclips it never borrowed.",
     family: 'metal-forged',
     spriteId: 'iron_slime'
   },
@@ -99,7 +99,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['light'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'So bright it technically doesn\'t cast a shadow, which really confuses photographers. It remembers the Lighthouse Sanctuaries of the Crystal Coast, where lost Forgers once found their way home through impossible storms.',
+    description: "So bright it technically doesn't cast a shadow, which really confuses photographers.",
     family: 'cosmic-elements',
     spriteId: 'glow_slime'
   },
@@ -109,7 +109,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['shadow'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Lives in the corners of your eyes. Yes, right now. It guards the hidden libraries beneath the Forgotten Castle, where secrets are kept in shadows that even light cannot reach.',
+    description: "Lives in the corners of your eyes.",
     family: 'cosmic-elements',
     spriteId: 'dark_slime'
   },
@@ -119,7 +119,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['light', 'fire'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Once outshone the sun, but only because it was being particularly dramatic that day. It remembers the Observatory Sanctuaries of the Starlight Peaks, where futures were once read in constellations.',
+    description: "Once outshone the sun, but only because it was being particularly dramatic that day.",
     family: 'cosmic-elements',
     spriteId: 'star_slime'
   },
@@ -129,7 +129,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['shadow', 'water'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Technically a puddle with commitment issues, but don\'t tell it that—it gets defensive. It remembers the Alchemy Sanctuaries of the Shadow Marsh, where potions once tasted both bitter and sweet.',
+    description: "Technically a puddle with commitment issues, but don't tell it that—it gets defensive.",
     family: 'cosmic-elements',
     spriteId: 'ooze_slime'
   },
@@ -139,7 +139,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['ice', 'earth'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Doesn\'t rust, it just \'gains character\' according to its dating profile. It remembers the Crystal Sanctuaries of the Geode Caves, where memories were once stored in facets.',
+    description: "Doesn't rust, it just 'gains character' according to its dating profile.",
     family: 'frozen-realms',
     spriteId: 'gem_slime'
   },
@@ -149,7 +149,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['water', 'fire'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Prefers sparkling water over still because \'the bubbles tickle its soul\'. It remembers the Volcanic Sanctuaries of the Fire Peaks, where creation once rose from destruction.',
+    description: "Prefers sparkling water over still because 'the bubbles tickle its soul'.",
     family: 'elemental-foundations',
     spriteId: 'lava_slime'
   },
@@ -159,7 +159,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['plant', 'earth'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Actually just a collection of sentient vines pretending to be a slime. It remembers the Great Gardens of the Verdant Valley, where plants and fungi once communicated through light.',
+    description: "Actually just a collection of sentient vines pretending to be a slime.",
     family: 'natures-garden',
     spriteId: 'nature_slime'
   },
@@ -169,7 +169,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['electric', 'wind'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Claims to hear the thoughts of every toaster within a ten-mile radius. It remembers the Library Sanctuaries of the Rune Towers, where words once had the power to shape reality.',
+    description: "Claims to hear the thoughts of every toaster within a ten-mile radius.",
     family: 'cosmic-elements',
     spriteId: 'rune_slime'
   },
@@ -179,7 +179,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     elements: ['light', 'water'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Can turn invisible, but only when no one is looking at it. It remembers the Angel Sanctuaries of the Celestial Peaks, where prayers once had the power to reshape reality.',
+    description: "Can turn invisible, but only when no one is looking at it.",
     family: 'cosmic-elements',
     spriteId: 'angel_slime'
   }
@@ -193,7 +193,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['plant', 'fire'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Once accidentally set a merchant\'s beard on fire just by sneezing. It remembers the Festival Sanctuaries of the Sweet Valley, where celebrations once lasted for weeks.',
+    description: "Leaves a trail of wrappers wherever it goes and swears it is not littering, it is decorating.",
     family: 'sweet-confections',
     spriteId: 'candy_slime'
   },
@@ -203,7 +203,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['water', 'earth'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Secretly dreams of becoming a professional dancer. It remembers the Comfort Sanctuaries of the Creamy Hills, where desserts once healed broken hearts.',
+    description: "Secretly dreams of becoming a professional dancer.",
     family: 'sweet-confections',
     spriteId: 'pudding_slime'
   },
@@ -213,7 +213,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'The only slime that can\'t be seen by cats, and it\'s very proud of this accomplishment. It remembers the Orchard Sanctuaries of the Berry Fields, where fruits once stored memories.',
+    description: "Is absolutely convinced it is a gourmet fruit, and stains everything it touches to prove it.",
     family: 'natures-garden',
     spriteId: 'berry_slime'
   },
@@ -223,7 +223,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['plant', 'ice'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Its favorite hobby is judging your interior design choices. It remembers the Garden Sanctuaries of the Mint Meadows, where herbs once cleared troubled minds.',
+    description: "Its favorite hobby is judging your interior design choices.",
     family: 'sweet-confections',
     spriteId: 'mint_slime'
   },
@@ -233,7 +233,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['water', 'fire'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Once won a marathon by simply rolling downhill. It remembers the Kitchen Sanctuaries of the Caramel Caverns, where patience was once the secret ingredient.',
+    description: "Once won a marathon by simply rolling downhill.",
     family: 'sweet-confections',
     spriteId: 'caramel_slime'
   },
@@ -243,7 +243,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['wind', 'plant'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Technically a fruit, but don\'t try to eat it—it gets very defensive about its botanical classification. It remembers the Carnival Sanctuaries of the Sugar Plains, where laughter once floated on the wind.',
+    description: "Eighty percent air and one hundred percent fluff, and very sensitive about both.",
     family: 'sweet-confections',
     spriteId: 'cotton_candy_slime'
   },
@@ -253,7 +253,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['earth', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Can sleep for three years without waking up, and often does. It remembers the Bakery Sanctuaries of the Doughnut District, where circles once represented completeness.',
+    description: "Can sleep for three years without waking up, and often does.",
     family: 'sweet-confections',
     spriteId: 'donut_slime'
   },
@@ -263,7 +263,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['water', 'electric'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Its sneezes sound exactly like a slide whistle. It remembers the Fountain Sanctuaries of the Soda Springs, where enthusiasm once flowed like water.',
+    description: "Its sneezes sound exactly like a slide whistle.",
     family: 'sweet-confections',
     spriteId: 'soda_slime'
   },
@@ -273,7 +273,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['fire', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'The primary reason why socks go missing in the dryer, though it denies everything. It remembers the Spa Sanctuaries of the Steam Valley, where warmth once healed weary souls.',
+    description: "The primary reason why socks go missing in the dryer, though it denies everything.",
     family: 'elemental-foundations',
     spriteId: 'steam_slime'
   },
@@ -283,7 +283,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['metal', 'fire'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Can speak 14 languages, all of them dead. It remembers the Confectionery Sanctuaries of the Toffee Towers, where sweetness once withstood pressure.',
+    description: "Sticks to your teeth, your hands and your decisions, and considers that a feature.",
     family: 'sweet-confections',
     spriteId: 'toffee_slime'
   },
@@ -293,7 +293,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['plant', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Born from a single tear shed by a cloud that lost its way. It remembers the Hive Sanctuaries of the Golden Hives, where sunshine was once stored in jars.',
+    description: "Slow, sweet, and absolutely sure the bees owe it money.",
     family: 'sweet-confections',
     spriteId: 'honey_slime'
   },
@@ -303,7 +303,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['earth', 'fire'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Secretly wishes it was a tropical fruit punch flavor. It remembers the Cacao Sanctuaries of the Chocolate Mountains, where darkness once created the richest flavors.',
+    description: "Secretly wishes it was a tropical fruit punch flavor.",
     family: 'sweet-confections',
     spriteId: 'chocolate_slime'
   },
@@ -313,7 +313,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Can eat its own weight in pixels every hour. It remembers the Candy Sanctuaries of the Gummy Grove, where happiness once bounced back from pressure.',
+    description: "Can eat its own weight in pixels every hour.",
     family: 'sweet-confections',
     spriteId: 'gummybear_slime'
   }
@@ -327,7 +327,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['water', 'fire'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Claims to be the descendant of a supernova, but mostly just uses its heat to toast marshmallows. It remembers the Volcanic Sanctuaries of the Fire Mountains, where land was once forged from destruction.',
+    description: "Claims to be the descendant of a supernova, but mostly just uses its heat to toast marshmallows.",
     family: 'elemental-foundations',
     spriteId: 'volcano_slime'
   },
@@ -337,7 +337,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['wind', 'electric'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Can\'t stay still for more than five seconds without accidentally creating a small dust devil. It remembers the Storm Sanctuaries of the Windy Plains, where futures were once read in chaos.',
+    description: "Can't stay still for more than five seconds without accidentally creating a small dust devil.",
     family: 'storm-forces',
     spriteId: 'tornado_slime'
   },
@@ -347,7 +347,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['water', 'wind'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Can mimic the sound of a bubbling brook, which it uses to trick hikers into falling into puddles. It remembers the Ocean Sanctuaries of the Deep Trench, where waves once cleansed stained souls.',
+    description: "Can mimic the sound of a bubbling brook, which it uses to trick hikers into falling into puddles.",
     family: 'aquatic-worlds',
     spriteId: 'tsunami_slime'
   },
@@ -357,7 +357,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['earth', 'metal'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Technically heavier than it looks, often causing minor earthquakes when it hops excitedly. It remembers the Forge Sanctuaries of the Shifting Ground, where foundations were once rebuilt from rubble.',
+    description: "Technically heavier than it looks, often causing minor earthquakes when it hops excitedly.",
     family: 'metal-forged',
     spriteId: 'earthquake_slime'
   },
@@ -367,7 +367,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['fire', 'plant'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Has a symbiotic relationship with a specific type of moss that only grows on Tuesdays. It remembers the Forest Sanctuaries of the Burning Woods, where endings once became beginnings.',
+    description: "Started as a campfire that was told \"just one more marshmallow\" and never stopped.",
     family: 'storm-forces',
     spriteId: 'wildfire_slime'
   },
@@ -377,7 +377,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['ice', 'wind'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Spends most of its time trying to photosynthesize under moonlight because \'it\'s more aesthetic\'. It remembers the Arctic Sanctuaries of the Ice Wastes, where knowledge was once frozen in time.',
+    description: "Arrives uninvited, stays too long, and leaves everything slightly colder.",
     family: 'frozen-realms',
     spriteId: 'blizzard_slime'
   },
@@ -387,7 +387,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['earth', 'wind'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'A fragment of a hurricane that decided it wanted to settle down and be cozy. It remembers the Desert Sanctuaries of the Sandy Wastes, where winds once uncovered buried cities.',
+    description: "Wears goggles indoors and still finds sand in places it has never been.",
     family: 'storm-forces',
     spriteId: 'sandstorm_slime'
   },
@@ -397,7 +397,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['light', 'fire'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'A physical manifestation of a \'good idea\' that was never acted upon. It remembers the Solar Sanctuaries of the Sun Peaks, where star-fire once powered cities of light.',
+    description: "Gets so excited it forgets to cool down, which is how the last three picnics ended.",
     family: 'storm-forces',
     spriteId: 'solarflare_slime'
   },
@@ -407,7 +407,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     elements: ['earth', 'fire'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Was once a lightning bolt that got stuck in a jar of jelly. It remembers the Star Sanctuaries of the Cosmic Falls, where visitors once fell from the sky bearing gifts.',
+    description: "Was once a lightning bolt that got stuck in a jar of jelly.",
     family: 'elemental-foundations',
     spriteId: 'meteor_slime'
   }
@@ -421,7 +421,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['light', 'plant', 'earth', 'water'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'The slime that seeded the first forests, and still has the receipts to prove it. It remembers when the earth was barren and empty, and it knows Voss fears true creation more than anything.',
+    description: "The slime that seeded the first forests, and still has the receipts to prove it.",
     family: 'ancient-mysteries',
     spriteId: 'genesis_slime'
   },
@@ -431,7 +431,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['shadow', 'water', 'fire'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'Born from the heat of a dying world, and still bitter about the eviction notice. It carries the memory of every civilization that chose extraction over creation, and it knows Voss is making the same mistakes.',
+    description: "Born from the heat of a dying world, and still bitter about the eviction notice.",
     family: 'ancient-mysteries',
     spriteId: 'apocalypse_slime'
   },
@@ -441,7 +441,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['light', 'water', 'wind'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'So large it was once mistaken for a floating island, and it\'s still mad about the property taxes. It swims between stars carrying memories of worlds that have been and might be, proving Voss\'s machines are laughably small.',
+    description: "So large it was once mistaken for a floating island, and it's still mad about the property taxes.",
     family: 'aquatic-worlds',
     spriteId: 'galaxy_whale_slime'
   },
@@ -451,7 +451,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['metal', 'electric', 'light'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'A slime that replaced its body with perfect machinery, but kept the original warranty. It chose transcendence over limitation and knows Voss seeks its secrets without understanding why some things should never be mechanized.',
+    description: "A slime that replaced its body with perfect machinery, but kept the original warranty.",
     family: 'ancient-mysteries',
     spriteId: 'mechagod_slime'
   },
@@ -461,7 +461,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['shadow', 'electric', 'wind'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'Even other slimes are afraid to look at it, which it finds terribly dramatic. It emerged from the first question that should never have been asked and carries knowledge that breaks minds as easily as it opens them.',
+    description: "Even other slimes are afraid to look at it, which it finds terribly dramatic.",
     family: 'cosmic-elements',
     spriteId: 'eldritch_slime'
   },
@@ -471,7 +471,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['plant', 'earth', 'water'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'It grows a miniature world on its back, and charges rent to the inhabitants. It\'s the living heart of the world tree that Voss seeks to sever, remembering when nine worlds were one.',
+    description: "It grows a miniature world on its back, and charges rent to the inhabitants. It's the living heart of the world tree that Voss seeks to sever, remembering when nine worlds were one.",
     family: 'ancient-mysteries',
     spriteId: 'yggdrasil_slime'
   },
@@ -481,7 +481,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['shadow', 'light'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'It consumes light to grow stronger, which makes solar panels very nervous. It embodies the cosmic paradox that darkness is created by consuming light, proving Voss\'s shadows are born from the light he fears.',
+    description: "It consumes light to grow stronger, which makes solar panels very nervous.",
     family: 'cosmic-elements',
     spriteId: 'star_eater_slime'
   },
@@ -491,7 +491,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['light', 'plant', 'wind', 'water'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'Its presence stops all nearby battles instantly, which makes it terrible at parties. It remembers the Golden Age when all elements worked together, and reminds Voss of the peace he threw away for power.',
+    description: "Its presence stops all nearby battles instantly, which makes it terrible at parties.",
     family: 'cosmic-elements',
     spriteId: 'harmoney_slime'
   },
@@ -501,7 +501,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['shadow', 'electric', 'fire'],
     rarityTier: 'Legendary',
     weight: 1,
-    description: 'A slime that contains all of the world\'s curiosities, and the receipts to prove it. It remembers the first Library of All Things where some questions were more valuable than their answers.',
+    description: "Looks like a chest, acts like a library, and does not lend anything out.",
     family: 'cosmic-elements',
     spriteId: 'pandora_slime'
   },
@@ -511,7 +511,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     elements: ['ice', 'earth', 'light'],
     rarityTier: 'Legendary',
     weight: 3,
-    description: 'A crystalline fusion that stores memories in its facets, like a cosmic USB drive. It remembers the Great Library that Voss burned and carries the last remnants that could expose his true origins.',
+    description: "A crystalline fusion that stores memories in its facets, like a cosmic USB drive.",
     family: 'frozen-realms',
     spriteId: 'ice_crystal_slime'
   }
@@ -525,7 +525,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['shadow', 'water', 'earth'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Born from the shadow of a shadow, which is quite an identity crisis. It remembers the Cleansing Sanctuaries of the Toxic Falls, where purification once required pain.',
+    description: "Smells like a science fair and leaves a tiny hole in everything it loves.",
     family: 'storm-forces',
     spriteId: 'acidrain_slime'
   },
@@ -535,7 +535,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['wind', 'ice'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Constantly worried it\'s going to drift away, so it carries a heavy heart (literally). It remembers the Alpine Sanctuaries of the Frost Peaks, where winds once carried ancient wisdom.',
+    description: "Climbed one mountain once and has never let anyone forget the view.",
     family: 'frozen-realms',
     spriteId: 'alpine_slime'
   },
@@ -545,7 +545,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['plant', 'metal'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Thinks it\'s a mighty oak, despite being roughly the size of a cabbage. It remembers the Forest Sanctuaries of the Bamboo Grove, where homes once grew with their inhabitants.',
+    description: "Grows two feet overnight, mostly out of spite.",
     family: 'metal-forged',
     spriteId: 'bamboo_slime'
   },
@@ -555,7 +555,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['earth', 'water', 'fire'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Collects rare pebbles and treats them like its own children. It remembers the Canyon Sanctuaries of the Deep Gorges, where history was once written in stone.',
+    description: "Collects rare pebbles and treats them like its own children.",
     family: 'frozen-realms',
     spriteId: 'canyon_slime'
   },
@@ -565,7 +565,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['earth', 'shadow'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Actually quite cheerful, but its aesthetic demands that it remains \'edge-lordy\' for the brand. It remembers the Underground Sanctuaries of the Dark Depths, where treasures once hid in shadows.',
+    description: "Actually quite cheerful, but its aesthetic demands that it remains 'edge-lordy' for the brand.",
     family: 'underground-depths',
     spriteId: 'cave_slime'
   },
@@ -575,7 +575,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['water', 'earth'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Secretly afraid of the dark, which is quite an identity crisis. It remembers the Reef Sanctuaries of the Coral Gardens, where cities once built themselves together.',
+    description: "Wears a tiny reef as a hat and greets every passing fish as a guest.",
     family: 'aquatic-worlds',
     spriteId: 'coral_slime'
   },
@@ -585,7 +585,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['earth', 'fire'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Formed over a thousand years from the dust of a forgotten mountain. It remembers the Desert Sanctuaries of the Sand Dunes, where life once thrived in scarcity.',
+    description: "Has not seen rain in a thousand years and will not stop mentioning it.",
     family: 'underground-depths',
     spriteId: 'desert_slime'
   },
@@ -595,7 +595,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['water', 'earth'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Forged in the heart of a falling star that hit a blacksmith\'s shop. It remembers the Island Sanctuaries of the Lonely Isles, where uniqueness once created strength.',
+    description: "Has its own beach, one palm tree, and a strict no-visitors policy.",
     family: 'aquatic-worlds',
     spriteId: 'island_slime'
   },
@@ -605,7 +605,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Ninety-nine percent water and one percent pure, unadulterated sass. It remembers the Jungle Sanctuaries of the Dense Canopy, where plants once supported each other.',
+    description: "All leaves, vines and attitude, and it gets louder every time it rains.",
     family: 'natures-garden',
     spriteId: 'jungle_slime'
   },
@@ -615,7 +615,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'This spirit was born from the first ember of a dying campfire. It remembers the Coastal Sanctuaries of the Tidal Zones, where life once thrived between worlds.',
+    description: "Keeps its roots in the mud and its opinions to itself, until you ask about the tide.",
     family: 'natures-garden',
     spriteId: 'mangrove_slime'
   },
@@ -625,7 +625,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['plant', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Legend says it can melt through solid steel, but it refuses to melt through a locked refrigerator door. It remembers the Meadow Sanctuaries of the Flower Fields, where peace once bloomed in diversity.',
+    description: "Smells like a summer afternoon and, accordingly, is always asleep.",
     family: 'natures-garden',
     spriteId: 'meadow_slime'
   },
@@ -635,7 +635,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['water', 'plant'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Uses its own body to keep its owner\'s drinks cold. A true hero. It remembers the Desert Sanctuaries of the Hidden Springs, where hope once created reality.',
+    description: "Uses its own body to keep its owner's drinks cold.",
     family: 'natures-garden',
     spriteId: 'oasis_slime'
   },
@@ -645,7 +645,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['plant', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Born in the heart of a glacier that had a particularly vivid dream. It remembers the Great Sanctuaries of the Emerald Canopy, where every plant once contributed to planetary health.',
+    description: "Rains on itself, indoors, as a matter of principle.",
     family: 'aquatic-worlds',
     spriteId: 'rainforest_slime'
   },
@@ -655,7 +655,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['earth', 'wind'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Whistles a tune that can only be heard by birds and very confused dogs. It remembers the Grassland Sanctuaries of the Golden Plains, where seasons once taught adaptation.',
+    description: "Whistles a tune that can only be heard by birds and very confused dogs.",
     family: 'underground-depths',
     spriteId: 'savanna_slime'
   },
@@ -665,7 +665,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['water', 'earth'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'The primary cause of static shock in the forest, though it blames the squirrels. It remembers the Wetland Sanctuaries of the Murky Marsh, where endings once became beginnings.',
+    description: "Collects mushrooms, grudges, and one very old boot.",
     family: 'aquatic-worlds',
     spriteId: 'swamp_slime'
   },
@@ -675,7 +675,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     elements: ['ice', 'wind'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'So cold it once froze time for exactly 0.0001 seconds, and it still brags about it. It remembers the Arctic Sanctuaries of the Frozen Wastes, where winter once guarded spring\'s possibilities.',
+    description: "So cold that even its shadow wears a scarf.",
     family: 'frozen-realms',
     spriteId: 'tundra_slime'
   }
@@ -689,7 +689,7 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
     elements: ['wind', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A floating fusion that proves joy makes you lighter than air. It formed from the first laugh that learned to float, showing Voss that the lightest things in life are the hardest to capture in machines.',
+    description: "A floating fusion that proves joy makes you lighter than air.",
     family: 'odd-balls',
     spriteId: 'balloon_slime'
   },
@@ -699,7 +699,7 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
     elements: ['earth', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'A colorful fusion that can draw dreams into reality, but mostly just doodles. It emerged from the first crayon that learned imagination could change the world as much as any machine.',
+    description: "A colorful fusion that can draw dreams into reality, but mostly just doodles.",
     family: 'odd-balls',
     spriteId: 'crayon_slime'
   },
@@ -709,7 +709,7 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
     elements: ['shadow', 'electric'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'A flickering error in reality that exists between the code and the world. Glim warns that this is the only creature Voss truly fears, as its chaos cannot be programmed.',
+    description: "A flickering error in reality that exists between the code and the world.",
     family: 'cosmic-elements',
     spriteId: 'glitched_slime'
   }
@@ -723,7 +723,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['metal', 'wind'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Hums a different note every time it is startled, which is often, and it blames the breeze every time. It remembers the Bell Sanctuaries of the Hollow Spires, where the wind once rang out warnings before Voss silenced the towers.',
+    description: "Hums a different note every time it is startled, which is often, and it blames the breeze every time.",
     family: 'metal-forged',
     spriteId: 'chime_slime'
   },
@@ -733,7 +733,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['electric', 'ice'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Gives static shocks that arrive pre-frozen, so you feel them a full minute later. It guards the Lightning Sanctuaries of the Glass Glacier, where storms once froze mid-strike and are still waiting to finish.',
+    description: "Gives static shocks that arrive pre-frozen, so you feel them a full minute later.",
     family: 'frozen-realms',
     spriteId: 'frostbolt_slime'
   },
@@ -743,7 +743,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['metal', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Carries its own umbrella and still somehow always ends up the soggiest in the room. It remembers the Pipeworks Sanctuaries of the Drowned Foundry, where every drip was once part of a plan.',
+    description: "Carries its own umbrella and still somehow always ends up the soggiest in the room.",
     family: 'metal-forged',
     spriteId: 'rust_slime'
   },
@@ -753,7 +753,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['plant', 'shadow'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Looks delicious and knows it, which is the entire point. It tends the Moonless Sanctuaries of the Gloam Garden, where flowers bloom only for those who walk in without a lantern.',
+    description: "Looks delicious and knows it, which is the entire point.",
     family: 'natures-garden',
     spriteId: 'nightshade_slime'
   },
@@ -763,7 +763,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['earth', 'electric'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Cracked itself open once to show off and has been too embarrassed to close back up. It remembers the Crystal Sanctuaries of the Humming Deep, where the mountains themselves once sang in current.',
+    description: "Cracked itself open once to show off and has been too embarrassed to close back up.",
     family: 'underground-depths',
     spriteId: 'geode_spark_slime'
   },
@@ -773,7 +773,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['electric'],
     rarityTier: 'Common',
     weight: 100,
-    description: 'Cannot be hugged without a small, offended zap, and has never once apologized for it. It remembers the Dynamo Sanctuaries of the Static Fields, where the first lightning was caught and taught to behave.',
+    description: "Cannot be hugged without a small, offended zap, and has never once apologized for it.",
     family: 'storm-forces',
     spriteId: 'spark_slime'
   },
@@ -783,7 +783,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['fire', 'ice'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Argues with itself constantly about whether the room is too hot or too cold, and both sides lose. It guards the Ember Sanctuaries of the Ashen Glacier, where fire and frost once called a truce and nobody knows who blinked first.',
+    description: "Argues with itself constantly about whether the room is too hot or too cold, and both sides lose.",
     family: 'frozen-realms',
     spriteId: 'cinderfrost_slime'
   },
@@ -793,7 +793,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['electric', 'fire'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Gets overexcited at the smallest things, and anything nearby tends to catch fire as a result. It remembers the Forge Sanctuaries of the Blazing Grid, where Voss first learned that wildfire could be made to run on a schedule.',
+    description: "Gets overexcited at the smallest things, and anything nearby tends to catch fire as a result.",
     family: 'storm-forces',
     spriteId: 'voltfire_slime'
   },
@@ -803,7 +803,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['fire', 'shadow'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Holds the record for most dramatic entrance, mostly because it hovers in a doorway until someone notices. It haunts the Pyre Sanctuaries of the Smoldering Hollow, where fires that were put out still refuse to be forgotten.',
+    description: "Holds the record for most dramatic entrance, mostly because it hovers in a doorway until someone notices.",
     family: 'cosmic-elements',
     spriteId: 'cinder_wraith_slime'
   },
@@ -813,7 +813,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['ice', 'water'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Cannot decide whether it is a liquid or a solid and is deeply sensitive about being asked. It remembers the Thaw Sanctuaries of the Brimming Shallows, where winter once melted politely instead of all at once.',
+    description: "Cannot decide whether it is a liquid or a solid and is deeply sensitive about being asked.",
     family: 'frozen-realms',
     spriteId: 'slush_slime'
   },
@@ -823,7 +823,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['electric', 'plant'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Grows an inch every time it gets startled, and it startles at everything. It tends the Greenhouse Sanctuaries of the Humming Canopy, where plants once grew toward lightning instead of sunlight.',
+    description: "Grows an inch every time it gets startled, and it startles at everything.",
     family: 'natures-garden',
     spriteId: 'sprout_spark_slime'
   },
@@ -833,7 +833,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['shadow', 'wind'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Slips through keyholes just to rearrange the furniture, then slips out again without a word. It drifts through the Whisper Sanctuaries of the Hollow Moors, where the wind carries the last words of things Voss tried to erase.',
+    description: "Slips through keyholes just to rearrange the furniture, then slips out again without a word.",
     family: 'cosmic-elements',
     spriteId: 'phantom_gust_slime'
   },
@@ -843,7 +843,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['ice', 'metal'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Wears armor it does not need, because it saw a knight do it once and thought it looked important. It remembers the Bastion Sanctuaries of the Winterforge Wall, where the cold itself was hammered into a shield.',
+    description: "Wears armor it does not need, because it saw a knight do it once and thought it looked important.",
     family: 'frozen-realms',
     spriteId: 'frostplate_slime'
   },
@@ -853,7 +853,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['ice', 'light'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Spends the whole day trying to catch its own reflection and is always one blink too slow. It remembers the Prism Sanctuaries of the Radiant Ice Fields, where every glacier once held a rainbow in reserve.',
+    description: "Spends the whole day trying to catch its own reflection and is always one blink too slow.",
     family: 'frozen-realms',
     spriteId: 'glacier_gleam_slime'
   },
@@ -863,7 +863,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['ice', 'shadow'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Gets noticeably colder whenever someone says it looks spiky, which is how you can tell it likes the attention. It keeps watch over the Midnight Sanctuaries of the Black Glacier, where the cold stopped being weather and started being a warning.',
+    description: "Gets noticeably colder whenever someone says it looks spiky, which is how you can tell it likes the attention.",
     family: 'frozen-realms',
     spriteId: 'umbra_frost_slime'
   },
@@ -873,7 +873,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['fire', 'earth'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Hides a warm little flame inside a pile of rubble and acts shocked when you find it. It remembers the Hearth Sanctuaries of the Smoldering Cairns, where every campfire was built on a stone that still held the heat.',
+    description: "Hides a warm little flame inside a pile of rubble and acts shocked when you find it.",
     family: 'elemental-foundations',
     spriteId: 'cinderheart_slime'
   },
@@ -883,7 +883,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['electric', 'light'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Drifts through the air like a jellyfish and refuses to confirm it is not one. It remembers the Sky Sanctuaries of the Shimmering Veil, where the night itself was lit by lightning that learned how to glow instead of strike.',
+    description: "Drifts through the air like a jellyfish and refuses to confirm it is not one.",
     family: 'cosmic-elements',
     spriteId: 'aurora_slime'
   },
@@ -893,7 +893,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['electric', 'metal'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Runs on pure enthusiasm and a suspicious amount of copper wire, and has never once been switched off. It remembers the Generator Sanctuaries of the Clockwork Grid, where the gears turned for the joy of it long before Voss gave them a quota.',
+    description: "Runs on pure enthusiasm and a suspicious amount of copper wire, and has never once been switched off.",
     family: 'metal-forged',
     spriteId: 'dynamo_slime'
   },
@@ -903,7 +903,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['light', 'metal'],
     rarityTier: 'Uncommon',
     weight: 60,
-    description: 'Cannot walk past a puddle without checking its own reflection, and has never once been disappointed. It remembers the Mirror Sanctuaries of the Gleaming Foundry, where metal was polished until it learned to hold the light on its own.',
+    description: "Cannot walk past a puddle without checking its own reflection, and has never once been disappointed.",
     family: 'metal-forged',
     spriteId: 'chrome_slime'
   },
@@ -913,7 +913,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     elements: ['metal', 'shadow'],
     rarityTier: 'Rare',
     weight: 25,
-    description: 'Wears a stolen helmet two sizes too big and glares from under it like that was the plan all along. It haunts the Ruined Sanctuaries of the Blighted Armory, where the steel Voss left behind slowly remembered how to fight back.',
+    description: "Wears a stolen helmet two sizes too big and glares from under it like that was the plan all along.",
     family: 'metal-forged',
     spriteId: 'blightsteel_slime'
   }
