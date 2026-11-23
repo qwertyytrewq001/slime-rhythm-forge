@@ -34,7 +34,7 @@ export const PaintedDialogue: React.FC<PaintedDialogueProps> = ({ speaker, expre
   const turned = () => setFlip(n => n + 1);
   return (
   <div className="fixed left-0 right-0 flex justify-center items-end pointer-events-none" style={{ bottom: 14, zIndex: 9999, fontFamily: FRED, padding: '0 10px' }}>
-    <style>{`@keyframes pdRise { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: none } } @keyframes pdBlink { 50% { opacity: 0 } } @keyframes pdFlip { 0% { transform: perspective(900px) rotateY(-72deg) translateX(-6px); opacity: 0 } 45% { opacity: 1 } 100% { transform: perspective(900px) rotateY(0) translateX(0); opacity: 1 } } @keyframes pdSheen { 0% { transform: translateX(-110%) } 100% { transform: translateX(110%) } }`}</style>
+    <style>{`@keyframes pdRise { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: none } } @keyframes pdBlink { 50% { opacity: 0 } } @keyframes pdFlip { 0% { transform: translateX(26px); opacity: 0 } 60% { opacity: 1 } 100% { transform: translateX(0); opacity: 1 } } @keyframes pdSheen { 0% { transform: translateX(-110%) } 100% { transform: translateX(110%) } }`}</style>
     <div className="relative flex items-end pointer-events-auto" style={{ width: 'min(100%, 860px)', animation: 'pdRise 0.3s ease-out' }}>
       <div className="shrink-0 pointer-events-none" style={{ width: 'clamp(110px, 21vw, 190px)', height: 'clamp(110px, 21vw, 190px)', marginRight: -24, zIndex: 2, marginBottom: 4 }}>
         {portrait ?? <GlimCharacter expression={expression} size={190} />}
@@ -51,9 +51,9 @@ export const PaintedDialogue: React.FC<PaintedDialogueProps> = ({ speaker, expre
             <span className="absolute flex items-center justify-center font-bold" style={{ left: '17%', right: '17%', top: 0, bottom: '32%', fontSize: 20, color: '#fff3d0', WebkitTextStroke: '4px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>{speaker}</span>
           </div>
 
-          <div className="relative flex-1 overflow-y-auto" style={{ maxHeight: '28vh', minHeight: 54 }}>
+          <div className="relative flex-1 overflow-y-auto overflow-x-hidden" style={{ maxHeight: '28vh', minHeight: 54 }}>
             {flip > 0 && <span key={`sheen${flip}`} className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(100deg, transparent 30%, rgba(255,250,230,0.75) 50%, transparent 70%)', animation: 'pdSheen 0.4s ease-out both', zIndex: 2 }} />}
-            <div key={flip} style={{ transformOrigin: '0% 50%', animation: flip > 0 ? 'pdFlip 0.34s cubic-bezier(.2,.8,.3,1) both' : undefined }}>
+            <div key={flip} style={{ animation: flip > 0 ? 'pdFlip 0.28s cubic-bezier(.2,.8,.3,1) both' : undefined }}>
             <p className="font-semibold" style={{ fontSize: 'clamp(15px, 2vw, 21px)', lineHeight: 1.35 }}>
               {text}
               {isTyping && <span style={{ animation: 'pdBlink 0.8s steps(1) infinite', marginLeft: 3 }}>|</span>}
