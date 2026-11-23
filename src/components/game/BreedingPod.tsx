@@ -180,7 +180,7 @@ export function BreedingPod(props: BreedingPodProps) {
     setMergeParticles(true);
     audioEngine.playSfx('breed');
 
-    const resultSlime = breedSlimes(slot1Slime, slot2Slime, state.mutationJuiceActive);
+    const resultSlime = breedSlimes(slot1Slime, slot2Slime, state.mutationJuiceActive, state.luckyCharmActive);
     const isEpicOrBetter = ['Epic', 'Legendary', 'Divine', 'Ancient'].includes(resultSlime.rarityTier);
     const duration = isEpicOrBetter ? 30000 : 10000;
 
@@ -199,6 +199,7 @@ export function BreedingPod(props: BreedingPodProps) {
     }
 
     if (state.mutationJuiceActive) dispatch({ type: 'DEACTIVATE_MUTATION_JUICE' });
+    if (state.luckyCharmActive) dispatch({ type: 'DEACTIVATE_LUCKY_CHARM' });
     setTimeout(() => setMergeParticles(false), 2000);
   }, [slot1Slime, slot2Slime, state.activeBreeding, state.activeHatching, state.mutationJuiceActive, dispatch]);
 

@@ -164,6 +164,7 @@ export interface GameState {
   breedHistory: BreedResult[];
   achievements: Achievement[];
   mutationJuiceActive: boolean;
+  luckyCharmActive: boolean;
   totalBreeds: number;
   perfectTaps: number;
   muted: boolean;
@@ -282,6 +283,9 @@ export type GameAction =
   | { type: 'SPEND_GOO'; amount: number }
   | { type: 'ACTIVATE_MUTATION_JUICE' }
   | { type: 'DEACTIVATE_MUTATION_JUICE' }
+  | { type: 'ACTIVATE_LUCKY_CHARM' }
+  | { type: 'DEACTIVATE_LUCKY_CHARM' }
+  | { type: 'GRANT_SLIME_XP'; slimeId: string; amount: number }
   | { type: 'UNLOCK_ACHIEVEMENT'; id: string }
   | { type: 'CLAIM_ACHIEVEMENT'; id: string }
   | { type: 'ADD_BREED_HISTORY'; result: BreedResult }

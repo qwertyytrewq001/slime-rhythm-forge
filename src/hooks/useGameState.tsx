@@ -150,6 +150,7 @@ function createInitialState(): GameState {
       breedHistory: saved.breedHistory ?? [],
       achievements: mergeAchievements(saved.achievements),
       mutationJuiceActive: saved.mutationJuiceActive ?? false,
+      luckyCharmActive: (saved as { luckyCharmActive?: boolean }).luckyCharmActive ?? false,
       totalBreeds: saved.totalBreeds ?? 0,
       perfectTaps: saved.perfectTaps ?? 0,
       muted: saved.muted ?? false,
@@ -185,6 +186,7 @@ function createInitialState(): GameState {
     breedHistory: [],
     achievements: createAchievementState(),
     mutationJuiceActive: false,
+    luckyCharmActive: false,
     totalBreeds: 0,
     perfectTaps: 0,
     muted: false,
@@ -220,6 +222,7 @@ export interface LocalGameState {
   breedHistory: BreedResult[];
   achievements: Achievement[];
   mutationJuiceActive: boolean;
+  luckyCharmActive: boolean;
   totalBreeds: number;
   perfectTaps: number;
   muted: boolean;
@@ -327,6 +330,21 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, mutationJuiceActive: true };
     case 'DEACTIVATE_MUTATION_JUICE':
       return { ...state, mutationJuiceActive: false };
+    case 'ACTIVATE_LUCKY_CHARM':
+      return { ...state, luckyCharmActive: true };
+    case 'DEACTIVATE_LUCKY_CHARM':
+      return { ...state, luckyCharmActive: false };
+    case 'GRANT_SLIME_XP': {
+      const target = state.slimes.find(s => s.id === action.slimeId);
+      if (!target || target.level >= MAX_SLIME_LEVEL) return state;
+      const gained = addXp(target, action.amount);
+      return {
+        ...state,
+        slimes: state.slimes.map(s => (s.id === target.id ? gained.slime : s)),
+        lastEvolution: gained.evolved ?? state.lastEvolution,
+        lastLevelUp: gained.leveledUp ?? state.lastLevelUp,
+      };
+    }
     case 'UNLOCK_ACHIEVEMENT':
       return {
         ...state,

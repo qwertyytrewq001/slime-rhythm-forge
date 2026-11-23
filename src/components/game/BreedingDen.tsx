@@ -277,6 +277,11 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
           <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(18px, 2.4vw, 32px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Breeding Den</span>
         </div>
         <p className="font-bold mt-1" style={{ animation: 'denTitle 3s ease-in-out infinite', fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.1vw, 15px)', color: '#ffe9a8', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.1em' }}>SELECT PARENTS TO BREED</p>
+        {(state.mutationJuiceActive || state.luckyCharmActive) && (
+          <p className="font-bold mt-1" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(11px, 1.1vw, 14px)', color: '#d9ffb8', WebkitTextStroke: '3px #1f4a2a', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>
+            {[state.mutationJuiceActive && 'Mutation Juice ready', state.luckyCharmActive && 'Lucky Charm ready'].filter(Boolean).join('  +  ')}
+          </p>
+        )}
       </div>
 
       {/* The mystery egg floats above the altar; tap it to see what this pair could make */}
@@ -344,8 +349,12 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                     slot1Slime.level || 1,
                     slot2Slime.level || 1,
                     slot1Slime.rarityTier || 'Common',
-                    slot2Slime.rarityTier || 'Common'
+                    slot2Slime.rarityTier || 'Common',
+                    { luck: state.luckyCharmActive ? 0.35 : 0, skipCommon: state.mutationJuiceActive }
                   );
+                  // the shop boosts only last for one breed
+                  if (state.mutationJuiceActive) dispatch({ type: 'DEACTIVATE_MUTATION_JUICE' });
+                  if (state.luckyCharmActive) dispatch({ type: 'DEACTIVATE_LUCKY_CHARM' });
                   
                   let selectedSlime = null;
                   if (breedingResult) {

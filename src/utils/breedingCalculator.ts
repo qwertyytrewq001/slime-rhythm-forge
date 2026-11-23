@@ -104,7 +104,9 @@ export function calculateBreedingResult(
   parent1Level: number = 1, 
   parent2Level: number = 1,
   parent1Rarity: RarityTier = 'Common',
-  parent2Rarity: RarityTier = 'Common'
+  parent2Rarity: RarityTier = 'Common',
+  /** Shop items: luck nudges the odds toward rarer slimes, skipCommon avoids Common results when anything rarer is possible. */
+  opts: { luck?: number; skipCommon?: boolean } = {}
 ): BreedingResult | null {
   // Input validation
   const parent1Validation = validateSlimeElements(parent1Elements);
@@ -149,8 +151,9 @@ export function calculateBreedingResult(
     
     // Strong parents (high level + high rarity) push odds toward rarer tiers
     // and away from Common. power01: 0 = level-1 Common parents, 1 = maxed.
-    const power01 = Math.min(1, breedingPower / MAX_BREEDING_POWER);
+    const power01 = Math.min(1, breedingPower / MAX_BREEDING_POWER + (opts.luck ?? 0));
     finalWeight = baseWeight * (1 + power01 * POWER_TIER_BONUS[slime.rarityTier]);
+    if (opts.skipCommon && slime.rarityTier === 'Common' && validOutcomes.some(o => o.rarityTier !== 'Common')) finalWeight *= 0.02;
 
     finalWeights[slime.id] = Math.max(0.01, finalWeight);
   });

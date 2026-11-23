@@ -1,6 +1,6 @@
 import { EGG_COST } from '@/utils/gooEconomy';
 import React, { useState } from 'react';
-import { useGameState } from '@/hooks/useGameState';
+import { useGameState, xpToNextLevel } from '@/hooks/useGameState';
 import { createElementSlime } from '@/utils/slimeGenerator';
 import { audioEngine } from '@/utils/audioEngine';
 import { SlimeTraits, SlimeElement, Slime } from '@/types/slime';
@@ -25,10 +25,10 @@ const ELEMENT_EGG_IMAGE: Record<SlimeElement, string> = {
 };
 
 const ITEM_SHOP = [
-  { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Next breed: 50% mutation rate', cost: 60, icon: '🧪', category: 'breeding', rarity: 'rare' },
-  { id: 'wild_food', name: 'Wild Food', desc: 'Boost a random trait on selected slime', cost: 80, icon: '🥩', category: 'boosts', rarity: 'common' },
-  { id: 'energy_crystal', name: 'Energy Crystal', desc: 'Instantly complete hatching', cost: 100, icon: '💎', category: 'time', rarity: 'epic' },
-  { id: 'lucky_charm', name: 'Lucky Charm', desc: 'Higher chance of rare offspring', cost: 40, icon: '🍀', category: 'breeding', rarity: 'rare' },
+  { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Your next breed will skip Common results whenever a rarer slime is possible', cost: 60, icon: '🧪', category: 'breeding', rarity: 'rare' },
+  { id: 'wild_food', name: 'Wild Food', desc: 'Pick a slime first. It instantly gains one level', cost: 80, icon: '🥩', category: 'boosts', rarity: 'common' },
+  { id: 'energy_crystal', name: 'Energy Crystal', desc: 'Skips the wait: your egg in the jar is ready to crack now', cost: 100, icon: '💎', category: 'time', rarity: 'epic' },
+  { id: 'lucky_charm', name: 'Lucky Charm', desc: 'Your next breed has better odds of a rare slime', cost: 40, icon: '🍀', category: 'breeding', rarity: 'rare' },
 ];
 
 const STARTER_EGG_COST = EGG_COST;
@@ -127,6 +127,18 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
       return;
     }
 
+    if ((itemId === 'mutation_juice' && state.mutationJuiceActive) || (itemId === 'lucky_charm' && state.luckyCharmActive)) {
+      toast({ title: "Already active", description: "It is ready for your next breed, so no need to buy another yet.", variant: "destructive" });
+      return;
+    }
+    if (itemId === 'wild_food') {
+      const target = state.slimes.find(s => s.id === state.selectedSlimeId);
+      if (!target || target.level >= 50) {
+        toast({ title: "Cannot level that slime", description: "Pick a slime that is not at the top level.", variant: "destructive" });
+        return;
+      }
+    }
+
     dispatch({ type: 'SPEND_GOO', amount: cost });
     audioEngine.playSfx('purchase');
 
@@ -137,13 +149,12 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
     switch (itemId) {
       case 'mutation_juice':
         dispatch({ type: 'ACTIVATE_MUTATION_JUICE' });
-        toast({ title: "Mutation Juice Active!", description: "Your next breed has a boosted mutation rate." });
+        toast({ title: "Mutation Juice ready!", description: "Your next breed will skip Common results whenever a rarer slime is possible." });
         break;
       case 'wild_food': {
-        const traitKeys: (keyof SlimeTraits)[] = ['shape', 'color1', 'color2', 'eyes', 'mouth', 'spikes', 'pattern', 'glow', 'aura', 'rhythm', 'accessory'];
-        const randomTrait = traitKeys[Math.floor(Math.random() * traitKeys.length)];
-        dispatch({ type: 'BOOST_TRAIT', slimeId: state.selectedSlimeId!, trait: randomTrait });
-        toast({ title: "Trait Boosted!", description: "Your slime's traits have shifted." });
+        const target = state.slimes.find(s => s.id === state.selectedSlimeId)!;
+        dispatch({ type: 'GRANT_SLIME_XP', slimeId: target.id, amount: xpToNextLevel(target.level) });
+        toast({ title: "Level up!", description: target.name + " gained a level." });
         break;
       }
       case 'energy_crystal':
@@ -155,8 +166,8 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         });
         break;
       case 'lucky_charm':
-        dispatch({ type: 'ACTIVATE_MUTATION_JUICE' });
-        toast({ title: "Lucky Charm Active!", description: "Higher chance of rare offspring on your next breed." });
+        dispatch({ type: 'ACTIVATE_LUCKY_CHARM' });
+        toast({ title: "Lucky Charm ready!", description: "Your next breed has better odds of a rare slime." });
         break;
     }
   };

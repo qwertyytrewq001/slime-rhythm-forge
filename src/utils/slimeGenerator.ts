@@ -128,7 +128,7 @@ export function createElementSlime(element: SlimeElement): Slime {
   return createCodexSlime('fire_slime', undefined);
 }
 
-export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = false): Slime {
+export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = false, luckBoost = false): Slime {
   // Use the new enhanced breeding calculator instead of procedural generation
   const breedingResult = calculateBreedingResult(
     parent1.elements, 
@@ -136,7 +136,8 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
     parent1.level || 1,
     parent2.level || 1,
     parent1.rarityTier,
-    parent2.rarityTier
+    parent2.rarityTier,
+    { luck: luckBoost ? 0.35 : 0, skipCommon: mutationBoost }
   );
   
   if (!breedingResult) {
