@@ -8,3 +8,4 @@ Changed: passive income x0.35 (about 250/hour per Common slime), hatch bonus 500
 
 Still to watch after real play: late game (20+ high-level slimes) still earns tens of thousands an hour, so late sinks (farm land up to 100k, sanctuary level 5 at 8k plus food) should stay the long-term goals. If it still feels too generous, lower GOO_RATE first.
 Egg prices now scale with the element (see eggCost in src/utils/gooEconomy.ts): starter four 120g, wind 150g, ice and electric 180g, metal 220g, light and shadow 260g.
+Bazaar items are rare and gated by resonance level: Lucky Charm 300g (Lv 3), Wild Food 250g (Lv 4), Energy Crystal 350g (Lv 5), Mutation Juice 600g (Lv 6).

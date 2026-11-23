@@ -25,10 +25,10 @@ const ELEMENT_EGG_IMAGE: Record<SlimeElement, string> = {
 };
 
 const ITEM_SHOP = [
-  { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Your next breed will skip Common results whenever a rarer slime is possible', cost: 60, icon: '🧪', category: 'breeding', rarity: 'rare' },
-  { id: 'wild_food', name: 'Wild Food', desc: 'Pick a slime first. It instantly gains one level', cost: 80, icon: '🥩', category: 'boosts', rarity: 'common' },
-  { id: 'energy_crystal', name: 'Energy Crystal', desc: 'Skips the wait: your egg in the jar is ready to crack now', cost: 100, icon: '💎', category: 'time', rarity: 'epic' },
-  { id: 'lucky_charm', name: 'Lucky Charm', desc: 'Your next breed has better odds of a rare slime', cost: 40, icon: '🍀', category: 'breeding', rarity: 'rare' },
+  { id: 'mutation_juice', name: 'Mutation Juice', desc: 'Your next breed will skip Common results whenever a rarer slime is possible', cost: 600, level: 6, icon: '🧪', category: 'breeding', rarity: 'rare' },
+  { id: 'wild_food', name: 'Wild Food', desc: 'Pick a slime first. It instantly gains one level', cost: 250, level: 4, icon: '🥩', category: 'boosts', rarity: 'common' },
+  { id: 'energy_crystal', name: 'Energy Crystal', desc: 'Skips the wait: your egg in the jar is ready to crack now', cost: 350, level: 5, icon: '💎', category: 'time', rarity: 'epic' },
+  { id: 'lucky_charm', name: 'Lucky Charm', desc: 'Your next breed has better odds of a rare slime', cost: 300, level: 3, icon: '🍀', category: 'breeding', rarity: 'rare' },
 ];
 
 const SHOP_EGG_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
@@ -104,6 +104,11 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
   };
 
   const handleBuyItem = (itemId: string, cost: number) => {
+    const need = ITEM_SHOP.find(i => i.id === itemId)?.level ?? 1;
+    if (playerLevel < need) {
+      toast({ title: "Not unlocked yet", description: `Your spirit resonance must reach Level ${need} to buy this. Breed and collect slimes to raise it.`, variant: "destructive" });
+      return;
+    }
     if (state.goo < cost) return;
 
     // Some items require a precondition (a selected slime, an egg currently
@@ -470,14 +475,15 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
 
                   {selectedCategory === 'items' && (
                     (getCurrentPageItems() as typeof ITEM_SHOP).map(item => {
-                      const canAfford = state.goo >= item.cost;
+                      const locked = playerLevel < item.level;
+                      const canAfford = !locked && state.goo >= item.cost;
                       return (
                         <div
                           key={item.id}
-                          onClick={() => canAfford && handleBuyItem(item.id, item.cost)}
+                          onClick={() => (locked || canAfford) && handleBuyItem(item.id, item.cost)}
                           className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-80 baz-card px-5 pt-6 pb-4 ${
-                            canAfford ? 'hover:scale-105' : 'opacity-40 grayscale'
-                          }`}
+                            canAfford || locked ? 'hover:scale-105' : 'opacity-40 grayscale'
+                          } ${locked ? 'grayscale-[60%] opacity-80' : ''}`}
                         >
                           <div className={`w-28 h-28 flex items-center justify-center mb-3 rounded-full bg-[radial-gradient(circle,rgba(255,255,255,0.8),rgba(255,233,168,0.35)_58%,transparent_72%)]`}>
                             <img src={`${import.meta.env.BASE_URL}altar/bazaar_${({ mutation_juice: 'mutation', wild_food: 'meat', energy_crystal: 'crystal', lucky_charm: 'charm' } as Record<string, string>)[item.id] ?? 'mutation'}.png`} alt={item.name} draggable={false} style={{ width: 72, height: 72, objectFit: 'contain', imageRendering: 'auto' }} />
@@ -493,15 +499,15 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                             <div
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (canAfford) handleBuyItem(item.id, item.cost);
+                                if (canAfford || locked) handleBuyItem(item.id, item.cost);
                               }}
                               className={`cursor-pointer transition-all transform active:scale-95 mt-4 ${
-                                canAfford
+                                canAfford || locked
                                   ? 'baz-tag-pill hover:brightness-110'
                                   : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
-                              <span className="text-sm font-bold">{item.cost}g</span>
+                              <span className="text-sm font-bold">{locked ? `Level ${item.level}` : `${item.cost}g`}</span>
                             </div>
                           </div>
                         </div>
