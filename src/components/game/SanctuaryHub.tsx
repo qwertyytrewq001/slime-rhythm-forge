@@ -208,9 +208,9 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
           >
             <img src={`${BASE}altar/${gifts ? 'ui_btn_begin' : 'ui_btn_begin_off'}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
             {gifts > 0 && <span className="absolute inset-0 pointer-events-none sanct-shine" />}
-            <span className="absolute flex items-center justify-center" style={{ left: '15%', right: '15%', top: 0, bottom: 0, gap: sw * 0.004 }}>
-              <ArtImg file="icon_gift_bubble.png" style={{ width: sw * 0.028, flexShrink: 0, filter: gifts ? undefined : 'grayscale(1) opacity(0.6)' }} fallback={<span style={{ fontSize: sw * 0.02 }}>🎁</span>} />
-              <span className="font-bold whitespace-nowrap" style={{ fontSize: sw * 0.0125, color: gifts ? '#fff' : 'rgba(255,255,255,0.7)', WebkitTextStroke: `${sw * 0.0026}px ${gifts ? '#4a1d7a' : '#4a4650'}`, paintOrder: 'stroke fill', letterSpacing: '0.03em' }}>{gifts ? 'Collect All' : 'No gifts yet'}</span>
+            <span className="absolute flex items-center justify-center" style={{ left: '21%', right: '21%', top: 0, bottom: 0, gap: sw * 0.003 }}>
+              <ArtImg file="icon_gift_bubble.png" style={{ width: sw * 0.022, flexShrink: 0, filter: gifts ? undefined : 'grayscale(1) opacity(0.6)' }} fallback={<span style={{ fontSize: sw * 0.02 }}>🎁</span>} />
+              <span className="font-bold whitespace-nowrap" style={{ fontSize: sw * 0.0108, color: gifts ? '#fff' : 'rgba(255,255,255,0.7)', WebkitTextStroke: `${sw * 0.0026}px ${gifts ? '#4a1d7a' : '#4a4650'}`, paintOrder: 'stroke fill', letterSpacing: '0.03em' }}>{gifts ? 'Collect All' : 'No gifts'}</span>
             </span>
             {gifts > 0 && <span className="absolute rounded-full font-bold text-white flex items-center justify-center" style={{ right: '2%', top: '-4%', background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.021, height: sw * 0.021, fontSize: sw * 0.011, padding: '0 4px' }}>{gifts}</span>}
           </button>
