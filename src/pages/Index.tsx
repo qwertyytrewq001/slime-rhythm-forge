@@ -225,13 +225,7 @@ function GameLayout() {
     return () => document.removeEventListener('click', onClick);
   }, []);
 
-  // a swoosh when you travel to another screen, a softer open sound for popups
-  const viewSeen = useRef(currentView);
-  useEffect(() => {
-    if (viewSeen.current === currentView) return;
-    viewSeen.current = currentView;
-    if (!showTitle) void soundtrack.sfx('ui_open');
-  }, [currentView]);
+  // popups get an open sound; changing screens stays silent (each screen has its own music)
   const popupsSeen = useRef(false);
   useEffect(() => {
     if (!popupsSeen.current) { popupsSeen.current = true; return; }
