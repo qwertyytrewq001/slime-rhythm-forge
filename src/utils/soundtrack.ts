@@ -25,9 +25,9 @@ const MANIFEST: Record<Kind, Record<string, string>> = {
   music: { battle: 'ogg', battle_map: 'mp3', farm: 'mp3', home: 'mp3', lofi_loop: 'mp3', medieval: 'ogg', sanctuary_day: 'mp3' },
   ambience: { garden: 'mp3' },
   sfx: {
-    achievement: 'ogg', bond_chime: 'wav', buy_land: 'ogg', claim: 'ogg', coin: 'ogg', decor_place: 'ogg', egg_crack_1: 'ogg', egg_crack_2: 'ogg',
-    egg_crack_3: 'ogg', egg_hatch: 'ogg', gift_collect: 'wav', harvest_pop: 'ogg', level_up: 'ogg', new_slime: 'ogg', plant_dig: 'ogg',
-    page_turn: 'wav', purchase: 'ogg', ritual_start: 'wav', slime_tap: 'ogg', ui_click: 'ogg', ui_error: 'ogg', ui_open: 'ogg', ui_toggle: 'ogg', water_splash: 'ogg',
+    achievement: 'ogg', bond_chime: 'ogg', buy_land: 'ogg', claim: 'ogg', coin: 'ogg', decor_place: 'ogg', egg_crack_1: 'ogg', egg_crack_2: 'ogg',
+    egg_crack_3: 'ogg', egg_hatch: 'ogg', gift_collect: 'ogg', harvest_pop: 'ogg', level_up: 'ogg', new_slime: 'ogg', plant_dig: 'ogg',
+    page_turn: 'ogg', purchase: 'ogg', ritual_start: 'ogg', slime_tap: 'ogg', ui_click: 'ogg', ui_error: 'ogg', ui_open: 'ogg', ui_toggle: 'ogg', water_splash: 'ogg',
   },
 };
 /** Preload order: the screens people reach first. */
