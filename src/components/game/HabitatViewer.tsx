@@ -1378,9 +1378,9 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
       </div>
 
       <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
-        <SheetContent side="bottom" className="h-[80vh] bg-obsidian-glass p-0 border-t-4 border-[#FF7EB6]/50 shadow-2xl">
-          <SheetHeader className="p-4 border-b border-white/10 bg-black/40">
-            <SheetTitle className="text-center text-sm font-black text-[#FF7EB6] uppercase tracking-[0.3em]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+        <SheetContent side="bottom" className="h-[80vh] p-0 border-t-4 border-[#c8922a] shadow-2xl" style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }}>
+          <SheetHeader className="p-4 border-b border-[#c8922a]/40">
+            <SheetTitle className="text-center text-lg font-bold tracking-widest" style={{ fontFamily: "'Fredoka', sans-serif", color: '#ffe9a8', textShadow: '0 2px 0 rgba(20,8,40,0.8)' }}>
               Select {ELEMENT_DISPLAY_NAMES[habitat.element]} Slime
             </SheetTitle>
           </SheetHeader>
