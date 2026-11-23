@@ -1,43 +1,35 @@
 import { render, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, vi } from 'vitest';
-import { GameProvider, useGameState } from '@/hooks/useGameState';
+import { GameProvider } from '@/hooks/useGameState';
 import { SlimeGallery } from '@/components/game/SlimeGallery';
 import { BreedingPod } from '@/components/game/BreedingPod';
 
-// verify gallery-selection flow operated earlier
-
 describe('slot picker flow', () => {
-  it('opens gallery when slot clicked regardless of selection', async () => {
-    const onRequestGallery = vi.fn();
-    const { getAllByText } = render(
+  it('sends the player to the Breeding Den when a pedestal is clicked', () => {
+    const onNavigateToBreedingDen = vi.fn();
+    const { container } = render(
       <GameProvider>
-        <BreedingPod onRequestGallery={onRequestGallery} />
+        <BreedingPod onNavigateToBreedingDen={onNavigateToBreedingDen} />
       </GameProvider>
     );
 
-    const slots = getAllByText('Drop slime here');
+    // the two parent pedestals are the clickable slots
+    const slots = container.querySelectorAll('.cursor-pointer');
+    expect(slots.length).toBeGreaterThanOrEqual(2);
     fireEvent.click(slots[0]);
-    expect(onRequestGallery).toHaveBeenCalledWith(1);
-
-    // simulate existing selection then click again
-    const { dispatch } = require('@/hooks/useGameState').useGameState();
-    const dummy: any = { id: 'z', name: 'z', traits: {}, elements: ['nature'], element: 'nature', rarityScore: 0, rarityStars: 1, rarityTier: 'Common', createdAt: Date.now() };
-    dispatch({ type: 'ADD_SLIME', slime: dummy });
-    dispatch({ type: 'SELECT_SLIME', id: dummy.id });
-
     fireEvent.click(slots[1]);
-    expect(onRequestGallery).toHaveBeenCalledWith(2);
+    expect(onNavigateToBreedingDen).toHaveBeenCalledTimes(2);
+  });
 
-    // selecting from gallery still works
+  it('lets the player pick a slime from the gallery', async () => {
     const handleSelect = vi.fn();
-    const { getByText: getByText2 } = render(
+    const { container } = render(
       <GameProvider>
         <SlimeGallery onSelect={handleSelect} />
       </GameProvider>
     );
-
-    const goo = await waitFor(() => getByText2('Goo Slime'));
-    fireEvent.click(goo);
+    await waitFor(() => expect(container.querySelectorAll('.gallery-card').length).toBeGreaterThan(0));
+    fireEvent.click(container.querySelector('.gallery-card') as HTMLElement);
     expect(handleSelect).toHaveBeenCalledTimes(1);
   });
 });

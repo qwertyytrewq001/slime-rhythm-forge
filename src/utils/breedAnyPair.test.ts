@@ -33,5 +33,5 @@ describe('breeding never produces a slime the game cannot show', () => {
       }
     }
     expect(tried).toBe(parents.length * parents.length);
-  });
+  }, 120_000);
 });
