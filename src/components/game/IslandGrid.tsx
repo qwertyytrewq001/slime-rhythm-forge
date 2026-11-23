@@ -69,7 +69,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
             <div className="flex-1 overflow-y-auto pr-2" style={{minHeight: '50px'}}>
               <div className="flex items-start justify-between gap-4">
                 <p className="text-slate-800 text-2xl leading-relaxed font-bold italic flex-1" style={{ fontFamily: "'VT323', monospace" }}>
-                  "You're placing a {ELEMENT_DISPLAY_NAMES[state.pendingHabitatPlacement.element]} Sanctum! Click on any empty slot to place it."
+                  "You're placing a {ELEMENT_DISPLAY_NAMES[state.pendingHabitatPlacement.element]} Habitat! Click on any empty slot to place it."
                 </p>
                 
                 {/* Cancel Button */}

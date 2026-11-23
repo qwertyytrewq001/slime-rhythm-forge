@@ -64,7 +64,7 @@ export function PlayerLevelUpPopup() {
 
           {hasUnlocks ? (
             <div className="rounded-2xl text-left" style={{ background: 'rgba(255,255,255,0.5)', border: `2px solid ${INK}33`, padding: '12px 14px' }}>
-              <div className="font-bold text-center mb-2" style={{ fontSize: 16 }}>New eggs and sanctums unlocked!</div>
+              <div className="font-bold text-center mb-2" style={{ fontSize: 16 }}>New eggs and habitats unlocked!</div>
               <div className="flex flex-wrap justify-center gap-2">
                 {unlockedElements.map(e => (
                   <span key={e} className="inline-flex items-center gap-1 font-bold rounded-full" style={{ background: '#fff7dc', border: `2px solid ${INK}`, padding: '2px 10px 2px 4px', fontSize: 13 }}>

@@ -61,7 +61,9 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
   const BASE = import.meta.env.BASE_URL;
   const tier = slime.rarityTier;
   const codex = getCodexSlime(slime);
-  const lore = codex?.description || 'A mysterious slime with unknown origins.';
+  const fullLore = codex?.description || 'A mysterious slime with unknown origins.';
+  // keep the one-line joke that opens each entry; the second "It remembers..." sentence is filler
+  const lore = fullLore.split(/(?<=[.!?])s+(?=Its)/)[0];
   const family = (codex?.family ?? '').split('-').map(w => w.charAt(0).toUpperCase() + w.slice(1)).join(' ');
   const stats = deriveBattleStats(slime);
   const strong = [...new Set(slime.elements.flatMap(e => ELEMENT_EFFECTIVENESS[e]?.strong ?? []))];
@@ -104,7 +106,7 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
   const actions = compatibleHabitats.length > 0 ? (
     <button onClick={() => handleAssignToHabitat(compatibleHabitats[0].id)} className="relative block hover:scale-105 active:scale-95 transition-transform" style={{ width: 'min(100%, 280px)', background: 'transparent', border: 'none', padding: 0 }}>
       <img src={`${BASE}altar/ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 10px rgba(190,120,255,0.7))' }} />
-      <span className="absolute inset-0 flex items-center justify-center font-bold whitespace-nowrap" style={{ fontSize: 17, color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.03em', fontFamily: FRED }}>Move into a habitat</span>
+      <span className="absolute flex items-center justify-center font-bold whitespace-nowrap" style={{ left: '20%', right: '20%', top: 0, bottom: 0, fontSize: 'clamp(13px, 1.5vw, 16px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.02em', fontFamily: FRED }}>Move to habitat</span>
     </button>
   ) : (
     <div className="flex items-center gap-3 flex-wrap">
@@ -138,7 +140,7 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
       </div>
 
       <div className="rounded-2xl" style={{ background: 'rgba(255,255,255,0.55)', border: '2px solid rgba(74,47,23,0.25)', padding: '10px 14px' }}>
-        <p className="font-semibold italic" style={{ fontSize: 14, lineHeight: 1.4, fontFamily: FRED, margin: 0 }}>"{lore}"</p>
+        <p className="font-semibold italic" style={{ fontSize: 15, lineHeight: 1.4, fontFamily: FRED, margin: 0 }}>{lore}</p>
       </div>
 
       <div className="rounded-2xl flex flex-col" style={{ background: 'rgba(255,247,220,0.7)', border: '2px solid rgba(74,47,23,0.25)', padding: '8px 14px', gap: 2, fontFamily: FRED }}>

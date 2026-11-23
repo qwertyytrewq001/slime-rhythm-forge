@@ -188,7 +188,7 @@ export function Shop() {
               Tools
             </TabsTrigger>
             <TabsTrigger value="habitats" className="text-xs uppercase font-black data-[state=active]:bg-[#FF7EB6] data-[state=active]:text-white">
-              Sanctums
+              Habitats
             </TabsTrigger>
           </TabsList>
         </div>
@@ -276,7 +276,7 @@ export function Shop() {
                       <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-center">
                           <span className="text-sm font-black text-slate-700 uppercase truncate">
-                            {ELEMENT_DISPLAY_NAMES[elem]} Sanctum
+                            {ELEMENT_DISPLAY_NAMES[elem]} Habitat
                           </span>
                           <span className="text-sm font-bold text-[#FF7EB6]">
                             {cost}g

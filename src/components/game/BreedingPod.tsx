@@ -215,8 +215,8 @@ export function BreedingPod(props: BreedingPodProps) {
 
     if (!availableHabitat) {
       toast({
-        title: "No Sanctum Available",
-        description: "There's no sanctum available for the spirit. Please build a matching habitat first!",
+        title: "No Habitat Available",
+        description: "There's no habitat available for the spirit. Please build a matching habitat first!",
         variant: "destructive"
       });
       return;
