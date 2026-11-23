@@ -5,6 +5,8 @@ import { ELEMENT_DISPLAY_NAMES, MODEL_NAMES, RARITY_TIER_COLORS } from '@/data/t
 
 import { SlimeElement } from '@/types/slime';
 
+/** Tier colours that read on parchment (the shared palette is tuned for dark backgrounds). */
+const CARD_TIER_COLORS: Record<string, string> = { Common: '#7a6a55', Uncommon: '#1f8f86', Rare: '#2a4fc0', Epic: '#7b3fa0', Legendary: '#b8860b', Divine: '#c23a0a', Ancient: '#c2306f' };
 const PER_PAGE = 8; // Reduced per page for 2-column layout
 type SortMode = 'rarity' | 'name' | 'newest';
 
@@ -119,7 +121,7 @@ export function SlimeGallery({ onSelect, filterElement, adultsOnly }: SlimeGalle
           {pageSlimes.map(slime => (
             <div
               key={slime.id}
-              className={`gallery-card group relative flex flex-col items-center px-5 pt-8 pb-5 transition-all duration-300 cursor-pointer hover:scale-105 ${state.selectedSlimeId === slime.id ? 'gallery-card-on' : ''}`}
+              className={`gallery-card group relative flex flex-col items-center px-4 pt-9 pb-11 transition-all duration-300 cursor-pointer hover:scale-105 ${state.selectedSlimeId === slime.id ? 'gallery-card-on' : ''}`}
               onClick={() => handleSlimeSelect(slime.id)}
               onMouseEnter={() => window.dispatchEvent(new CustomEvent('breedHover', { detail: { id: slime.id } }))}
               onMouseLeave={() => window.dispatchEvent(new CustomEvent('breedHover', { detail: { id: null } }))}
@@ -127,13 +129,14 @@ export function SlimeGallery({ onSelect, filterElement, adultsOnly }: SlimeGalle
               <div>
                 <div className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-20 transition-opacity" 
                      style={{ backgroundColor: RARITY_TIER_COLORS[slime.rarityTier] }} />
-                <SlimeCanvas slime={slime} size={100} animated sizeMultiplier={2.0} animationStyle="calm" />
+                <SlimeCanvas slime={slime} size={100} animated sizeMultiplier={1.8} animationStyle="calm" />
                 <span className="absolute top-4 left-5 z-10 flex items-center justify-center font-black text-white rounded-full" style={{ minWidth: 34, height: 34, padding: '0 6px', fontSize: 13, background: 'radial-gradient(circle at 35% 30%, #ffe98a, #e09a1a)', border: '3px solid #4a2f17', boxShadow: '0 2px 4px rgba(0,0,0,0.35)', WebkitTextStroke: '2px #4a2f17', paintOrder: 'stroke fill' }} title={`Level ${slime.level}`}>{slime.level}</span>
               </div>
               <div className="mt-4 w-full text-center">
                 <p className="text-base font-bold text-[#4a2f17] uppercase leading-none mb-1 break-words px-1 [font-family:Fredoka,sans-serif]">{slime.name}</p>
                 <div className="flex items-center justify-center gap-2">
-                  <p className="text-[11px] font-black tracking-widest" style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}>
+                  <img src={`${import.meta.env.BASE_URL}altar/gem_${slime.rarityTier.toLowerCase()}.png`} alt="" draggable={false} style={{ width: 20, imageRendering: 'auto', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
+                  <p className="text-[12px] font-bold tracking-wider uppercase [font-family:Fredoka,sans-serif]" style={{ color: CARD_TIER_COLORS[slime.rarityTier] ?? '#6b4a2c' }}>
                     {slime.rarityTier}
                   </p>
                 </div>

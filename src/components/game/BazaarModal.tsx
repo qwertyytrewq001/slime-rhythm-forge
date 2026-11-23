@@ -1,4 +1,4 @@
-import { EGG_COST } from '@/utils/gooEconomy';
+import { eggCost } from '@/utils/gooEconomy';
 import React, { useState } from 'react';
 import { useGameState, xpToNextLevel } from '@/hooks/useGameState';
 import { createElementSlime } from '@/utils/slimeGenerator';
@@ -31,7 +31,6 @@ const ITEM_SHOP = [
   { id: 'lucky_charm', name: 'Lucky Charm', desc: 'Your next breed has better odds of a rare slime', cost: 40, icon: '🍀', category: 'breeding', rarity: 'rare' },
 ];
 
-const STARTER_EGG_COST = EGG_COST;
 const SHOP_EGG_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 const SHOP_HABITAT_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
 
@@ -82,7 +81,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
       });
       return;
     }
-    if (state.goo < STARTER_EGG_COST) return;
+    if (state.goo < eggCost(element)) return;
     if (state.activeHatching) {
       toast({
         title: "Hatchery Occupied",
@@ -91,7 +90,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
       });
       return;
     }
-    dispatch({ type: 'SPEND_GOO', amount: STARTER_EGG_COST });
+    dispatch({ type: 'SPEND_GOO', amount: eggCost(element) });
     audioEngine.playSfx('purchase');
 
     // First egg ever bought: "Good. Now head to the hatchery and get that egg warm."
@@ -345,7 +344,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                           key={elem}
                           onClick={() => handleBuyEgg(elem)}
                           className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-80 baz-card px-5 pt-6 pb-4 ${
-                            state.goo >= STARTER_EGG_COST 
+                            state.goo >= eggCost(elem) 
                               ? 'hover:scale-105' 
                               : 'opacity-40 grayscale'
                           }`}
@@ -383,17 +382,17 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                             <div 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (state.goo >= STARTER_EGG_COST) {
+                                if (state.goo >= eggCost(elem)) {
                                   handleBuyEgg(elem);
                                 }
                               }}
                               className={`cursor-pointer transition-all transform active:scale-95 mt-4 ${
-                                state.goo >= STARTER_EGG_COST 
+                                state.goo >= eggCost(elem) 
                                   ? 'baz-tag-pill hover:brightness-110' 
                                   : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
-                              <span className="text-sm font-bold">{STARTER_EGG_COST}g</span>
+                              <span className="text-sm font-bold">{eggCost(elem)}g</span>
                             </div>
                           </div>
                         </div>

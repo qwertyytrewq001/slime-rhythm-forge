@@ -9,3 +9,6 @@ export const GOO_RATE = 0.07;
 export const HATCH_BONUS = 200;
 /** Starter egg price in the Bazaar (was 50). */
 export const EGG_COST = 120;
+/** Egg prices by element: the four starter elements cost the base price, the later elements cost more (the same order as their habitats). */
+const EGG_COSTS: Record<string, number> = { wind: 150, ice: 180, electric: 180, metal: 220, light: 260, shadow: 260 };
+export const eggCost = (element: string) => EGG_COSTS[element] ?? EGG_COST;
