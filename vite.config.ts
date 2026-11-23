@@ -1,7 +1,15 @@
-import { defineConfig } from "vite";
+import { defineConfig, type Plugin } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
 import { componentTagger } from "lovable-tagger";
+
+const BUILD_ID = Date.now().toString(36);
+
+// a tiny file with this build's id, so an open or cached tab can notice a newer version exists
+const versionFile: Plugin = {
+  name: 'version-file',
+  generateBundle() { this.emitFile({ type: 'asset', fileName: 'version.json', source: JSON.stringify({ id: BUILD_ID }) }); },
+};
 
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
@@ -15,7 +23,7 @@ export default defineConfig(({ mode }) => ({
   },
 
   // A new id every build, added to slime picture links so a returning player never sees a stale cached sprite
-  define: { __BUILD_ID__: JSON.stringify(Date.now().toString(36)) },
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
 
   // Strip debug console.log from production builds (errors/warnings are kept)
   esbuild: {
@@ -32,7 +40,8 @@ export default defineConfig(({ mode }) => ({
   },
 
   plugins: [
-    react(), 
+    react(),
+    versionFile,
     mode === "development" && componentTagger()
   ].filter(Boolean),
 
