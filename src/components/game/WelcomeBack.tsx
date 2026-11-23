@@ -46,7 +46,7 @@ export function WelcomeBack({ awaySince, onClose }: { awaySince: number; onClose
     const gifts = totalGifts(state.habitats);
     if (gifts) out.push({ key: 'gifts', icon: <img src={`${BASE}habitat/icon_gift_bubble.png`} alt="" style={{ width: 40, imageRendering: 'auto' }} />, text: `Your slimes left ${gifts} gift${gifts === 1 ? '' : 's'} in the habitats.` });
     if (state.visitor && !state.visitor.done) out.push({ key: 'visitor', icon: <img src={`${BASE}sanctuary/visitor_idle.png`} alt="" style={{ width: 40, imageRendering: 'auto' }} />, text: `Wicks is visiting! He wants ${state.visitor.qty} ${CROPS[state.visitor.crop].name}.` });
-    if (state.activeBreeding && now >= state.activeBreeding.endTime) out.push({ key: 'ritual', icon: <img src={`${BASE}altar/gem_${state.activeBreeding.resultSlime.rarityTier.toLowerCase()}.png`} alt="" style={{ width: 38, imageRendering: 'auto' }} />, text: 'The breeding ritual is finished. An egg is waiting at the altar.' });
+    if (state.activeBreeding?.resultSlime && now >= state.activeBreeding.endTime) out.push({ key: 'ritual', icon: <img src={`${BASE}altar/gem_${state.activeBreeding.resultSlime.rarityTier.toLowerCase()}.png`} alt="" style={{ width: 38, imageRendering: 'auto' }} />, text: 'The breeding ritual is finished. An egg is waiting at the altar.' });
     return out;
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

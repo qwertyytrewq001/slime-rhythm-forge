@@ -4,7 +4,7 @@ import { FarmSlice, createFarmPlots, createFarmState, migrateFarm, plant as farm
 import { SanctSlice, FEED_JOY, addJoy, collectAll, collectGift, normalizeHabitat, perksFrom, petHabitat, placeDecor, removeDecor, rollerFrom, tickHabitat, upgradeHabitat } from '@/utils/sanctuaryCore';
 import { visitorTick, deliver as visitorDeliver } from '@/utils/visitorCore';
 import { GOO_RATE } from '@/utils/gooEconomy';
-import { createStarterSlimes } from '@/utils/slimeGenerator';
+import { createStarterSlimes, breedSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
@@ -12,6 +12,16 @@ import { CodexManager } from '@/utils/codexManager';
 import { getCodexSlime } from '@/data/slimeCodex';
 import { ACHIEVEMENT_DEFS, DEFAULT_STATS, createAchievementState, mergeAchievements } from '@/data/achievements';
 import { toast } from '@/hooks/use-toast';
+
+/** An old save can hold a breeding ritual with no baby chosen yet (the Den used to decide it at the end). Choose it now, or drop the ritual if the parents are gone. */
+function repairRitual(ritual: any, slimes: Slime[]) {
+  if (!ritual) return null;
+  if (ritual.resultSlime) return ritual;
+  const p1 = slimes.find(s => s.id === ritual.parent1Id);
+  const p2 = slimes.find(s => s.id === ritual.parent2Id);
+  if (!p1 || !p2) return null;
+  try { return { ...ritual, resultSlime: breedSlimes(p1, p2) }; } catch { return null; }
+}
 
 export function getStage(level: number): SlimeEvolutionStage {
   if (level < 5) return 'baby';
@@ -145,7 +155,7 @@ function createInitialState(): GameState {
       selectedSlimeId: null,
       breedSlot1: null,
       breedSlot2: null,
-      activeBreeding: saved.activeBreeding ?? null,
+      activeBreeding: repairRitual(saved.activeBreeding, migratedSlimes),
       activeHatching: saved.activeHatching ?? null,
       breedHistory: saved.breedHistory ?? [],
       achievements: mergeAchievements(saved.achievements),

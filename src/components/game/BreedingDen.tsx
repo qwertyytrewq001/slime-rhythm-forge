@@ -9,7 +9,7 @@ import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { X, Heart, Sparkles, Plus, ChevronLeft, HelpCircle } from 'lucide-react';
 import { calculateBreedingResult, getPossibleOutcomes } from '@/utils/breedingCalculator';
-import { createCodexSlime } from '@/utils/slimeGenerator';
+import { breedSlimes, createCodexSlime } from '@/utils/slimeGenerator';
 
 interface BreedingDenProps {
   onRequestGallery?: (slot: 1 | 2) => void;
@@ -105,11 +105,15 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
     if (slot1Slime && slot2Slime && !state.activeBreeding) {
       // Create breeding ritual object
       const breedingTime = 30000; // 30 seconds
+      // the baby is decided now (with any Mutation Juice / Lucky Charm), so a finished ritual always has a slime to hatch
+      const resultSlime = breedSlimes(slot1Slime, slot2Slime, state.mutationJuiceActive, state.luckyCharmActive);
+      if (state.mutationJuiceActive) dispatch({ type: 'DEACTIVATE_MUTATION_JUICE' });
+      if (state.luckyCharmActive) dispatch({ type: 'DEACTIVATE_LUCKY_CHARM' });
       const ritual = {
         parent1Id: slot1Slime.id,
         parent2Id: slot2Slime.id,
         endTime: Date.now() + breedingTime,
-        resultSlime: null // Will be calculated when breeding completes
+        resultSlime,
       };
       dispatch({ type: 'START_BREEDING', ritual });
     }
@@ -340,53 +344,12 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 console.log('🔍 BreedingDen: Go to Hatchery button clicked');
                 console.log('🔍 BreedingDen: activeBreeding =', state.activeBreeding);
                 
-                // Calculate breeding result and create egg in hatchery
-                if (state.activeBreeding && slot1Slime && slot2Slime) {
-                  // Use new Parent Union breeding system
-                  const breedingResult = calculateBreedingResult(
-                    slot1Slime.elements,
-                    slot2Slime.elements,
-                    slot1Slime.level || 1,
-                    slot2Slime.level || 1,
-                    slot1Slime.rarityTier || 'Common',
-                    slot2Slime.rarityTier || 'Common',
-                    { luck: state.luckyCharmActive ? 0.35 : 0, skipCommon: state.mutationJuiceActive }
-                  );
-                  // the shop boosts only last for one breed
-                  if (state.mutationJuiceActive) dispatch({ type: 'DEACTIVATE_MUTATION_JUICE' });
-                  if (state.luckyCharmActive) dispatch({ type: 'DEACTIVATE_LUCKY_CHARM' });
-                  
-                  let selectedSlime = null;
-                  if (breedingResult) {
-                    selectedSlime = SLIME_CODEX_MAP.get(breedingResult.slimeId);
-                  }
-                  
-                  console.log('🔍 BreedingDen: selected slime =', selectedSlime?.name);
-                  
-                  if (selectedSlime) {
-                    // Create the baby slime using the selected slime
-                    const babySlime = createCodexSlime(selectedSlime.id, [
-                      slot1Slime.id, 
-                      slot2Slime.id
-                    ]);
-                    
-                    console.log('🔍 BreedingDen: babySlime created =', babySlime);
-                    
-                    // Start hatching process in hatchery
-                    const hatchingDuration = 45000; // 45 seconds
-                    console.log('🔍 BreedingDen: Dispatching START_HATCHING with duration =', hatchingDuration);
-                    dispatch({ 
-                      type: 'START_HATCHING', 
-                      slime: babySlime, 
-                      duration: hatchingDuration 
-                    });
-                    
-                    console.log('🔍 BreedingDen: START_HATCHING dispatched');
-                  } else {
-                    console.log('🔍 BreedingDen: No breeding result found');
-                  }
-                } else {
-                  console.log('🔍 BreedingDen: Missing active breeding or parent slimes');
+                // the egg that was decided when the ritual started goes to the hatchery
+                const ritual = state.activeBreeding;
+                if (ritual?.resultSlime) {
+                  dispatch({ type: 'START_HATCHING', slime: ritual.resultSlime, duration: 45000 });
+                  dispatch({ type: 'ADD_BREED_HISTORY', result: { parent1Id: ritual.parent1Id, parent2Id: ritual.parent2Id, childId: ritual.resultSlime.id, timestamp: Date.now() } });
+                  dispatch({ type: 'INCREMENT_BREEDS' });
                 }
                 
                 // Clear active breeding

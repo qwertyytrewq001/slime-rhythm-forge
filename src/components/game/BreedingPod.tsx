@@ -136,7 +136,7 @@ export function BreedingPod(props: BreedingPodProps) {
   );
 
   const breeding = !!state.activeBreeding && now < state.activeBreeding.endTime;
-  const breedFinished = !!state.activeBreeding && now >= state.activeBreeding.endTime;
+  const breedFinished = !!state.activeBreeding && !!state.activeBreeding.resultSlime && now >= state.activeBreeding.endTime;
 
   const handleDrop = useCallback((slot: 1 | 2) => (e: React.DragEvent) => {
     if (state.activeBreeding) return;
