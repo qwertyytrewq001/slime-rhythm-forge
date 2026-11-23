@@ -14,6 +14,9 @@ export default defineConfig(({ mode }) => ({
     emptyOutDir: true, // Cleans the folder before building
   },
 
+  // A new id every build, added to slime picture links so a returning player never sees a stale cached sprite
+  define: { __BUILD_ID__: JSON.stringify(Date.now().toString(36)) },
+
   // Strip debug console.log from production builds (errors/warnings are kept)
   esbuild: {
     pure: mode === 'production' ? ['console.log', 'console.debug'] : [],

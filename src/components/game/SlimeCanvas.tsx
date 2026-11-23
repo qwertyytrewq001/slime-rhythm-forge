@@ -111,7 +111,7 @@ export function SlimeCanvas({
     try {
       const spriteId = getSpriteIdForSlime(slime);
       const base = import.meta.env.BASE_URL;
-      return `${base}${spriteId}.png`;
+      return `${base}${spriteId}.png?v=${__BUILD_ID__}`;
     } catch (error) {
       console.warn('Failed to get sprite path:', error);
       setSpriteError(true);
