@@ -6,7 +6,7 @@ import { SlimeElement, Slime } from '@/types/slime';
 import { ELEMENT_COLORS, ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Sparkles, Zap, Wand2, MousePointer2, Trophy, X, ShoppingCart } from 'lucide-react';
 import { audioEngine } from '@/utils/audioEngine';
-import { drawEnhancedEgg } from '@/utils/eggRenderer';
+import { PaintedEgg } from './PaintedEgg';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { DiscoveryPopup } from './DiscoveryPopup';
@@ -14,30 +14,7 @@ import { FairySparkle } from './FairySparkle';
 import { HatcheryScreen } from './HatcheryScreen';
 
 function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackProgress: number; shaking?: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    drawEnhancedEgg(ctx, {
-      size: 120,
-      slime,
-      crackProgress,
-      isShaking: shaking
-    });
-  }, [slime, crackProgress, shaking]);
-
-  return (
-    <canvas 
-      ref={canvasRef} 
-      width={120} 
-      height={120} 
-      className={`w-[5.4rem] h-[5.4rem] pixel-art transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`}
-    />
-  );
+  return <PaintedEgg slime={slime} crackProgress={crackProgress} shaking={shaking} boxClass="w-[5.4rem] h-[5.4rem]" fallbackSize={120} />;
 }
 
 import { triggerDialogue } from '@/utils/dialogueTriggers';
@@ -153,7 +130,6 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
               {isFinished && !isHatching && (
                 <div className="absolute pointer-events-none rounded-full" style={{ left: '50%', top: '50%', width: 110, height: 110, transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle, rgba(255,240,170,0.75), rgba(255,240,170,0) 68%)', animation: 'hatchGlow 1.8s ease-in-out infinite' }} />
               )}
-              {crackProgress > 0 && <img src={`${import.meta.env.BASE_URL}altar/hatch_cracks_${Math.min(3, Math.max(1, Math.ceil(crackProgress * 3)))}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '50%', width: 62, transform: 'translate(-50%,-50%)', imageRendering: 'auto' }} />}
               <div className="absolute -top-12 left-1/2 -translate-x-1/2 w-48 text-center pointer-events-none">
                 {isFinished ? (
                   <div className={`flex flex-col items-center ${isHatching ? 'animate-pulse' : 'animate-bounce'}`}>
@@ -168,14 +144,14 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
                   </div>
                 ) : (
                   <div className="flex flex-col items-center gap-1">
-                    <div className="text-[14px] text-[#FF7EB6] font-black tracking-[0.2em] animate-pulse drop-shadow-[0_2px_8px_rgba(255,126,182,0.4)]">{formatTime(activeHatching.endTime - now)}</div>
+                    <div className="font-bold tracking-wider" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 16, color: '#fff3d0', WebkitTextStroke: '3.5px #3a2150', paintOrder: 'stroke fill' }}>{formatTime(activeHatching.endTime - now)}</div>
                   </div>
                 )}
               </div>
             </div>
             {!isFinished && (
               <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap translate-x-12">
-                <p className="text-[11px] text-[#FF7EB6] animate-inscription-glow font-black uppercase tracking-widest drop-shadow-[0_2px_8px_rgba(255,126,182,0.4)]">{ELEMENT_DISPLAY_NAMES[activeHatching.slime.element]} Slime</p>
+                <p className="font-bold tracking-wide" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 13, color: '#fff3d0', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill' }}>{ELEMENT_DISPLAY_NAMES[activeHatching.slime.elements?.[0] ?? activeHatching.slime.element]} Egg</p>
               </div>
             )}
           </div>

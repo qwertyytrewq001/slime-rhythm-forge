@@ -6,7 +6,7 @@ import { Slime } from '@/types/slime';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { Sparkles, Zap, MousePointer2, X } from 'lucide-react';
 import { audioEngine } from '@/utils/audioEngine';
-import { drawEnhancedEgg } from '@/utils/eggRenderer';
+import { PaintedEgg } from './PaintedEgg';
 import { SlimeCanvas } from './SlimeCanvas';
 import { FairySparkle } from './FairySparkle';
 import { DiscoveryPopup } from './DiscoveryPopup';
@@ -17,30 +17,7 @@ interface HatcheryScreenProps {
 }
 
 function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackProgress: number; shaking?: boolean }) {
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-
-  useEffect(() => {
-    const canvas = canvasRef.current;
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-    if (!ctx) return;
-
-    drawEnhancedEgg(ctx, {
-      size: 100,
-      slime,
-      crackProgress,
-      isShaking: shaking
-    });
-  }, [slime, crackProgress, shaking]);
-
-  return (
-    <canvas 
-      ref={canvasRef} 
-      width={100} 
-      height={100} 
-      className={`w-24 h-24 pixel-art transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`}
-    />
-  );
+  return <PaintedEgg slime={slime} crackProgress={crackProgress} shaking={shaking} boxClass="w-28 h-28" fallbackSize={100} />;
 }
 
 export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
