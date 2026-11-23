@@ -94,7 +94,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
       <div className="absolute inset-0 bg-cover bg-center scale-110 blur-md" style={{ backgroundImage: `url("${backdrop}")` }} />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(20,10,5,0.35), rgba(10,5,2,0.85))' }} />
 
-      <div className="relative w-full max-w-5xl h-full max-h-[100vh] flex flex-col gap-3 p-3 sm:p-5">
+      <div className="relative w-full max-w-5xl h-full max-h-[100cqh] flex flex-col gap-3 p-3 sm:p-5">
         {/* Banner */}
         <div className="flex items-center justify-between gap-3">
           <div className="relative rounded-lg px-5 py-2 shadow-[0_6px_16px_rgba(0,0,0,0.5)]" style={panel}>

@@ -8,7 +8,8 @@ const Dialog = DialogPrimitive.Root;
 
 const DialogTrigger = DialogPrimitive.Trigger;
 
-const DialogPortal = DialogPrimitive.Portal;
+const stageHost = () => (typeof document !== 'undefined' ? document.getElementById('root') ?? undefined : undefined);
+const DialogPortal = (props: React.ComponentProps<typeof DialogPrimitive.Portal>) => <DialogPrimitive.Portal container={stageHost()} {...props} />;
 
 const DialogClose = DialogPrimitive.Close;
 

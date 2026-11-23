@@ -48,23 +48,23 @@ export function TitleScreen({ onPlay, muted, onToggleMute }: TitleScreenProps) {
       ))}
 
       {logoFailed ? (
-        <h1 className="font-bold text-center" style={{ fontSize: 'clamp(40px, 8vw, 96px)', color: '#ffe9a8', WebkitTextStroke: '6px #3a2150', paintOrder: 'stroke fill', animation: 'titleFloat 4s ease-in-out infinite' }}>RareSlime Forge</h1>
+        <h1 className="font-bold text-center" style={{ fontSize: 'clamp(40px, 8cqw, 96px)', color: '#ffe9a8', WebkitTextStroke: '6px #3a2150', paintOrder: 'stroke fill', animation: 'titleFloat 4s ease-in-out infinite' }}>RareSlime Forge</h1>
       ) : (
-        <img src={`${ART}title_logo.png`} alt="RareSlime Forge" draggable={false} onError={() => setLogoFailed(true)} style={{ width: 'auto', height: 'auto', maxWidth: 'min(78vw, 820px)', maxHeight: '44vh', imageRendering: 'auto', animation: 'titleFloat 4s ease-in-out infinite', filter: 'drop-shadow(0 8px 14px rgba(0,0,0,0.5))' }} />
+        <img src={`${ART}title_logo.png`} alt="RareSlime Forge" draggable={false} onError={() => setLogoFailed(true)} style={{ width: 'auto', height: 'auto', maxWidth: 'min(78cqw, 820px)', maxHeight: '44cqh', imageRendering: 'auto', animation: 'titleFloat 4s ease-in-out infinite', filter: 'drop-shadow(0 8px 14px rgba(0,0,0,0.5))' }} />
       )}
 
-      <button onClick={start} aria-label="Play" className="relative outline-none" style={{ marginTop: 'clamp(12px, 4vh, 40px)', width: 'min(56vw, 420px, 50vh)', animation: 'titlePulse 1.8s ease-in-out infinite', background: 'transparent', border: 'none', padding: 0 }}>
+      <button onClick={start} aria-label="Play" className="relative outline-none" style={{ marginTop: 'clamp(12px, 4cqh, 40px)', width: 'min(56cqw, 420px, 50cqh)', animation: 'titlePulse 1.8s ease-in-out infinite', background: 'transparent', border: 'none', padding: 0 }}>
         {playFailed ? (
           <span className="block rounded-full font-bold" style={{ background: 'linear-gradient(#ff7eb6,#ff1493)', border: '4px solid #fff3c0', color: '#fff', fontSize: 34, padding: '10px 0' }}>PLAY</span>
         ) : (
           <>
             <img src={`${ART}title_btn_play.png`} alt="" draggable={false} onError={() => setPlayFailed(true)} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.5))' }} />
-            <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 'clamp(22px, 3.4vw, 40px)', color: '#5a2a08', letterSpacing: '0.12em', textShadow: '0 2px 0 rgba(255,255,255,0.55)' }}>PLAY</span>
+            <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 'clamp(22px, 3.4cqw, 40px)', color: '#5a2a08', letterSpacing: '0.12em', textShadow: '0 2px 0 rgba(255,255,255,0.55)' }}>PLAY</span>
           </>
         )}
       </button>
 
-      <div className="font-semibold text-white/85" style={{ marginTop: 'clamp(8px, 2vh, 20px)', fontSize: 'clamp(11px, 1.2vw, 15px)', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Press Play, or hit Enter</div>
+      <div className="font-semibold text-white/85" style={{ marginTop: 'clamp(8px, 2cqh, 20px)', fontSize: 'clamp(11px, 1.2cqw, 15px)', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Press Play, or hit Enter</div>
 
       <button onClick={onToggleMute} aria-label={muted ? 'Turn sound on' : 'Turn sound off'} className="absolute outline-none hover:scale-110 transition-transform" style={{ left: 22, bottom: 22, width: 56, background: 'transparent', border: 'none', padding: 0 }}>
         <img src={`${ART}title_btn_sound_${muted ? 'off' : 'on'}.png`} alt="" draggable={false} className="w-full" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.5))' }} />

@@ -15,6 +15,7 @@ import { SanctuaryHub } from '@/components/game/SanctuaryHub';
 import { TitleScreen } from '@/components/game/TitleScreen';
 import { FirstVisitTip } from '@/components/game/FirstVisitTip';
 import { soundtrack, trackFor } from '@/utils/soundtrack';
+import { commercialBreak, gameplayStart, gameplayStop, isAdPlaying, isHeld, loadingFinished, onHoldChange } from '@/utils/portal';
 import { dayPhase, nowForDay } from '@/utils/sanctuaryCore';
 import { HomeScene } from '@/components/game/HomeScene';
 import { GlimCompanion } from '@/components/game/GlimCompanion';
@@ -76,6 +77,10 @@ function GameLayout() {
   const [showLevelDialogue, setShowLevelDialogue] = useState(false);
   const [showTitle, setShowTitle] = useState(true);
   const [welcomeDone, setWelcomeDone] = useState(false);
+  // a portal ad is on screen, or the portal / a hidden tab asked for silence
+  const [held, setHeld] = useState(isHeld());
+  const [adOn, setAdOn] = useState(isAdPlaying());
+  useEffect(() => onHoldChange(h => { setHeld(h); setAdOn(isAdPlaying()); }), []);
   const awaySince = useAwaySince();
   const [dialogueLevel, setDialogueLevel] = useState(1);
   
@@ -173,6 +178,8 @@ function GameLayout() {
 
   const handleBattleComplete = (result: { winner: 'player' | 'opponent'; level: number }) => {
     setBattleTeam(null);
+    // a natural pause: the portal may show an ad here (does nothing on the plain web build)
+    void commercialBreak();
     if (result.winner === 'player') {
       const dialogueLevels = [1, 5, 10, 14, 15, 16];
       if (dialogueLevels.includes(result.level)) {
@@ -247,8 +254,12 @@ function GameLayout() {
 
   // music follows the screen
   useEffect(() => {
-    soundtrack.setMuted(state.muted);
-  }, [state.muted]);
+    soundtrack.setMuted(state.muted || held);
+  }, [state.muted, held]);
+
+  // tell the portal when real play starts and stops, and that the first screen is up
+  useEffect(() => { loadingFinished(); }, []);
+  useEffect(() => { if (showTitle) gameplayStop(); else gameplayStart(); }, [showTitle]);
   useEffect(() => {
     soundtrack.play(trackFor({ title: showTitle, view: currentView, night: dayPhase(nowForDay()).night, inBattle: !!battleTeam, bazaar: bazaarModalOpen, library: codexGalleryOpen || showAchievements }));
     soundtrack.ambience(currentView === 'farm' || (currentView === 'sanctuaries' && !dayPhase(nowForDay()).night) ? 'garden' : null);
@@ -262,6 +273,7 @@ function GameLayout() {
 
   return (
     <div className="flex flex-col h-screen overflow-hidden relative bg-black">
+      {adOn && <div className="fixed inset-0 z-[2147483000] bg-black/70 pointer-events-auto" aria-hidden />}
       {/* Background Layer - Conditional: Video for Altar, Image for Sanctuaries */}
       <div className="fixed inset-0 z-0 pointer-events-none bg-black">
         {currentView === 'sanctuaries' ? (

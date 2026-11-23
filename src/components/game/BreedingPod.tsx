@@ -88,7 +88,7 @@ const RitualInscription = ({
       style={{ 
         // painted-game lettering, to match the rest of the screen (the old pixel font clashed with the new art)
         fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", 
-        fontSize: 'clamp(11px, 0.95vw, 15px)',
+        fontSize: 'clamp(11px, 0.95cqw, 15px)',
         WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill',
         textShadow: '0 2px 0 rgba(30,14,40,0.6)'
       }}

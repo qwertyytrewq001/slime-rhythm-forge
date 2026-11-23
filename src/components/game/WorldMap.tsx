@@ -110,9 +110,9 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
         key={`stage-${screen}`}
         className="relative animate-fade-in"
         style={{
-          ['--sw' as string]: 'min(100vw, calc(100vh * 16 / 9))',
-          width: 'min(100vw, calc(100vh * 16 / 9))',
-          height: 'min(100vh, calc(100vw * 9 / 16))',
+          ['--sw' as string]: 'min(100cqw, calc(100cqh * 16 / 9))',
+          width: 'min(100cqw, calc(100cqh * 16 / 9))',
+          height: 'min(100cqh, calc(100cqw * 9 / 16))',
         }}
       >
         <img src={MAP_IMAGES[screen]} alt={info.name} draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
@@ -263,7 +263,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
             <span className={`${arrowCircle} group-hover/arrow:scale-110`} style={{ background: PARCHMENT, borderColor: INK, color: INK }}>
               <ChevronLeft className="w-3/5 h-3/5" strokeWidth={3} />
             </span>
-            <span className="px-2 py-0.5 rounded bg-black/65 text-white font-semibold text-[max(8px,calc(var(--sw)*0.0085))] max-w-[12vw] text-center leading-tight">{prevName}</span>
+            <span className="px-2 py-0.5 rounded bg-black/65 text-white font-semibold text-[max(8px,calc(var(--sw)*0.0085))] max-w-[12cqw] text-center leading-tight">{prevName}</span>
           </button>
         )}
         {canGoNext && (
@@ -279,7 +279,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
             >
               {nextLocked ? <Lock className="w-1/2 h-1/2" /> : <ChevronRight className="w-3/5 h-3/5" strokeWidth={3} />}
             </span>
-            <span className="px-2 py-0.5 rounded bg-black/65 text-white font-semibold text-[max(8px,calc(var(--sw)*0.0085))] max-w-[12vw] text-center leading-tight">
+            <span className="px-2 py-0.5 rounded bg-black/65 text-white font-semibold text-[max(8px,calc(var(--sw)*0.0085))] max-w-[12cqw] text-center leading-tight">
               {nextLocked ? '???' : nextName}
             </span>
           </button>

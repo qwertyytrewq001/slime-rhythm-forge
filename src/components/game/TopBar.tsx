@@ -39,14 +39,14 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
     onClick={onClick}
     aria-label={label}
     className="relative transition-transform duration-150 hover:scale-105 hover:brightness-110 active:scale-95 outline-none"
-    style={{ width: 'clamp(150px, 17vw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
+    style={{ width: 'clamp(150px, 17cqw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
   >
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
     {/* the plate image already has a clean cream medallion (measured centre and size below); only the icon goes on top */}
     <img src={`${import.meta.env.BASE_URL}${encodeURI(icon)}`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: `${PLATE[art].cx}%`, top: `${PLATE[art].cy}%`, width: `${PLATE[art].d * 0.84 * ICON_BALANCE[art].s}%`, height: `${PLATE[art].d * 0.84 * ICON_BALANCE[art].s * (520 / PLATE[art].h)}%`, objectFit: 'contain', transform: `translate(calc(-50% + ${ICON_BALANCE[art].ox * Math.min(1, ICON_BALANCE[art].aspect) * 100}%), calc(-50% + ${ICON_BALANCE[art].oy * Math.min(1, 1 / ICON_BALANCE[art].aspect) * 100}%))`, imageRendering: 'auto' }} />
     <span
       className="absolute flex items-center justify-center text-center text-game-ui"
-      style={{ left: '38%', right: '3%', top: 0, bottom: 0, whiteSpace: 'nowrap', fontSize: 'clamp(11px, 1.15vw, 17px)', color, letterSpacing: '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}
+      style={{ left: '38%', right: '3%', top: 0, bottom: 0, whiteSpace: 'nowrap', fontSize: 'clamp(11px, 1.15cqw, 17px)', color, letterSpacing: '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}
     >
       {label}
     </span>

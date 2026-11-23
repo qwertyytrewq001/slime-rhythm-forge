@@ -265,10 +265,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
       {boughtEgg && (
         <div className="absolute inset-0 z-[300] flex items-center justify-center bg-black/65" onClick={() => setBoughtEgg(null)} style={{ fontFamily: "'Fredoka', sans-serif" }}>
           <style>{`@keyframes eggPopIn { 0% { opacity: 0; transform: scale(0.6) translateY(30px) } 65% { transform: scale(1.05) } 100% { opacity: 1; transform: none } } @keyframes eggBounce { 0%,100% { transform: translateY(0) rotate(-3deg) } 50% { transform: translateY(-12px) rotate(3deg) } } @keyframes eggSpin { to { transform: translate(-50%,-50%) rotate(360deg) } }`}</style>
-          <div className="relative text-center" onClick={e => e.stopPropagation()} style={{ width: 'min(92vw, 440px)', animation: 'eggPopIn 0.45s ease-out both' }}>
+          <div className="relative text-center" onClick={e => e.stopPropagation()} style={{ width: 'min(92cqw, 440px)', animation: 'eggPopIn 0.45s ease-out both' }}>
             <div className="relative mx-auto pointer-events-none" style={{ width: '88%', marginBottom: -26, zIndex: 3 }}>
               <img src={`${import.meta.env.BASE_URL}altar/love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.4))' }} />
-              <span className="absolute flex items-center justify-center font-bold" style={{ left: 0, right: 0, top: 0, bottom: '30%', fontSize: 'clamp(20px, 4.4vw, 28px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>You got an egg!</span>
+              <span className="absolute flex items-center justify-center font-bold" style={{ left: 0, right: 0, top: 0, bottom: '30%', fontSize: 'clamp(20px, 4.4cqw, 28px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>You got an egg!</span>
             </div>
             <div className="relative rounded-[28px] overflow-hidden" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '5px solid #4a2f17', padding: '44px 24px 22px', color: '#4a2f17', boxShadow: '0 20px 50px rgba(0,0,0,0.55)' }}>
               <div className="relative mx-auto flex items-center justify-center" style={{ width: 190, height: 170 }}>
@@ -555,10 +555,10 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                 onClick={() => setSelectedCategory(key)}
                 aria-label={label}
                 className="relative transition-transform hover:scale-105 active:scale-95"
-                style={{ width: 'clamp(120px, 20vw, 190px)', background: 'transparent', border: 'none', padding: 0, transform: selectedCategory === key ? 'scale(1.08)' : undefined }}
+                style={{ width: 'clamp(120px, 20cqw, 190px)', background: 'transparent', border: 'none', padding: 0, transform: selectedCategory === key ? 'scale(1.08)' : undefined }}
               >
                 <img src={`${import.meta.env.BASE_URL}ui/${selectedCategory === key ? 'baz_tab_on' : 'baz_tab'}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
-                <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(13px, 1.5vw, 18px)', letterSpacing: '0.08em', color: selectedCategory === key ? '#4a2f17' : '#ffe9a8', textShadow: selectedCategory === key ? '0 1px 0 rgba(255,255,255,0.5)' : '0 2px 0 rgba(30,12,4,0.85)' }}>{label}</span>
+                <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(13px, 1.5cqw, 18px)', letterSpacing: '0.08em', color: selectedCategory === key ? '#4a2f17' : '#ffe9a8', textShadow: selectedCategory === key ? '0 1px 0 rgba(255,255,255,0.5)' : '0 2px 0 rgba(30,12,4,0.85)' }}>{label}</span>
               </button>
             ))}
           </div>

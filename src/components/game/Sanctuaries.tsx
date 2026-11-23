@@ -18,7 +18,7 @@ export function Habitats({ onClose }: SanctuariesProps) {
       
       {/* Content */}
       <div className="relative z-10 flex items-center justify-center min-h-screen p-8">
-        <div className="bg-black/60 backdrop-blur-md rounded-2xl border-2 border-[#FF7EB6]/30 p-8 max-w-6xl max-h-[80vh] overflow-y-auto">
+        <div className="bg-black/60 backdrop-blur-md rounded-2xl border-2 border-[#FF7EB6]/30 p-8 max-w-6xl max-h-[80cqh] overflow-y-auto">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-3xl font-bold text-[#FF7EB6] mb-4">Habitats</h2>
             <button

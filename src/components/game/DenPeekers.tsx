@@ -4,6 +4,7 @@ import { SlimeCanvas } from './SlimeCanvas';
 import { Slime } from '@/types/slime';
 import { audioEngine } from '@/utils/audioEngine';
 import { getStage } from '@/utils/slimeRenderer';
+import { stageSize } from '@/utils/stage';
 
 /** The eight lit alcoves painted into the Den background (measured from the image), as percentages of the PICTURE: centre x, bottom y, width, height. They are mapped onto the screen with the same cover-fit the painting uses. */
 const IMG_W = 1376, IMG_H = 768;
@@ -26,7 +27,7 @@ const pick = <T,>(arr: T[]) => arr[Math.floor(Math.random() * arr.length)];
 export function DenPeekers() {
   const { state } = useGameState();
   const [out, setOut] = useState<Record<number, Peeker>>({});
-  const [view, setView] = useState(() => ({ w: window.innerWidth, h: window.innerHeight }));
+  const [view, setView] = useState(() => ({ w: stageSize().w, h: stageSize().h }));
   const root = useRef<HTMLDivElement>(null);
   const alive = useRef(true);
   const timers = useRef<number[]>([]);

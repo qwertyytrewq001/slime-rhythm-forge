@@ -58,7 +58,7 @@ export function WelcomeBack({ awaySince, onClose }: { awaySince: number; onClose
   return (
     <div className="fixed inset-0 z-[9000] flex items-center justify-center bg-black/55" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }} onClick={onClose}>
       <style>{`@keyframes wbRise { from { opacity: 0; transform: translateY(14px) scale(0.96) } to { opacity: 1; transform: none } }`}</style>
-      <div onClick={e => e.stopPropagation()} className="flex items-center rounded-3xl shadow-2xl" style={{ width: 'min(92vw, 640px)', background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '4px solid #4a2f17', color: '#4a2f17', padding: 18, gap: 16, animation: 'wbRise 0.3s ease-out' }}>
+      <div onClick={e => e.stopPropagation()} className="flex items-center rounded-3xl shadow-2xl" style={{ width: 'min(92cqw, 640px)', background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '4px solid #4a2f17', color: '#4a2f17', padding: 18, gap: 16, animation: 'wbRise 0.3s ease-out' }}>
         <img src={`${BASE}altar/glim_wave.png`} alt="" draggable={false} style={{ height: 150, width: 'auto', imageRendering: 'auto', flexShrink: 0 }} />
         <div className="flex-1">
           <div className="font-bold leading-none" style={{ fontSize: 26 }}>Welcome back!</div>

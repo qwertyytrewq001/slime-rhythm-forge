@@ -301,7 +301,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
       <div
         ref={stageRef}
         className="relative"
-        style={{ width: 'min(100vw, calc(100vh * 16 / 9))', height: 'min(100vh, calc(100vw * 9 / 16))' }}
+        style={{ width: 'min(100cqw, calc(100cqh * 16 / 9))', height: 'min(100cqh, calc(100cqw * 9 / 16))' }}
         onClick={onStageClick}
         onMouseMove={onStageMove}
       >

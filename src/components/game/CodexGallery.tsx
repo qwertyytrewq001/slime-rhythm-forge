@@ -231,7 +231,7 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
         <div className="p-6 border-b-2 border-[#FF7EB6]/10 bg-white/40 backdrop-blur-md">
           <div className="flex items-center justify-between mb-3">
             <div>
-              <div className="relative" style={{ width: 300, maxWidth: '60vw' }}>
+              <div className="relative" style={{ width: 300, maxWidth: '60cqw' }}>
                 <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.35))' }} />
                 <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 26, color: '#fff3d0', WebkitTextStroke: '4.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.07em' }}>Slime Codex</div>
               </div>

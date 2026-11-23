@@ -122,7 +122,7 @@ export function GlimCompanion() {
     say(c.m, c.t);
   };
 
-  const H = 'clamp(74px, 8.2vw, 112px)';
+  const H = 'clamp(74px, 8.2cqw, 112px)';
   const peeking = hint && !out;
   return (
     <div className="fixed pointer-events-none" style={{ left: 0, top: '41%', zIndex: 55 }}>
@@ -152,7 +152,7 @@ export function GlimCompanion() {
           <div
             key={bubble.id}
             className="absolute font-semibold"
-            style={{ left: '100%', top: '4%', marginLeft: 6, width: 'clamp(180px, 20vw, 270px)', background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '3px solid #4a2f17', borderRadius: 18, boxShadow: '0 6px 14px rgba(0,0,0,0.35)', color: '#4a2f17', padding: '8px 12px', fontSize: 'clamp(11px, 1.05vw, 14px)', lineHeight: 1.25, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", animation: 'glimBubble 0.25s ease-out 0.25s both' }}
+            style={{ left: '100%', top: '4%', marginLeft: 6, width: 'clamp(180px, 20cqw, 270px)', background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: '3px solid #4a2f17', borderRadius: 18, boxShadow: '0 6px 14px rgba(0,0,0,0.35)', color: '#4a2f17', padding: '8px 12px', fontSize: 'clamp(11px, 1.05cqw, 14px)', lineHeight: 1.25, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", animation: 'glimBubble 0.25s ease-out 0.25s both' }}
           >
             {bubble.t}
           </div>

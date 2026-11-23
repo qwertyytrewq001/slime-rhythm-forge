@@ -2,11 +2,11 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <meta name="mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="theme-color" content="#1a1030" />
     
-    <!-- Preload critical fonts to prevent loading conflicts -->
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preload" href="https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&family=Fredoka:wght@600;700&display=swap" as="style" />
     
     <title>RareSlime Forge</title>
     
@@ -29,6 +29,12 @@
 
   <body>
     <div id="root"></div>
+    <div class="rotate-hint" id="rotate-hint" role="dialog" aria-label="Rotate your device">
+      <div class="rotate-phone"></div>
+      <div class="rotate-title">Turn your phone sideways</div>
+      <div class="rotate-sub">Rare Slime Forge plays best in landscape.</div>
+      <button class="rotate-skip" onclick="document.documentElement.dataset.rotateSkip='1'">Play anyway</button>
+    </div>
     <script type="module" src="./src/main.tsx"></script>
   </body>
 </html>

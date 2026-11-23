@@ -14,20 +14,21 @@ const versionFile: Plugin = {
 // https://vitejs.dev/config/
 export default defineConfig(({ mode }) => ({
   // Use relative paths for GitHub Pages to avoid CSP issues
-  base: mode === 'production' ? './' : '/',
+  base: mode === 'production' || mode === 'poki' || mode === 'crazygames' ? './' : '/',
   
   // 2. Configure build output to use the 'docs' folder for GitHub Pages
   build: {
-    outDir: "docs",
+    // GitHub Pages serves docs/; the portal builds go to their own folders so they never touch the live site
+    outDir: mode === 'poki' ? 'dist-poki' : mode === 'crazygames' ? 'dist-crazygames' : 'docs',
     emptyOutDir: true, // Cleans the folder before building
   },
 
   // A new id every build, added to slime picture links so a returning player never sees a stale cached sprite
-  define: { __BUILD_ID__: JSON.stringify(BUILD_ID) },
+  define: { __BUILD_ID__: JSON.stringify(BUILD_ID), 'import.meta.env.VITE_PORTAL': JSON.stringify(mode === 'poki' ? 'poki' : mode === 'crazygames' ? 'crazygames' : 'none') },
 
   // Strip debug console.log from production builds (errors/warnings are kept)
   esbuild: {
-    pure: mode === 'production' ? ['console.log', 'console.debug'] : [],
+    pure: mode === 'development' ? [] : ['console.log', 'console.debug'],
   },
 
   server: {

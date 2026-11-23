@@ -1,5 +1,3 @@
-@import url('https://fonts.googleapis.com/css2?family=Press+Start+2P&family=VT323&display=swap');
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -439,3 +437,45 @@ select option {
 .animate-float {
   animation: float 6s ease-in-out infinite;
 }
+
+
+/* ---- The game screen ----
+   The game is drawn on a virtual screen (see src/utils/stage.ts): it is sized and scaled by script,
+   and cq units inside it mean "percent of the virtual screen". */
+html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden; overscroll-behavior: none; background: #000; }
+#root {
+  position: fixed;
+  left: 0;
+  top: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  transform-origin: 0 0;
+  container-type: size;
+}
+
+/* ---- Touch and small screens ---- */
+.h-screen { height: 100cqh; }
+.min-h-screen { min-height: 100cqh; }
+.w-screen { width: 100cqw; }
+html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
+body { -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
+input, textarea, [contenteditable] { user-select: text; -webkit-user-select: text; }
+button, [role="button"], a, .cursor-pointer { touch-action: manipulation; }
+img { -webkit-user-drag: none; }
+
+/* Held upright on a phone: ask for a wide screen */
+.rotate-hint {
+  display: none; position: fixed; inset: 0; z-index: 2147483000; flex-direction: column; align-items: center; justify-content: center; gap: 14px;
+  background: radial-gradient(circle at 50% 35%, #3a2766 0%, #170f2c 75%); color: #fff3d0; text-align: center; padding: 24px;
+  font-family: 'Fredoka', 'Trebuchet MS', sans-serif; user-select: none;
+}
+html[data-portrait="1"]:not([data-rotate-skip="1"]) .rotate-hint { display: flex; }
+.rotate-phone { width: 56px; height: 96px; border: 5px solid #ffd34d; border-radius: 12px; position: relative; animation: rotatePhone 2.6s ease-in-out infinite; box-shadow: 0 0 24px rgba(255,211,77,0.35); }
+.rotate-phone::after { content: ''; position: absolute; left: 50%; bottom: 6px; width: 14px; height: 4px; margin-left: -7px; border-radius: 2px; background: #ffd34d; }
+.rotate-title { font-size: 24px; font-weight: 700; letter-spacing: 0.02em; }
+.rotate-sub { font-size: 15px; opacity: 0.8; }
+.rotate-skip { margin-top: 12px; padding: 9px 22px; border-radius: 999px; border: 2px solid rgba(255,211,77,0.7); background: rgba(255,211,77,0.12); color: #ffe9a8; font: 600 15px 'Fredoka', sans-serif; cursor: pointer; }
+@keyframes rotatePhone { 0%, 15% { transform: rotate(0deg); } 50%, 75% { transform: rotate(-90deg); } 100% { transform: rotate(0deg); } }

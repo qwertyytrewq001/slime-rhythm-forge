@@ -69,13 +69,13 @@ export function FirstVisitTip({ when, ready = true }: { when: TipKey | null; rea
   return (
     <div className="fixed inset-0 z-[9500] flex items-end justify-center pointer-events-none" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
       <style>{`@keyframes tipUp { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: none } }`}</style>
-      <div className="relative pointer-events-auto flex items-end" style={{ width: 'min(94vw, 760px)', marginBottom: 84, animation: 'tipUp 0.3s ease-out' }}>
-        <img src={`${A}glim_${data.face}.png`} alt="" draggable={false} style={{ height: 'clamp(120px, 20vh, 190px)', width: 'auto', marginRight: -26, zIndex: 2, imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.4))' }} />
+      <div className="relative pointer-events-auto flex items-end" style={{ width: 'min(94cqw, 760px)', marginBottom: 84, animation: 'tipUp 0.3s ease-out' }}>
+        <img src={`${A}glim_${data.face}.png`} alt="" draggable={false} style={{ height: 'clamp(120px, 20cqh, 190px)', width: 'auto', marginRight: -26, zIndex: 2, imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.4))' }} />
         <div className="relative flex-1" style={{ minHeight: 150 }}>
           <img src={`${U}dlg_box.png`} alt="" draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto', objectFit: 'fill' }} />
           <div className="relative flex flex-col" style={{ padding: '22px 30px 16px 40px', color: '#4a2f17', minHeight: 150 }}>
-            <div className="font-bold" style={{ fontSize: 'clamp(15px, 2vw, 21px)', letterSpacing: '0.04em' }}>{data.title}</div>
-            <div className="font-semibold flex-1" style={{ fontSize: 'clamp(13px, 1.6vw, 17px)', lineHeight: 1.3, marginTop: 4 }}>{data.lines[step]}</div>
+            <div className="font-bold" style={{ fontSize: 'clamp(15px, 2cqw, 21px)', letterSpacing: '0.04em' }}>{data.title}</div>
+            <div className="font-semibold flex-1" style={{ fontSize: 'clamp(13px, 1.6cqw, 17px)', lineHeight: 1.3, marginTop: 4 }}>{data.lines[step]}</div>
             <div className="flex items-center justify-between" style={{ marginTop: 6 }}>
               <span className="text-xs font-bold opacity-60">{step + 1} / {data.lines.length}</span>
               <div className="flex items-center gap-2">

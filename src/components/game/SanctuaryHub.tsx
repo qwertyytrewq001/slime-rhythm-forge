@@ -110,7 +110,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
       <div className="absolute inset-0 bg-cover bg-center blur-2xl scale-110 opacity-60" style={{ backgroundImage: `url("${BASE}second_screen_background.png")` }} />
       {/* soft light for the time of day, over the WHOLE screen (not just the stage) and under the interface */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: day.tint ?? 'transparent', opacity: day.tint ? 1 : 0, transition: 'opacity 1.5s ease', zIndex: 250 }} />
-      <div ref={stageRef} className="relative" style={{ width: 'min(100vw, calc(100vh * 16 / 9))', height: 'min(100vh, calc(100vw * 9 / 16))' }}>
+      <div ref={stageRef} className="relative" style={{ width: 'min(100cqw, calc(100cqh * 16 / 9))', height: 'min(100cqh, calc(100cqw * 9 / 16))' }}>
         {/* painted sky if it exists, otherwise the existing backdrop */}
         <ArtImg file="sanct_hub_background.jpg" className="absolute inset-0 w-full h-full" fallback={<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${BASE}second_screen_background.png")` }}><div className="absolute inset-0 bg-black/50" /></div>} />
         <MirrorBackdrop src={`${SANCT}sanct_hub_background.jpg`} />

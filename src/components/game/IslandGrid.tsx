@@ -51,7 +51,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
             left: '50%',
             transform: 'translateX(-50%)',
             width: '640px',
-            maxWidth: '85vw',
+            maxWidth: '85cqw',
             background: 'rgba(255, 255, 255, 0.95)',
             borderRadius: '24px',
             border: '4px solid #FF7EB6',

@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
+import { stageSize, onStageChange } from '@/utils/stage';
 import { Slime } from '@/types/slime';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
@@ -25,12 +26,11 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
   const { state, dispatch } = useGameState();
   const [mounted, setMounted] = useState(false);
   const [animate, setAnimate] = useState(false);
-  const [vh, setVh] = useState(() => window.innerHeight);
-  const [vw, setVw] = useState(() => window.innerWidth);
+  const [vh, setVh] = useState(() => stageSize().h);
+  const [vw, setVw] = useState(() => stageSize().w);
   useEffect(() => {
-    const on = () => { setVh(window.innerHeight); setVw(window.innerWidth); };
-    window.addEventListener('resize', on);
-    return () => window.removeEventListener('resize', on);
+    const on = () => { setVh(stageSize().h); setVw(stageSize().w); };
+    return onStageChange(on);
   }, []);
 
   useEffect(() => {
@@ -106,7 +106,7 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
   const actions = compatibleHabitats.length > 0 ? (
     <button onClick={() => handleAssignToHabitat(compatibleHabitats[0].id)} className="relative block hover:scale-105 active:scale-95 transition-transform" style={{ width: 'min(100%, 280px)', background: 'transparent', border: 'none', padding: 0 }}>
       <img src={`${BASE}altar/ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 10px rgba(190,120,255,0.7))' }} />
-      <span className="absolute flex items-center justify-center font-bold whitespace-nowrap" style={{ left: '20%', right: '20%', top: 0, bottom: 0, fontSize: 'clamp(13px, 1.5vw, 16px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.02em', fontFamily: FRED }}>Move to habitat</span>
+      <span className="absolute flex items-center justify-center font-bold whitespace-nowrap" style={{ left: '20%', right: '20%', top: 0, bottom: 0, fontSize: 'clamp(13px, 1.5cqw, 16px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.02em', fontFamily: FRED }}>Move to habitat</span>
     </button>
   ) : (
     <div className="flex items-center gap-3 flex-wrap">
@@ -122,7 +122,7 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
     <div className="flex flex-col" style={{ gap: 8, textAlign: wide ? 'left' : 'center' }}>
       <div>
         <div className="font-bold uppercase" style={{ color: '#b8660e', fontSize: 13, letterSpacing: '0.18em', fontFamily: FRED }}>Species unlocked</div>
-        <div className="font-bold" style={{ fontSize: 'clamp(28px, 4vw, 38px)', lineHeight: 1.1, fontFamily: FRED, color: INK }}>{slime.name}</div>
+        <div className="font-bold" style={{ fontSize: 'clamp(28px, 4cqw, 38px)', lineHeight: 1.1, fontFamily: FRED, color: INK }}>{slime.name}</div>
       </div>
 
       <div className="flex flex-wrap items-center gap-2" style={{ justifyContent: wide ? 'flex-start' : 'center' }}>
@@ -173,14 +173,14 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
       `}</style>
       <div className="absolute inset-0 bg-[#1d1235]/70 backdrop-blur-sm" onClick={onClose} />
 
-      <div className="relative w-full flex flex-col items-center" style={{ maxWidth: wide ? 860 : 520, maxHeight: '98vh' }} onClick={(e) => e.stopPropagation()}>
+      <div className="relative w-full flex flex-col items-center" style={{ maxWidth: wide ? 860 : 520, maxHeight: '98cqh' }} onClick={(e) => e.stopPropagation()}>
         {/* ribbon straddling the card's top edge */}
         <div className="relative pointer-events-none" style={{ width: 'min(86%, 360px)', marginBottom: -26, zIndex: 3, animation: 'discBanner 0.6s ease-out both' }}>
           <img src={`${BASE}altar/love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.4))' }} />
-          <span className="absolute flex items-center justify-center font-bold" style={{ left: '16%', right: '16%', top: 0, bottom: '30%', fontFamily: FRED, fontSize: 'clamp(20px, 4.4vw, 30px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>NEW SLIME!</span>
+          <span className="absolute flex items-center justify-center font-bold" style={{ left: '16%', right: '16%', top: 0, bottom: '30%', fontFamily: FRED, fontSize: 'clamp(20px, 4.4cqw, 30px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>NEW SLIME!</span>
         </div>
 
-        <div className="disc-scroll relative w-full overflow-x-hidden overflow-y-auto" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: `5px solid ${INK}`, borderRadius: 28, boxShadow: '0 22px 50px rgba(0,0,0,0.55)', color: INK, padding: wide ? '38px 26px 18px' : '38px 18px 18px', maxHeight: 'calc(98vh - 50px)', overscrollBehavior: 'contain' }}>
+        <div className="disc-scroll relative w-full overflow-x-hidden overflow-y-auto" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: `5px solid ${INK}`, borderRadius: 28, boxShadow: '0 22px 50px rgba(0,0,0,0.55)', color: INK, padding: wide ? '38px 26px 18px' : '38px 18px 18px', maxHeight: 'calc(98cqh - 50px)', overscrollBehavior: 'contain' }}>
           <button onClick={onClose} aria-label="Close" className="absolute top-3 right-3 hover:scale-110 active:scale-90 transition-transform z-10">
             <img src={`${BASE}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 40, height: 40, imageRendering: 'auto' }} />
           </button>
@@ -201,5 +201,5 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
     </div>
   );
 
-  return createPortal(content, document.body);
+  return createPortal(content, document.getElementById('root') ?? document.body);
 }

@@ -87,9 +87,9 @@ export function SlimeGallery({ onSelect, filterElement, adultsOnly, autoPlace = 
     <div className="relative flex flex-col h-full p-5" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
       
       <style>{`.gallery-card { background: url(${import.meta.env.BASE_URL}ui/baz_card.png) center / 100% 100% no-repeat; filter: drop-shadow(0 4px 6px rgba(70,40,10,0.35)); } .gallery-card-on { filter: drop-shadow(0 0 10px #ffd34d) drop-shadow(0 4px 6px rgba(70,40,10,0.35)) brightness(1.06); }`}</style>
-      <div className="relative mx-auto mb-2" style={{ width: 'min(72%, clamp(170px, 30vh, 280px))' }}>
+      <div className="relative mx-auto mb-2" style={{ width: 'min(72%, clamp(170px, 30cqh, 280px))' }}>
         <img src={`${import.meta.env.BASE_URL}ui/../altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.35))' }} />
-        <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(15px, 3.4vh, 24px)', color: '#fff3d0', WebkitTextStroke: '4px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Collection</div>
+        <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(15px, 3.4cqh, 24px)', color: '#fff3d0', WebkitTextStroke: '4px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Collection</div>
       </div>
 
       <div className="text-center mb-3 text-[13px] font-bold tracking-wide" style={{ color: '#ffe9a8', textShadow: '0 2px 0 rgba(20,8,40,0.8)' }}>

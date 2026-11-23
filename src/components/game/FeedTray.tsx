@@ -169,7 +169,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
 
         <div
           className="relative drop-shadow-[0_10px_18px_rgba(0,0,0,0.55)]"
-          style={{ width: 'min(78vw, 280px)', aspectRatio: String(FRAME_ASPECT) }}
+          style={{ width: 'min(78cqw, 280px)', aspectRatio: String(FRAME_ASPECT) }}
         >
           <img src={asset('ui_tray.png')} alt="" draggable={false} className="absolute inset-0 w-full h-full pointer-events-none" style={crisp} />
 

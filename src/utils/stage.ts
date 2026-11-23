@@ -1,0 +1,89 @@
+/**
+ * The game is drawn on a "virtual screen" that is never smaller than MIN_W x MIN_H.
+ * On a big screen nothing changes. On a small one (a phone held sideways, a small laptop window) the whole game
+ * is laid out at the virtual size and then scaled down to fit, so every screen keeps its proportions.
+ *
+ * Layout units: use `cqw` / `cqh` (1% of the virtual screen) instead of `vw` / `vh`.
+ * Pointer maths: while the stage is scaled, pointer positions, getBoundingClientRect, elementFromPoint and
+ * window.innerWidth/innerHeight are all reported in virtual-screen pixels (see installCoordinateShim), so game code
+ * can keep treating them as ordinary CSS pixels. On a big screen the scale is 1 and nothing is changed.
+ */
+export const MIN_W = 1000;
+export const MIN_H = 600;
+
+let scale = 1;
+// the real screen size, read before the shim below changes what window.innerWidth says
+const realInnerWidth = Object.getOwnPropertyDescriptor(window, 'innerWidth');
+const realInnerHeight = Object.getOwnPropertyDescriptor(window, 'innerHeight');
+const rw = (): number => (realInnerWidth?.get ? realInnerWidth.get.call(window) : document.documentElement.clientWidth);
+const rh = (): number => (realInnerHeight?.get ? realInnerHeight.get.call(window) : document.documentElement.clientHeight);
+let width = typeof window !== 'undefined' ? window.innerWidth : MIN_W;
+let height = typeof window !== 'undefined' ? window.innerHeight : MIN_H;
+const listeners = new Set<() => void>();
+
+/** How much the virtual screen is shrunk on the real screen (1 = not at all). */
+export const stageScale = () => scale;
+/** Size of the virtual screen in CSS pixels. */
+export const stageSize = () => ({ w: width, h: height });
+/** Real screen pixel to virtual screen pixel. */
+export const toStage = (x: number, y: number) => ({ x: x / scale, y: y / scale });
+export const onStageChange = (fn: () => void) => { listeners.add(fn); return () => { listeners.delete(fn); }; };
+
+function apply() {
+  const root = document.getElementById('root');
+  if (!root) return;
+  const vv = window.visualViewport;
+  const w = Math.round(vv?.width ?? rw());
+  const h = Math.round(vv?.height ?? rh());
+  const s = Math.min(1, w / MIN_W, h / MIN_H);
+  scale = s;
+  width = s < 1 ? Math.ceil(w / s) : w;
+  height = s < 1 ? Math.ceil(h / s) : h;
+  root.style.width = `${width}px`;
+  root.style.height = `${height}px`;
+  root.style.transform = s < 1 ? `scale(${s})` : 'none';
+  document.documentElement.style.setProperty('--stage-scale', String(s));
+  // a phone held upright: the game wants a wide screen
+  const portrait = h > w * 1.05 && Math.min(w, h) < 900;
+  document.documentElement.dataset.portrait = portrait ? '1' : '0';
+  listeners.forEach(fn => fn());
+}
+
+/** Make browser coordinates read in virtual-screen pixels while the stage is scaled down. */
+function installCoordinateShim() {
+  const wrapGetter = (proto: object, key: string, fn: (v: number) => number) => {
+    const d = Object.getOwnPropertyDescriptor(proto, key);
+    if (!d?.get) return;
+    const g = d.get;
+    Object.defineProperty(proto, key, { ...d, get() { const v = g.call(this) as number; return scale === 1 ? v : fn(v); } });
+  };
+  const div = (v: number) => v / scale;
+  for (const k of ['clientX', 'clientY', 'pageX', 'pageY', 'x', 'y']) wrapGetter(MouseEvent.prototype, k, div);
+  if (typeof Touch !== 'undefined') for (const k of ['clientX', 'clientY', 'pageX', 'pageY']) wrapGetter(Touch.prototype, k, div);
+  const rectOf = Element.prototype.getBoundingClientRect;
+  Element.prototype.getBoundingClientRect = function () {
+    const r = rectOf.call(this);
+    return scale === 1 ? r : new DOMRect(r.x / scale, r.y / scale, r.width / scale, r.height / scale);
+  };
+  const clientRects = Element.prototype.getClientRects;
+  Element.prototype.getClientRects = function () {
+    const list = clientRects.call(this);
+    if (scale === 1) return list;
+    const out = Array.from(list as unknown as ArrayLike<DOMRect>, r => new DOMRect(r.x / scale, r.y / scale, r.width / scale, r.height / scale));
+    return Object.assign(out, { item: (i: number) => out[i] ?? null }) as unknown as DOMRectList;
+  };
+  const at = Document.prototype.elementFromPoint;
+  Document.prototype.elementFromPoint = function (x: number, y: number) { return at.call(this, x * scale, y * scale); };
+  const atAll = Document.prototype.elementsFromPoint;
+  Document.prototype.elementsFromPoint = function (x: number, y: number) { return atAll.call(this, x * scale, y * scale); };
+  Object.defineProperty(window, 'innerWidth', { configurable: true, get: () => (scale === 1 ? rw() : width) });
+  Object.defineProperty(window, 'innerHeight', { configurable: true, get: () => (scale === 1 ? rh() : height) });
+}
+
+export function initStage() {
+  installCoordinateShim();
+  apply();
+  window.addEventListener('resize', apply);
+  window.addEventListener('orientationchange', () => setTimeout(apply, 120));
+  window.visualViewport?.addEventListener('resize', apply);
+}

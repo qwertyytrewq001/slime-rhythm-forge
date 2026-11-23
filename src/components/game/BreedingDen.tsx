@@ -138,7 +138,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       <DenPeekers />
 
       {/* the central egg altar */}
-      <img src={`${import.meta.env.BASE_URL}altar/denp_egg_altar.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '74%', width: 'min(17vw, 230px)', transform: 'translate(-50%, -50%)', imageRendering: 'auto' }} />
+      <img src={`${import.meta.env.BASE_URL}altar/denp_egg_altar.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', top: '74%', width: 'min(17cqw, 230px)', transform: 'translate(-50%, -50%)', imageRendering: 'auto' }} />
 
       {/* Left incubator circle */}
       <div 
@@ -153,8 +153,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         }}
         onClick={() => handleSlotClick(1)}
       >
-        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot1Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25vw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
-        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18vw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot1Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25cqw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18cqw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
         {slot1Slime ? (
           <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 1 ? (reaction === 'shy' ? 'denShy 0.5s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot1Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
@@ -204,8 +204,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         }}
         onClick={() => handleSlotClick(2)}
       >
-        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot2Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25vw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
-        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18vw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot2Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25cqw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18cqw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
         {slot2Slime ? (
           <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 2 ? (reaction === 'shy' || reaction === 'smitten' ? 'denShy 0.5s ease-in-out infinite' : reaction === 'cool' ? 'denCool 1.4s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot2Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
@@ -269,20 +269,20 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       <div className="absolute top-4 left-4">
       </div>
       {onBackToAltar && (
-        <button onClick={onBackToAltar} aria-label="Close" className="absolute top-4 right-4 hover:scale-110 active:scale-90 transition-transform" style={{ width: 'clamp(44px, 4.2vw, 62px)', background: 'transparent', border: 'none', padding: 0, zIndex: 20 }}>
+        <button onClick={onBackToAltar} aria-label="Close" className="absolute top-4 right-4 hover:scale-110 active:scale-90 transition-transform" style={{ width: 'clamp(44px, 4.2cqw, 62px)', background: 'transparent', border: 'none', padding: 0, zIndex: 20 }}>
           <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.45))' }} />
         </button>
       )}
 
       {/* Breeding title */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 text-center" style={{ width: 'min(46vw, 430px)' }}>
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 text-center" style={{ width: 'min(46cqw, 430px)' }}>
         <div className="relative">
           <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.45))' }} />
-          <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(18px, 2.4vw, 32px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Breeding Den</span>
+          <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(18px, 2.4cqw, 32px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Breeding Den</span>
         </div>
-        <p className="font-bold mt-1" style={{ animation: 'denTitle 3s ease-in-out infinite', fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.1vw, 15px)', color: '#ffe9a8', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.1em' }}>SELECT PARENTS TO BREED</p>
+        <p className="font-bold mt-1" style={{ animation: 'denTitle 3s ease-in-out infinite', fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(11px, 1.1cqw, 15px)', color: '#ffe9a8', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.1em' }}>SELECT PARENTS TO BREED</p>
         {(state.mutationJuiceActive || state.luckyCharmActive) && (
-          <p className="font-bold mt-1" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(11px, 1.1vw, 14px)', color: '#d9ffb8', WebkitTextStroke: '3px #1f4a2a', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>
+          <p className="font-bold mt-1" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(11px, 1.1cqw, 14px)', color: '#d9ffb8', WebkitTextStroke: '3px #1f4a2a', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>
             {[state.mutationJuiceActive && 'Mutation Juice ready', state.luckyCharmActive && 'Lucky Charm ready'].filter(Boolean).join('  +  ')}
           </p>
         )}
@@ -295,12 +295,12 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
             onClick={() => setShowPossibleModal(true)}
             aria-label="Possible slimes"
             className="absolute flex flex-col items-center outline-none hover:scale-110 active:scale-95 transition-transform"
-            style={{ left: '50%', top: '33%', width: 'min(9vw, 120px)', transform: 'translateX(-50%)', background: 'transparent', border: 'none', padding: 0, zIndex: 12, animation: 'denEggBob 2.6s ease-in-out infinite' }}
+            style={{ left: '50%', top: '33%', width: 'min(9cqw, 120px)', transform: 'translateX(-50%)', background: 'transparent', border: 'none', padding: 0, zIndex: 12, animation: 'denEggBob 2.6s ease-in-out infinite' }}
           >
             <img src={`${import.meta.env.BASE_URL}ui/mystery_egg.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 14px rgba(190,140,255,0.8)) drop-shadow(0 6px 6px rgba(0,0,0,0.45))' }} />
             <span className="relative" style={{ width: '170%', marginTop: -6 }}>
               <img src={`${import.meta.env.BASE_URL}ui/baz_tab.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
-              <span className="absolute inset-0 flex items-center justify-center font-bold whitespace-nowrap" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(10px, 1.05vw, 14px)', color: '#ffe9a8', textShadow: '0 2px 0 rgba(30,12,4,0.85)', letterSpacing: '0.05em' }}>Possible Slimes</span>
+              <span className="absolute inset-0 flex items-center justify-center font-bold whitespace-nowrap" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(10px, 1.05cqw, 14px)', color: '#ffe9a8', textShadow: '0 2px 0 rgba(30,12,4,0.85)', letterSpacing: '0.05em' }}>Possible Slimes</span>
             </span>
           </button>
 
@@ -308,10 +308,10 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
             onClick={handleStartBreeding}
             aria-label="Start breeding"
             className="absolute outline-none hover:scale-110 active:scale-95 transition-transform"
-            style={{ left: '50%', bottom: '3%', width: 'min(17vw, 230px)', transform: 'translateX(-50%)', background: 'transparent', border: 'none', padding: 0, zIndex: 12, animation: 'denBeginPulse 1.6s ease-in-out infinite' }}
+            style={{ left: '50%', bottom: '3%', width: 'min(17cqw, 230px)', transform: 'translateX(-50%)', background: 'transparent', border: 'none', padding: 0, zIndex: 12, animation: 'denBeginPulse 1.6s ease-in-out infinite' }}
           >
             <img src={`${import.meta.env.BASE_URL}ui/../altar/ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 12px rgba(190,120,255,0.75))' }} />
-            <span className="absolute flex items-center justify-center font-bold whitespace-nowrap" style={{ left: '22%', right: '22%', top: 0, bottom: 0, fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(15px, 1.8vw, 22px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>Start</span>
+            <span className="absolute flex items-center justify-center font-bold whitespace-nowrap" style={{ left: '22%', right: '22%', top: 0, bottom: 0, fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(15px, 1.8cqw, 22px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>Start</span>
           </button>
         </>
       )}
@@ -378,7 +378,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         onClick={() => setShowPossibleModal(false)}
       >
         <div 
-          className="bg-[#f6e8c3] rounded-3xl p-8 max-w-5xl w-full max-h-[90vh] overflow-y-auto border-4 border-[#4a2f17] shadow-2xl backdrop-blur-sm relative"
+          className="bg-[#f6e8c3] rounded-3xl p-8 max-w-5xl w-full max-h-[90cqh] overflow-y-auto border-4 border-[#4a2f17] shadow-2xl backdrop-blur-sm relative"
           onClick={(e) => e.stopPropagation()}
         >
           {/* Modal Header */}

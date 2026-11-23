@@ -732,9 +732,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
         ref={stageRef}
         className="relative"
         style={{
-          ['--sw' as string]: 'min(100vw, calc(100vh * 16 / 9))',
-          width: 'min(100vw, calc(100vh * 16 / 9))',
-          height: 'min(100vh, calc(100vw * 9 / 16))',
+          ['--sw' as string]: 'min(100cqw, calc(100cqh * 16 / 9))',
+          width: 'min(100cqw, calc(100cqh * 16 / 9))',
+          height: 'min(100cqh, calc(100cqw * 9 / 16))',
           touchAction: 'manipulation',
         }}
       >

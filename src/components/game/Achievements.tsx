@@ -30,7 +30,7 @@ export function Achievements({ onClose }: { onClose: () => void }) {
       <img src={`${U}ach_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(30,16,10,0.05), rgba(30,16,10,0.5))' }} />
 
-      <div className="relative w-full max-w-3xl max-h-[90vh] flex flex-col rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()} style={{ background: 'rgba(246,232,195,0.88)', border: '4px solid #4a2f17', boxShadow: '0 20px 60px rgba(0,0,0,0.55)' }}>
+      <div className="relative w-full max-w-3xl max-h-[90cqh] flex flex-col rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()} style={{ background: 'rgba(246,232,195,0.88)', border: '4px solid #4a2f17', boxShadow: '0 20px 60px rgba(0,0,0,0.55)' }}>
         <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 p-3 sm:p-4" style={{ background: 'linear-gradient(#5a3a7a,#3f2757)', borderBottom: '4px solid #f2d68a', color: '#fff3d0' }}>
           <div className="flex items-center gap-3">
             <img src={`${U}tool_achievements.png`} alt="" draggable={false} className="w-16 h-16" style={{ imageRendering: 'auto' }} />

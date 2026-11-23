@@ -8,7 +8,8 @@ const AlertDialog = AlertDialogPrimitive.Root;
 
 const AlertDialogTrigger = AlertDialogPrimitive.Trigger;
 
-const AlertDialogPortal = AlertDialogPrimitive.Portal;
+const stageHost = () => (typeof document !== 'undefined' ? document.getElementById('root') ?? undefined : undefined);
+const AlertDialogPortal = (props: React.ComponentProps<typeof AlertDialogPrimitive.Portal>) => <AlertDialogPrimitive.Portal container={stageHost()} {...props} />;
 
 const AlertDialogOverlay = React.forwardRef<
   React.ElementRef<typeof AlertDialogPrimitive.Overlay>,
