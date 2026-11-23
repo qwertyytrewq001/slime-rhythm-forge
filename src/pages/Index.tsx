@@ -213,16 +213,30 @@ function GameLayout() {
     }
   }, [state.tutorialCompleted, state.slimes.length, showTitle]);
 
-  // every button press gets a click, unless the button already plays a sound of its own a moment earlier
+  // every button, icon and tappable thing gets a click, unless it already plays a sound of its own a moment earlier
   useEffect(() => {
-    const onClick = (e: MouseEvent) => {
-      const el = (e.target as Element | null)?.closest?.('button, [role="button"], a, [data-sfx]') as HTMLButtonElement | null;
-      if (!el || el.disabled || el.closest('[data-nosfx]')) return;
-      if (performance.now() - soundtrack.lastSfxAt < 120) return;
-      void soundtrack.sfx('ui_click');
+    const tappable = (t: EventTarget | null): HTMLElement | null => {
+      let el = t instanceof Element ? (t as HTMLElement) : null;
+      for (let i = 0; el && i < 6; i++, el = el.parentElement) {
+        if (el.matches('button, [role="button"], a, [data-sfx]') || getComputedStyle(el).cursor === 'pointer') return el;
+      }
+      return null;
     };
+    const usable = (el: HTMLElement | null) => !!el && !(el as HTMLButtonElement).disabled && !el.closest('[data-nosfx]');
+    const click = () => { void soundtrack.sfx('ui_click'); };
+    // the sound buttons click first, while the sound is still on, so muting is heard too
+    const onCapture = (e: MouseEvent) => {
+      const el = tappable(e.target);
+      if (usable(el) && /mute|sound/i.test(el!.getAttribute('aria-label') ?? '')) click();
+    };
+    const onClick = (e: MouseEvent) => {
+      const el = tappable(e.target);
+      if (!usable(el) || performance.now() - soundtrack.lastSfxAt < 120) return;
+      click();
+    };
+    document.addEventListener('click', onCapture, true);
     document.addEventListener('click', onClick);
-    return () => document.removeEventListener('click', onClick);
+    return () => { document.removeEventListener('click', onCapture, true); document.removeEventListener('click', onClick); };
   }, []);
 
   // opening and closing share the one button click above, so no separate open sound
