@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import type { Slime } from '@/types/slime';
 import { drawEnhancedEgg } from '@/utils/eggRenderer';
+import { EggMarks } from './EggMarks';
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -33,6 +34,8 @@ interface PaintedEggProps {
 export function PaintedEgg({ slime, crackProgress, shaking, boxClass, fallbackSize = 120 }: PaintedEggProps) {
   const element = eggElementFor(slime);
   const [missing, setMissing] = useState(false);
+  const [own, setOwn] = useState<'try' | 'yes' | 'no'>('try'); // a hand-painted egg for this exact species (public/eggs/<id>.png)?
+  const speciesKey = slime.codexId;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const motion = `transition-transform duration-75 ${shaking ? 'scale-110' : 'scale-100 hover:scale-105'}`;
 
@@ -49,6 +52,9 @@ export function PaintedEgg({ slime, crackProgress, shaking, boxClass, fallbackSi
 
   return (
     <div className={`relative ${boxClass} ${motion}`}>
+      {speciesKey && own !== 'no' && (
+        <img src={`${BASE}eggs/${speciesKey}.png`} alt="" draggable={false} onLoad={() => setOwn('yes')} onError={() => setOwn('no')} className="absolute inset-0 w-full h-full object-contain z-10" style={{ display: own === 'yes' ? 'block' : 'none', imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.35))' }} />
+      )}
       <img
         src={`${BASE}ui/eggc_${element}.png`}
         alt=""
@@ -57,6 +63,7 @@ export function PaintedEgg({ slime, crackProgress, shaking, boxClass, fallbackSi
         className="absolute inset-0 w-full h-full object-contain"
         style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.35))' }}
       />
+      {own !== 'yes' && speciesKey && <EggMarks slime={slime} element={element} />}
       {crackProgress > 0 && (
         <img
           src={`${BASE}altar/hatch_cracks_${Math.min(3, Math.max(1, Math.ceil(crackProgress * 3)))}.png`}
