@@ -9,8 +9,8 @@
  * can keep treating them as ordinary CSS pixels. On a big screen the scale is 1 and nothing is changed.
  */
 // Smaller than before so a phone held sideways shows the game bigger (it used to be drawn at 1000x600 and shrunk to about 65%)
-export const MIN_W = 840;
-export const MIN_H = 480;
+export const MIN_W = 700;
+export const MIN_H = 400;
 
 let scale = 1;
 let offX = 0; // where the game's top-left corner sits on the real screen (the safe-area insets)

@@ -228,7 +228,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
                   <span className="absolute top-0.5 left-0.5 px-1 rounded text-[9px] font-bold text-white" style={{ background: v.color }}>{v.arrow} {v.label}</span>
                   <div className={tiny ? '' : 'mt-2'}><SlimeCanvas slime={slime} size={tiny ? 34 : compact ? 44 : 64} animated /></div>
                   <p className="text-[11px] font-bold truncate w-full text-center">{slime.name}</p>
-                  <p className="text-[10px] font-semibold opacity-70">Lv {slime.level} · {slime.elements.map(e => ELEMENT_ICONS[e]).join('')}</p>
+                  <p className="text-[10px] font-semibold opacity-70">Lv {slime.level} · {slime.elements.map(e => ELEMENT_ICONS[e]).join('')}{getStage(slime.level || 1) === 'baby' ? ' · Baby' : ''}</p>
                   {!tiny && <p className="text-[10px] font-bold">💪 {power}</p>}
                 </button>
               );

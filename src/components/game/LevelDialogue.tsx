@@ -1,6 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { X } from 'lucide-react';
 import { PaintedDialogue } from './PaintedDialogue';
+import { VossPortrait } from './VossPortrait';
+
+type Line = string | { who: 'Glim' | 'Voss'; mood?: string; text: string };
+const lineText = (l: Line | undefined) => (l === undefined ? '' : typeof l === 'string' ? l : l.text);
 
 interface LevelDialogueProps {
   isOpen: boolean;
@@ -43,14 +47,16 @@ const LEVEL_DIALOGUES = {
   15: {
     expression: 'worried' as const,
     dialogue: [
-      "Hm.",
-      "A new Forger. I didn't think the Altar could still produce one.",
-      "I've been collecting.",
-      "A golden slime. I haven't seen one of those in… quite some time.",
-      "I'm not doing anything. Just observing.",
-      "You've done well so far. The breeding, the Habitats — competent work. You should go home and enjoy it.",
-      "The further paths are no place for a Forger."
-    ]
+      { who: 'Voss', mood: 'calm', text: "Hm." },
+      { who: 'Voss', mood: 'calm', text: "A new Forger. I didn't think the Altar could still produce one." },
+      { who: 'Glim', text: "Voss. Whatever you're doing, stop." },
+      { who: 'Voss', mood: 'amused', text: "Glim. Still hiding behind a child. How very like you." },
+      { who: 'Voss', mood: 'calm', text: "I'm not doing anything. Just collecting. A golden slime, there. I haven't seen one of those in quite some time." },
+      { who: 'Glim', text: "They aren't yours to collect." },
+      { who: 'Voss', mood: 'cold', text: "Everything in this valley is a resource. Some of us simply admit it." },
+      { who: 'Voss', mood: 'calm', text: "You've done well, little Forger. The breeding, the Habitats. Competent work. Go home and enjoy it." },
+      { who: 'Voss', mood: 'cold', text: "The further paths are no place for you." }
+    ] as Line[]
   },
   16: {
     expression: 'worried' as const,
@@ -76,7 +82,8 @@ function LevelDialogueInner({ isOpen, onClose, level, onVossEncounter }: LevelDi
   const dialogueData = LEVEL_DIALOGUES[level as keyof typeof LEVEL_DIALOGUES];
   
 
-  const fullText = dialogueData.dialogue[currentDialogueIndex] || '';
+  const line = (dialogueData.dialogue as Line[])[currentDialogueIndex];
+  const fullText = lineText(line);
 
   // Typewriter effect with error handling
   useEffect(() => {
@@ -121,15 +128,16 @@ function LevelDialogueInner({ isOpen, onClose, level, onVossEncounter }: LevelDi
 
   if (!isOpen) return null;
 
-  // For level 15, show Voss instead of Glim
-  const isVoss = level === 15;
+  // each line says who is talking: Voss gets his own face and name
+  const isVoss = typeof line === 'object' && line.who === 'Voss';
+  const mood = typeof line === 'object' ? line.mood : undefined;
 
   return (
     <div className="fixed inset-0 z-[200] pointer-events-none">
       <PaintedDialogue
         speaker={isVoss ? 'Voss' : 'Glim'}
         expression={dialogueData.expression}
-        portrait={isVoss ? <div className="text-8xl flex items-center justify-center h-full">🌑</div> : undefined}
+        portrait={isVoss ? <VossPortrait mood={mood} /> : undefined}
         text={displayedText}
         isTyping={isTyping}
         onNext={handleNext}

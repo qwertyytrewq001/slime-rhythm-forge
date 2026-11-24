@@ -47,7 +47,9 @@ const hasSeenEvent = (eventName: string): boolean => {
 };
 
 export function BazaarModal({ onClose }: BazaarModalProps) {
-  const bazaarScale = Math.max(0.55, Math.min(1, (useStageSize().h - 225) / 345)); // short screens: shrink the cards so they are not cut off
+  const stageH = useStageSize().h;
+  const short = stageH < 560; // a phone held sideways: slim header and tabs, smaller cards
+  const bazaarScale = Math.max(0.55, Math.min(1, (stageH - (short ? 150 : 225)) / 345));
   const { state, dispatch, playerLevel } = useGameState();
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<'eggs' | 'habitats' | 'items'>('eggs');
@@ -300,15 +302,15 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         <img src={`${import.meta.env.BASE_URL}ui/bazaar_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(20,8,30,0.10), rgba(20,8,30,0.45))' }} />
         {/* Header */}
-        <div className="relative shrink-0 bg-[#2a1238]/80 backdrop-blur-sm p-4 text-[#fff3d0] border-b-4 border-[#f2d68a]/60">
+        <div className={`relative shrink-0 bg-[#2a1238]/80 backdrop-blur-sm ${short ? 'px-4 py-1' : 'p-4'} text-[#fff3d0] border-b-4 border-[#f2d68a]/60`}>
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <img src={`${import.meta.env.BASE_URL}ui/tool_bazaar.png`} alt="" draggable={false} className="w-20 h-20" style={{ imageRendering: 'auto' }} />
+              <img src={`${import.meta.env.BASE_URL}ui/tool_bazaar.png`} alt="" draggable={false} className={short ? 'w-12 h-12' : 'w-20 h-20'} style={{ imageRendering: 'auto' }} />
               <div>
-                <div className="text-4xl font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", letterSpacing: '0.06em', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill' }}>
+                <div className={`${short ? 'text-2xl' : 'text-4xl'} font-bold`} style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", letterSpacing: '0.06em', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill' }}>
                   MYSTIC BAZAAR
                 </div>
-                <div className="text-lg opacity-90 font-semibold text-[#ffe9a8] [font-family:Fredoka,sans-serif]">Treasures from slime world...</div>
+                <div className={`${short ? 'text-sm' : 'text-lg'} opacity-90 font-semibold text-[#ffe9a8] [font-family:Fredoka,sans-serif]`}>Treasures from slime world...</div>
               </div>
             </div>
             <div className="flex items-center gap-4">
@@ -552,7 +554,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         </div>
 
         {/* Category Navigation - Bottom */}
-        <div className="shrink-0 bg-[#2a1238]/85 px-4 py-3 border-t-4 border-[#f2d68a]/60">
+        <div className={`shrink-0 bg-[#2a1238]/85 px-4 ${short ? 'py-1' : 'py-3'} border-t-4 border-[#f2d68a]/60`}>
           <div className="flex gap-3 justify-center items-center">
             {([['eggs', 'EGGS'], ['habitats', 'HABITATS'], ['items', 'ITEMS']] as const).map(([key, label]) => (
               <button
@@ -560,7 +562,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                 onClick={() => setSelectedCategory(key)}
                 aria-label={label}
                 className="relative transition-transform hover:scale-105 active:scale-95"
-                style={{ width: 'clamp(120px, 20cqw, 190px)', background: 'transparent', border: 'none', padding: 0, transform: selectedCategory === key ? 'scale(1.08)' : undefined }}
+                style={{ width: short ? 'clamp(90px, 14cqw, 130px)' : 'clamp(120px, 20cqw, 190px)', background: 'transparent', border: 'none', padding: 0, transform: selectedCategory === key ? 'scale(1.08)' : undefined }}
               >
                 <img src={`${import.meta.env.BASE_URL}ui/${selectedCategory === key ? 'baz_tab_on' : 'baz_tab'}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
                 <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 'clamp(13px, 1.5cqw, 18px)', letterSpacing: '0.08em', color: selectedCategory === key ? '#4a2f17' : '#ffe9a8', textShadow: selectedCategory === key ? '0 1px 0 rgba(255,255,255,0.5)' : '0 2px 0 rgba(30,12,4,0.85)' }}>{label}</span>

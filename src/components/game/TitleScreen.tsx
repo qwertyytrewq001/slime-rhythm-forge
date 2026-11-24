@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { audioEngine } from '@/utils/audioEngine';
+import { hasSavedGame, startNewGame } from '@/utils/gameStorage';
 
 interface TitleScreenProps {
   onPlay: () => void;
@@ -17,6 +18,8 @@ export function TitleScreen({ onPlay, muted, onToggleMute }: TitleScreenProps) {
   const [leaving, setLeaving] = useState(false);
   const [logoFailed, setLogoFailed] = useState(false);
   const [playFailed, setPlayFailed] = useState(false);
+  const [sure, setSure] = useState(false);
+  const canReset = hasSavedGame();
 
   const start = () => {
     if (leaving) return;
@@ -65,6 +68,17 @@ export function TitleScreen({ onPlay, muted, onToggleMute }: TitleScreenProps) {
       </button>
 
       <div className="font-semibold text-white/85" style={{ marginTop: 'clamp(8px, 2cqh, 20px)', fontSize: 'clamp(11px, 1.2cqw, 15px)', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Press Play, or hit Enter</div>
+
+      {canReset && (
+        <button
+          onClick={() => (sure ? startNewGame() : setSure(true))}
+          onBlur={() => setSure(false)}
+          className="absolute outline-none rounded-full font-bold"
+          style={{ right: 16, bottom: 16, padding: '6px 14px', fontSize: 13, color: '#fff', background: sure ? 'rgba(200,40,60,0.9)' : 'rgba(20,10,40,0.6)', border: '2px solid rgba(255,255,255,0.4)' }}
+        >
+          {sure ? 'Erase everything? Tap again' : 'New game'}
+        </button>
+      )}
 
       <button onClick={onToggleMute} aria-label={muted ? 'Turn sound on' : 'Turn sound off'} className="absolute outline-none hover:scale-110 transition-transform" style={{ left: 22, bottom: 22, width: 56, background: 'transparent', border: 'none', padding: 0 }}>
         <img src={`${ART}title_btn_sound_${muted ? 'off' : 'on'}.png`} alt="" draggable={false} className="w-full" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.5))' }} />

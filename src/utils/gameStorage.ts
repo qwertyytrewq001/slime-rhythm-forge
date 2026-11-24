@@ -2,7 +2,21 @@ import { GameState } from '@/types/slime';
 
 const STORAGE_KEY = 'rareslime-forge-save';
 
+let saveDisabled = false; // set while starting a new game, so the page closing does not write the old game back
+
+export const hasSavedGame = (): boolean => { try { return !!localStorage.getItem(STORAGE_KEY); } catch { return false; } };
+
+/** Wipes the save, the tutorial progress, the codex and the tips (not the volume settings), then reloads. */
+export function startNewGame(): void {
+  saveDisabled = true;
+  try {
+    Object.keys(localStorage).forEach(k => { if (k !== 'rs_music_vol_v2' && k !== 'rs_sfx_vol_v2') localStorage.removeItem(k); });
+  } catch { /* storage blocked: nothing to wipe */ }
+  location.reload();
+}
+
 export function saveGame(state: GameState): void {
+  if (saveDisabled) return;
   try {
     const data = {
       slimes: state.slimes,

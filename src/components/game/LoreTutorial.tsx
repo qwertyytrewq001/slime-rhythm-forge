@@ -3,6 +3,9 @@ import { BATTLE_STORY } from '@/data/battleStory';
 import { X, ChevronRight, ChevronLeft, SkipForward } from 'lucide-react';
 import { useGameState } from '@/hooks/useGameState';
 import { PaintedDialogue } from './PaintedDialogue';
+import { VossPortrait } from './VossPortrait';
+
+const V = (mood: string, text: string) => ({ speaker: 'Voss' as const, expression: mood, text });
 import { triggerDialogue, clearDialogueTrigger, useDialogueTrigger, getDialogueTrigger } from '@/utils/dialogueTriggers';
 
 // Define the actual trigger types that match the triggerDialogue function
@@ -339,7 +342,11 @@ const LEVEL_DIALOGUE = {
     { expression: 'quiet', text: "Can I tell you something?" },
     { expression: 'quiet', text: "The Forgotten Castle didn't just go quiet. Someone shut it down, a Forger who wanted every slime answering to them." },
     { expression: 'quiet', text: "Voss has found the old books, so he knows what's buried there." },
-    { expression: 'quiet', text: "So do I." }
+    { expression: 'quiet', text: "So do I." },
+    V('amused', "Whispering about my books again? Speak up, Glim. You always did mumble."),
+    { expression: 'serious', text: "You read them, Voss. You never understood them." },
+    V('cold', "I understood them perfectly. Goo is a resource. Slimes are the machinery that makes it. Nothing more."),
+    { expression: 'quiet', text: "...He's listening through the swamp. Keep going." }
   ],
   35: [
     { expression: 'still', text: "Before we go on, there's something you should know." },
@@ -353,7 +360,11 @@ const LEVEL_DIALOGUE = {
     { expression: 'serious', text: "Voss takes Goo. We make slimes. Let's show him which one works better." }
   ],
   45: [
-    { expression: 'smirk', text: "Careful. Whatever he's cooking up in there, he can't control it." }
+    { expression: 'smirk', text: "Careful. Whatever he's cooking up in there, he can't control it." },
+    V('amused', "Almost at my door. How kind of you, saving me the walk."),
+    V('calm', "Do you know, I built a thousand of them. Perfect, obedient, tireless. Not one of them ever wanted anything."),
+    V('cold', "Yours want things. I wonder what that costs you."),
+    { expression: 'serious', text: "Don't listen to him. Everything you've raised wants to be here." }
   ],
   49: [
     { expression: 'scared', text: "This is the last stretch. Whatever happens at the gate, you've already done more than anyone expected." },
@@ -362,7 +373,11 @@ const LEVEL_DIALOGUE = {
   50: [
     { expression: 'determined', text: "This is it." },
     { expression: 'determined', text: "Every slime you've bred and every Habitat you've restored led us here." },
-    { expression: 'determined', text: "Voss takes Goo. We make slimes. Go and show him." }
+    { expression: 'determined', text: "Voss takes Goo. We make slimes. Go and show him." },
+    V('calm', "Come in. I've been expecting you both."),
+    { expression: 'determined', text: "It ends here, Voss." },
+    V('angry', "Does it? I've watched you for fifty battles, little Forger. You feed them, you name them, you let them love you."),
+    V('cold', "Show me what you've bred. Show me what I never could."),
   ]
 };
 
@@ -674,7 +689,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       // but should act as a portal root for its children.
     >
       <PaintedDialogue
-        speaker="Glim"
+        speaker={(currentCard as { speaker?: string } | undefined)?.speaker ?? 'Glim'}
+        portrait={(currentCard as { speaker?: string } | undefined)?.speaker === 'Voss' ? <VossPortrait mood={currentCard?.expression} /> : undefined}
         expression={currentCard?.expression ?? 'shocked'}
         text={displayedText ?? ''}
         isTyping={isTyping}
