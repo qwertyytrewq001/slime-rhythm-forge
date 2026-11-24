@@ -318,7 +318,7 @@ const IslandView: React.FC<{
         <div className="mx-auto flex items-center justify-center" style={{ gap: sw * 0.003, marginTop: sw * 0.002 }}>
           <Heart size={sw * 0.016} kind={joy >= 0.99 ? 'full' : joy > 0.15 ? 'half' : 'empty'} />
           <div className="rounded-full overflow-hidden" style={{ width: '50%', height: Math.max(4, sw * 0.0045), background: 'rgba(0,0,0,0.55)', border: '1px solid rgba(255,255,255,0.4)' }}>
-            <div className="h-full" style={{ width: `${joy * 100}%`, background: 'linear-gradient(90deg,#ff9ac8,#ff4f9d)', transition: 'width 1s' }} />
+            <div className="h-full" style={{ width: `${joy * 100}%`, background: 'linear-gradient(90deg,#ffe27a,#f2a81d)', transition: 'width 1s' }} />
           </div>
         </div>
       </div>

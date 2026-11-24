@@ -6,7 +6,7 @@ import { foodSpriteUrl } from '@/data/foodSprites';
 import { audioEngine } from '@/utils/audioEngine';
 import {
   DECOR, ELEMENT_PERKS, JOY_MAX, MAX_SANCT_LEVEL, UPGRADE_COST, canAffordUpgrade, decorById, decorSlots, giftCap, habitatCapacity, habitatLevel,
-  minutesToNextGift, perksFrom, CAPACITY_AT, GIFT_CAP_AT,
+  minutesToNextGift, perksFrom, CAPACITY_AT, GIFT_CAP_AT, PERK_AREA, PERK_EXPLAIN,
 } from '@/utils/sanctuaryCore';
 import { ArtImg, DECOR_EMOJI, Emblem, Heart, formatMinutes } from './sanctuary/sanctArt';
 
@@ -44,7 +44,8 @@ export function SanctuaryPanel({ habitat: habitatProp, sw = 1000, onClose }: Pan
 
   return (
     <div className="absolute inset-0 flex items-center justify-center bg-black/55" style={{ zIndex: 600 }} onClick={onClose}>
-      <div onClick={e => e.stopPropagation()} className="rounded-3xl shadow-2xl overflow-y-auto" style={{ width: 680 * f, maxHeight: '92%', background: `linear-gradient(${PARCHMENT}, #ecd9a8)`, border: `4px solid ${INK}`, color: INK, padding: 16 * f, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
+      <div onClick={e => e.stopPropagation()} className="rounded-3xl shadow-2xl overflow-y-auto sanct-scroll" style={{ scrollbarWidth: "thin", scrollbarColor: "#4a2f17aa transparent", width: 680 * f, maxHeight: '92%', background: `linear-gradient(${PARCHMENT}, #ecd9a8)`, border: `4px solid ${INK}`, color: INK, padding: 16 * f, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
+        <style>{`.sanct-scroll::-webkit-scrollbar{width:8px}.sanct-scroll::-webkit-scrollbar-track{background:transparent;margin:14px 0}.sanct-scroll::-webkit-scrollbar-thumb{background:rgba(74,47,23,0.55);border-radius:8px}`}</style>
         {/* header */}
         <div className="flex items-center justify-between" style={{ marginBottom: 10 * f }}>
           <div className="flex items-center" style={{ gap: 10 * f }}>
@@ -60,7 +61,7 @@ export function SanctuaryPanel({ habitat: habitatProp, sw = 1000, onClose }: Pan
         {/* joy and gifts */}
         <Card f={f} title="Joy and gifts" icon={<Heart size={20 * f} />}>
           <div className="rounded-full overflow-hidden" style={{ height: 14 * f, background: 'rgba(0,0,0,0.25)', border: `2px solid ${INK}` }}>
-            <div className="h-full" style={{ width: `${joy * 100}%`, background: 'linear-gradient(90deg,#ff9ac8,#ff4f9d)' }} />
+            <div className="h-full" style={{ width: `${joy * 100}%`, background: 'linear-gradient(90deg,#ffe27a,#f2a81d)' }} />
           </div>
           <div className="flex justify-between font-semibold" style={{ fontSize: 12 * f, marginTop: 4 * f }}>
             <span>Next gift: {formatMinutes(eta)}</span>
@@ -71,9 +72,15 @@ export function SanctuaryPanel({ habitat: habitatProp, sw = 1000, onClose }: Pan
 
         {/* perk */}
         <Card f={f} title={`Perk: ${perk.title}`}>
-          <div className="font-semibold" style={{ fontSize: 13 * f }}>Now: {perk.text(level)}</div>
-          {level < MAX_SANCT_LEVEL && <div className="opacity-75" style={{ fontSize: 12 * f }}>Next level: {perk.text(level + 1)}</div>}
+          <div className="flex items-center flex-wrap" style={{ gap: 6 * f, marginBottom: 4 * f }}>
+            <span className="rounded-full font-bold" style={{ fontSize: 11 * f, padding: `1px ${8 * f}px`, background: '#e9dcb8', border: `2px solid ${INK}55` }}>Helps: {PERK_AREA[habitat.element]}</span>
+            <span className="rounded-full font-bold" style={{ fontSize: 11 * f, padding: `1px ${8 * f}px`, background: habitat.assignedSlimeIds.length ? '#d9f7c8' : '#ffd9d0', border: `2px solid ${habitat.assignedSlimeIds.length ? '#3a8a2a' : '#c0392b'}` }}>{habitat.assignedSlimeIds.length ? 'Active now' : 'Switched off'}</span>
+          </div>
+          <div style={{ fontSize: 12 * f, marginBottom: 4 * f }} className="opacity-80">{PERK_EXPLAIN[habitat.element]}</div>
+          <div className="font-semibold" style={{ fontSize: 13 * f }}>Right now: {perk.text(level)}</div>
+          {level < MAX_SANCT_LEVEL && <div className="opacity-75" style={{ fontSize: 12 * f }}>After the next upgrade: {perk.text(level + 1)}</div>}
           {!habitat.assignedSlimeIds.length && <div style={{ fontSize: 12 * f, color: '#a8461a' }} className="font-bold">Move in a {ELEMENT_DISPLAY_NAMES[habitat.element]} slime to switch this on.</div>}
+          <div className="opacity-65" style={{ fontSize: 11 * f, marginTop: 4 * f }}>Every habitat gives one perk like this while a matching slime lives in it. Perks from all your habitats add together, and upgrading a habitat makes its perk stronger.</div>
         </Card>
 
         {/* upgrade */}

@@ -150,22 +150,31 @@ export const RARITY_TIER_STARS: Record<string, number> = {
 
 // ===== PROGRESSIVE ELEMENT UNLOCKING =====
 
+/** New players start with four elements; each tier opens at a player level (resonance), so the game widens slowly. */
 export const ELEMENT_TIERS: Record<number, SlimeElement[]> = {
   1: ['fire', 'water', 'wind', 'earth'],
-  2: ['plant', 'light', 'shadow', 'ice', 'electric', 'metal'],
-  3: [], // All 10 core elements unlocked by tier 2
+  2: ['plant', 'electric'],
+  3: ['ice', 'metal'],
+  4: ['light', 'shadow'],
 };
+export const ELEMENT_TIER_LEVEL: Record<number, number> = { 1: 1, 2: 3, 3: 6, 4: 10 };
 
 export function getPlayerLevel(totalBreeds: number, slimeCount: number): number {
   return Math.floor((totalBreeds * 2 + slimeCount) / 5) + 1;
 }
 
 export function getUnlockedElements(level: number): SlimeElement[] {
-  return [...ELEMENT_TIERS[1], ...ELEMENT_TIERS[2]];
+  return Object.keys(ELEMENT_TIERS).map(Number).filter(t => level >= ELEMENT_TIER_LEVEL[t]).flatMap(t => ELEMENT_TIERS[t]);
+}
+
+/** The player level at which an element's egg and habitat open up. */
+export function elementUnlockLevel(el: SlimeElement): number {
+  const t = Object.keys(ELEMENT_TIERS).map(Number).find(k => ELEMENT_TIERS[k].includes(el));
+  return t ? ELEMENT_TIER_LEVEL[t] : 1;
 }
 
 export function getElementTierForLevel(level: number): number {
-  return level >= 10 ? 2 : 1;
+  return Object.keys(ELEMENT_TIER_LEVEL).map(Number).filter(t => level >= ELEMENT_TIER_LEVEL[t]).length;
 }
 
 // Habitat costs per element - Updated for 10 core elements

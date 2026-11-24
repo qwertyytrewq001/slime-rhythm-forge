@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { audioEngine } from '@/utils/audioEngine';
-import { ELEMENT_TIERS, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
+import { ELEMENT_TIERS, ELEMENT_TIER_LEVEL, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
 import { Emblem } from './sanctuary/sanctArt';
 
 const U = `${import.meta.env.BASE_URL}ui/`;
@@ -38,7 +38,7 @@ export function PlayerLevelUpPopup() {
   if (!localLevelUp && !isVisible) return null;
 
   const level = localLevelUp?.level || 0;
-  const unlockedElements = level === 6 ? ELEMENT_TIERS[2] : level === 11 ? ELEMENT_TIERS[3] : [];
+  const unlockedElements = Object.keys(ELEMENT_TIERS).map(Number).filter(t => ELEMENT_TIER_LEVEL[t] === level).flatMap(t => ELEMENT_TIERS[t]);
   const hasUnlocks = unlockedElements.length > 0;
 
   return (

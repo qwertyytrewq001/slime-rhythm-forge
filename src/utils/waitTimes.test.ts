@@ -11,7 +11,9 @@ describe('waiting times and rushing', () => {
       expect(breedMs(tiers[i])).toBeGreaterThan(breedMs(tiers[i - 1]));
       expect(hatchMs(tiers[i])).toBeGreaterThan(hatchMs(tiers[i - 1]));
     }
-    expect(hatchMs('Common')).toBeGreaterThanOrEqual(2 * 60_000);
+    expect(hatchMs('Common')).toBe(30_000);
+    expect(breedMs('Common')).toBe(60_000);
+    expect(breedMs('Legendary')).toBeGreaterThanOrEqual(15 * 60_000);
   });
 
   it('rushing a crop costs real goo, and the long crops cost the most', () => {

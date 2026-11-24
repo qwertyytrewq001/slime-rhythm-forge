@@ -30,6 +30,8 @@ interface FeedTrayProps {
   /** origin is where the food was released, or the tray item's centre for a tap. */
   onFeed: (food: SlimeFoodType, slimeId: string, origin: { x: number; y: number }) => void;
   onNeedSelect: () => void;
+  /** Food let go over bare floor instead of a slime: it lands there and a slime comes to eat it. */
+  onThrow?: (food: SlimeFoodType, at: { x: number; y: number }) => void;
 }
 
 interface Drag {
@@ -42,7 +44,7 @@ interface Drag {
   pointerId: number;
 }
 
-export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, onDragMove, onOpenFarm, onFeed, onNeedSelect }: FeedTrayProps) {
+export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, onDragMove, onOpenFarm, onFeed, onNeedSelect, onThrow }: FeedTrayProps) {
   const { state } = useGameState();
   const [drag, setDrag] = useState<Drag | null>(null);
   const dragRef = useRef<Drag | null>(null);
@@ -86,6 +88,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
 
       if (cur.moved) {
         if (over) onFeed(cur.food, over, { x: e.clientX, y: e.clientY });
+        else onThrow?.(cur.food, { x: e.clientX, y: e.clientY });
       } else if (selectedSlimeId) {
         // plain tap: feed the selected slime
         onFeed(cur.food, selectedSlimeId, { x: cur.startX, y: cur.startY });

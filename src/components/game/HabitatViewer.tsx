@@ -882,7 +882,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
 
       {(selected || targeted) && (
         <div
-          className={`absolute left-1/2 bottom-[-2px] -translate-x-1/2 h-6 rounded-[50%] blur-[3px] ${targeted ? 'w-36 bg-[#7CFFB2]/70' : 'w-28 bg-[#FF7EB6]/60 animate-pulse'}`}
+          className={`absolute left-1/2 bottom-[-2px] -translate-x-1/2 h-6 rounded-[50%] blur-[3px] ${targeted ? 'w-36 bg-[#7CFFB2]/70' : 'w-28 bg-[#f2b632]/60 animate-pulse'}`}
         />
       )}
 
@@ -912,7 +912,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
               <span className="text-[10px] font-black text-amber-300">Lv {slime.level}</span>
             </div>
             <div className="w-24 h-2 rounded-full bg-black/60 border border-white/25 overflow-hidden">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] transition-all duration-500" style={{ width: `${pct}%` }} />
+              <div className="h-full rounded-full bg-gradient-to-r from-[#8ee06a] to-[#3fae3a] transition-all duration-500" style={{ width: `${pct}%` }} />
             </div>
           </div>
         )}
@@ -1131,6 +1131,69 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     setTimeout(() => triggerDialogue('firstFeed'), 2400);
   };
 
+  // ---- throwing food on the floor: it lands where you let go, the slimes run to it and the nearest one eats ----
+  const [pellets, setPellets] = useState<Array<{ id: number; food: SlimeFoodType; x: number; y: number; born: number }>>([]);
+  const pelletsRef = useRef(pellets);
+  pelletsRef.current = pellets;
+  const pelletId = useRef(0);
+  const pelletAttract = useRef(false);
+
+  const handleThrow = (food: SlimeFoodType, at: { x: number; y: number }) => {
+    const pending = pelletsRef.current.filter(p => p.food === food).length;
+    if ((stateRef.current.inventory[food] || 0) - pending < 1) {
+      addFx({ kind: 'text', x: at.x - 60, y: at.y - 40, text: 'None left in the bag', color: '#ff8a8a' }, 1400);
+      return;
+    }
+    if (pelletsRef.current.length >= 4) return;
+    audioEngine.playSfx('tap');
+    // food lands on the ground where slimes can walk, so a drop in the sky or the far edge still gets eaten
+    const rect = sceneRef.current?.getBoundingClientRect();
+    const land = rect
+      ? { x: Math.min(rect.left + rect.width * 0.88, Math.max(rect.left + rect.width * 0.12, at.x)), y: Math.min(rect.top + rect.height * 0.8, Math.max(rect.top + rect.height * 0.64, at.y)) }
+      : at;
+    setPellets(list => [...list, { id: ++pelletId.current, food, x: land.x, y: land.y, born: Date.now() }]);
+  };
+
+  useEffect(() => {
+    const id = window.setInterval(() => {
+      const list = pelletsRef.current;
+      const now = Date.now();
+      if (!list.length) {
+        if (pelletAttract.current && !draggingFoodRef.current) { attractRef.current = null; pelletAttract.current = false; }
+        return;
+      }
+      const fresh = list.filter(p => now - p.born < 25_000); // nobody came: it vanishes and costs nothing
+      if (fresh.length !== list.length) setPellets(fresh);
+      if (!fresh.length) return;
+      if (!draggingFoodRef.current) { attractRef.current = { x: fresh[0].x, y: fresh[0].y }; pelletAttract.current = true; }
+      const live = stateRef.current;
+      const hab = live.habitats.find(h => h.id === habitatId);
+      const hungry = (hab?.assignedSlimeIds ?? []).map(sid => live.slimes.find(s => s.id === sid)).filter((s): s is Slime => !!s && s.level < 50);
+      for (const p of fresh) {
+        let best: { slime: Slime; c: { x: number; y: number }; d: number } | null = null;
+        for (const sl of hungry) {
+          const c = centerOf(sl.id);
+          if (!c) continue;
+          const d = Math.hypot(c.x - p.x, c.y - p.y);
+          if (!best || d < best.d) best = { slime: sl, c, d };
+        }
+        if (best && best.d < 80) {
+          setPellets(l => l.filter(x => x.id !== p.id));
+          if ((live.inventory[p.food] || 0) < 1) continue;
+          dispatch({ type: 'FEED_SLIME_XP', slimeId: best.slime.id, foodType: p.food });
+          dispatch({ type: 'SANCT_JOY', habitatId, source: 'feed', now: Date.now(), rolls: Array.from({ length: 12 }, Math.random) });
+          setEatNonce(n => ({ ...n, [best!.slime.id]: (n[best!.slime.id] || 0) + 1 }));
+          audioEngine.playSfx('collect');
+          addFx({ kind: 'burst', x: best.c.x, y: best.c.y - 20, emojis: ['💖', '✨'], count: 6 });
+          addFx({ kind: 'text', x: best.c.x + 35, y: best.c.y - 45, text: `+${SLIME_FOODS[p.food].xpValue} XP`, color: '#7CFFB2' }, 1300);
+          break;
+        }
+      }
+    }, 250);
+    return () => window.clearInterval(id);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [habitatId]);
+
   // One controller for every pointer interaction with the slimes. It finds the slime under the
   // pointer by geometry instead of relying on element hit-testing, so it keeps working while a
   // slime is moving, tilted, squashed or has anything transparent over it.
@@ -1268,11 +1331,11 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
       className="sanctuary-root fixed inset-0 z-[10000] flex flex-col bg-black/80 select-none"
       style={{ pointerEvents: 'auto', WebkitUserSelect: 'none', userSelect: 'none', WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none' }}
     >
-      <div className="sticky top-0 z-40 flex-shrink-0 bg-gradient-to-b from-black/95 via-black/90 to-black/70 pt-4 pb-8 px-6 backdrop-blur-md border-b border-white/10">
+      <div className="sticky top-0 z-40 flex-shrink-0 pt-3 pb-4 px-6 backdrop-blur-md" style={{ background: "linear-gradient(rgba(46,26,70,0.97), rgba(46,26,70,0.84))", borderBottom: "3px solid #f2b632" }}>
         <button onClick={onClose} className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-lg transition-all">
-          <ChevronLeft className="w-6 h-6 text-[#FF7EB6]" />
+          <ChevronLeft className="w-6 h-6 text-[#f6e8c3]" />
         </button>
-        <h2 className="text-center text-2xl font-black uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive", color: theme.accent }}>
+        <h2 className="text-center text-2xl font-black uppercase tracking-widest" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>
           {ELEMENT_DISPLAY_NAMES[habitat.element]} Habitat
         </h2>
         <p className="text-center text-xs text-white/60 mt-2 font-bold tracking-wider">{theme.desc}</p>
@@ -1280,7 +1343,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           <div title="Joy: fill it for a gift. Petting and feeding help." className="flex items-center gap-2">
             <Heart size={26} />
             <div className="rounded-full overflow-hidden" style={{ width: 120, height: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.4)' }}>
-              <div className="h-full" style={{ width: `${((habitat.joy ?? 0) / JOY_MAX) * 100}%`, background: 'linear-gradient(90deg,#ff9ac8,#ff4f9d)', transition: 'width 0.6s' }} />
+              <div className="h-full" style={{ width: `${((habitat.joy ?? 0) / JOY_MAX) * 100}%`, background: 'linear-gradient(90deg,#ffe27a,#f2a81d)', transition: 'width 0.6s' }} />
             </div>
           </div>
           {(habitat.gifts?.length ?? 0) > 0 && (
@@ -1292,13 +1355,13 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
                 });
                 audioEngine.playSfx('collect');
               }}
-              className="rounded-full px-3 py-1 text-sm font-black text-white bg-gradient-to-r from-[#FF7EB6] to-[#FF1493] hover:scale-105 transition-transform animate-pulse"
+              className="rounded-full px-3 py-1 text-sm font-black text-[#4a2f17] border-2 border-[#4a2f17] hover:scale-105 transition-transform animate-pulse" style={{ background: "linear-gradient(#ffe98a,#f2b632)", boxShadow: "0 2px 0 #8a5a14" }}
               aria-label="Collect gifts"
             >
               🎁 {habitat.gifts?.length}
             </button>
           )}
-          <button onClick={() => setManageOpen(true)} className="rounded-full px-3 py-1 text-sm font-black text-[#4a2f17] bg-[#f6e8c3] border-2 border-[#4a2f17] hover:scale-105 transition-transform" aria-label="Manage habitat">⚙ Manage</button>
+          <button onClick={() => setManageOpen(true)} className="rounded-full px-3 py-1 text-sm font-black text-[#4a2f17] border-2 border-[#4a2f17] hover:scale-105 transition-transform" style={{ background: "linear-gradient(#f6e8c3,#ecd9a8)", boxShadow: "0 2px 0 rgba(0,0,0,0.4)" }} aria-label="Manage habitat">⚙ Manage</button>
         </div>
       </div>
 
@@ -1321,7 +1384,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
               slime={slime}
               selected={selectedId === slime.id}
               targeted={targetId === slime.id}
-              dragging={dragging}
+              dragging={dragging || pellets.length > 0}
               wantsFood={hasFood && slime.level < 50}
               landmarks={[...(LANDMARKS[habitat.element] ?? []), ...(habitat.decor ?? []).map((id, i) => ({ x: [12, 84, 28, 68][i % 4], y: 70, e: DECOR_EMOJI[id] ?? '✨' }))]}
               attractRef={attractRef}
@@ -1337,10 +1400,10 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
             <div className="absolute bottom-1/4 left-[15%] z-[150]" data-sanctuary-ui>
               <button
                 onClick={() => setGalleryOpen(true)}
-                className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#FF7EB6] hover:scale-110 transition-all flex items-center justify-center group"
+                className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#f2b632] hover:scale-110 transition-all flex items-center justify-center group"
                 aria-label="Add a slime"
               >
-                <Plus className="w-8 h-8 text-white/40 group-hover:text-[#FF7EB6]" />
+                <Plus className="w-8 h-8 text-white/40 group-hover:text-[#f2b632]" />
               </button>
             </div>
           )}
@@ -1355,16 +1418,17 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
             onDragMove={p => { attractRef.current = p; }}
             onOpenFarm={onOpenFarm}
             onFeed={handleFeed}
+            onThrow={handleThrow}
             onNeedSelect={() => {
               const first = assignedSlimes[0];
               const c = first && centerOf(first.id);
-              if (c) addFx({ kind: 'text', x: c.x - 70, y: c.y - 90, text: 'Drag it onto a slime!', color: '#ffffff' }, 1500);
+              if (c) addFx({ kind: 'text', x: c.x - 70, y: c.y - 90, text: 'Drag it onto a slime, or drop it on the floor!', color: '#ffffff' }, 1500);
             }}
           />
         )}
       </div>
 
-      <div className="sticky bottom-0 z-40 flex-shrink-0 bg-gradient-to-t from-black/95 via-black/90 to-black/70 px-6 py-4 backdrop-blur-md border-t border-white/10">
+      <div className="sticky bottom-0 z-40 flex-shrink-0 px-6 py-3 backdrop-blur-md" style={{ background: "linear-gradient(rgba(46,26,70,0.84), rgba(46,26,70,0.97))", borderTop: "3px solid #f2b632" }}>
         <div className="flex items-center justify-between">
           <div>
             <p className="text-xs text-white/60 font-bold tracking-wider uppercase">Inhabitants</p>
@@ -1372,7 +1436,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           </div>
           <div className="text-right">
             <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">Available Goo</p>
-            <p className="text-lg font-black text-[#FF7EB6]">{state.goo.toFixed(1)} 💧</p>
+            <p className="text-lg font-black text-[#f2d98a]">{state.goo.toFixed(1)} 💧</p>
           </div>
         </div>
       </div>
@@ -1390,6 +1454,10 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         </SheetContent>
       </Sheet>
 
+      {pellets.map(p => (
+        <img key={p.id} src={foodSpriteUrl(p.food)} alt="" draggable={false} className="fixed pointer-events-none" style={{ left: p.x - 20, top: p.y - 20, width: 40, height: 40, zIndex: 40, imageRendering: 'auto', filter: 'drop-shadow(0 4px 3px rgba(0,0,0,0.5))', animation: 'pelletDrop 0.35s ease-out both' }} />
+      ))}
+      <style>{`@keyframes pelletDrop { 0% { transform: translateY(-40px) scale(1.3); opacity: 0.4 } 70% { transform: translateY(4px) scale(0.95) } 100% { transform: none; opacity: 1 } }`}</style>
       <FxLayer items={fx} />
 
       <style>{`

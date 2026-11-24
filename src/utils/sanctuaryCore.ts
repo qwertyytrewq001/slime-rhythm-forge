@@ -75,6 +75,23 @@ export const ELEMENT_PERKS: Record<SlimeElement, PerkInfo> = {
   shadow: { title: 'Gentle Dusk', text: l => `Joy builds ${pct(0.1 * l)} faster`, apply: (p, l) => { p.joyMult += 0.1 * l; } },
 };
 
+/** Where an element's perk shows up, and a plain sentence on what it does, for the habitat panel. */
+export const PERK_AREA: Record<SlimeElement, string> = {
+  plant: 'Farm', earth: 'Farm', wind: 'Farm', water: 'Farm', electric: 'Farm', metal: 'Farm', light: 'Farm', fire: 'Gifts', ice: 'Gifts', shadow: 'Joy',
+};
+export const PERK_EXPLAIN: Record<SlimeElement, string> = {
+  plant: 'When you harvest on the Farm, a plant habitat gives you a small chance of getting extra crops.',
+  earth: 'An earth habitat adds a small chance that a crop you harvest turns out golden, which is worth more.',
+  wind: 'A wind habitat makes everything you plant on the Farm finish growing sooner.',
+  water: 'A water habitat makes seeds cheaper to buy at the Farm.',
+  electric: 'An electric habitat makes it cheaper to speed up a crop with goo.',
+  metal: 'A metal habitat makes buying new Farm land cheaper.',
+  light: 'A light habitat gives bonus Farm XP every time you harvest, which levels the Farm up faster.',
+  fire: 'A fire habitat makes the goo gifts your slimes leave bigger.',
+  ice: 'An ice habitat can keep one more gift waiting before it stops making new ones.',
+  shadow: 'A shadow habitat makes Joy fill up faster in every habitat, so gifts come sooner.',
+};
+
 // ---- decoration slimes use; each raises how fast Joy builds ----
 export interface DecorDef {
   id: string;

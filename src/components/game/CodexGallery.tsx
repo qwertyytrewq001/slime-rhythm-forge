@@ -125,12 +125,12 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
         }}
       >
         {isDiscovered && <div className="absolute left-3 right-3 top-0 h-1.5 rounded-b-full" style={{ background: tier }} />}
-        <div className="w-full h-32 flex items-center justify-center mb-2 rounded-xl" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%)' }}>
+        <div className="w-full h-40 flex items-center justify-center mb-2 rounded-xl" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%)' }}>
           <div
             className="transition-all duration-500"
             style={{
               // an undiscovered slime is a solid dark shape: you can see its outline, not its colours
-              filter: isDiscovered ? 'none' : 'brightness(0) opacity(0.62) drop-shadow(0 0 1px rgba(255,255,255,0.35))',
+              filter: isDiscovered ? 'none' : 'url(#codex-silhouette)',
             }}
           >
             <SlimeCanvas slime={displaySlime} size={120} animated={false} sizeMultiplier={2.2} />
@@ -154,6 +154,12 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
 
   return (
     <div className="relative flex h-full text-slate-900 custom-scrollbar" style={{ background: '#1d1630' }}>
+      {/* turns any sprite into one solid dark shape, even a see-through ghost: colour off, transparency pushed to solid */}
+      <svg width="0" height="0" style={{ position: 'absolute' }} aria-hidden>
+        <filter id="codex-silhouette" colorInterpolationFilters="sRGB">
+          <feColorMatrix type="matrix" values="0 0 0 0 0.2  0 0 0 0 0.15  0 0 0 0 0.09  0 0 0 7 -0.9" />
+        </filter>
+      </svg>
       {/* painted library behind the panels, darkened so the parchment reads */}
       <img src={`${import.meta.env.BASE_URL}ui/codex_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(rgba(24,12,40,0.62), rgba(24,12,40,0.78))' }} />

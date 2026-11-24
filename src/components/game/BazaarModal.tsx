@@ -4,7 +4,7 @@ import { useGameState, xpToNextLevel } from '@/hooks/useGameState';
 import { createElementSlime } from '@/utils/slimeGenerator';
 import { audioEngine } from '@/utils/audioEngine';
 import { SlimeTraits, SlimeElement, Slime } from '@/types/slime';
-import { getUnlockedElements, ELEMENT_DISPLAY_NAMES, HABITAT_COSTS, HABITAT_THEMES, getPlayerLevel, ELEMENT_COLORS, ALL_ELEMENTS } from '@/data/traitData';
+import { getUnlockedElements, elementUnlockLevel, ELEMENT_DISPLAY_NAMES, HABITAT_COSTS, HABITAT_THEMES, getPlayerLevel, ELEMENT_COLORS, ALL_ELEMENTS } from '@/data/traitData';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { ShoppingBag, Sparkles, Home, Egg, X, Trophy, Star, Zap, Shield } from 'lucide-react';
@@ -31,8 +31,8 @@ const ITEM_SHOP = [
   { id: 'lucky_charm', name: 'Lucky Charm', desc: 'Your next breed has better odds of a rare slime', cost: 300, level: 3, icon: '🍀', category: 'breeding', rarity: 'rare' },
 ];
 
-const SHOP_EGG_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
-const SHOP_HABITAT_ELEMENTS: SlimeElement[] = ALL_ELEMENTS;
+const SHOP_EGG_ELEMENTS: SlimeElement[] = [...ALL_ELEMENTS].sort((a, b) => elementUnlockLevel(a) - elementUnlockLevel(b));
+const SHOP_HABITAT_ELEMENTS: SlimeElement[] = [...ALL_ELEMENTS].sort((a, b) => elementUnlockLevel(a) - elementUnlockLevel(b));
 
 interface BazaarModalProps {
   onClose: () => void;
@@ -68,7 +68,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
   }, []);
 
   const getRequiredLevel = (element: SlimeElement): number => {
-    return 1;
+    return elementUnlockLevel(element);
   };
 
   const handleBuyEgg = (element: SlimeElement) => {
@@ -344,12 +344,13 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                 <div className="flex gap-8 flex-1 justify-center items-stretch">
                   {selectedCategory === 'eggs' && (
                     getCurrentPageItems().map(elem => {
+                      const lockedEl = !unlockedElements.includes(elem);
                       return (
                         <div
                           key={elem}
                           onClick={() => handleBuyEgg(elem)}
                           className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-80 baz-card px-5 pt-6 pb-4 ${
-                            state.goo >= eggCost(elem) 
+                            lockedEl ? 'opacity-60 grayscale' : state.goo >= eggCost(elem) 
                               ? 'hover:scale-105' 
                               : 'opacity-40 grayscale'
                           }`}
@@ -397,7 +398,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
-                              <span className="text-sm font-bold">{eggCost(elem)}g</span>
+                              <span className="text-sm font-bold">{lockedEl ? `🔒 Level ${elementUnlockLevel(elem)}` : `${eggCost(elem)}g`}</span>
                             </div>
                           </div>
                         </div>
@@ -409,12 +410,13 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                     getCurrentPageItems().map(elem => {
                       const cost = HABITAT_COSTS[elem];
                       const theme = HABITAT_THEMES[elem];
+                      const lockedEl = !unlockedElements.includes(elem);
                       return (
                         <div
                           key={elem}
-                          onClick={() => state.goo >= cost && handleBuyHabitat(elem, cost)}
+                          onClick={() => (lockedEl ? toast({ title: 'Not unlocked yet', description: `This habitat opens at Level ${elementUnlockLevel(elem)}. Breed and collect slimes to raise your level.`, variant: 'destructive' }) : state.goo >= cost && handleBuyHabitat(elem, cost))}
                           className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-[21rem] baz-card px-5 pt-6 pb-4 ${
-                            state.goo >= cost 
+                            lockedEl ? 'opacity-60 grayscale' : state.goo >= cost 
                               ? 'hover:scale-105' 
                               : 'opacity-40 grayscale'
                           }`}
@@ -455,7 +457,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                             <div 
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (state.goo >= cost) {
+                                if (!lockedEl && state.goo >= cost) {
                                   handleBuyHabitat(elem, cost);
                                 }
                               }}
@@ -465,7 +467,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
-                              <span className="text-sm font-bold">{cost}g</span>
+                              <span className="text-sm font-bold">{lockedEl ? `🔒 Level ${elementUnlockLevel(elem)}` : `${cost}g`}</span>
                             </div>
                           </div>
                         </div>

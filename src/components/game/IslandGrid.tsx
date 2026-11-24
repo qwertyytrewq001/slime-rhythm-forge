@@ -54,7 +54,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
             maxWidth: '85cqw',
             background: 'rgba(255, 255, 255, 0.95)',
             borderRadius: '24px',
-            border: '4px solid #FF7EB6',
+            border: '4px solid #f2b632',
             padding: '16px 24px',
             boxShadow: '0 20px 50px rgba(255, 126, 182, 0.2)'
           }}
@@ -62,7 +62,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
           <div className="h-full flex flex-col">
             {/* Character Name */}
             <div className="mb-3">
-              <h3 className="text-[#FF7EB6] font-black text-xl uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>Habitat Placement</h3>
+              <h3 className="text-[#f2b632] font-black text-xl uppercase tracking-widest" style={{ fontFamily: "'Press Start 2P', cursive" }}>Habitat Placement</h3>
             </div>
 
             {/* Dialogue Text */}
@@ -90,19 +90,19 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
         <button 
           onClick={() => setCurrentPage(prev => Math.max(0, prev - 1))}
           disabled={currentPage === 0}
-          className="p-3 bg-black/60 border-2 border-[#FF7EB6] rounded-full hover:bg-[#FF7EB6] hover:text-black disabled:opacity-10 transition-all shadow-[0_0_15px_rgba(255,126,182,0.3)]"
+          className="p-3 bg-black/60 border-2 border-[#f2b632] rounded-full hover:bg-[#f2b632] hover:text-black disabled:opacity-10 transition-all shadow-[0_0_15px_rgba(242,182,50,0.3)]"
         >
           <ChevronLeft className="w-8 h-8" />
         </button>
 
-        <h3 className="text-xl text-center text-[#FF7EB6] font-black uppercase tracking-[0.4em] drop-shadow-[0_2px_10px_#FF7EB660]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
+        <h3 className="text-xl text-center text-[#f2b632] font-black uppercase tracking-[0.4em] drop-shadow-[0_2px_10px_#f2b63260]" style={{ fontFamily: "'Press Start 2P', cursive" }}>
           Mystic Habitats ({currentPage + 1}/{totalPages})
         </h3>
 
         <button 
           onClick={() => setCurrentPage(prev => Math.min(totalPages - 1, prev + 1))}
           disabled={currentPage >= totalPages - 1}
-          className="p-3 bg-black/60 border-2 border-[#FF7EB6] rounded-full hover:bg-[#FF7EB6] hover:text-black disabled:opacity-10 transition-all shadow-[0_0_15px_rgba(255,126,182,0.3)]"
+          className="p-3 bg-black/60 border-2 border-[#f2b632] rounded-full hover:bg-[#f2b632] hover:text-black disabled:opacity-10 transition-all shadow-[0_0_15px_rgba(242,182,50,0.3)]"
         >
           <ChevronRight className="w-8 h-8" />
         </button>
@@ -117,7 +117,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
             return (
               <div 
                 key={`empty-${i}`} 
-                className="aspect-square rounded-[2.5rem] border-4 border-dashed border-white/30 bg-black/50 backdrop-blur-sm flex items-center justify-center cursor-pointer transition-all hover:border-[#FF7EB6] hover:bg-black/60 hover:scale-105"
+                className="aspect-square rounded-[2.5rem] border-4 border-dashed border-white/30 bg-black/50 backdrop-blur-sm flex items-center justify-center cursor-pointer transition-all hover:border-[#f2b632] hover:bg-black/60 hover:scale-105"
                 onClick={() => {
                   if (state.pendingHabitatPlacement) {
                     dispatch({ type: 'PLACE_HABITAT_IN_SLOT', element: state.pendingHabitatPlacement.element, gridX: slotX, gridY: slotY });
@@ -126,7 +126,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
               >
                 <span className="text-sm font-black uppercase tracking-widest transition-colors">
                   {state.pendingHabitatPlacement ? (
-                    <span className="text-[#FF7EB6] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Click to Place</span>
+                    <span className="text-[#f2b632] drop-shadow-[0_2px_4px_rgba(0,0,0,0.8)]">Click to Place</span>
                   ) : (
                     <span className="text-white/40">Available Slot</span>
                   )}
@@ -175,8 +175,8 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
                   </div>
                 ))}
                 {assignedSlimes.length < habitat.capacity && (
-                  <div className="w-20 h-20 rounded-2xl border-4 border-dashed flex items-center justify-center transition-colors group-hover:border-[#FF7EB6]/60" style={{ borderColor: theme.accent + '40' }}>
-                    <span className="text-3xl font-black text-white/20 group-hover:text-[#FF7EB6] animate-pulse">+</span>
+                  <div className="w-20 h-20 rounded-2xl border-4 border-dashed flex items-center justify-center transition-colors group-hover:border-[#f2b632]/60" style={{ borderColor: theme.accent + '40' }}>
+                    <span className="text-3xl font-black text-white/20 group-hover:text-[#f2b632] animate-pulse">+</span>
                   </div>
                 )}
               </div>
@@ -192,7 +192,7 @@ export function IslandGrid({ onHabitatClick }: IslandGridProps = {}) {
                   e.stopPropagation();
                   onHabitatClick?.(habitat.id);
                 }}
-                className="absolute top-4 right-4 p-2 bg-black/60 hover:bg-[#FF7EB6] hover:text-black rounded-xl opacity-0 group-hover:opacity-100 transition-all z-20 shadow-xl border-2 border-white/10"
+                className="absolute top-4 right-4 p-2 bg-black/60 hover:bg-[#f2b632] hover:text-black rounded-xl opacity-0 group-hover:opacity-100 transition-all z-20 shadow-xl border-2 border-white/10"
               >
                 <Maximize2 className="w-5 h-5" />
               </button>
