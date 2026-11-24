@@ -55,7 +55,8 @@ export function Achievements({ onClose }: { onClose: () => void }) {
           </div>
         </div>
 
-        <div className="overflow-y-auto p-4 space-y-5">
+        <style>{`.ach-scroll{scrollbar-width:thin;scrollbar-color:#8a5a14 transparent}.ach-scroll::-webkit-scrollbar{width:10px}.ach-scroll::-webkit-scrollbar-track{background:rgba(74,47,23,0.12);border-radius:8px;margin:6px 0}.ach-scroll::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#f2b632,#b8801a);border:2px solid #4a2f17;border-radius:8px}`}</style>
+        <div className="overflow-y-auto p-4 space-y-5 ach-scroll">
           {ACHIEVEMENT_CATEGORIES.map(category => {
             const defs = ACHIEVEMENT_DEFS.filter(d => d.category === category);
             const done = defs.filter(d => state.achievements.find(a => a.id === d.id)?.unlocked).length;
