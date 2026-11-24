@@ -112,7 +112,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       const ritual = {
         parent1Id: slot1Slime.id,
         parent2Id: slot2Slime.id,
-        endTime: Date.now() + breedMs(resultSlime.rarityTier, state.totalBreeds === 0),
+        endTime: Date.now() + breedMs(resultSlime.rarityTier, state.totalBreeds === 0, resultSlime.elements),
         resultSlime,
       };
       dispatch({ type: 'START_BREEDING', ritual });
@@ -347,7 +347,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 // the egg that was decided when the ritual started goes to the hatchery
                 const ritual = state.activeBreeding;
                 if (ritual?.resultSlime) {
-                  dispatch({ type: 'START_HATCHING', slime: ritual.resultSlime, duration: hatchMs(ritual.resultSlime.rarityTier, state.totalBreeds === 0) });
+                  dispatch({ type: 'START_HATCHING', slime: ritual.resultSlime, duration: hatchMs(ritual.resultSlime.rarityTier, state.totalBreeds === 0, ritual.resultSlime.elements) });
                   dispatch({ type: 'ADD_BREED_HISTORY', result: { parent1Id: ritual.parent1Id, parent2Id: ritual.parent2Id, childId: ritual.resultSlime.id, timestamp: Date.now() } });
                   dispatch({ type: 'INCREMENT_BREEDS' });
                 }

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GooIcon } from './GooIcon';
 import { useGameState } from '@/hooks/useGameState';
 import { BattleSlime, SlimeElement, SlimeFoodType, SLIME_FOODS } from '@/types/slime';
 import { calculateBattleRewards, getTypeMultiplier, isBossLevel } from '@/utils/battleEngine';
@@ -1046,7 +1047,7 @@ const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record
             boxShadow: '0 6px 14px rgba(0,0,0,0.45)',
           }}
         >
-          <div className="font-bold flex items-center gap-2 leading-none" style={{ fontSize: sw * 0.024 }}>💧 +{goo} <span className="font-semibold opacity-70" style={{ fontSize: sw * 0.012 }}>Goo</span></div>
+          <div className="font-bold flex items-center gap-2 leading-none" style={{ fontSize: sw * 0.024 }}><GooIcon /> +{goo} <span className="font-semibold opacity-70" style={{ fontSize: sw * 0.012 }}>Goo</span></div>
           <div className="font-bold flex items-center gap-3 leading-none" style={{ fontSize: sw * 0.022 }}>
             {(['basic', 'elemental', 'royal'] as SlimeFoodType[]).filter(k => result.food[k] > 0).map(k => (
               <span key={k} title={SLIME_FOODS[k].name}>{SLIME_FOODS[k].icon} +{result.food[k]}</span>

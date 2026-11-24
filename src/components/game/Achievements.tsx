@@ -1,4 +1,5 @@
 import { useGameState } from '@/hooks/useGameState';
+import { GooIcon } from './GooIcon';
 import { ACHIEVEMENT_CATEGORIES, ACHIEVEMENT_DEFS } from '@/data/achievements';
 import { audioEngine } from '@/utils/audioEngine';
 
@@ -102,7 +103,7 @@ export function Achievements({ onClose }: { onClose: () => void }) {
                                 <span className="absolute inset-0 flex items-center justify-center font-bold text-white whitespace-nowrap" style={{ fontSize: 13, WebkitTextStroke: '3px #1f4a1a', paintOrder: 'stroke fill' }}>Claim {def.rewardAmount}</span>
                               </button>
                             ) : (
-                              <span className="text-sm font-bold opacity-70">{def.rewardAmount} 💧</span>
+                              <span className="text-sm font-bold opacity-70">{def.rewardAmount} <GooIcon /></span>
                             )}
                           </div>
                         </div>

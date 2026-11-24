@@ -1,3 +1,4 @@
+import { ELEMENT_TIERS } from '@/data/traitData';
 /**
  * Goo economy knobs in one place. Slimes earn goo passively; eggs, habitats and shop items drain it. The original
  * numbers were very generous (one Common slime made ~720 goo an hour against a 50 goo egg), so passive income is
@@ -17,5 +18,18 @@ export const eggCost = (element: string) => EGG_COSTS[element] ?? EGG_COST;
 const BREED_MIN: Record<string, number> = { Common: 1, Uncommon: 2, Rare: 5, Epic: 10, Legendary: 20, Divine: 35, Ancient: 60 };
 const HATCH_MIN: Record<string, number> = { Common: 0.5, Uncommon: 1, Rare: 3, Epic: 6, Legendary: 12, Divine: 20, Ancient: 40 };
 export const FIRST_WAIT_MS = 20_000;
-export const breedMs = (tier: string, isFirst = false) => (isFirst ? FIRST_WAIT_MS : (BREED_MIN[tier] ?? 5) * 60_000);
-export const hatchMs = (tier: string, isFirst = false) => (isFirst ? FIRST_WAIT_MS : (HATCH_MIN[tier] ?? 3) * 60_000);
+/**
+ * The elements a new player starts with are quick; each tier that unlocks later is slower to breed and hatch.
+ * A slime with several elements waits as long as its most complex one.
+ */
+const ELEMENT_WAIT_FACTOR: Record<number, number> = { 1: 1, 2: 1.5, 3: 2, 4: 3 };
+export const elementWaitFactor = (elements: readonly string[] = []) =>
+  Math.max(1, ...elements.map(el => {
+    const tier = Object.keys(ELEMENT_TIERS).map(Number).find(t => (ELEMENT_TIERS[t] as string[]).includes(el));
+    return tier ? ELEMENT_WAIT_FACTOR[tier] ?? 1 : 1;
+  }));
+const roundWait = (ms: number) => (ms < 120_000 ? Math.round(ms / 5000) * 5000 : Math.round(ms / 30_000) * 30_000);
+export const breedMs = (tier: string, isFirst = false, elements: readonly string[] = []) =>
+  isFirst ? FIRST_WAIT_MS : roundWait((BREED_MIN[tier] ?? 5) * 60_000 * elementWaitFactor(elements));
+export const hatchMs = (tier: string, isFirst = false, elements: readonly string[] = []) =>
+  isFirst ? FIRST_WAIT_MS : roundWait((HATCH_MIN[tier] ?? 3) * 60_000 * elementWaitFactor(elements));

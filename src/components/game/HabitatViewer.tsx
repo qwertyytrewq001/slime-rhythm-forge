@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
+import { GooIcon } from './GooIcon';
 import { useGameState, xpToNextLevel, getStage } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
 import { HABITAT_THEMES, ELEMENT_DISPLAY_NAMES } from '@/data/traitData';
@@ -1436,7 +1437,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           </div>
           <div className="text-right">
             <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">Available Goo</p>
-            <p className="text-lg font-black text-[#f2d98a]">{state.goo.toFixed(1)} 💧</p>
+            <p className="text-lg font-black text-[#f2d98a]">{state.goo.toFixed(1)} <GooIcon /></p>
           </div>
         </div>
       </div>

@@ -1,4 +1,5 @@
 import React, { useMemo } from 'react';
+import { GooIcon } from './GooIcon';
 import { useGameState } from '@/hooks/useGameState';
 import { Habitat, SlimeFoodType } from '@/types/slime';
 import { ELEMENT_DISPLAY_NAMES, HABITAT_THEMES } from '@/data/traitData';
@@ -91,7 +92,7 @@ export function SanctuaryPanel({ habitat: habitatProp, sw = 1000, onClose }: Pan
                 Level {level + 1}: room for {CAPACITY_AT[level + 1]} slimes, holds {GIFT_CAP_AT[level + 1]} gifts, {decorSlots({ ...habitat, level: level + 1 })} decor slots, stronger perk.
               </div>
               <div className="flex items-center flex-wrap" style={{ gap: 8 * f, margin: `${6 * f}px 0` }}>
-                <Cost f={f} ok={state.goo >= nextCost.goo}>{nextCost.goo.toLocaleString()} 💧</Cost>
+                <Cost f={f} ok={state.goo >= nextCost.goo}>{nextCost.goo.toLocaleString()} <GooIcon /></Cost>
                 {(Object.entries(nextCost.food) as Array<[SlimeFoodType, number]>).map(([c, n]) => (
                   <Cost key={c} f={f} ok={(state.inventory[c] || 0) >= n}>
                     <img src={foodSpriteUrl(c)} alt="" draggable={false} style={{ width: 22 * f, imageRendering: 'auto' }} /> {state.inventory[c] || 0}/{n}
@@ -124,7 +125,7 @@ export function SanctuaryPanel({ habitat: habitatProp, sw = 1000, onClose }: Pan
                 >
                   <ArtImg file={`decor_${d.id}.png`} className="mx-auto" style={{ width: 44 * f, height: 44 * f, objectFit: 'contain' }} fallback={<div style={{ fontSize: 30 * f, lineHeight: 1.1 }}>{DECOR_EMOJI[d.id]}</div>} />
                   <div className="font-bold leading-tight" style={{ fontSize: 11 * f }}>{d.name}</div>
-                  <div className="font-semibold" style={{ fontSize: 10 * f }}>{isPlaced ? 'Placed' : `${d.cost} 💧`} · +{Math.round(d.joy * 100)}%</div>
+                  <div className="font-semibold" style={{ fontSize: 10 * f }}>{isPlaced ? 'Placed' : `${d.cost}`}{!isPlaced && <> <GooIcon /></>} · +{Math.round(d.joy * 100)}%</div>
                 </button>
               );
             })}

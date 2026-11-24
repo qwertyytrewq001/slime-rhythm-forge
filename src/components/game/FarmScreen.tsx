@@ -172,7 +172,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     const at = px(plotId);
     if (!next) {
       const cost = plantCost(toSlice(), crop);
-      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.06, text: cropUnlocked(crop, stateRef.current.farm.level) ? `Need ${cost} 💧` : `Farm Lv ${CROPS[crop].unlockLevel}`, color: '#ff9a9a', size: 0.9 }, 1200);
+      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.06, text: cropUnlocked(crop, stateRef.current.farm.level) ? `Need ${cost} goo` : `Farm Lv ${CROPS[crop].unlockLevel}`, color: '#ff9a9a', size: 0.9 }, 1200);
       return;
     }
     addFx({ kind: 'dust', x: at.x, y: at.y, color: '#8a5a34', count: 8 }, 800);
@@ -217,7 +217,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     if (!plot) return;
     const cost = rushCost(plot, Date.now(), perks);
     if (cost > stateRef.current.goo) {
-      addFx({ kind: 'pop', x: px(plotId).x, y: px(plotId).y - sw * 0.06, text: `Need ${cost} 💧`, color: '#ff9a9a', size: 0.9 }, 1100);
+      addFx({ kind: 'pop', x: px(plotId).x, y: px(plotId).y - sw * 0.06, text: `Need ${cost} goo`, color: '#ff9a9a', size: 0.9 }, 1100);
       return;
     }
     addFx({ kind: 'burst', x: px(plotId).x, y: px(plotId).y - sw * 0.03, emojis: ['⚡', '✨'], count: 6 }, 900);
@@ -235,7 +235,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
     }
     const landCost = plotCost(rule, perks);
     if (goo < landCost) {
-      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Need ${landCost.toLocaleString()} 💧 to buy this land`, color: '#ff9a9a', size: 0.85 }, 1500);
+      addFx({ kind: 'pop', x: at.x, y: at.y - sw * 0.04, text: `Need ${landCost.toLocaleString()} goo to buy this land`, color: '#ff9a9a', size: 0.85 }, 1500);
       return;
     }
     addFx({ kind: 'burst', x: at.x, y: at.y, emojis: ['🌿', '✨'], count: 8 }, 1000);

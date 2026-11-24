@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { GooIcon } from './GooIcon';
 import { useGameState } from '@/hooks/useGameState';
 import { Habitat, HabitatGift } from '@/types/slime';
 import { ELEMENT_DISPLAY_NAMES, HABITAT_THEMES } from '@/data/traitData';
@@ -189,7 +190,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
         <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
           <ClockChip day={day} sw={sw} />
           <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0135, padding: `${sw * 0.004}px ${sw * 0.012}px`, minWidth: sw * 0.09, textAlign: 'center' }}>
-            {Math.floor(state.goo).toLocaleString()} 💧
+            {Math.floor(state.goo).toLocaleString()} <GooIcon />
           </div>
         </div>
         <div className="absolute flex items-center justify-center pointer-events-none" style={{ left: '50%', top: sw * 0.014, transform: 'translateX(-50%)', zIndex: 300 }}>
@@ -370,7 +371,7 @@ const VisitorDialog: React.FC<{ sw: number; onClose: () => void }> = ({ sw, onCl
                 <span className="inline-flex items-center rounded-full font-bold" style={{ background: ok ? '#d9f7c8' : '#ffd9d0', border: `2px solid ${ok ? '#3a8a2a' : '#c0392b'}`, padding: `0 ${10 * f}px`, fontSize: 14 * f, gap: 4 * f }}>
                   <img src={foodSpriteUrl(v.crop)} alt="" draggable={false} style={{ width: 26 * f, imageRendering: 'auto' }} /> {have} / {v.qty}
                 </span>
-                <span className="font-bold" style={{ fontSize: 13 * f }}>Reward: {v.rewardGoo.toLocaleString()} 💧</span>
+                <span className="font-bold" style={{ fontSize: 13 * f }}>Reward: {v.rewardGoo.toLocaleString()} <GooIcon /></span>
                 <span className="font-bold inline-flex items-center" style={{ fontSize: 13 * f, gap: 3 * f }}>and <Heart size={18 * f} /> +{v.rewardJoy} Joy in every habitat</span>
               </div>
               <button onClick={give} disabled={!ok} className={`rounded-full font-bold border-[3px] shadow-lg transition-transform ${ok ? 'hover:scale-105 active:scale-95' : 'opacity-55 cursor-not-allowed'}`} style={{ marginTop: 10 * f, background: ok ? 'linear-gradient(#ffe98a,#f2b632)' : '#e8dfc9', borderColor: INK, fontSize: 15 * f, padding: `${5 * f}px ${18 * f}px` }}>

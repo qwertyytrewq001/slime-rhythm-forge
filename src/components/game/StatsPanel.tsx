@@ -1,4 +1,5 @@
 import { useGameState } from '@/hooks/useGameState';
+import { GooIcon } from './GooIcon';
 import { SlimeCanvas } from './SlimeCanvas';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS, MODEL_NAMES } from '@/data/traitData';
 import { getCodexSlime } from '@/data/slimeCodex';
@@ -99,7 +100,7 @@ export function StatsPanel({ onRequestGallery }: StatsPanelProps) {
                 </span>
               </div>
               <div className="w-12 h-12 rounded-2xl bg-rose-50 flex items-center justify-center border-2 border-[#FF7EB6]/10 animate-float">
-                <div className="text-2xl">💧</div>
+                <div className="text-2xl"><GooIcon size="1.2em" /></div>
               </div>
             </div>
           </div>

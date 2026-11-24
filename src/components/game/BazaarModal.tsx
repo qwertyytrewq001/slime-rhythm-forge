@@ -1,4 +1,5 @@
 import { eggCost, hatchMs } from '@/utils/gooEconomy';
+import { GooIcon } from './GooIcon';
 import React, { useState } from 'react';
 import { useGameState, xpToNextLevel } from '@/hooks/useGameState';
 import { createElementSlime } from '@/utils/slimeGenerator';
@@ -99,7 +100,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
     }
 
     const newSlime = createElementSlime(element);
-    dispatch({ type: 'START_HATCHING', slime: newSlime, duration: hatchMs('Common', state.totalBreeds === 0 && state.slimes.length <= 3) });
+    dispatch({ type: 'START_HATCHING', slime: newSlime, duration: hatchMs('Common', state.totalBreeds === 0 && state.slimes.length <= 3, [element]) });
     setBoughtEgg(element); // a proper "you got an egg" moment instead of a toast
   };
 
@@ -310,7 +311,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
             </div>
             <div className="flex items-center gap-4">
               <div className="flex items-center gap-2 px-5 py-2 rounded-full bg-[#2a1238] border-[3px] border-[#f2d68a]">
-                <img src={`${import.meta.env.BASE_URL}ui/baz_coin.png`} alt="" className="w-8 h-8" style={{ imageRendering: 'auto' }} />
+                <GooIcon size={32} />
                 <span className="text-2xl font-bold text-[#fff3d0]" style={{ fontFamily: "'Fredoka', sans-serif" }}>{Math.floor(state.goo).toLocaleString()}</span>
               </div>
               <button
@@ -398,7 +399,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
-                              <span className="text-sm font-bold">{lockedEl ? `🔒 Level ${elementUnlockLevel(elem)}` : `${eggCost(elem)}g`}</span>
+                              <span className="text-sm font-bold">{lockedEl ? `Level ${elementUnlockLevel(elem)}` : `${eggCost(elem)}g`}</span>
                             </div>
                           </div>
                         </div>
@@ -467,7 +468,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
-                              <span className="text-sm font-bold">{lockedEl ? `🔒 Level ${elementUnlockLevel(elem)}` : `${cost}g`}</span>
+                              <span className="text-sm font-bold">{lockedEl ? `Level ${elementUnlockLevel(elem)}` : `${cost}g`}</span>
                             </div>
                           </div>
                         </div>

@@ -24,3 +24,19 @@ describe('waiting times and rushing', () => {
     expect(fresh('royal')).toBeGreaterThan(2000);
   });
 });
+
+import { elementWaitFactor } from './gooEconomy';
+describe('element complexity slows waits', () => {
+  it('starter elements are quickest and later tiers wait longer', () => {
+    expect(hatchMs('Common', false, ['fire'])).toBe(30_000);
+    expect(hatchMs('Common', false, ['plant'])).toBeGreaterThan(hatchMs('Common', false, ['fire']));
+    expect(hatchMs('Common', false, ['ice'])).toBeGreaterThan(hatchMs('Common', false, ['plant']));
+    expect(hatchMs('Common', false, ['light'])).toBeGreaterThan(hatchMs('Common', false, ['ice']));
+    expect(breedMs('Rare', false, ['shadow'])).toBe(15 * 60_000);
+    expect(breedMs('Rare', false, ['fire', 'water'])).toBe(5 * 60_000);
+  });
+  it('a mixed slime waits as long as its hardest element', () => {
+    expect(elementWaitFactor(['fire', 'light'])).toBe(3);
+    expect(elementWaitFactor([])).toBe(1);
+  });
+});

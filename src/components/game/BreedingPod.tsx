@@ -182,7 +182,7 @@ export function BreedingPod(props: BreedingPodProps) {
     audioEngine.playSfx('breed');
 
     const resultSlime = breedSlimes(slot1Slime, slot2Slime, state.mutationJuiceActive, state.luckyCharmActive);
-    const duration = breedMs(resultSlime.rarityTier, state.totalBreeds === 0);
+    const duration = breedMs(resultSlime.rarityTier, state.totalBreeds === 0, resultSlime.elements);
 
     dispatch({ 
       type: 'START_BREEDING', 
@@ -222,7 +222,7 @@ export function BreedingPod(props: BreedingPodProps) {
       return;
     }
 
-    dispatch({ type: 'START_HATCHING', slime: child, duration: hatchMs(child.rarityTier, state.totalBreeds === 0) });
+    dispatch({ type: 'START_HATCHING', slime: child, duration: hatchMs(child.rarityTier, state.totalBreeds === 0, child.elements) });
     dispatch({ type: 'ADD_BREED_HISTORY', result: {
       parent1Id: state.activeBreeding.parent1Id,
       parent2Id: state.activeBreeding.parent2Id,
