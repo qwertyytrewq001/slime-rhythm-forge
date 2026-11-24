@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RESULT_LINES } from '@/data/battleStory';
+import { canOfferRewarded, rewardedBreak } from '@/utils/portal';
 import { GooIcon } from './GooIcon';
 import { useGameState } from '@/hooks/useGameState';
 import { BattleSlime, SlimeElement, SlimeFoodType, SLIME_FOODS } from '@/types/slime';
@@ -1026,6 +1027,19 @@ const Orb: React.FC<{ fx: Extract<Fx, { kind: 'orb' }>; sw: number }> = ({ fx, s
 
 const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record<SlimeFoodType, number>; perfects: number }; sw: number; team: Unit[]; view: Record<string, View>; onContinue: () => void }> = ({ result, sw, team, view, onContinue }) => {
   const [goo, setGoo] = useState(0);
+  const { dispatch: gameDispatch } = useGameState();
+  const [bonusDone, setBonusDone] = useState(false);
+  const [adBusy, setAdBusy] = useState(false);
+  const watchForBonus = async () => {
+    if (adBusy || bonusDone) return;
+    setAdBusy(true);
+    const ok = await rewardedBreak();
+    setAdBusy(false);
+    if (!ok) return; // no reward unless the ad really played
+    setBonusDone(true);
+    gameDispatch({ type: 'ADD_GOO', amount: result.goo });
+    setGoo(g => g * 2);
+  };
   const [glimLine] = useState(() => {
     const alive = team.every(u => view[u.id]?.alive);
     const pool = !result.won ? RESULT_LINES.lose : result.perfects >= 3 ? RESULT_LINES.perfect : alive ? RESULT_LINES.flawless : RESULT_LINES.win;
@@ -1076,6 +1090,16 @@ const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record
         ))}
       </div>
       <div className="font-semibold text-center" style={{ marginTop: sw * 0.008, maxWidth: sw * 0.42, fontSize: sw * 0.0135, color: '#fff3d0', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Glim: “{glimLine}”</div>
+      {result.won && result.goo > 0 && canOfferRewarded() && !bonusDone && (
+        <button
+          onClick={watchForBonus}
+          disabled={adBusy}
+          className="rounded-full font-bold border-[3px] hover:scale-105 transition-transform"
+          style={{ marginTop: sw * 0.008, fontSize: sw * 0.0125, padding: `${sw * 0.004}px ${sw * 0.02}px`, background: 'linear-gradient(#b38cff,#7a4fd6)', borderColor: '#fff3c0', color: '#fff', opacity: adBusy ? 0.6 : 1 }}
+        >
+          🎬 Watch a short video for double Goo (+{result.goo})
+        </button>
+      )}
       <button
         onClick={onContinue}
         className="rounded-full font-bold text-white uppercase border-[3px] hover:scale-105 active:translate-y-1 transition-transform"

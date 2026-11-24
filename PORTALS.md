@@ -35,8 +35,7 @@ All the portal code is in `src/utils/portal.ts` (tested in `portal.test.ts`).
 | Music licences confirmed | both | NOT done (`public/audio/CREDITS.txt`) |
 | AI-art disclosure rules | both | NOT checked, read each portal's current rule before submitting |
 
-## Not built yet
-- A "watch an ad for goo" button. `rewardedBreak()` already exists in `portal.ts`, it only needs a button and a daily limit.
+## Not built yet (see SUBMISSION.md for the full plan; the rewarded "double Goo" button on the battle result is done)
 - Saving progress through each portal's own cloud save (the game saves in the browser).
 - A real phone test, and a pass on the long text screens (Codex, Achievements) at phone size.
 
