@@ -400,7 +400,7 @@ function GameLayout() {
           )}
 
           <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
-            <SheetContent side="left" style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }} className="p-0 border-r-4 border-[#c8922a] flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto z-[120]">
+            <SheetContent side="left" style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }} className="p-0 border-r-4 border-[#c8922a] flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto">
               <div className="flex-1 overflow-hidden">
                 <SlimeGallery adultsOnly autoPlace={false} onSelect={handleGallerySelect} />
               </div>
