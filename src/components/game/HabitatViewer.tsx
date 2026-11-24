@@ -226,7 +226,7 @@ interface BouncingSlimeProps {
 const DECOR_ANIM: Record<string, string> = { ball: 'dc-ball', swing: 'dc-swing', lantern: 'dc-sway', hammock: 'dc-swing', flowers: 'dc-sway', mushroom: 'dc-squash', stump: 'dc-squash', fountain: 'dc-pulse' };
 
 // The ground band slimes live in (percent of the scene), and how they feel about moving around it
-const BAND = { minX: 10, maxX: 90, minY: 61, maxY: 80 };
+const BAND = { minX: 6, maxX: 94, minY: 50, maxY: 90 };
 const GRAVITY = 1150; // px/s^2: low on purpose, so hops hang in the air
 
 interface Personality {
@@ -249,6 +249,18 @@ const PERSONALITIES: Record<string, Personality> = {
   wind: { idle: [0.4, 1.0], jump: [260, 340], range: 38, float: true },
 };
 
+const pickOf = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
+/** What each toy makes a slime do: the little words it says and the bounces it does there. */
+const DECOR_PLAY: Record<string, { words: string[]; bounces: number[] }> = {
+  ball: { words: ['Pop pop!', 'Boing!', 'Bob bob!'], bounces: [330, 250] },
+  mushroom: { words: ['Boing boing!', 'Wheee!'], bounces: [460, 380, 300, 220] },
+  stump: { words: ['Hup!', 'Up I go!'], bounces: [520, 300] },
+  swing: { words: ['Wheee!', 'Swish swish'], bounces: [260, 260] },
+  fountain: { words: ['Splish!', 'Splash!'], bounces: [240, 240, 240] },
+  flowers: { words: ['Sniff sniff', 'So pretty'], bounces: [] },
+  lantern: { words: ['Ooh, glowy', 'So warm'], bounces: [] },
+  hammock: { words: ['Cosy...', 'Zzz...'], bounces: [] },
+};
 const CALM_BUBBLES = ['🎵', '✨', '🍃', '😊'];
 const POKE_BUBBLES = ['💖', '😊', '😆'];
 // 'p:name' draws the painted particle from public/altar/particle_<name>.png instead of an emoji
@@ -317,6 +329,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     energy: 0, // each outing tires it a little; after a few it naps
     decorSeen: {} as Record<string, number>,
     visit: null as string | null, // a friend it is walking over to see
+    nap: false,
   });
 
   // Show a reaction bubble. Soft ones (mood chatter) never interrupt a bubble that is already up.
@@ -330,7 +343,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
   useEffect(() => {
     if (!eatNonce) return;
     setEating(true);
-    say('😋', 1600);
+    say(`txt:${pickOf(['Nom nom!', 'Yum!', 'Tasty!'])}`, 1800);
     sim.current.last = performance.now() / 1000;
     const t = setTimeout(() => setEating(false), 600);
     return () => clearTimeout(t);
@@ -371,7 +384,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         s.explore = null;
         s.bounceQ = [];
         setSleeping(false);
-        say('😮', 8000);
+        say(`txt:${pickOf(['Whoa!', 'Eep!', 'Up we go!'])}`, 8000);
       },
       drop: () => {
         const s = sim.current;
@@ -401,13 +414,13 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
           s.vx = clamp((vpx / rect.width) * 100 * 0.9, -110, 110);
           s.vy = clamp((vpy / rect.height) * 100 * 0.5, -35, 35);
           s.vz = clamp(220 - vpy * 0.5, 120, 760);
-          say('🤩', 2200);
+          say(`txt:${pickOf(['Wheeee!', 'Flyyy!'])}`, 2200);
         } else {
           s.thrown = false;
           s.vz = 0;
           s.vx = 0;
           s.vy = 0;
-          say('😄', 1600);
+          say(`txt:${pickOf(['Yay!', 'Again!', 'Boing!'])}`, 1600);
         }
       },
       setPressed: (v: boolean) => {
@@ -424,7 +437,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
       greet: () => {
         const s = sim.current;
         if (s.mode === 'sleep' || s.mode === 'carried' || s.mode === 'air') return;
-        say('😊', 1800, false);
+        say(pickOf(['txt:Hi hi!', 'txt:Oh, hello!', 'txt:Yay, a friend!']), 2200, false);
         if (s.mode === 'idle' || s.mode === 'land') {
           s.mode = 'air'; s.vz = 300; s.jump = 300; s.vx = 0; s.vy = 0; s.hasTarget = false; s.z = Math.max(s.z, 1); s.syv += 3;
         }
@@ -495,10 +508,21 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         const friend = apiRef.current[s.visit];
         s.visit = null;
         s.energy += 1;
-        say('😊', 2000, false);
+        say(pickOf(['txt:Hi!', 'txt:Hello!', 'txt:Hey you!']), 2200, false);
         friend?.greet();
         s.mode = 'idle';
         s.t = rand(3, 5);
+        return;
+      }
+      if (s.nap && s.explore) {
+        s.nap = false;
+        s.energy = 0;
+        s.explore = null;
+        cb.current.onDecor?.('hammock');
+        say(`txt:${pickOf(DECOR_PLAY.hammock.words)}`, 2200, false);
+        s.mode = 'sleep';
+        s.t = rand(9, 14);
+        setSleeping(true);
         return;
       }
       if (s.explore) {
@@ -508,8 +532,20 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         s.mode = 'inspect';
         s.t = rand(2.6, 4.2);
         s.sniff = rand(0.6, 1.1);
-        say(s.inspecting.decor ? `decor:${s.inspecting.decor}` : '❓', 2600, false);
-        if (s.inspecting.decor) cb.current.onDecor?.(s.inspecting.decor);
+        const dec = s.inspecting.decor;
+        if (dec) {
+          const play = DECOR_PLAY[dec];
+          cb.current.onDecor?.(dec);
+          say(`txt:${pickOf(play?.words ?? ['Ooh!'])}`, 2400, false);
+          if (play && play.bounces.length) {
+            // bouncy toys: actually play on it instead of just looking
+            s.inspecting = null;
+            s.bounceQ = [...play.bounces];
+            bounceNext();
+          }
+        } else {
+          say('❓', 2400, false);
+        }
         return;
       }
       if (viaFloat && Math.random() < (pers.float ? 0.6 : 0.85)) {
@@ -572,6 +608,15 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
       // Decide what it WANTS to do, in order of how much it cares:
       //  1. tired after a few outings: nap (floaty slimes just drift instead)
       if (s.energy >= 4 && !pers.float) {
+        const hammock = lms.find(l => l.decor === 'hammock');
+        if (hammock && !s.nap) {
+          // there is a hammock: go and sleep in it
+          s.nap = true;
+          s.explore = hammock;
+          goTo(hammock.x + rand(-1.5, 1.5), hammock.y + rand(-1, 1), travelStyle(), hopJump());
+          return;
+        }
+        s.nap = false;
         s.energy = 0;
         s.mode = 'sleep';
         s.t = rand(8, 12);
@@ -653,7 +698,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
       if (s.mode === 'sleep' || s.mode === 'carried') return;
       const grounded = s.mode === 'idle' || s.mode === 'land';
       if (m === 'lonely') {
-        say('🥺', 2600, false);
+        say(pickOf(['txt:Hello...?', 'txt:Anyone?', '🥺']), 2600, false);
         s.lonelyIn = rand(7, 12);
       } else if (m === 'curious' && prev !== 'happy') {
         say('❓', 1500, false);
@@ -758,7 +803,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
             s.lonelyIn -= dt;
             if (s.lonelyIn <= 0) {
               s.lonelyIn = rand(8, 13);
-              say(Math.random() < 0.6 ? '🥺' : '💧', 2200, false);
+              say(pickOf(['🥺', 'txt:Pssst...', 'txt:Play with me?']), 2200, false);
             }
           }
           if (s.t <= 0) {
@@ -814,7 +859,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
             } else {
               if (s.thrown && s.throwPower > 0.5) {
                 s.dizzy = 1.4;
-                say('😵', 2200);
+                say('txt:Dizzy...', 2200);
               }
               s.thrown = false;
               s.vx = 0;
@@ -911,7 +956,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
 
       // Depth: lower on screen reads as closer
       const depth = (s.y - BAND.minY) / (BAND.maxY - BAND.minY);
-      const scale = 0.82 + 0.3 * depth;
+      const scale = 0.72 + 0.42 * depth;
       ground.dataset.mode = s.mode;
       ground.dataset.mood = s.mood;
       ground.style.left = `${s.x}%`;
@@ -966,6 +1011,11 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
           <div className="absolute top-[0%] left-[62%] z-30 pointer-events-none animate-pulse" style={{ width: 34 }}><ArtImg file="icon_sleep.png" className="w-full" fallback={<span className="text-lg">💤</span>} /></div>
         )}
         {bubble && !sleeping && (
+          bubble.startsWith('txt:') ? (
+            <div className="absolute z-30 pointer-events-none top-[-8%] left-[55%] animate-in zoom-in-50 fade-in duration-300 whitespace-nowrap rounded-2xl px-3 py-1 font-black" style={{ background: 'linear-gradient(#fffdf2,#f3e3b8)', border: '3px solid #4a2f17', boxShadow: '0 3px 0 rgba(0,0,0,0.35)', color: '#4a2f17', fontSize: 15, fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
+              {bubble.slice(4)}
+            </div>
+          ) :
           bubble.startsWith('decor:') || bubble === 'food' ? (
             <div className="absolute z-30 pointer-events-none top-[-6%] left-[60%] animate-in zoom-in-50 fade-in duration-300 flex items-center justify-center rounded-full" style={{ width: 52, height: 52, background: 'radial-gradient(circle at 35% 30%, #fffdf2, #f3e3b8)', border: '3px solid #4a2f17', boxShadow: '0 3px 0 rgba(0,0,0,0.35)' }}>
               {bubble === 'food'
@@ -1248,7 +1298,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     // food lands on the ground where slimes can walk, so a drop in the sky or the far edge still gets eaten
     const rect = sceneRef.current?.getBoundingClientRect();
     const land = rect
-      ? { x: Math.min(rect.left + rect.width * 0.88, Math.max(rect.left + rect.width * 0.12, at.x)), y: Math.min(rect.top + rect.height * 0.8, Math.max(rect.top + rect.height * 0.64, at.y)) }
+      ? { x: Math.min(rect.left + rect.width * 0.92, Math.max(rect.left + rect.width * 0.08, at.x)), y: Math.min(rect.top + rect.height * 0.9, Math.max(rect.top + rect.height * 0.52, at.y)) }
       : at;
     setPellets(list => [...list, { id: ++pelletId.current, food, x: land.x, y: land.y, born: Date.now() }]);
   };
