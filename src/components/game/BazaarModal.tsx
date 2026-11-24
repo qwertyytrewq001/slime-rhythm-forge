@@ -399,7 +399,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
-                              <span className="text-sm font-bold">{lockedEl ? `Level ${elementUnlockLevel(elem)}` : `${eggCost(elem)}g`}</span>
+                              <span className="text-sm font-bold">{lockedEl ? <span className="inline-flex items-center gap-1"><img src={`${import.meta.env.BASE_URL}ui/icon_lock.png`} alt="" draggable={false} style={{ width: 18, height: 18, objectFit: 'contain', imageRendering: 'auto' }} />Level {elementUnlockLevel(elem)}</span> : `${eggCost(elem)}g`}</span>
                             </div>
                           </div>
                         </div>
@@ -468,7 +468,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                                   : 'baz-tag-pill opacity-60 grayscale cursor-not-allowed'
                               }`}
                             >
-                              <span className="text-sm font-bold">{lockedEl ? `Level ${elementUnlockLevel(elem)}` : `${cost}g`}</span>
+                              <span className="text-sm font-bold">{lockedEl ? <span className="inline-flex items-center gap-1"><img src={`${import.meta.env.BASE_URL}ui/icon_lock.png`} alt="" draggable={false} style={{ width: 18, height: 18, objectFit: 'contain', imageRendering: 'auto' }} />Level {elementUnlockLevel(elem)}</span> : `${cost}g`}</span>
                             </div>
                           </div>
                         </div>
