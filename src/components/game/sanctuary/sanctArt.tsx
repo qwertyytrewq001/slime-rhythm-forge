@@ -30,6 +30,7 @@ export const MOOD_ICON: Record<string, string> = {
   '🎵': 'mood_calm', '🍃': 'mood_calm', '✨': 'mood_calm',
   '😊': 'mood_happy', '💖': 'mood_happy', '😆': 'mood_happy', '🥰': 'mood_happy',
   '🥺': 'mood_lonely', '💧': 'mood_lonely', '❓': 'mood_curious',
+  '😋': 'mood_happy', '🤩': 'mood_happy', '😄': 'mood_happy', '😮': 'mood_curious', '❗': 'mood_curious', '😵': 'mood_curious',
 };
 
 export const DECOR_EMOJI: Record<string, string> = {

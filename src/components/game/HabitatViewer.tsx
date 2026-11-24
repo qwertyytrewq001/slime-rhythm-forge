@@ -481,7 +481,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         s.mode = 'inspect';
         s.t = rand(2.6, 4.2);
         s.sniff = rand(0.6, 1.1);
-        say(s.inspecting.e, 2600, false);
+        say(s.inspecting.decor ? `decor:${s.inspecting.decor}` : '❓', 2600, false);
         if (s.inspecting.decor) cb.current.onDecor?.(s.inspecting.decor);
         return;
       }
@@ -515,7 +515,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         const a = toPct(attract);
         const dx = a.x - s.x;
         const dy = clamp(a.y, BAND.minY, BAND.maxY) - s.y;
-        if (Math.abs(dx) < 9 && Math.abs(dy) < 8) goTo(s.x, s.y, 'hop', 200);
+        if (Math.abs(dx) < 2.2 && Math.abs(dy) < 2.2) goTo(s.x, s.y, 'hop', 200);
         else goTo(s.x + clamp(dx, -26, 26), s.y + clamp(dy, -8, 8), pers.float ? 'float' : 'hop', hopJump());
         return;
       }
@@ -686,7 +686,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
           if (s.bubbleIn <= 0) {
             s.bubbleIn = rand(8, 15);
             if (s.mood === 'calm') {
-              const pick = l.wantsFood && Math.random() < 0.35 ? '🍓' : CALM_BUBBLES[Math.floor(Math.random() * CALM_BUBBLES.length)];
+              const pick = l.wantsFood && Math.random() < 0.35 ? 'food' : CALM_BUBBLES[Math.floor(Math.random() * CALM_BUBBLES.length)];
               say(pick, 2000, false);
             }
           }
@@ -902,6 +902,13 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
           <div className="absolute top-[0%] left-[62%] z-30 pointer-events-none animate-pulse" style={{ width: 34 }}><ArtImg file="icon_sleep.png" className="w-full" fallback={<span className="text-lg">💤</span>} /></div>
         )}
         {bubble && !sleeping && (
+          bubble.startsWith('decor:') || bubble === 'food' ? (
+            <div className="absolute z-30 pointer-events-none top-[-6%] left-[60%] animate-in zoom-in-50 fade-in duration-300 flex items-center justify-center rounded-full" style={{ width: 52, height: 52, background: 'radial-gradient(circle at 35% 30%, #fffdf2, #f3e3b8)', border: '3px solid #4a2f17', boxShadow: '0 3px 0 rgba(0,0,0,0.35)' }}>
+              {bubble === 'food'
+                ? <img src={foodSpriteUrl('basic')} alt="" draggable={false} style={{ width: 34, height: 34, objectFit: 'contain' }} />
+                : <ArtImg file={`decor_${bubble.slice(6)}.png`} className="drop-shadow" style={{ width: 38, height: 38, objectFit: 'contain' }} />}
+            </div>
+          ) :
           MOOD_ICON[bubble] ? (
             <div className="absolute z-30 pointer-events-none top-[-2%] left-[64%] animate-in zoom-in-50 fade-in duration-300" style={{ width: 38 }}><ArtImg file={`icon_${MOOD_ICON[bubble]}.png`} className="w-full drop-shadow" fallback={<span className="text-sm">{bubble}</span>} /></div>
           ) : (
@@ -925,7 +932,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
 
         <div
           className={eating ? 'slime-eat' : targeted ? 'slime-target' : ''}
-          style={{ pointerEvents: 'none', transformOrigin: '50% 90%' }}
+          style={{ pointerEvents: 'none', transformOrigin: '50% 90%', position: 'absolute', left: '50%', bottom: -Math.round(72 * (slime.level < 5 ? 0.6 : slime.level < 10 ? 0.85 : 1)), transform: 'translateX(-50%)' }}
         >
           <SlimeCanvas slime={slime} size={120} animated={true} />
         </div>
@@ -1154,7 +1161,13 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
   const [pellets, setPellets] = useState<Array<{ id: number; food: SlimeFoodType; x: number; y: number; born: number }>>([]);
 // Decorations react when a slime comes over to play with them (the ball rolls, the swing swings...)
   const [decorPlay, setDecorPlay] = useState<Record<string, number>>({});
-  const playDecor = useCallback((id: string) => setDecorPlay(p => (p[id] && Date.now() - p[id] < 2000 ? p : { ...p, [id]: Date.now() })), []);
+  const [decorX, setDecorX] = useState<Record<string, number>>({});
+  const playDecor = useCallback((id: string) => {
+    setDecorPlay(p => (p[id] && Date.now() - p[id] < 2000 ? p : { ...p, [id]: Date.now() }));
+    // the ball really gets kicked: it rolls away along the ground and the slimes chase it next time
+    if (id === 'ball') setDecorX(d => { const cur = d.ball ?? 30; const dir = cur > 70 ? -1 : cur < 25 ? 1 : Math.random() < 0.5 ? -1 : 1; return { ...d, ball: Math.min(86, Math.max(14, cur + dir * (14 + Math.random() * 14))) }; });
+  }, []);
+  const decorBaseX = (id: string, i: number) => decorX[id] ?? [12, 84, 28, 68][i % 4];
   const pelletsRef = useRef(pellets);
   pelletsRef.current = pellets;
   const pelletId = useRef(0);
@@ -1196,10 +1209,13 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         for (const sl of hungry) {
           const c = centerOf(sl.id);
           if (!c) continue;
-          const d = Math.hypot(c.x - p.x, c.y - p.y);
+          // measure from the slime's feet to the food on the ground (not from its body centre in the air)
+          const holder = document.querySelector(`[data-slime-id="${sl.id}"]`)?.getBoundingClientRect();
+          const fx0 = holder ? (holder.left + holder.right) / 2 : c.x, fy0 = holder ? holder.bottom : c.y;
+          const d = Math.hypot(fx0 - p.x, (fy0 - p.y) * 1.5);
           if (!best || d < best.d) best = { slime: sl, c, d };
         }
-        if (best && best.d < 80) {
+        if (best && best.d < 85) {
           setPellets(l => l.filter(x => x.id !== p.id));
           if ((live.inventory[p.food] || 0) < 1) continue;
           dispatch({ type: 'FEED_SLIME_XP', slimeId: best.slime.id, foodType: p.food });
@@ -1398,14 +1414,14 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         {/* Tap empty ground to deselect; slimes are handled by the pointer controller above */}
         <div ref={sceneRef} className="absolute inset-0" style={{ pointerEvents: 'auto', touchAction: 'none' }}>
           <style>{`
-            @keyframes dc-ball{0%{transform:translate(0,0) rotate(0)}20%{transform:translate(18%,-55%) rotate(120deg)}40%{transform:translate(40%,0) rotate(260deg)}55%{transform:translate(52%,-22%) rotate(330deg)}70%{transform:translate(60%,0) rotate(400deg)}100%{transform:translate(0,0) rotate(0)}}
+            @keyframes dc-ball{0%{transform:translateY(0) rotate(0)}25%{transform:translateY(-45%) rotate(160deg)}50%{transform:translateY(0) rotate(330deg)}70%{transform:translateY(-18%) rotate(480deg)}100%{transform:translateY(0) rotate(720deg)}}
             @keyframes dc-swing{0%,100%{transform:rotate(0)}25%{transform:rotate(14deg)}75%{transform:rotate(-14deg)}}
             @keyframes dc-sway{0%,100%{transform:rotate(0)}30%{transform:rotate(6deg)}70%{transform:rotate(-6deg)}}
             @keyframes dc-squash{0%,100%{transform:scale(1,1)}25%{transform:scale(1.12,0.82)}50%{transform:scale(0.92,1.14) translateY(-10%)}75%{transform:scale(1.08,0.9)}}
             @keyframes dc-pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
           `}</style>
           {(habitat.decor ?? []).map((id, i) => decorById(id) && (
-            <div key={id} className="absolute pointer-events-none" style={{ left: `${[12, 84, 28, 68][i % 4]}%`, top: `${[58, 60, 52, 54][i % 4]}%`, width: '11%', transform: 'translateX(-50%)', zIndex: 1 }}>
+            <div key={id} className="absolute pointer-events-none" style={{ left: `${decorBaseX(id, i)}%`, top: `${[58, 60, 52, 54][i % 4]}%`, width: '11%', transform: 'translateX(-50%)', zIndex: 1, transition: id === 'ball' ? 'left 1.2s cubic-bezier(.2,.7,.3,1)' : undefined }}>
               <ArtImg key={`${id}-${decorPlay[id] ?? 0}`} file={`decor_${id}.png`} className="w-full block" style={{ filter: 'drop-shadow(0 8px 6px rgba(0,0,0,0.35))', transformOrigin: id === 'swing' || id === 'lantern' || id === 'hammock' ? '50% 0%' : '50% 90%', animation: decorPlay[id] ? `${DECOR_ANIM[id] ?? 'dc-pulse'} 1.8s ease-in-out` : undefined }} />
             </div>
           ))}
@@ -1417,7 +1433,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
               targeted={targetId === slime.id}
               dragging={dragging || pellets.length > 0}
               wantsFood={hasFood && slime.level < 50}
-              landmarks={[...(LANDMARKS[habitat.element] ?? []), ...(habitat.decor ?? []).map((id, i) => ({ x: [12, 84, 28, 68][i % 4], y: 70, e: DECOR_EMOJI[id] ?? '✨', decor: id }))]}
+              landmarks={[...(LANDMARKS[habitat.element] ?? []), ...(habitat.decor ?? []).map((id, i) => ({ x: decorBaseX(id, i), y: 70, e: DECOR_EMOJI[id] ?? '✨', decor: id }))]}
               onDecor={playDecor}
               attractRef={attractRef}
               pointerRef={pointerRef}
