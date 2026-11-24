@@ -318,6 +318,14 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, activeHatching: { slime: action.slime, endTime: Date.now() + action.duration } };
     case 'FINISH_HATCHING':
       return { ...state, activeHatching: null };
+    case 'AD_SPEED': {
+      // a rewarded video cuts the time that is left by half
+      const now = Date.now();
+      const half = (end: number) => (end > now ? now + Math.floor((end - now) / 2) : end);
+      if (action.target === 'hatch') return state.activeHatching && !state.activeHatching.waiting ? { ...state, activeHatching: { ...state.activeHatching, endTime: half(state.activeHatching.endTime) } } : state;
+      if (action.target === 'breed') return state.activeBreeding ? { ...state, activeBreeding: { ...state.activeBreeding, endTime: half(state.activeBreeding.endTime) } } : state;
+      return { ...state, farmPlots: state.farmPlots.map(p => (p.cropType && p.readyAt && p.readyAt > now ? { ...p, readyAt: half(p.readyAt) } : p)) };
+    }
     case 'ADD_BOND':
       return { ...state, slimes: state.slimes.map(s => s.id === action.slimeId ? { ...s, bond: Math.min(999, (s.bond ?? 0) + action.amount) } : s) };
     case 'HATCH_WAIT':

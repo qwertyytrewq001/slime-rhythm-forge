@@ -9,6 +9,7 @@ import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { X, Heart, Sparkles, Plus, ChevronLeft, HelpCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
+import { AdBoostButton } from './AdBoostButton';
 import { calculateBreedingResult, getPossibleOutcomes } from '@/utils/breedingCalculator';
 import { breedSlimes, createCodexSlime } from '@/utils/slimeGenerator';
 import { breedMs, hatchMs } from '@/utils/gooEconomy';
@@ -343,6 +344,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
             <p className="text-purple-700 text-sm font-bold">
               {Math.max(0, Math.ceil((state.activeBreeding!.endTime - Date.now()) / 1000))}s
             </p>
+            <div className="mt-2"><AdBoostButton kind="breed" label="Breed twice as fast" onReward={() => dispatch({ type: 'AD_SPEED', target: 'breed' })} /></div>
           </div>
         </div>
       )}

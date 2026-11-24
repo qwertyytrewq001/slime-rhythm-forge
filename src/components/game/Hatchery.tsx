@@ -12,6 +12,7 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { DiscoveryPopup } from './DiscoveryPopup';
 import { FairySparkle } from './FairySparkle';
 import { HatcheryScreen } from './HatcheryScreen';
+import { AdBoostButton } from './AdBoostButton';
 
 function HatchingEgg({ slime, crackProgress, shaking }: { slime: Slime; crackProgress: number; shaking?: boolean }) {
   return <PaintedEgg slime={slime} crackProgress={crackProgress} shaking={shaking} boxClass="w-[5.4rem] h-[5.4rem]" fallbackSize={120} />;
@@ -154,6 +155,11 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
                 )}
               </div>
             </div>
+            {!isFinished && (
+              <div className="absolute left-1/2 -translate-x-1/2" style={{ top: '104%' }}>
+                <AdBoostButton kind="hatch" label="Hatch twice as fast" onReward={() => dispatch({ type: 'AD_SPEED', target: 'hatch' })} />
+              </div>
+            )}
             {!isFinished && (
               <div className="absolute -bottom-12 left-1/2 -translate-x-1/2 whitespace-nowrap translate-x-12">
                 <p className="font-bold tracking-wide" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 13, color: '#fff3d0', WebkitTextStroke: '3px #3a2150', paintOrder: 'stroke fill' }}>{ELEMENT_DISPLAY_NAMES[eggElementFor(activeHatching.slime) as keyof typeof ELEMENT_DISPLAY_NAMES]} Egg</p>

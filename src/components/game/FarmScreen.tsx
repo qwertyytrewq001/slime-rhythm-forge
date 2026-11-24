@@ -13,6 +13,7 @@ import { audioEngine } from '@/utils/audioEngine';
 import { CropArt, stageOf } from './farm/CropArt';
 import { MirrorBackdrop } from './MirrorBackdrop';
 import { Lock } from 'lucide-react';
+import { AdBoostButton } from './AdBoostButton';
 
 interface FarmScreenProps {
   onClose: () => void;
@@ -496,6 +497,9 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
           <ActionButton disabled={!growingUnwatered.length} onClick={waterEverything} sw={sw} badge={growingUnwatered.length || undefined}>
             <Ico name="icon_water_can" w={sw * 0.022} style={{ marginRight: 4 }} />Water All
           </ActionButton>
+          {farmPlots.some(p => p.unlocked && isGrowing(p, now)) && (
+            <AdBoostButton kind="farm" label="Grow twice as fast" style={{ fontSize: sw * 0.0125 }} onReward={() => dispatch({ type: 'AD_SPEED', target: 'farm' })} />
+          )}
           <button
             onClick={() => dispatch({ type: 'SET_AUTO_REPLANT', value: !farm.autoReplant })}
             title="After a harvest, plant the same crop again automatically"

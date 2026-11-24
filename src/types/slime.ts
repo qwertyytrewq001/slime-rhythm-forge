@@ -282,6 +282,7 @@ export type GameAction =
   | { type: 'START_HATCHING'; slime: Slime; duration: number }
   | { type: 'FINISH_HATCHING' }
   | { type: 'HATCH_WAIT' }
+  | { type: 'AD_SPEED'; target: 'hatch' | 'breed' | 'farm' }
   | { type: 'ADD_BOND'; slimeId: string; amount: number }
   | { type: 'ADD_GOO'; amount: number }
   | { type: 'SPEND_GOO'; amount: number }

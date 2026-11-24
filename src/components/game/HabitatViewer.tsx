@@ -8,6 +8,7 @@ import { ChevronLeft, Plus } from 'lucide-react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { SlimeGallery } from './SlimeGallery';
 import { FeedTray } from './FeedTray';
+import { AdBoostButton } from './AdBoostButton';
 import { foodSpriteUrl } from '@/data/foodSprites';
 import { audioEngine } from '@/utils/audioEngine';
 import { bondLevel, bondProgress, BOND_LEVELS, slimeNature, NATURE_BLURB } from '@/utils/bond';
@@ -1687,6 +1688,11 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           )}
         </div>
 
+        {assignedSlimes.length > 0 && !hasFood && (
+          <div className="absolute z-[160]" style={{ left: 16, bottom: 90 }} data-sanctuary-ui>
+            <AdBoostButton kind="food" label="Free food" onReward={() => dispatch({ type: 'ADD_TO_INVENTORY', foodType: 'basic', quantity: 3 })} />
+          </div>
+        )}
         {assignedSlimes.length > 0 && (
           <FeedTray
             slimeAt={slimeAt}

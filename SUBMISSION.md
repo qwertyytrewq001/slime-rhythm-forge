@@ -67,7 +67,7 @@ I use 1 to 8 USD per 1,000 plays as the range you take home, which is cautious.
 
 ### Ready in the game
 - Portal builds: `npm run build:crazy` and `npm run build:poki` (50 MB total, 538 files; limits are 250 MB and 1500 files).
-- SDK: loading, gameplay start/stop, a midgame ad after battles, a rewarded "double Goo" button on the battle result screen (shows only on a portal build, only after a win, never rewards if the ad fails).
+- SDK: loading, gameplay start/stop, a midgame ad after battles, and rewarded video buttons (portal builds only, never rewarding if the ad fails, a minute of rest between uses): "Hatch twice as fast" (hatchery), "Breed twice as fast" (Breeding Den), "Grow twice as fast" (farm), "Free food" (habitat, only when the food bag is empty, gives 3 basic food) and "double Goo" on the battle result screen.
 - Ad rules: game paused and muted during ads, still works with an ad blocker, no internal ad timer, rewarded button smaller than Continue and not green, with the film-clip icon Poki requires.
 - Storage: if the portal blocks storage (incognito, iframe), the game now falls back to memory instead of crashing. Progress is then not saved.
 - No outside requests (fonts bundled), no outgoing links, no in-game purchases, English only, no custom fullscreen button, no cross-promotion.
