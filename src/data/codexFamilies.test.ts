@@ -21,6 +21,11 @@ describe('codex families', () => {
     ALL_CODEX_SLIMES.forEach(s => per.set(s.family as string, (per.get(s.family as string) ?? 0) + 1));
     expect([...per.values()].reduce((a, b) => a + b, 0)).toBe(ALL_CODEX_SLIMES.length);
   });
+  it('no family has more than 8 slimes, and none is a lonely 1-2', () => {
+    const per = new Map<string, number>();
+    ALL_CODEX_SLIMES.forEach(s => per.set(s.family as string, (per.get(s.family as string) ?? 0) + 1));
+    for (const [f, n] of per) { expect(n, `${f} too big`).toBeLessThanOrEqual(8); expect(n, `${f} too small`).toBeGreaterThanOrEqual(3); }
+  });
 });
 
 import { existsSync } from 'fs';

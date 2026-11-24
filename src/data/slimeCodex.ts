@@ -7,7 +7,7 @@ export interface CodexSlime {
   rarityTier: RarityTier;
   weight: number;
   description: string;
-  family?: 'elemental-foundations' | 'sweet-confections' | 'natures-garden' | 'storm-forces' | 'frozen-realms' | 'underground-depths' | 'aquatic-worlds' | 'metal-forged' | 'cosmic-elements' | 'ancient-mysteries' | 'odd-balls';
+  family?: 'elemental-foundations' | 'molten-fires' | 'storm-forces' | 'aquatic-worlds' | 'natures-garden' | 'frozen-realms' | 'earthen-wilds' | 'metal-forged' | 'shadow-realm' | 'celestial-lights' | 'playroom' | 'sweet-confections' | 'ancient-mysteries';
   spriteId: string;
 }
 
@@ -30,7 +30,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Claims to be 99% water and 1% existential dread.",
-    family: 'aquatic-worlds',
+    family: 'elemental-foundations',
     spriteId: 'water_slime'
   },
   {
@@ -40,7 +40,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Secretly believes it's a mighty oak, despite being cabbage-sized.",
-    family: 'natures-garden',
+    family: 'elemental-foundations',
     spriteId: 'leaf_slime'
   },
   {
@@ -70,7 +70,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Once froze time for exactly 0.0001 seconds and won't let anyone forget it.",
-    family: 'frozen-realms',
+    family: 'elemental-foundations',
     spriteId: 'snow_slime'
   },
   {
@@ -100,7 +100,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "So bright it technically doesn't cast a shadow, which really confuses photographers.",
-    family: 'cosmic-elements',
+    family: 'celestial-lights',
     spriteId: 'glow_slime'
   },
   {
@@ -110,7 +110,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Lives in the corners of your eyes.",
-    family: 'cosmic-elements',
+    family: 'elemental-foundations',
     spriteId: 'dark_slime'
   },
   {
@@ -120,7 +120,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Once outshone the sun, but only because it was being particularly dramatic that day.",
-    family: 'cosmic-elements',
+    family: 'celestial-lights',
     spriteId: 'star_slime'
   },
   {
@@ -130,7 +130,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Technically a puddle with commitment issues, but don't tell it that—it gets defensive.",
-    family: 'cosmic-elements',
+    family: 'shadow-realm',
     spriteId: 'ooze_slime'
   },
   {
@@ -150,7 +150,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Runs hot, holds grudges, and has never once been asked to calm down, which is why it hasn't.",
-    family: 'elemental-foundations',
+    family: 'molten-fires',
     spriteId: 'lava_slime'
   },
   {
@@ -170,7 +170,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Claims to hear the thoughts of every toaster within a ten-mile radius.",
-    family: 'cosmic-elements',
+    family: 'storm-forces',
     spriteId: 'rune_slime'
   },
   {
@@ -180,7 +180,7 @@ export const PRIMAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Common',
     weight: 100,
     description: "Can turn invisible, but only when no one is looking at it.",
-    family: 'cosmic-elements',
+    family: 'celestial-lights',
     spriteId: 'angel_slime'
   }
 ];
@@ -194,7 +194,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Leaves a trail of wrappers wherever it goes and swears it is not littering, it is decorating.",
-    family: 'sweet-confections',
+    family: 'playroom',
     spriteId: 'candy_slime'
   },
   {
@@ -244,7 +244,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Eighty percent air and one hundred percent fluff, and very sensitive about both.",
-    family: 'sweet-confections',
+    family: 'playroom',
     spriteId: 'cotton_candy_slime'
   },
   {
@@ -264,7 +264,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Its sneezes sound exactly like a slide whistle.",
-    family: 'sweet-confections',
+    family: 'playroom',
     spriteId: 'soda_slime'
   },
   {
@@ -274,7 +274,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "The primary reason why socks go missing in the dryer, though it denies everything.",
-    family: 'elemental-foundations',
+    family: 'molten-fires',
     spriteId: 'steam_slime'
   },
   {
@@ -314,7 +314,7 @@ export const SWEET_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Bounces back from everything, and has been told that is not a personality.",
-    family: 'sweet-confections',
+    family: 'playroom',
     spriteId: 'gummybear_slime'
   }
 ];
@@ -328,7 +328,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Claims to be the descendant of a supernova, but mostly just uses its heat to toast marshmallows.",
-    family: 'elemental-foundations',
+    family: 'molten-fires',
     spriteId: 'volcano_slime'
   },
   {
@@ -368,7 +368,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Started as a campfire that was told \"just one more marshmallow\" and never stopped.",
-    family: 'storm-forces',
+    family: 'molten-fires',
     spriteId: 'wildfire_slime'
   },
   {
@@ -388,7 +388,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Wears goggles indoors and still finds sand in places it has never been.",
-    family: 'storm-forces',
+    family: 'earthen-wilds',
     spriteId: 'sandstorm_slime'
   },
   {
@@ -398,7 +398,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Gets so excited it forgets to cool down, which is how the last three picnics ended.",
-    family: 'storm-forces',
+    family: 'celestial-lights',
     spriteId: 'solarflare_slime'
   },
   {
@@ -408,7 +408,7 @@ export const STORM_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Fell out of the sky onto a very surprised picnic and has been apologizing badly ever since.",
-    family: 'elemental-foundations',
+    family: 'molten-fires',
     spriteId: 'meteor_slime'
   }
 ];
@@ -462,7 +462,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: "Even other slimes are afraid to look at it, which it finds terribly dramatic.",
-    family: 'cosmic-elements',
+    family: 'shadow-realm',
     spriteId: 'eldritch_slime'
   },
   {
@@ -482,7 +482,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: "It consumes light to grow stronger, which makes solar panels very nervous.",
-    family: 'cosmic-elements',
+    family: 'shadow-realm',
     spriteId: 'star_eater_slime'
   },
   {
@@ -492,7 +492,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: "Its presence stops all nearby battles instantly, which makes it terrible at parties.",
-    family: 'cosmic-elements',
+    family: 'celestial-lights',
     spriteId: 'harmoney_slime'
   },
   {
@@ -502,7 +502,7 @@ export const LOST_SLIMES: CodexSlime[] = [
     rarityTier: 'Legendary',
     weight: 1,
     description: "Looks like a chest, acts like a library, and does not lend anything out.",
-    family: 'cosmic-elements',
+    family: 'shadow-realm',
     spriteId: 'pandora_slime'
   },
   {
@@ -526,7 +526,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Smells like a science fair and leaves a tiny hole in everything it loves.",
-    family: 'storm-forces',
+    family: 'aquatic-worlds',
     spriteId: 'acidrain_slime'
   },
   {
@@ -556,7 +556,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Collects rare pebbles and treats them like its own children.",
-    family: 'frozen-realms',
+    family: 'earthen-wilds',
     spriteId: 'canyon_slime'
   },
   {
@@ -566,7 +566,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Actually quite cheerful, but its aesthetic demands that it remains 'edge-lordy' for the brand.",
-    family: 'underground-depths',
+    family: 'earthen-wilds',
     spriteId: 'cave_slime'
   },
   {
@@ -586,7 +586,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Has not seen rain in a thousand years and will not stop mentioning it.",
-    family: 'underground-depths',
+    family: 'earthen-wilds',
     spriteId: 'desert_slime'
   },
   {
@@ -646,7 +646,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Uses its own body to keep its owner's drinks cold.",
-    family: 'natures-garden',
+    family: 'aquatic-worlds',
     spriteId: 'oasis_slime'
   },
   {
@@ -656,7 +656,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Rains on itself, indoors, as a matter of principle.",
-    family: 'aquatic-worlds',
+    family: 'natures-garden',
     spriteId: 'rainforest_slime'
   },
   {
@@ -666,7 +666,7 @@ export const NATURE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Whistles a tune that can only be heard by birds and very confused dogs.",
-    family: 'underground-depths',
+    family: 'earthen-wilds',
     spriteId: 'savanna_slime'
   },
   {
@@ -700,7 +700,7 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "A floating fusion that proves joy makes you lighter than air.",
-    family: 'odd-balls',
+    family: 'playroom',
     spriteId: 'balloon_slime'
   },
   {
@@ -710,7 +710,7 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "A colorful fusion that can draw dreams into reality, but mostly just doodles.",
-    family: 'odd-balls',
+    family: 'playroom',
     spriteId: 'crayon_slime'
   },
   {
@@ -720,7 +720,7 @@ export const SPECIAL_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "A flickering error in reality that exists between the code and the world.",
-    family: 'cosmic-elements',
+    family: 'shadow-realm',
     spriteId: 'glitched_slime'
   }
 ];
@@ -744,7 +744,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Gives static shocks that arrive pre-frozen, so you feel them a full minute later.",
-    family: 'frozen-realms',
+    family: 'storm-forces',
     spriteId: 'frostbolt_slime'
   },
   {
@@ -774,7 +774,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Cracked itself open once to show off and has been too embarrassed to close back up.",
-    family: 'underground-depths',
+    family: 'earthen-wilds',
     spriteId: 'geode_spark_slime'
   },
   {
@@ -794,7 +794,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Argues with itself constantly about whether the room is too hot or too cold, and both sides lose.",
-    family: 'frozen-realms',
+    family: 'molten-fires',
     spriteId: 'cinderfrost_slime'
   },
   {
@@ -814,7 +814,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Holds the record for most dramatic entrance, mostly because it hovers in a doorway until someone notices.",
-    family: 'cosmic-elements',
+    family: 'shadow-realm',
     spriteId: 'cinder_wraith_slime'
   },
   {
@@ -834,7 +834,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Grows an inch every time it gets startled, and it startles at everything.",
-    family: 'natures-garden',
+    family: 'storm-forces',
     spriteId: 'sprout_spark_slime'
   },
   {
@@ -844,7 +844,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Slips through keyholes just to rearrange the furniture, then slips out again without a word.",
-    family: 'cosmic-elements',
+    family: 'shadow-realm',
     spriteId: 'phantom_gust_slime'
   },
   {
@@ -874,7 +874,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Gets noticeably colder whenever someone says it looks spiky, which is how you can tell it likes the attention.",
-    family: 'frozen-realms',
+    family: 'shadow-realm',
     spriteId: 'umbra_frost_slime'
   },
   {
@@ -884,7 +884,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Hides a warm little flame inside a pile of rubble and acts shocked when you find it.",
-    family: 'elemental-foundations',
+    family: 'molten-fires',
     spriteId: 'cinderheart_slime'
   },
   {
@@ -894,7 +894,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Rare',
     weight: 25,
     description: "Drifts through the air like a jellyfish and refuses to confirm it is not one.",
-    family: 'cosmic-elements',
+    family: 'celestial-lights',
     spriteId: 'aurora_slime'
   },
   {
@@ -904,7 +904,7 @@ export const COVERAGE_SLIMES: CodexSlime[] = [
     rarityTier: 'Uncommon',
     weight: 60,
     description: "Runs on pure enthusiasm and a suspicious amount of copper wire, and has never once been switched off.",
-    family: 'metal-forged',
+    family: 'storm-forces',
     spriteId: 'dynamo_slime'
   },
   {

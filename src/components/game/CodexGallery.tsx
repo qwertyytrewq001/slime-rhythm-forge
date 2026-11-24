@@ -25,8 +25,11 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
 
   // Get unique families for the sidebar
   const familyOptions = useMemo(() => {
-    const families = [...new Set(ALL_CODEX_SLIMES.map(s => s.family).filter(Boolean))];
-    return families;
+    const families = [...new Set(ALL_CODEX_SLIMES.map(s => s.family).filter(Boolean))] as string[];
+    // Starter families first, rare ones last (unknown names go to the end).
+    const ORDER = ['elemental-foundations', 'natures-garden', 'aquatic-worlds', 'molten-fires', 'earthen-wilds', 'frozen-realms', 'storm-forces', 'metal-forged', 'sweet-confections', 'playroom', 'celestial-lights', 'shadow-realm', 'ancient-mysteries'];
+    const rank = (f: string) => (ORDER.indexOf(f) < 0 ? 99 : ORDER.indexOf(f));
+    return families.sort((a, b) => rank(a) - rank(b));
   }, []);
 
   // Get slimes for selected family only
