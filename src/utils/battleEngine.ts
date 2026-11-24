@@ -157,6 +157,7 @@ const TIER_ORDER: RarityTier[] = ['Common', 'Uncommon', 'Rare', 'Epic', 'Legenda
 function maxTierForLevel(level: number): RarityTier {
   if (level <= 8) return 'Uncommon';
   if (level <= 20) return 'Rare';
+  if (level <= 32) return 'Epic'; // a smooth step: jumping straight to Legendary at level 21 made level 25 a wall
   return 'Legendary';
 }
 
