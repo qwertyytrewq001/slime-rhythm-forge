@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from 'react';
+import { useStageSize, altarPad } from '@/utils/stage';
 import { useGameState } from '../../hooks/useGameState';
 import { isReady } from '../../utils/farmCore';
 import { totalGifts } from '../../utils/sanctuaryCore';
@@ -73,9 +74,10 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
   const readyCrops = state.farmPlots.filter(p => isReady(p, nowMs)).length;
 
   const home = currentView === 'breeding';
+  const stageH = useStageSize().h;
 
   return (
-    <div className="flex justify-between px-4 pt-3 pb-[135px] sm:pb-[135px] bg-transparent relative z-[60] pointer-events-none">
+    <div className="flex justify-between px-4 pt-3 bg-transparent relative z-[60] pointer-events-none" style={{ paddingBottom: altarPad(stageH) }}>
       <div className="flex flex-col sm:flex-row items-start gap-2 sm:gap-3 pointer-events-auto">
         {home ? (
           <>

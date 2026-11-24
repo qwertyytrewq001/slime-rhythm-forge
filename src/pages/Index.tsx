@@ -1,4 +1,5 @@
 import type React from 'react';
+import { useStageSize, altarScale } from '@/utils/stage';
 import { useEffect, useRef, useState } from 'react';
 import { GameProvider, useGameState, getStage } from '@/hooks/useGameState';
 import { TopBar } from '@/components/game/TopBar';
@@ -40,6 +41,7 @@ import { triggerDialogue } from '@/utils/dialogueTriggers';
 
 function GameLayout() {
   const { state, dispatch } = useGameState();
+  const stageSize = useStageSize();
   const [currentView, setCurrentView] = useState<'breeding' | 'breedingDen' | 'sanctuaries' | 'battleMap' | 'habitats' | 'hatchery' | 'farm'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
@@ -374,9 +376,11 @@ function GameLayout() {
         {/* Central Content */}
         <div className={`flex-1 overflow-hidden flex flex-col items-center justify-center ${currentView === 'sanctuaries' ? 'pointer-events-auto' : 'pointer-events-none'} relative`}>
           {currentView === 'breeding' && (
-            <div className="w-full h-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto">
+            <div className="w-full h-full flex flex-col items-center justify-center gap-16 animate-scale-in pointer-events-auto" style={{ ['--altar-scale' as string]: altarScale(stageSize.h) }}>
               <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[400px] bg-[#FF7EB6]/5 rounded-full blur-[100px] pointer-events-none" />
-              <BreedingPod onRequestGallery={openGalleryForSlot} onNavigateToBreedingDen={() => setCurrentView('breedingDen')} />
+              <div style={{ transform: `scale(${altarScale(stageSize.h)})`, transformOrigin: 'center center' }}>
+                <BreedingPod onRequestGallery={openGalleryForSlot} onNavigateToBreedingDen={() => setCurrentView('breedingDen')} />
+              </div>
               <Hatchery onNavigateToHatchery={() => setCurrentView('hatchery')} />
             </div>
           )}

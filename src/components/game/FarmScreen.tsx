@@ -364,8 +364,8 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
               {!plot.unlocked && (
                 <div className="absolute inset-0 flex flex-col items-center justify-center text-center pointer-events-none" style={{ color: '#fff', textShadow: '0 2px 3px rgba(0,0,0,0.85)' }}>
                   <Lock style={{ width: w * 0.2, height: w * 0.2, opacity: 0.85 }} />
-                  <span className="font-bold leading-none" style={{ fontSize: Math.max(9, sw * 0.0105 * c.scale), marginTop: 2 }}>
-                    {canBuy ? <>Buy {plotCost(rule, perks).toLocaleString()} <Ico name="icon_drop" w={Math.max(10, sw * 0.011 * c.scale)} /></> : <><span className="block">Farm Lv {rule.level}</span><span className="block opacity-85" style={{ fontSize: '0.85em' }}>{plotCost(rule, perks).toLocaleString()} <Ico name="icon_drop" w={Math.max(9, sw * 0.0095 * c.scale)} /></span></>}
+                  <span className="font-bold leading-none" style={{ fontSize: Math.max(12, sw * 0.0105 * c.scale), marginTop: 2 }}>
+                    {canBuy ? <>Buy {plotCost(rule, perks).toLocaleString()} <Ico name="icon_drop" w={Math.max(13, sw * 0.011 * c.scale)} /></> : <><span className="block">Farm Lv {rule.level}</span><span className="block opacity-85" style={{ fontSize: '0.85em' }}>{plotCost(rule, perks).toLocaleString()} <Ico name="icon_drop" w={Math.max(12, sw * 0.0095 * c.scale)} /></span></>}
                   </span>
                 </div>
               )}
@@ -390,8 +390,8 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
           const progress = progressOf(plot, now);
           return (
             <div key={`t${plot.id}`} className="absolute pointer-events-none" style={{ left: `${c.x * 100}%`, top: `${c.y * 100}%`, transform: `translate(-50%, ${h * 0.16}px)`, zIndex: 11 + c.row * 3 }}>
-              <div className="relative overflow-hidden whitespace-nowrap rounded-full font-bold text-white flex items-center" style={{ background: 'rgba(30,14,40,0.82)', fontSize: Math.max(8, sw * 0.0088 * c.scale), padding: `${sw * 0.0008}px ${sw * 0.0048}px ${sw * 0.002}px`, border: '1px solid rgba(255,255,255,0.3)', lineHeight: 1.15 }}>
-                {plot.watered && <Ico name="icon_drop" w={Math.max(8, sw * 0.0088 * c.scale)} style={{ marginRight: 2 }} />}{formatDuration(plot.readyAt - now)}
+              <div className="relative overflow-hidden whitespace-nowrap rounded-full font-bold text-white flex items-center" style={{ background: 'rgba(30,14,40,0.82)', fontSize: Math.max(11, sw * 0.0088 * c.scale), padding: `${sw * 0.0008}px ${sw * 0.0048}px ${sw * 0.002}px`, border: '1px solid rgba(255,255,255,0.3)', lineHeight: 1.15 }}>
+                {plot.watered && <Ico name="icon_drop" w={Math.max(11, sw * 0.0088 * c.scale)} style={{ marginRight: 2 }} />}{formatDuration(plot.readyAt - now)}
                 <div className="absolute left-0 bottom-0" style={{ height: Math.max(2, sw * 0.0022), width: `${progress * 100}%`, background: 'linear-gradient(90deg,#7dff9e,#f2d94a)' }} />
               </div>
             </div>
@@ -555,7 +555,7 @@ const ActionButton: React.FC<{ children: React.ReactNode; onClick: () => void; d
     onClick={onClick}
     disabled={disabled}
     className={`relative rounded-full font-bold border-[3px] shadow-lg transition-transform whitespace-nowrap ${disabled ? 'opacity-55 cursor-not-allowed' : 'hover:scale-105 active:scale-95'} ${primary && !disabled ? 'farm-ready-btn' : ''}`}
-    style={{ background: primary && !disabled ? 'linear-gradient(#ff7eb6,#ff1493)' : PARCHMENT, borderColor: primary && !disabled ? '#fff3c0' : INK, color: primary && !disabled ? '#fff' : INK, fontSize: sw * 0.0125, padding: `${sw * 0.005}px ${sw * 0.014}px`, textShadow: primary && !disabled ? '0 1px 2px rgba(80,0,40,0.6)' : undefined }}
+    style={{ background: primary && !disabled ? 'linear-gradient(#ff7eb6,#ff1493)' : PARCHMENT, borderColor: primary && !disabled ? '#fff3c0' : INK, color: primary && !disabled ? '#fff' : INK, fontSize: Math.max(13, sw * 0.0125), padding: `${sw * 0.005}px ${sw * 0.014}px`, textShadow: primary && !disabled ? '0 1px 2px rgba(80,0,40,0.6)' : undefined }}
   >
     {children}
     {badge ? (
