@@ -8,6 +8,7 @@ import { CodexSlime } from '@/data/slimeCodex';
 import { ELEMENT_DISPLAY_NAMES, RARITY_TIER_COLORS } from '@/data/traitData';
 import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { X, Heart, Sparkles, Plus, ChevronLeft, HelpCircle } from 'lucide-react';
+import { toast } from '@/hooks/use-toast';
 import { calculateBreedingResult, getPossibleOutcomes } from '@/utils/breedingCalculator';
 import { breedSlimes, createCodexSlime } from '@/utils/slimeGenerator';
 import { breedMs, hatchMs } from '@/utils/gooEconomy';
@@ -117,6 +118,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
   };
 
   const handleStartBreeding = () => {
+    if (state.activeHatching) { toast({ title: 'The incubator is still busy', description: state.activeHatching.waiting ? 'Your newborn needs a habitat with room before you can breed again.' : 'Hatch the egg first.' }); return; }
     if (slot1Slime && slot2Slime && !state.activeBreeding) {
       // Create breeding ritual object
       // the baby is decided now (with any Mutation Juice / Lucky Charm), so a finished ritual always has a slime to hatch

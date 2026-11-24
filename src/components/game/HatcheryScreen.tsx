@@ -93,7 +93,10 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
   };
 
   const finalizeHatch = () => {
-    dispatch({ type: 'FINISH_HATCHING' });
+    const sl = activeHatching?.slime;
+    const homed = !!sl && state.habitats.some(h => h.assignedSlimeIds.includes(sl.id));
+    // No habitat has room: the baby keeps the incubator until it has a home.
+    dispatch({ type: homed || !sl ? 'FINISH_HATCHING' : 'HATCH_WAIT' });
     setDiscoveredSlime(null);
     setCrackProgress(0);
   };
@@ -150,7 +153,9 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
 
             {/* Status text */}
             <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-48 text-center pointer-events-none">
-              {isFinished ? (
+              {activeHatching.waiting ? (
+                <div className="text-[12px] text-[#FFD27E] font-black uppercase tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">Needs a home! Build a {ELEMENT_DISPLAY_NAMES[activeHatching.slime.element]} habitat with room.</div>
+              ) : isFinished ? (
                 <div className={`flex flex-col items-center ${isHatching ? 'animate-pulse' : 'animate-bounce'}`}>
                   <div className="text-[12px] text-[#FF7EB6] animate-inscription-glow font-black uppercase whitespace-nowrap tracking-wider drop-shadow-[0_2px_8px_rgba(255,126,182,0.4)]">
                     {isHatching ? 'LIFE AWAKENS...' : crackProgress > 0 ? 'TAP TO BREAK!' : 'READY TO HATCH!'}

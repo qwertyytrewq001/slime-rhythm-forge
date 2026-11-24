@@ -143,8 +143,10 @@ export function calculateBreedingResult(
   }
   
   // ===== PHASE TWO: BREEDINGPOWER CALCULATION =====
-  const breedingPower = ((parent1Level + parent2Level) * 0.5) + 
-                        (RARITY_VALUES[parent1Rarity] + RARITY_VALUES[parent2Rarity]);
+  // Parent quality: 60% from level, 40% from rarity (each normalised 0..1), scaled to the old 0..64 range.
+  const levelPart = Math.min(1, ((parent1Level + parent2Level) * 0.5) / 50);
+  const rarityPart = Math.min(1, (RARITY_VALUES[parent1Rarity] + RARITY_VALUES[parent2Rarity] - 2) / 12);
+  const breedingPower = (levelPart * 0.6 + rarityPart * 0.4) * MAX_BREEDING_POWER;
   debugLog(`🧬 BreedingPower: ${breedingPower} (Levels: ${parent1Level + parent2Level}, Rarities: ${parent1Rarity} + ${parent2Rarity})`);
   
   // ===== PHASE THREE: DYNAMIC WEIGHTED SELECTION =====

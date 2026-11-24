@@ -160,6 +160,7 @@ export interface GameState {
   activeHatching: {
     slime: Slime;
     endTime: number;
+    waiting?: boolean; // hatched, but no habitat has room yet
   } | null;
   breedHistory: BreedResult[];
   achievements: Achievement[];
@@ -279,6 +280,7 @@ export type GameAction =
   | { type: 'COLLECT_EGG' }
   | { type: 'START_HATCHING'; slime: Slime; duration: number }
   | { type: 'FINISH_HATCHING' }
+  | { type: 'HATCH_WAIT' }
   | { type: 'ADD_GOO'; amount: number }
   | { type: 'SPEND_GOO'; amount: number }
   | { type: 'ACTIVATE_MUTATION_JUICE' }

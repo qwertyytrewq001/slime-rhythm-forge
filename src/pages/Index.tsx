@@ -45,6 +45,19 @@ function GameLayout() {
   const [showAchievements, setShowAchievements] = useState(false);
   const claimableAchievements = state.achievements.filter(a => a.unlocked && !a.claimed).length;
   
+  // A hatched slime waits in the incubator until some habitat has room, then moves in and frees it.
+  useEffect(() => {
+    const ah = state.activeHatching;
+    if (!ah?.waiting) return;
+    const sl = ah.slime;
+    if (state.habitats.some(h => h.assignedSlimeIds.includes(sl.id))) { dispatch({ type: 'FINISH_HATCHING' }); return; }
+    const home = state.habitats.find(h => sl.elements.includes(h.element) && h.assignedSlimeIds.length < h.capacity);
+    if (home) {
+      dispatch({ type: 'ASSIGN_SLIME_TO_HABITAT', habitatId: home.id, slimeId: sl.id });
+      dispatch({ type: 'FINISH_HATCHING' });
+    }
+  }, [state.activeHatching, state.habitats, dispatch]);
+
   // Preload sprites on app startup
   useEffect(() => {
     preloadEssentialSprites().then(() => {

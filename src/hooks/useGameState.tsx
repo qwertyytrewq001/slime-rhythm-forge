@@ -228,7 +228,7 @@ export interface LocalGameState {
   breedSlot1: string | null;
   breedSlot2: string | null;
   activeBreeding: { ritual: string } | null;
-  activeHatching: { slime: Slime; endTime: number } | null;
+  activeHatching: { slime: Slime; endTime: number; waiting?: boolean } | null;
   breedHistory: BreedResult[];
   achievements: Achievement[];
   mutationJuiceActive: boolean;
@@ -318,6 +318,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, activeHatching: { slime: action.slime, endTime: Date.now() + action.duration } };
     case 'FINISH_HATCHING':
       return { ...state, activeHatching: null };
+    case 'HATCH_WAIT':
+      return state.activeHatching ? { ...state, activeHatching: { ...state.activeHatching, waiting: true } } : state;
     case 'ADD_GOO':
       return { ...state, goo: Math.round((state.goo + action.amount) * 100) / 100 };
     case 'SPEND_GOO':
