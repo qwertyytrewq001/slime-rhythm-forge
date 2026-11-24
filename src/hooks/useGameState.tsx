@@ -134,7 +134,7 @@ function findNextGridSlot(habitats: Habitat[]): { x: number; y: number } {
   return { x: 0, y: 0 };
 }
 
-function createInitialState(): GameState {
+export function createInitialState(): GameState {
   const saved = loadGame();
   if (saved && saved.slimes && saved.slimes.length > 0) {
     // Older saves can contain several slimes sharing one id (two eggs of the same species).
@@ -259,27 +259,15 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       const { result } = action;
       const isWin = result.winner === 'player';
 
-      // Run XP through the shared helper so battle XP triggers the same
-      // level-up / evolution popups as feeding does.
-      let levelUp: GameState['lastLevelUp'] = null;
-      let evolution: GameState['lastEvolution'] = null;
-      const updatedSlimes: Slime[] = [];
-      for (const s of state.slimes) {
-        if (!result.playerTeam.find(ps => ps.id === s.id)) {
-          updatedSlimes.push(s);
-          continue;
-        }
-        const gained = addXp(s, result.xpReward);
-        levelUp = levelUp ?? gained.leveledUp;
-        evolution = evolution ?? gained.evolved;
-        updatedSlimes.push(gained.slime);
-      }
+      // Slimes level up only by eating, so a battle pays food into the bag instead of XP.
+      const inventory = { ...state.inventory };
+      for (const k of Object.keys(result.foodReward) as SlimeFoodType[]) inventory[k] = (inventory[k] || 0) + result.foodReward[k];
 
       const nextLevel = isWin ? Math.max(state.currentLevel, result.levelReached + 1) : state.currentLevel;
 
       return {
         ...state,
-        slimes: updatedSlimes,
+        inventory,
         goo: Math.round((state.goo + result.gooReward) * 100) / 100,
         currentLevel: nextLevel,
         stats: {
@@ -287,8 +275,6 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
           battlesWon: state.stats.battlesWon + (isWin ? 1 : 0),
           bossesDefeated: state.stats.bossesDefeated + (isWin && result.levelReached % 5 === 0 ? 1 : 0),
         },
-        lastLevelUp: levelUp ?? state.lastLevelUp,
-        lastEvolution: evolution ?? state.lastEvolution,
       };
     }
     case 'SET_CURRENT_LEVEL':

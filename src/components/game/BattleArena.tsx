@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
-import { BattleSlime, SlimeElement } from '@/types/slime';
+import { BattleSlime, SlimeElement, SlimeFoodType, SLIME_FOODS } from '@/types/slime';
 import { calculateBattleRewards, getTypeMultiplier, isBossLevel } from '@/utils/battleEngine';
 import {
   Action, ActionKind, Battle, BattleEvent, ENERGY_PER_ATTACK, SKILLS, SKILL_COST, ULTIMATE_COST, Unit,
@@ -110,7 +110,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
   const [dim, setDim] = useState(false);
   const [flash, setFlash] = useState(0);
   const [bossBanner, setBossBanner] = useState(false);
-  const [result, setResult] = useState<null | { won: boolean; goo: number; xp: number; perfects: number }>(null);
+  const [result, setResult] = useState<null | { won: boolean; goo: number; food: Record<SlimeFoodType, number>; perfects: number }>(null);
   const [confirmQuit, setConfirmQuit] = useState(false);
   const [speed, setSpeed] = useState<1 | 2>(1);
   const [auto, setAuto] = useState(false);
@@ -564,13 +564,13 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
     audioEngine.playSfx(won ? 'achievement' : 'tap');
     const c = { x: sw / 2, y: sw * 0.3 };
     if (won) addFx({ kind: 'burst', x: c.x, y: c.y, emojis: ['🎉', '⭐', '✨', '💖'], count: 24 }, 2200);
-    const { goo, xp } = calculateBattleRewards(level, won);
+    const { goo, food } = calculateBattleRewards(level, won);
     dispatch({
       type: 'BATTLE_REWARD',
-      result: { playerTeam, opponentTeam, winner: won ? 'player' : 'opponent', gooReward: goo, xpReward: xp, levelReached: level },
+      result: { playerTeam, opponentTeam, winner: won ? 'player' : 'opponent', gooReward: goo, foodReward: food, levelReached: level },
     });
     await new Promise(r => setTimeout(r, won ? 1500 : 1100));
-    setResult({ won, goo, xp, perfects: perfectsRef.current });
+    setResult({ won, goo, food, perfects: perfectsRef.current });
   };
 
   const cont = () => onBattleComplete?.({ winner: result?.won ? 'player' : 'opponent', level });
@@ -1016,14 +1016,13 @@ const Orb: React.FC<{ fx: Extract<Fx, { kind: 'orb' }>; sw: number }> = ({ fx, s
   return <div ref={ref} className="absolute rounded-full" style={{ left: fx.x, top: fx.y, width: s, height: s, transform: 'translate(-50%,-50%)', background: `radial-gradient(circle, #fff, ${fx.color} 55%, transparent 75%)`, boxShadow: `0 0 ${s}px ${fx.color}` }} />;
 };
 
-const ResultScreen: React.FC<{ result: { won: boolean; goo: number; xp: number; perfects: number }; sw: number; team: Unit[]; view: Record<string, View>; onContinue: () => void }> = ({ result, sw, team, view, onContinue }) => {
+const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record<SlimeFoodType, number>; perfects: number }; sw: number; team: Unit[]; view: Record<string, View>; onContinue: () => void }> = ({ result, sw, team, view, onContinue }) => {
   const [goo, setGoo] = useState(0);
-  const [xp, setXp] = useState(0);
   useEffect(() => {
     const t0 = Date.now();
     const id = setInterval(() => {
       const p = Math.min(1, (Date.now() - t0 - 600) / 900);
-      if (p >= 0) { setGoo(Math.round(result.goo * p)); setXp(Math.round(result.xp * p)); }
+      if (p >= 0) { setGoo(Math.round(result.goo * p)); }
       if (p >= 1) clearInterval(id);
     }, 30);
     return () => clearInterval(id);
@@ -1048,7 +1047,11 @@ const ResultScreen: React.FC<{ result: { won: boolean; goo: number; xp: number; 
           }}
         >
           <div className="font-bold flex items-center gap-2 leading-none" style={{ fontSize: sw * 0.024 }}>💧 +{goo} <span className="font-semibold opacity-70" style={{ fontSize: sw * 0.012 }}>Goo</span></div>
-          <div className="font-bold flex items-center gap-2 leading-none" style={{ fontSize: sw * 0.024 }}>⭐ +{xp} <span className="font-semibold opacity-70" style={{ fontSize: sw * 0.012 }}>XP each</span></div>
+          <div className="font-bold flex items-center gap-3 leading-none" style={{ fontSize: sw * 0.022 }}>
+            {(['basic', 'elemental', 'royal'] as SlimeFoodType[]).filter(k => result.food[k] > 0).map(k => (
+              <span key={k} title={SLIME_FOODS[k].name}>{SLIME_FOODS[k].icon} +{result.food[k]}</span>
+            ))}
+          </div>
           {result.perfects > 0 && <div className="font-bold leading-none" style={{ fontSize: sw * 0.0125, color: result.won ? '#a8650a' : '#ffe14d' }}>🎯 {result.perfects} perfect timing{result.perfects > 1 ? 's' : ''}</div>}
         </div>
       </div>

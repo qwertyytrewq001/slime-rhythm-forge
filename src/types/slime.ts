@@ -133,7 +133,7 @@ export interface BattleResult {
   opponentTeam: Slime[];
   winner: 'player' | 'opponent';
   gooReward: number;
-  xpReward: number;
+  foodReward: Record<SlimeFoodType, number>;
   levelReached: number;
 }
 

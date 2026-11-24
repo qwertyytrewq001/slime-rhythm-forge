@@ -45,6 +45,8 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
   const mapIndex = Math.min(MAP_SCREENS.length - 1, Math.floor((level - 1) / 10)) + 1;
   const backdrop = `${import.meta.env.BASE_URL}maps/map${mapIndex}.jpg`;
 
+  const ownedElements = useMemo(() => new Set(state.slimes.flatMap(s => s.elements)), [state.slimes]);
+
   const picked = playerTeam.filter((s): s is Slime => s !== null);
   const isTeamReady = picked.length > 0;
 
@@ -169,7 +171,8 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
             <p className="text-white font-bold text-sm uppercase tracking-widest mb-2 text-right drop-shadow">Enemies</p>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {opponentTeam.map((foe, idx) => {
-                const weakTo = ALL_ELEMENTS.filter(el => getTypeMultiplier(el, foe.elements) >= 1.2).slice(0, 3);
+                // only suggest elements the player actually owns a slime for
+                const weakTo = ALL_ELEMENTS.filter(el => ownedElements.has(el) && getTypeMultiplier(el, foe.elements) >= 1.2).slice(0, 3);
                 return (
                   <div key={idx} className="rounded-2xl p-2 flex flex-col items-center text-center shadow-lg" style={{ background: 'linear-gradient(#f3d3c8, #e2b3a4)', border: `3px solid #5b2417`, color: '#4a1a10' }}>
                     <div className="w-full aspect-square flex items-center justify-center rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.6), rgba(255,255,255,0) 70%)' }}>
@@ -177,7 +180,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
                     </div>
                     <p className="font-bold text-sm leading-tight truncate w-full">{foe.name}</p>
                     <p className="text-[11px] font-semibold opacity-70">Lv {foe.level} · {foe.elements.map(e => ELEMENT_ICONS[e]).join(' ')}</p>
-                    <p className="mt-1 text-[10px] font-bold opacity-80">{weakTo.length ? `Weak to ${weakTo.map(e => ELEMENT_ICONS[e]).join(' ')}` : 'No clear weakness'}</p>
+                    <p className="mt-1 text-[10px] font-bold opacity-80">{weakTo.length ? `Your best: ${weakTo.map(e => ELEMENT_ICONS[e]).join(' ')}` : 'None of yours is strong here'}</p>
                   </div>
                 );
               })}

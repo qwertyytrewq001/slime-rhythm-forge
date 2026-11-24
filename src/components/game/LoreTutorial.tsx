@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { BATTLE_STORY } from '@/data/battleStory';
 import { X, ChevronRight, ChevronLeft, SkipForward } from 'lucide-react';
 import { useGameState } from '@/hooks/useGameState';
 import { PaintedDialogue } from './PaintedDialogue';
@@ -551,7 +552,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     // (keyed by battle-map level; each story beat plays once)
     if (triggerId === 'levelUp') {
       const battleLevel = data?.level || 1;
-      const levelDialogue = LEVEL_DIALOGUE[battleLevel as keyof typeof LEVEL_DIALOGUE];
+      const levelDialogue = (LEVEL_DIALOGUE as Record<number, { expression: string; text: string }[]>)[battleLevel] ?? BATTLE_STORY[battleLevel];
       if (levelDialogue && !hasSeenEvent(`levelStory_${battleLevel}`)) {
         markEventSeen(`levelStory_${battleLevel}`);
         startDialogue(levelDialogue);

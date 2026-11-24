@@ -1,4 +1,4 @@
-import { Slime, SlimeElement, BattleSlime, BattleTurn, RarityTier } from '../types/slime';
+import { Slime, SlimeElement, BattleSlime, BattleTurn, RarityTier, SlimeFoodType } from '../types/slime';
 import { ALL_CODEX_SLIMES, CodexSlime } from '../data/slimeCodex';
 import { createCodexSlime } from './slimeGenerator';
 
@@ -307,13 +307,21 @@ export function chooseBattleAction(
 // Rewards
 // ---------------------------------------------------------------------------
 
-export function calculateBattleRewards(level: number, won: boolean): { goo: number; xp: number } {
+/**
+ * Battles pay goo and food. Slimes only level up by eating, so food is how a fight helps your team grow:
+ * Glimberries every win, Moonpetal Honey from level 6, a Starfruit on every 10th level (the big bosses).
+ */
+export function calculateBattleRewards(level: number, won: boolean): { goo: number; food: Record<SlimeFoodType, number> } {
   const rand = (n: number) => Math.floor(Math.random() * n);
-  if (!won) return { goo: 5, xp: 8 + Math.floor(level / 2) };
-  const bossBonus = isBossLevel(level) ? 1.5 : 1;
+  if (!won) return { goo: 5, food: { basic: 1, elemental: 0, royal: 0 } };
+  const boss = isBossLevel(level);
   return {
-    goo: Math.round((20 + level * 2 + rand(16)) * bossBonus),
-    xp: Math.round((24 + level * 3 + rand(16)) * bossBonus),
+    goo: Math.round((20 + level * 2 + rand(16)) * (boss ? 1.5 : 1)),
+    food: {
+      basic: 2 + Math.floor(level / 10),
+      elemental: level >= 6 ? (boss ? 2 : 1) : 0,
+      royal: level % 10 === 0 ? 1 : 0,
+    },
   };
 }
 
