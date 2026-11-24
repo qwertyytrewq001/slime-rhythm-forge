@@ -19,6 +19,7 @@ export const BATTLE_STORY: Record<number, StoryBeat[]> = {
   11: beat('relieved', "Whispering Wood. The trees here talk, you just have to be patient.", "They're telling me a stranger went through, carrying a lot of empty barrels."),
   12: beat('serious', "Even the plant slimes are jumpy. They think we work for him.", "Let them swing first. They'll figure it out."),
   13: beat('urgent', "The tracks split here. One set goes to the plains, one goes underground.", "We take the plains. The underground set is too deep to follow just yet."),
+  16: beat('relieved', "Golden Plains. Look at that sky, you could bottle it.", "The slimes here are shy, not mean. Win them over and they'll follow you home."),
   17: beat('serious', "The Golden Plains used to glow at night. Now it's just grass.", "I want that glow back."),
   18: beat('grim', "Look at the soil. Burned, not by fire. Something sucked the life straight out of it.", "That's how his machines work."),
   19: beat('urgent', "One more fight and we're out of the Plains.", "After this it's mines, and mines are where I start to worry."),
@@ -45,4 +46,12 @@ export const BATTLE_STORY: Record<number, StoryBeat[]> = {
   46: beat('scared', "I don't like how quiet it got.", "Voss would have sent more by now. Unless he's saving them."),
   47: beat('serious', "Every slime you bred is fighting for you. Look at them.", "That's not something his machines can copy."),
   48: beat('determined', "One more door and the gate. Whatever's behind it, we do it together.", "Eat something. Rest your team."),
+};
+
+/** A quick Glim line on the result screen right after a fight, picked at random so repeat battles don't feel canned. */
+export const RESULT_LINES = {
+  perfect: ["Every beat landed. Okay, I'm impressed.", "That timing was clean. The slimes felt it too.", "You're not just tapping, you're playing them like a drum."],
+  flawless: ["Nobody went down. That's how a Forger does it.", "Whole team standing. They trust you, you know.", "Not a scratch on the team. Show-off."],
+  win: ["Good fight. Let the team rest, they earned it.", "Another one down. The road gets a little safer.", "Feed them well. A happy slime hits harder.", "That's the spirit. Slimes fight for people who care."],
+  lose: ["That's okay. Even Voss lost fights once.", "Don't sulk. Level them up, breed something new, and try again.", "Rest first. A different team mix might do the trick.", "We lost a round, not the war. Check their elements and come back."],
 };

@@ -252,12 +252,12 @@ const PERSONALITIES: Record<string, Personality> = {
 const pickOf = <T,>(a: T[]) => a[Math.floor(Math.random() * a.length)];
 /** What each toy makes a slime do: the little words it says and the bounces it does there. */
 const DECOR_PLAY: Record<string, { words: string[]; bounces: number[] }> = {
-  ball: { words: ['Pop pop!', 'Boing!', 'Bob bob!'], bounces: [330, 250] },
-  mushroom: { words: ['Boing boing!', 'Wheee!'], bounces: [460, 380, 300, 220] },
+  ball: { words: ['Pop pop!', 'Boing!', 'Bob bob!', 'Catch!', 'Bonk!'], bounces: [330, 250] },
+  mushroom: { words: ['Boing boing!', 'Wheee!', 'Higher!'], bounces: [460, 380, 300, 220] },
   stump: { words: ['Hup!', 'Up I go!'], bounces: [520, 300] },
-  swing: { words: ['Wheee!', 'Swish swish'], bounces: [260, 260] },
-  fountain: { words: ['Splish!', 'Splash!'], bounces: [240, 240, 240] },
-  flowers: { words: ['Sniff sniff', 'So pretty'], bounces: [] },
+  swing: { words: ['Wheee!', 'Swish swish', 'Higher, higher!', 'Wooo!'], bounces: [260, 260] },
+  fountain: { words: ['Splish!', 'Splash!', 'Cold!', 'Wet wet!'], bounces: [240, 240, 240] },
+  flowers: { words: ['Sniff sniff', 'So pretty', 'Smells nice'], bounces: [] },
   lantern: { words: ['Ooh, glowy', 'So warm'], bounces: [] },
   hammock: { words: ['Cosy...', 'Zzz...'], bounces: [] },
 };
@@ -545,6 +545,8 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
             s.inspecting = null;
             s.bounceQ = [...play.bounces];
             bounceNext();
+            // the payoff: a happy reaction once the playing is over (not every time, so it stays a treat)
+            if (Math.random() < 0.7) setTimeout(() => { if (!bubbleRef.current || Math.random() < 0.5) say(pickOf(['🤩', '😄', 'txt:Again!', 'txt:So fun!', 'txt:Yay!', '💖']), 1900, false); }, play.bounces.reduce((a, b) => a + b, 0) + 900);
           }
         } else {
           say('❓', 2400, false);

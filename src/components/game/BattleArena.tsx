@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { RESULT_LINES } from '@/data/battleStory';
 import { GooIcon } from './GooIcon';
 import { useGameState } from '@/hooks/useGameState';
 import { BattleSlime, SlimeElement, SlimeFoodType, SLIME_FOODS } from '@/types/slime';
@@ -227,6 +228,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
           addFx({ kind: 'pop', x: c.x, y: c.y - sw * 0.07, text: `-${ev.damage}`, color: popupColor(ev), size: ev.crit ? 1.9 : ev.effectiveness === 'super' ? 1.5 : 1.2, label, labelColor: popupColor(ev) }, 1100);
         } else {
           addFx({ kind: 'pop', x: c.x, y: c.y - sw * 0.07, text: 'BLOCKED', color: '#b8d8ff', size: 1.0 }, 1000);
+        }
+        if (ev.crit || ev.effectiveness === 'super') {
+          // big hits get an element-coloured shockwave and sparks; crits also flash the screen
+          addFx({ kind: 'ring', x: c.x, y: c.y, color: TINT[ev.element], big: ev.crit }, 900);
+          addFx({ kind: 'burst', x: c.x, y: c.y, emojis: ev.crit ? ['⭐', '✨'] : ['✨'], count: ev.crit ? 9 : 5 }, 900);
+          if (ev.crit) setFlash(f => f + 1);
         }
         audioEngine.playSfx(ev.crit ? 'discovery' : 'hatch');
         shake(ev.crit ? 14 : ev.effectiveness === 'super' ? 9 : 5);
@@ -1019,6 +1026,11 @@ const Orb: React.FC<{ fx: Extract<Fx, { kind: 'orb' }>; sw: number }> = ({ fx, s
 
 const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record<SlimeFoodType, number>; perfects: number }; sw: number; team: Unit[]; view: Record<string, View>; onContinue: () => void }> = ({ result, sw, team, view, onContinue }) => {
   const [goo, setGoo] = useState(0);
+  const [glimLine] = useState(() => {
+    const alive = team.every(u => view[u.id]?.alive);
+    const pool = !result.won ? RESULT_LINES.lose : result.perfects >= 3 ? RESULT_LINES.perfect : alive ? RESULT_LINES.flawless : RESULT_LINES.win;
+    return pool[Math.floor(Math.random() * pool.length)];
+  });
   useEffect(() => {
     const t0 = Date.now();
     const id = setInterval(() => {
@@ -1063,6 +1075,7 @@ const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record
           </div>
         ))}
       </div>
+      <div className="font-semibold text-center" style={{ marginTop: sw * 0.008, maxWidth: sw * 0.42, fontSize: sw * 0.0135, color: '#fff3d0', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>Glim: “{glimLine}”</div>
       <button
         onClick={onContinue}
         className="rounded-full font-bold text-white uppercase border-[3px] hover:scale-105 active:translate-y-1 transition-transform"
