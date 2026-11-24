@@ -1722,7 +1722,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
             {assignedSlimes.map(sl => {
               const lv = bondLevel(sl.bond ?? 0);
               return (
-                <div key={sl.id} className="flex flex-col items-center" style={{ minWidth: 64 }} title={`${sl.name}: ${BOND_LEVELS[lv].name}. ${NATURE_BLURB[slimeNature(sl.id)]}`}>
+                <div key={sl.id} className="flex flex-col items-center" style={{ minWidth: 64 }} title={`${sl.name}: ${BOND_LEVELS[lv].name}${lv ? ` (+${lv * 10}% Joy)` : ''}. ${NATURE_BLURB[slimeNature(sl.id)]}`}>
                   <span className="text-[10px] font-black text-white/80 leading-none truncate" style={{ maxWidth: 80 }}>{sl.name.replace(' Slime', '')}</span>
                   <span className="text-[13px] leading-none mt-0.5" style={{ color: '#ff7eb6', letterSpacing: 1 }}>{'♥'.repeat(lv)}<span style={{ color: 'rgba(255,255,255,0.25)' }}>{'♥'.repeat(3 - lv)}</span></span>
                   <span className="mt-0.5 rounded-full overflow-hidden" style={{ width: 52, height: 4, background: 'rgba(255,255,255,0.18)' }}><span className="block h-full" style={{ width: `${Math.round(bondProgress(sl.bond ?? 0) * 100)}%`, background: 'linear-gradient(90deg,#ff7eb6,#ffd27e)' }} /></span>

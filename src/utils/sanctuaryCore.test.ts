@@ -31,6 +31,11 @@ describe('joy', () => {
     const two = joyPerMinute(hab(), slimes);
     expect(two).toBeGreaterThan(one * 2);
   });
+  it('a best friend builds 30% more joy than a stranger', () => {
+    const base = joyPerMinute(hab({ assignedSlimeIds: ['a'] }), slimes);
+    const bonded = joyPerMinute(hab({ assignedSlimeIds: ['a'] }), slimes.map(x => (x.id === 'a' ? { ...x, bond: 300 } : x)));
+    expect(bonded / base).toBeCloseTo(1.3, 5);
+  });
   it('decor speeds joy up', () => {
     expect(joyPerMinute(hab({ decor: ['mushroom'] }), slimes)).toBeGreaterThan(joyPerMinute(hab(), slimes));
   });

@@ -7,6 +7,11 @@ import { canOfferRewarded, rewardedBreak } from '@/utils/portal';
  */
 const COOLDOWN_MS = 60_000;
 const lastUsed: Record<string, number> = {};
+// A daily limit so the boosts stay a treat, not a chore (resets each day, kept per browser)
+const DAILY_MAX = 10;
+const dayKey = () => `rf-ads-${new Date().toISOString().slice(0, 10)}`;
+const usedToday = () => { try { return parseInt(localStorage.getItem(dayKey()) || '0', 10) || 0; } catch { return 0; } };
+const countUse = () => { try { localStorage.setItem(dayKey(), String(usedToday() + 1)); } catch { /* storage blocked: no limit */ } };
 
 interface Props {
   kind: string; // one cooldown per kind: 'hatch', 'breed', 'farm', 'food'
@@ -35,7 +40,7 @@ export const AdBoostButton: React.FC<Props> = ({ kind, label, onReward, style, c
     return () => window.clearTimeout(id);
   }, [left]);
 
-  if (!offer) return null;
+  if (!offer || usedToday() >= DAILY_MAX) return null;
 
   const click = async (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -44,7 +49,7 @@ export const AdBoostButton: React.FC<Props> = ({ kind, label, onReward, style, c
     const ok = await rewardedBreak();
     setBusy(false);
     lastUsed[kind] = Date.now();
-    if (ok) onReward(); // no reward when the ad failed or was blocked
+    if (ok) { countUse(); onReward(); } // no reward when the ad failed or was blocked
     setTick(t => t + 1);
   };
 

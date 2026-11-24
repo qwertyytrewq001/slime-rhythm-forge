@@ -1,3 +1,4 @@
+import { useStageSize } from '@/utils/stage';
 import { eggCost, hatchMs } from '@/utils/gooEconomy';
 import { GooIcon } from './GooIcon';
 import React, { useState } from 'react';
@@ -46,6 +47,7 @@ const hasSeenEvent = (eventName: string): boolean => {
 };
 
 export function BazaarModal({ onClose }: BazaarModalProps) {
+  const bazaarScale = Math.max(0.55, Math.min(1, (useStageSize().h - 225) / 345)); // short screens: shrink the cards so they are not cut off
   const { state, dispatch, playerLevel } = useGameState();
   const { toast } = useToast();
   const [selectedCategory, setSelectedCategory] = useState<'eggs' | 'habitats' | 'items'>('eggs');
@@ -328,7 +330,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
         <div className="flex-1 min-h-0 flex flex-col">
           {/* Items Display - Horizontal Layout */}
           <div className="flex-1 min-h-0 flex items-center justify-center px-8 py-4 overflow-hidden">
-            <div className="w-full max-w-6xl">
+            <div className="w-full max-w-6xl" style={{ transform: `scale(${bazaarScale})`, transformOrigin: 'center center' }}>
               <div className="flex items-center justify-center gap-8">
                 {/* Previous Arrow */}
                 <button

@@ -39,8 +39,9 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
   const [opponentTeam, setOpponentTeam] = useState<BattleSlime[]>([]);
   // a short screen (phone held sideways, small laptop window) gets smaller cards so squads, enemies and roster all fit
   const [compact, setCompact] = useState(() => stageSize().h < 700);
-  useEffect(() => onStageChange(() => setCompact(stageSize().h < 700)), []);
-  const big = compact ? 62 : 96;
+  const [tiny, setTiny] = useState(() => stageSize().h < 560); // a phone held sideways: drop the extras
+  useEffect(() => onStageChange(() => { setCompact(stageSize().h < 700); setTiny(stageSize().h < 560); }), []);
+  const big = tiny ? 40 : compact ? 62 : 96;
 
   useEffect(() => {
     const avgLevel = state.slimes.reduce((sum, s) => sum + s.level, 0) / state.slimes.length || 1;
@@ -107,15 +108,15 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
       <div className="absolute inset-0 bg-cover bg-center scale-110 blur-md" style={{ backgroundImage: `url("${backdrop}")` }} />
       <div className="absolute inset-0" style={{ background: 'radial-gradient(ellipse at center, rgba(20,10,5,0.35), rgba(10,5,2,0.85))' }} />
 
-      <div className="relative w-full max-w-5xl h-full max-h-[100cqh] flex flex-col gap-3 p-3 sm:p-5" style={compact ? { gap: 6, padding: 8 } : undefined}>
+      <div className="relative w-full max-w-5xl h-full max-h-[100cqh] flex flex-col gap-3 p-3 sm:p-5" style={tiny ? { gap: 4, padding: 6 } : compact ? { gap: 6, padding: 8 } : undefined}>
         {/* Banner */}
         <div className="flex items-center justify-between gap-3">
-          <div className="relative rounded-lg px-5 py-2 shadow-[0_6px_16px_rgba(0,0,0,0.5)]" style={panel}>
+          <div className="relative rounded-lg px-5 py-2 shadow-[0_6px_16px_rgba(0,0,0,0.5)]" style={tiny ? { ...panel, padding: '2px 16px' } : panel}>
             <p className="font-bold leading-tight text-lg sm:text-2xl flex items-center gap-2">
               {boss && <Skull className="w-5 h-5 text-red-700" />}
               {boss ? 'Boss Battle' : 'Get Ready'} · Level {level}
             </p>
-            <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-widest opacity-70">{region.name}</p>
+            {!tiny && <p className="text-[11px] sm:text-xs font-semibold uppercase tracking-widest opacity-70">{region.name}</p>}
           </div>
           <button
             onClick={onClose}
@@ -127,14 +128,14 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
         </div>
 
         {BATTLE_BRIEFING[level] && (
-          <p className="text-center text-sm sm:text-base font-semibold text-white drop-shadow" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>“{BATTLE_BRIEFING[level]}” <span className="opacity-70">· Glim</span></p>
+          <p className={`text-center ${tiny ? 'text-xs' : 'text-sm sm:text-base'} font-semibold text-white drop-shadow`} style={{ textShadow: '0 1px 4px rgba(0,0,0,0.9)' }}>“{BATTLE_BRIEFING[level]}” <span className="opacity-70">· Glim</span></p>
         )}
 
         {/* The two squads */}
         <div className="flex-1 min-h-0 grid grid-cols-1 md:grid-cols-[1fr_auto_1fr] gap-3 md:gap-4 items-center overflow-y-auto">
           {/* Yours */}
           <section>
-            <p className="text-white font-bold text-sm uppercase tracking-widest mb-2 drop-shadow">Your squad</p>
+            <p className={`text-white font-bold text-sm uppercase tracking-widest drop-shadow ${tiny ? 'mb-0.5' : 'mb-2'}`}>Your squad</p>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {playerTeam.map((slime, idx) => {
                 const m = slime ? verdict(matchupVs(slime, opponentTeam)) : null;
@@ -150,13 +151,13 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
                     </div>
                     <p className="font-bold text-sm leading-tight truncate w-full">{slime.name}</p>
                     <p className="text-[11px] font-semibold opacity-70">Lv {slime.level} · {slime.elements.map(e => ELEMENT_ICONS[e]).join(' ')}</p>
-                    <div className="flex gap-2 mt-1 text-[11px] font-bold">
+                    <div className={`${tiny ? 'hidden' : 'flex'} gap-2 mt-1 text-[11px] font-bold`}>
                       <span>❤️ {stats.maxHp}</span>
                       <span>⚔️ {stats.attack}</span>
                     </div>
                   </div>
                 ) : (
-                  <div key={idx} className="rounded-2xl p-2 flex flex-col items-center justify-center text-center border-[3px] border-dashed aspect-[3/4] sm:aspect-auto sm:min-h-[200px]"  style={{ ...(compact ? { minHeight: 96, aspectRatio: 'auto' } : {}), borderColor: 'rgba(246,232,195,0.55)', background: 'rgba(0,0,0,0.3)', color: PARCHMENT }}>
+                  <div key={idx} className="rounded-2xl p-2 flex flex-col items-center justify-center text-center border-[3px] border-dashed aspect-[3/4] sm:aspect-auto sm:min-h-[200px]"  style={{ ...(compact ? { minHeight: tiny ? 70 : 96, aspectRatio: 'auto' } : {}), borderColor: 'rgba(246,232,195,0.55)', background: 'rgba(0,0,0,0.3)', color: PARCHMENT }}>
                     <Swords className="w-8 h-8 opacity-60" />
                     <p className="text-xs font-bold mt-1 opacity-80">Slot {idx + 1}</p>
                     <p className="text-[10px] font-semibold opacity-60">tap a slime below</p>
@@ -183,19 +184,19 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
 
           {/* Theirs */}
           <section>
-            <p className="text-white font-bold text-sm uppercase tracking-widest mb-2 text-right drop-shadow">Enemies</p>
+            <p className={`text-white font-bold text-sm uppercase tracking-widest text-right drop-shadow ${tiny ? 'mb-0.5' : 'mb-2'}`}>Enemies</p>
             <div className="grid grid-cols-3 gap-2 sm:gap-3">
               {opponentTeam.map((foe, idx) => {
                 // only suggest elements the player actually owns a slime for
                 const weakTo = ALL_ELEMENTS.filter(el => ownedElements.has(el) && getTypeMultiplier(el, foe.elements) >= 1.2).slice(0, 3);
                 return (
                   <div key={idx} className="rounded-2xl p-2 flex flex-col items-center text-center shadow-lg" style={{ background: 'linear-gradient(#f3d3c8, #e2b3a4)', border: `3px solid #5b2417`, color: '#4a1a10' }}>
-                    <div className="w-full aspect-square flex items-center justify-center rounded-full" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.6), rgba(255,255,255,0) 70%)' }}>
+                    <div className={`w-full ${tiny ? '' : 'aspect-square'} flex items-center justify-center rounded-full`} style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.6), rgba(255,255,255,0) 70%)', ...(tiny ? { height: 48 } : {}) }}>
                       <SlimeCanvas slime={foe} size={big} animated />
                     </div>
                     <p className="font-bold text-sm leading-tight truncate w-full">{foe.name}</p>
                     <p className="text-[11px] font-semibold opacity-70">Lv {foe.level} · {foe.elements.map(e => ELEMENT_ICONS[e]).join(' ')}</p>
-                    <p className="mt-1 text-[10px] font-bold opacity-80">{weakTo.length ? `Your best: ${weakTo.map(e => ELEMENT_ICONS[e]).join(' ')}` : 'None of yours is strong here'}</p>
+                    <p className={`mt-1 text-[10px] font-bold opacity-80 ${tiny ? 'hidden' : ''}`}>{weakTo.length ? `Your best: ${weakTo.map(e => ELEMENT_ICONS[e]).join(' ')}` : 'None of yours is strong here'}</p>
                   </div>
                 );
               })}
@@ -204,9 +205,9 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
         </div>
 
         {/* Roster */}
-        <div className="rounded-2xl p-2 sm:p-3 shadow-[0_-6px_20px_rgba(0,0,0,0.4)]" style={panel}>
-          <div className="flex items-center justify-between mb-2 gap-2">
-            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Your slimes · best matchup first{babiesHidden > 0 ? ` · ${babiesHidden} baby slime${babiesHidden > 1 ? 's' : ''} too small to fight (feed them to level 5)` : ''}</p>
+        <div className="rounded-2xl p-2 sm:p-3 shadow-[0_-6px_20px_rgba(0,0,0,0.4)]" style={tiny ? { ...panel, padding: 4 } : panel}>
+          <div className={`flex items-center justify-between gap-2 ${tiny ? 'mb-0.5' : 'mb-2'}`}>
+            <p className="text-xs font-bold uppercase tracking-widest opacity-70">Your slimes · best matchup first{babiesHidden > 0 ? ` · ${babiesHidden} baby slime${babiesHidden > 1 ? 's' : ''} too small to fight${tiny ? '' : ' (feed them to level 5)'}` : ''}</p>
             <button onClick={autoPick} className="flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-bold border-2 hover:scale-105 transition-transform" style={{ background: '#fff7dc', borderColor: INK }}>
               <Wand2 className="w-3.5 h-3.5" /> Auto-pick best
             </button>
@@ -225,10 +226,10 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
                   style={{ background: '#fff7dc', borderColor: INK }}
                 >
                   <span className="absolute top-0.5 left-0.5 px-1 rounded text-[9px] font-bold text-white" style={{ background: v.color }}>{v.arrow} {v.label}</span>
-                  <div className="mt-2"><SlimeCanvas slime={slime} size={compact ? 44 : 64} animated /></div>
+                  <div className={tiny ? '' : 'mt-2'}><SlimeCanvas slime={slime} size={tiny ? 34 : compact ? 44 : 64} animated /></div>
                   <p className="text-[11px] font-bold truncate w-full text-center">{slime.name}</p>
                   <p className="text-[10px] font-semibold opacity-70">Lv {slime.level} · {slime.elements.map(e => ELEMENT_ICONS[e]).join('')}</p>
-                  <p className="text-[10px] font-bold">💪 {power}</p>
+                  {!tiny && <p className="text-[10px] font-bold">💪 {power}</p>}
                 </button>
               );
             })}
@@ -240,7 +241,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
           <button
             disabled={!isTeamReady}
             onClick={() => onStartBattle(picked.map(toBattleSlime), opponentTeam)}
-            className={`h-14 px-10 rounded-full text-lg font-bold uppercase tracking-wide flex items-center gap-3 border-[3px] transition-all ${
+            className={`${tiny ? 'h-9 px-8' : 'h-14 px-10'} rounded-full text-lg font-bold uppercase tracking-wide flex items-center gap-3 border-[3px] transition-all ${
               isTeamReady ? 'text-white shadow-[0_6px_0_#8a0f55,0_10px_24px_rgba(0,0,0,0.5)] hover:scale-105 active:translate-y-1 active:shadow-[0_2px_0_#8a0f55]' : 'opacity-60 cursor-not-allowed text-white/70'
             }`}
             style={{ background: isTeamReady ? 'linear-gradient(#ff7eb6, #ff1493)' : '#6b5a45', borderColor: isTeamReady ? '#fff3c0' : '#3a2e22' }}

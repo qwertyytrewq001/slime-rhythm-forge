@@ -1,3 +1,4 @@
+import { bondLevel } from './bond';
 import { Habitat, HabitatGift, Slime, SlimeElement, SlimeFoodType } from '@/types/slime';
 
 /**
@@ -165,9 +166,11 @@ export const giftCap = (h: Habitat, perks: SanctuaryPerks = NO_PERKS) => GIFT_CA
 
 /** Joy per minute while the player is away. Only slimes of the right element live here. */
 export function joyPerMinute(h: Habitat, slimes: Slime[], perks: SanctuaryPerks = NO_PERKS): number {
-  const living = h.assignedSlimeIds.filter(id => slimes.find(s => s.id === id)).length;
+  const here = h.assignedSlimeIds.map(id => slimes.find(s => s.id === id)).filter((s): s is Slime => !!s);
+  const living = here.length;
   if (!living) return 0;
-  let rate = 0.4 * living;
+  // Friendship pays: each slime adds 10% more Joy per bond level (Friend, Buddy, Best Friend)
+  let rate = here.reduce((sum, s) => sum + 0.4 * (1 + 0.1 * bondLevel(s.bond ?? 0)), 0);
   if (living >= 2) rate *= 1.2; // friends
   const decor = (h.decor ?? []).reduce((sum, id) => sum + (decorById(id)?.joy ?? 0), 0);
   rate *= 1 + decor + (h.element === 'shadow' ? perks.joyMult : 0);
