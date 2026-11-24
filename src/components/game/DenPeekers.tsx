@@ -64,16 +64,16 @@ export function DenPeekers() {
     const key = ++keyN.current;
     set(i, { slime, mode, phase: 'in', key });
     later(() => set(i, { slime, mode, phase: 'show', key }), 60);
-    const stay = mode === 'peek' ? rand(2.2, 3.6) : rand(2.6, 4);
+    const stay = mode === 'peek' ? rand(4.5, 6.5) : rand(5, 7);
     later(() => set(i, { slime, mode, phase: 'out', key }), 60 + stay * 1000);
     later(() => {
       set(i, null);
       // often sneak out of a different alcove straight away
-      if (chain < 2 && Math.random() < 0.55) {
+      if (chain < 2 && Math.random() < 0.3) {
         const free = ALCOVES.map((_, k) => k).filter(k => k !== i && !outRef.current[k]);
-        if (free.length) later(() => perform(pick(free), slime, chain + 1), rand(350, 900));
+        if (free.length) later(() => perform(pick(free), slime, chain + 1), rand(2500, 4500));
       }
-    }, 60 + stay * 1000 + 600);
+    }, 60 + stay * 1000 + 1300);
   };
 
   useEffect(() => {
@@ -88,10 +88,10 @@ export function DenPeekers() {
     }
     const loop = () => {
       const free = ALCOVES.map((_, k) => k).filter(k => !outRef.current[k]);
-      if (free.length && Object.keys(outRef.current).length < 2) perform(pick(free), pick(cast), 0);
-      later(loop, rand(2200, 5200));
+      if (free.length && Object.keys(outRef.current).length < 1) perform(pick(free), pick(cast), 0);
+      later(loop, rand(6000, 10000));
     };
-    later(loop, 1600);
+    later(loop, 2500);
     return () => { alive.current = false; timers.current.forEach(clearTimeout); timers.current = []; };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [cast]);
@@ -136,7 +136,7 @@ export function DenPeekers() {
                 onClick={() => tap(i)}
                 aria-label={`${p.slime.name} peeking`}
                 className="absolute outline-none pointer-events-auto"
-                style={{ left: '50%', bottom: 0, width: size, height: size, marginLeft: -size / 2, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', transform: `translateY(${lift}%)`, transition: 'transform 0.55s cubic-bezier(.3,1.5,.5,1)' }}
+                style={{ left: '50%', bottom: 0, width: size, height: size, marginLeft: -size / 2, background: 'transparent', border: 'none', padding: 0, cursor: 'pointer', transform: `translateY(${lift}%)`, transition: 'transform 1.2s cubic-bezier(.4,0,.2,1)' }}
               >
                 <div className="flex items-end justify-center" style={{ width: '100%', height: '100%', animation: anim, transformOrigin: '50% 100%' }}>
                   {/* SlimeCanvas draws at size x multiplier x growth stage; ask for exactly the width we want, centred, with the art sitting on the floor */}

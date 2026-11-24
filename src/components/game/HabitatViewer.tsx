@@ -197,6 +197,8 @@ interface SlimeApi {
   drop: () => void;
   setPressed: (v: boolean) => void;
   setHover: (v: boolean) => void;
+  pos: () => { x: number; y: number };
+  greet: () => void;
 }
 
 interface PointerSample {
@@ -312,6 +314,9 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     lonelySince: 0,
     lonelyIn: rand(4, 8),
     pet: 0,
+    energy: 0, // each outing tires it a little; after a few it naps
+    decorSeen: {} as Record<string, number>,
+    visit: null as string | null, // a friend it is walking over to see
   });
 
   // Show a reaction bubble. Soft ones (mood chatter) never interrupt a bubble that is already up.
@@ -414,6 +419,16 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
       setHover: (v: boolean) => {
         hover.current = v;
       },
+      pos: () => ({ x: sim.current.x, y: sim.current.y }),
+      // a friend arrived next to us: perk up and say hi
+      greet: () => {
+        const s = sim.current;
+        if (s.mode === 'sleep' || s.mode === 'carried' || s.mode === 'air') return;
+        say('😊', 1800, false);
+        if (s.mode === 'idle' || s.mode === 'land') {
+          s.mode = 'air'; s.vz = 300; s.jump = 300; s.vx = 0; s.vy = 0; s.hasTarget = false; s.z = Math.max(s.z, 1); s.syv += 3;
+        }
+      },
     };
     apiRef.current[slime.id] = api;
     return () => {
@@ -475,8 +490,20 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     const finishTrip = (viaFloat: boolean) => {
       const s = sim.current;
       s.hasTarget = false;
+      if (s.visit) {
+        // reached a friend: say hello, the friend answers, then hang out for a moment
+        const friend = apiRef.current[s.visit];
+        s.visit = null;
+        s.energy += 1;
+        say('😊', 2000, false);
+        friend?.greet();
+        s.mode = 'idle';
+        s.t = rand(3, 5);
+        return;
+      }
       if (s.explore) {
         s.inspecting = s.explore;
+        s.energy += 1;
         s.explore = null;
         s.mode = 'inspect';
         s.t = rand(2.6, 4.2);
@@ -542,13 +569,50 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
       }
       // explore: wander over to something in the habitat and have a look at it
       const lms = cb.current.landmarks;
-      if (lms.length && Math.random() < 0.3) {
-        let i = Math.floor(Math.random() * lms.length);
-        if (i === s.lastLm) i = (i + 1) % lms.length;
-        s.lastLm = i;
-        const lm = lms[i];
+      // Decide what it WANTS to do, in order of how much it cares:
+      //  1. tired after a few outings: nap (floaty slimes just drift instead)
+      if (s.energy >= 4 && !pers.float) {
+        s.energy = 0;
+        s.mode = 'sleep';
+        s.t = rand(8, 12);
+        setSleeping(true);
+        return;
+      }
+      if (s.energy >= 4) s.energy = 0;
+      const nowS = performance.now() / 1000;
+      const decorLms = lms.filter(l => l.decor);
+      const goLandmark = (lm: Landmark) => {
+        if (lm.decor) s.decorSeen[lm.decor] = nowS;
         s.explore = lm;
         goTo(lm.x + rand(-2.5, 2.5), lm.y + rand(-1.5, 1.5), travelStyle(), hopJump());
+      };
+      //  2. its favourite toy (each slime always likes the same one best), unless it just played with it
+      if (decorLms.length) {
+        let h = 0;
+        for (const ch of slime.id) h = (h * 31 + ch.charCodeAt(0)) >>> 0;
+        const fav = decorLms[h % decorLms.length];
+        if (nowS - (s.decorSeen[fav.decor as string] ?? 0) > 22 && Math.random() < 0.5) { goLandmark(fav); return; }
+      }
+      //  3. a friend: walk over and say hello (the friend perks up when it arrives)
+      const mates = Object.keys(apiRef.current).filter(id => id !== slime.id);
+      if (mates.length && Math.random() < 0.28) {
+        const id = mates[Math.floor(Math.random() * mates.length)];
+        const p2 = apiRef.current[id]?.pos();
+        if (p2) {
+          s.visit = id;
+          const side = p2.x > s.x ? -1 : 1;
+          goTo(p2.x + side * rand(7, 10), p2.y + rand(-1.5, 1.5), travelStyle(), hopJump());
+          return;
+        }
+      }
+      //  4. any other toy it has not tried for a while, or a sight worth a look
+      if (lms.length && Math.random() < 0.3) {
+        const pool = lms.filter(l => !l.decor || nowS - (s.decorSeen[l.decor] ?? 0) > 22);
+        const list = pool.length ? pool : lms;
+        let i = Math.floor(Math.random() * list.length);
+        if (list[i] === lms[s.lastLm]) i = (i + 1) % list.length;
+        s.lastLm = lms.indexOf(list[i]);
+        goLandmark(list[i]);
         return;
       }
       if (Math.random() < 0.1) {

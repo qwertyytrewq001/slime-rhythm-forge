@@ -85,11 +85,19 @@ function validateSlimeElements(elements: SlimeElement[]): string | null {
 // Element Subset Rule (Dragon Mania Legends style): an offspring can be ANY
 // slime whose elements all come from the parents' combined elements, so
 // Iron+Fire+Shadow x Plant+Water can produce anything built from those five.
-function filterSlimesByExactElements(parentUnion: SlimeElement[]): CodexSlime[] {
+function filterSlimesByExactElements(parentUnion: SlimeElement[], parent1?: SlimeElement[], parent2?: SlimeElement[]): CodexSlime[] {
   const pool = new Set(parentUnion);
-  return ALL_CODEX_SLIMES.filter(slime =>
+  const subset = ALL_CODEX_SLIMES.filter(slime =>
     slime.elements.length > 0 && slime.elements.every(element => pool.has(element))
   );
+  if (!parent1 || !parent2) return subset;
+  // A baby should be a real blend: it must carry something from EACH parent, and (when there is any
+  // other choice) it should not just be a copy of one of the parents' own species.
+  const touches = (s: CodexSlime, p: SlimeElement[]) => s.elements.some(e => p.includes(e));
+  const sameSet = (a: SlimeElement[], b: SlimeElement[]) => a.length === b.length && a.every(e => b.includes(e));
+  const blends = subset.filter(s => touches(s, parent1) && touches(s, parent2));
+  const fresh = blends.filter(s => !sameSet(s.elements, parent1) && !sameSet(s.elements, parent2));
+  return fresh.length ? fresh : blends.length ? blends : subset;
 }
 
 /**
@@ -128,7 +136,7 @@ export function calculateBreedingResult(
   debugLog(`🧬 Parent Union: [${parentUnion.join(', ')}]`);
   
   // Database Filtration: Only slimes with EXACTLY the parent elements
-  const validOutcomes = filterSlimesByExactElements(parentUnion);
+  const validOutcomes = filterSlimesByExactElements(parentUnion, parent1Elements, parent2Elements);
   
   debugLog(`🧬 Valid Outcomes Found: ${validOutcomes.length} slimes`);
   
@@ -223,7 +231,7 @@ export function getPossibleOutcomes(
   debugLog(`🧬 GetPossibleOutcomes - Parent Union: [${parentUnion.join(', ')}]`);
   
   // Database Filtration: Only slimes with EXACTLY the parent elements
-  const validOutcomes = filterSlimesByExactElements(parentUnion);
+  const validOutcomes = filterSlimesByExactElements(parentUnion, parent1Elements, parent2Elements);
   
   debugLog(`🧬 GetPossibleOutcomes - Valid Outcomes Found: ${validOutcomes.length} slimes`);
   
