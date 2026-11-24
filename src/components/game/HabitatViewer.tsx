@@ -1066,21 +1066,31 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     setTimeout(() => setFx(list => list.filter(f => f.id !== id)), life);
   }, []);
 
+  // Where the slime's body really is. The tagged holder can be smaller than the painted sprite (big adults
+  // overflow it to the right), so measure the sprite itself and trim its transparent margins.
+  const bodyRect = (el: Element) => {
+    const img = el.querySelector('img');
+    const r = (img ?? el).getBoundingClientRect();
+    if (!img) return { left: r.left, right: r.right, top: r.top, bottom: r.bottom };
+    const ix = r.width * 0.16;
+    return { left: r.left + ix, right: r.right - ix, top: r.top + r.height * 0.14, bottom: r.bottom - r.height * 0.08 };
+  };
+
   const centerOf = useCallback((slimeId: string) => {
     const el = document.querySelector(`[data-slime-id="${slimeId}"]`);
     if (!el) return null;
-    const r = el.getBoundingClientRect();
-    return { x: r.left + r.width / 2, y: r.top + r.height / 2 };
+    const r = bodyRect(el);
+    return { x: (r.left + r.right) / 2, y: (r.top + r.bottom) / 2 };
   }, []);
 
   const slimeAt = useCallback((x: number, y: number) => {
     let best: string | null = null;
     let bestDist = Infinity;
     document.querySelectorAll('[data-slime-id]').forEach(el => {
-      const r = el.getBoundingClientRect();
-      const pad = 24;
+      const r = bodyRect(el);
+      const pad = 16;
       if (x >= r.left - pad && x <= r.right + pad && y >= r.top - pad && y <= r.bottom + pad) {
-        const d = Math.hypot(x - (r.left + r.width / 2), y - (r.top + r.height / 2));
+        const d = Math.hypot(x - (r.left + r.right) / 2, y - (r.top + r.bottom) / 2);
         if (d < bestDist) { bestDist = d; best = el.getAttribute('data-slime-id'); }
       }
     });
@@ -1090,10 +1100,13 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
   const handleSlimeSelect = (slimeId: string) => {
     if (!habitat) return;
     const slime = state.slimes.find(s => s.id === slimeId);
-    if (slime && slime.elements.includes(habitat.element)) {
-      dispatch({ type: 'ASSIGN_SLIME_TO_HABITAT', habitatId, slimeId });
-      setGalleryOpen(false);
-    }
+    const say = (text: string) => addFx({ kind: 'text', x: window.innerWidth / 2 - 90, y: 150, text, color: '#ffe14d' }, 2200);
+    if (!slime) return;
+    if (!slime.elements.includes(habitat.element)) { say(`${slime.name} doesn't match this habitat`); return; }
+    if (habitat.assignedSlimeIds.length >= habitat.capacity && !habitat.assignedSlimeIds.includes(slimeId)) { say('This habitat is full'); setGalleryOpen(false); return; }
+    dispatch({ type: 'ASSIGN_SLIME_TO_HABITAT', habitatId, slimeId });
+    setGalleryOpen(false);
+    say(`${slime.name} moved in!`);
   };
 
   const handlePoke = (slimeId: string, quiet = false) => {
@@ -1468,7 +1481,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
             </SheetTitle>
           </SheetHeader>
           <div className="h-full overflow-hidden">
-             <SlimeGallery onSelect={handleSlimeSelect} filterElement={habitat.element} />
+             <SlimeGallery autoPlace={false} onSelect={handleSlimeSelect} filterElement={habitat.element} />
           </div>
         </SheetContent>
       </Sheet>

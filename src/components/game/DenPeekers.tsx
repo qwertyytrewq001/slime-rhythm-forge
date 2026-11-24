@@ -124,7 +124,7 @@ export function DenPeekers() {
         const left = ox + (a.x / 100) * IMG_W * k - aw / 2, top = oy + (a.b / 100) * IMG_H * k - ah;
         // the slime art only fills about half of its square canvas, so the canvas is larger than the opening and the arch clips it
         const size = Math.round(Math.min(aw * 1.45, ah * 0.8));
-        const lift = !p ? 120 : p.phase === 'in' || p.phase === 'out' ? 120 : p.mode === 'peek' || p.mode === 'shy' ? 14 : 2;
+        const lift = !p ? 120 : p.phase === 'in' || p.phase === 'out' ? 120 : p.mode === 'peek' || p.mode === 'shy' ? 5 : 0;
         const anim = !p ? undefined : p.giggle ? 'peekGiggle 0.35s ease-in-out infinite'
           : p.phase !== 'show' ? undefined
           : p.mode === 'peek' ? 'peekWiggle 1.1s ease-in-out infinite' : p.mode === 'wave' ? 'peekWave 0.9s ease-in-out infinite' : p.mode === 'pop' ? 'peekPop 0.8s ease-in-out infinite' : 'peekShy 1.2s ease-in-out infinite';
@@ -140,7 +140,7 @@ export function DenPeekers() {
               >
                 <div className="flex items-end justify-center" style={{ width: '100%', height: '100%', animation: anim, transformOrigin: '50% 100%' }}>
                   {/* SlimeCanvas draws at size x multiplier x growth stage; ask for exactly the width we want, centred, with the art sitting on the floor */}
-                  <div style={{ marginBottom: -size * 0.2 }}>
+                  <div style={{ marginBottom: -size * 0.09 }}>
                     <SlimeCanvas slime={p.slime} size={size / (getStage(p.slime.level || 1) === 'baby' ? 0.6 : getStage(p.slime.level || 1) === 'teen' ? 0.85 : 1)} sizeMultiplier={1} animated animationStyle="playful" />
                   </div>
                 </div>
