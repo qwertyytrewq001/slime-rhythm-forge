@@ -38,7 +38,7 @@ export const PaintedDialogue: React.FC<PaintedDialogueProps> = ({ speaker, expre
   <div className="fixed left-0 right-0 flex justify-center items-end pointer-events-none" style={{ bottom: 14, zIndex: 9999, fontFamily: FRED, padding: '0 10px' }}>
     <style>{`@keyframes pdRise { from { opacity: 0; transform: translateY(20px) } to { opacity: 1; transform: none } } @keyframes pdBlink { 50% { opacity: 0 } } @keyframes pdFlip { 0% { transform: translateX(26px); opacity: 0 } 60% { opacity: 1 } 100% { transform: translateX(0); opacity: 1 } } @keyframes pdSheen { 0% { transform: translateX(-110%) } 100% { transform: translateX(110%) } }`}</style>
     <div className="relative flex items-end pointer-events-auto" style={{ width: 'min(100%, 860px)', animation: 'pdRise 0.3s ease-out' }}>
-      <div className="shrink-0 pointer-events-none" style={short ? { width: 'clamp(80px, 15cqw, 120px)', height: 'clamp(80px, 15cqw, 120px)', marginRight: -18, zIndex: 2, marginBottom: 2 } : { width: 'clamp(110px, 21cqw, 190px)', height: 'clamp(110px, 21cqw, 190px)', marginRight: -24, zIndex: 2, marginBottom: 4 }}>
+      <div className="shrink-0 pointer-events-none" style={short ? { width: 'clamp(90px, 18cqw, 140px)', height: 'clamp(90px, 18cqw, 140px)', marginRight: -18, zIndex: 2, marginBottom: 2 } : { width: 'clamp(110px, 21cqw, 190px)', height: 'clamp(110px, 21cqw, 190px)', marginRight: -24, zIndex: 2, marginBottom: 4 }}>
         {portrait ?? <GlimCharacter expression={expression} size={short ? 120 : 190} />}
       </div>
 

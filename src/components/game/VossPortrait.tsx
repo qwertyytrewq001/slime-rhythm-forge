@@ -16,7 +16,7 @@ export function VossPortrait({ mood = 'calm' }: { mood?: string }) {
   return (
     <div className="relative w-full h-full" style={{ filter: 'drop-shadow(0 6px 10px rgba(0,0,0,0.55))' }}>
       {art !== 'no' && (
-        <img src={src} alt="" draggable={false} onLoad={() => setArt('yes')} onError={() => setArt('no')} className="absolute inset-0 w-full h-full object-contain" style={{ display: art === 'yes' ? 'block' : 'none' }} />
+        <img src={src} alt="" draggable={false} onLoad={() => setArt('yes')} onError={() => setArt('no')} className="absolute inset-0 w-full h-full object-contain" style={{ display: art === 'yes' ? 'block' : 'none', imageRendering: 'auto' }} />
       )}
       {art !== 'yes' && (
         <svg viewBox="0 0 200 200" className="absolute inset-0 w-full h-full" role="img" aria-label="Voss">
