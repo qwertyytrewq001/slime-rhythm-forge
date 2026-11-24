@@ -18,6 +18,9 @@ interface BreedingDenProps {
   onNavigateToHatchery?: () => void;
 }
 
+/** Players see how likely a result is in words, never the exact percentage, so a lucky hatch still feels like a win. */
+const oddsLabel = (pct: number) => (pct >= 40 ? "Likely" : pct >= 15 ? "Possible" : pct >= 5 ? "Unlikely" : "Long shot");
+
 export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatchery }: BreedingDenProps) {
   const { state, dispatch } = useGameState();
   const [possibleOutcomes, setPossibleOutcomes] = useState<CodexSlime[]>([]);
@@ -431,7 +434,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                   <div className="flex justify-center mt-2">
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-[#4a2f17]" style={{ fontFamily: "'Fredoka', sans-serif" }}>
                       <img src={`${import.meta.env.BASE_URL}altar/gem_${slime.rarityTier.toLowerCase()}.png`} alt="" draggable={false} style={{ width: 22, height: 22, objectFit: 'contain', imageRendering: 'auto' }} />
-                      {slime.rarityTier}{oddsById.has(slime.id) && <span className="ml-1 opacity-80">· {oddsById.get(slime.id)! < 1 ? '<1' : Math.round(oddsById.get(slime.id)!)}%</span>}
+                      {slime.rarityTier}{oddsById.has(slime.id) && <span className="ml-1 opacity-80">· {oddsLabel(oddsById.get(slime.id)!)}</span>}
                     </span>
                   </div>
                 </div>
