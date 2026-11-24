@@ -22,3 +22,14 @@ describe('codex families', () => {
     expect([...per.values()].reduce((a, b) => a + b, 0)).toBe(ALL_CODEX_SLIMES.length);
   });
 });
+
+import { existsSync } from 'fs';
+import { resolve } from 'path';
+describe('codex art', () => {
+  it('every slime has its own sprite file, and no two slimes share one', () => {
+    const ids = ALL_CODEX_SLIMES.map(s => (s as { spriteId?: string }).spriteId ?? s.id);
+    for (const id of ids) expect(existsSync(resolve(__dirname, '../../public', `${id}.png`)), id).toBe(true);
+    const dup = ids.filter((x, i) => ids.indexOf(x) !== i);
+    expect(dup, 'two slimes using the same sprite').toEqual([]);
+  });
+});

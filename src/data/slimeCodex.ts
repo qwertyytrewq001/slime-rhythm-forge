@@ -620,6 +620,16 @@ export const NATURE_SLIMES: CodexSlime[] = [
     spriteId: 'mangrove_slime'
   },
   {
+    id: 'bee_slime',
+    name: 'Bee Slime',
+    elements: ['plant', 'wind'],
+    rarityTier: 'Uncommon',
+    weight: 60,
+    description: "Buzzes around the Habitat all day and gets very little done, but the flowers have never looked better.",
+    family: 'natures-garden',
+    spriteId: 'bee_slime'
+  },
+  {
     id: 'meadow_slime',
     name: 'Meadow Slime',
     elements: ['plant', 'light'],
