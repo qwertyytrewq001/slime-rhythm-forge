@@ -610,7 +610,7 @@ const CropChooser: React.FC<{
                   {!unlocked ? '' : cost === 0 ? 'Seeds ready' : <>{cost.toLocaleString()} <Ico name="icon_drop" w={sw * 0.0125} /></>}
                 </div>
                 {!unlocked && (
-                  <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center bg-black/55 text-white font-bold" style={{ fontSize: sw * 0.0145 }}>
+                  <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center bg-black/75 text-white font-bold" style={{ fontSize: sw * 0.0145 }}>
                     <Lock style={{ width: sw * 0.026, height: sw * 0.026 }} />
                     Farm Level {def.unlockLevel}
                   </div>

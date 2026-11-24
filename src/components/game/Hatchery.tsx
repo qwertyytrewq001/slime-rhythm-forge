@@ -73,7 +73,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
   };
 
   const handleReveal = () => {
-    if (!activeHatching) return;
+    if (!activeHatching || activeHatching.waiting) return; // a waiting newborn already hatched: never add it twice
     setIsHatching(true);
     audioEngine.playSfx('hatch');
     

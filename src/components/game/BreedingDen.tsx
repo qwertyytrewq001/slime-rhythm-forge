@@ -196,7 +196,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 e.stopPropagation();
                 handleRemoveSlime(1);
               }}
-              className="absolute hover:scale-110 active:scale-90 transition-transform z-10" style={{ left: "calc(50% + min(3.6cqw, 52px))", top: 38 }}
+              className="absolute hover:scale-110 active:scale-90 transition-transform z-10" style={{ left: "calc(50% + min(3.6cqw, 52px))", top: 38, display: state.activeBreeding ? "none" : undefined }}
             >
               <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Remove" draggable={false} style={{ width: 30, height: 30, imageRendering: 'auto' }} />
             </button>
@@ -247,7 +247,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                 e.stopPropagation();
                 handleRemoveSlime(2);
               }}
-              className="absolute hover:scale-110 active:scale-90 transition-transform z-10" style={{ left: "calc(50% + min(3.6cqw, 52px))", top: 38 }}
+              className="absolute hover:scale-110 active:scale-90 transition-transform z-10" style={{ left: "calc(50% + min(3.6cqw, 52px))", top: 38, display: state.activeBreeding ? "none" : undefined }}
             >
               <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Remove" draggable={false} style={{ width: 30, height: 30, imageRendering: 'auto' }} />
             </button>

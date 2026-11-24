@@ -54,7 +54,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
     console.log('🥚 HatcheryScreen: Egg clicked!');
     
     // Only allow clicking when egg is finished cooking
-    if (!isFinished || !activeHatching || isHatching || discoveredSlime) {
+    if (!isFinished || !activeHatching || activeHatching.waiting || isHatching || discoveredSlime) {
       console.log('❌ HatcheryScreen: Click blocked - egg not ready');
       return;
     }
@@ -73,7 +73,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
   };
 
   const handleReveal = () => {
-    if (!activeHatching) return;
+    if (!activeHatching || activeHatching.waiting) return; // a waiting newborn already hatched: never add it twice
     setIsHatching(true);
     audioEngine.playSfx('hatch');
     // Story beats: first hatch ("it needs a home") and second hatch (altar/breeding intro).
@@ -154,7 +154,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
             {/* Status text */}
             <div className="absolute -bottom-16 left-1/2 -translate-x-1/2 w-48 text-center pointer-events-none">
               {activeHatching.waiting ? (
-                <div className="text-[12px] text-[#FFD27E] font-black uppercase tracking-wider drop-shadow-[0_2px_8px_rgba(0,0,0,0.6)]">Needs a home! Build a {ELEMENT_DISPLAY_NAMES[activeHatching.slime.element]} habitat with room.</div>
+                <div className="text-[13px] text-[#FFD27E] font-black uppercase tracking-wider rounded-lg px-2 py-1" style={{ background: 'rgba(20,10,35,0.82)', border: '2px solid #f2b632' }}>Needs a home! Build a {ELEMENT_DISPLAY_NAMES[activeHatching.slime.element]} habitat with room.</div>
               ) : isFinished ? (
                 <div className={`flex flex-col items-center ${isHatching ? 'animate-pulse' : 'animate-bounce'}`}>
                   <div className="text-[12px] text-[#FF7EB6] animate-inscription-glow font-black uppercase whitespace-nowrap tracking-wider drop-shadow-[0_2px_8px_rgba(255,126,182,0.4)]">

@@ -10,6 +10,11 @@ export function saveGame(state: GameState): void {
       breedHistory: state.breedHistory,
       achievements: state.achievements,
       mutationJuiceActive: state.mutationJuiceActive,
+      luckyCharmActive: state.luckyCharmActive,
+      // an egg in the incubator or a ritual in progress must survive closing the tab (the game used to lose them, and the goo spent on them)
+      activeBreeding: state.activeBreeding,
+      activeHatching: state.activeHatching,
+      pendingHabitatPlacement: state.pendingHabitatPlacement,
       totalBreeds: state.totalBreeds,
       perfectTaps: state.perfectTaps,
       muted: state.muted,

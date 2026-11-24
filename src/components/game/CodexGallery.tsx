@@ -193,7 +193,7 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
             </div>
             <div className="flex-1 max-w-md min-w-[180px]" style={{ fontFamily: FRED }}>
               <div className="flex items-baseline justify-between mb-1">
-                <span className="font-bold capitalize" style={{ color: '#fff3d0', fontSize: 17 }}>{selectedFamily.replace(/-/g, ' ')}</span>
+                <span className="font-bold" style={{ color: '#fff3d0', fontSize: 17 }}>All slimes</span>
                 <span className="font-bold tabular-nums" style={{ color: '#f2d98a', fontSize: 14 }}>{discoveryProgress.discovered} / {discoveryProgress.total} found</span>
               </div>
               <div className="h-4 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.4)', border: '2px solid #f2b632' }}>
