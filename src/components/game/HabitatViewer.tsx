@@ -330,6 +330,8 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     decorSeen: {} as Record<string, number>,
     visit: null as string | null, // a friend it is walking over to see
     nap: false,
+    fed: performance.now() / 1000 - rand(30, 90), // when it last ate: hunger builds from here
+    rush: false,
   });
 
   // Show a reaction bubble. Soft ones (mood chatter) never interrupt a bubble that is already up.
@@ -345,6 +347,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     setEating(true);
     say(`txt:${pickOf(['Nom nom!', 'Yum!', 'Tasty!'])}`, 1800);
     sim.current.last = performance.now() / 1000;
+    sim.current.fed = performance.now() / 1000;
     const t = setTimeout(() => setEating(false), 600);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -574,7 +577,9 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         goTo(s.x, s.y, 'hop', 210); // food right over me: bounce with excitement
         return;
       }
+      if (!attract) s.rush = false;
       if (attract && rect) {
+        if (!s.rush) { s.rush = true; say(pickOf(['txt:Food!', 'txt:Ooh, snack!', 'txt:Me! Me!']), 1800, false); }
         const a = toPct(attract);
         const dx = a.x - s.x;
         const dy = clamp(a.y, BAND.minY, BAND.maxY) - s.y;
@@ -607,7 +612,8 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
       const lms = cb.current.landmarks;
       // Decide what it WANTS to do, in order of how much it cares:
       //  1. tired after a few outings: nap (floaty slimes just drift instead)
-      if (s.energy >= 4 && !pers.float) {
+      const napAt = dayPhase(nowForDay()).night ? 2 : 4; // sleepier at night
+      if (s.energy >= napAt && !pers.float) {
         const hammock = lms.find(l => l.decor === 'hammock');
         if (hammock && !s.nap) {
           // there is a hammock: go and sleep in it
@@ -623,8 +629,14 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         setSleeping(true);
         return;
       }
-      if (s.energy >= 4) s.energy = 0;
+      if (s.energy >= napAt) s.energy = 0;
       const nowS = performance.now() / 1000;
+      // hungry slimes are lazy: they sit and wait for food instead of going out
+      if (l.wantsFood && nowS - s.fed > 150 && Math.random() < 0.4) {
+        s.t = rand(3, 6);
+        s.mode = 'idle';
+        return;
+      }
       const decorLms = lms.filter(l => l.decor);
       const goLandmark = (lm: Landmark) => {
         if (lm.decor) s.decorSeen[lm.decor] = nowS;
@@ -795,7 +807,8 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
           if (s.bubbleIn <= 0) {
             s.bubbleIn = rand(8, 15);
             if (s.mood === 'calm') {
-              const pick = l.wantsFood && Math.random() < 0.35 ? 'food' : CALM_BUBBLES[Math.floor(Math.random() * CALM_BUBBLES.length)];
+              const hungry = l.wantsFood && performance.now() / 1000 - s.fed > 150;
+              const pick = hungry && Math.random() < 0.6 ? pickOf(['food', 'txt:Hungry...', 'txt:Snack?']) : l.wantsFood && Math.random() < 0.25 ? 'food' : CALM_BUBBLES[Math.floor(Math.random() * CALM_BUBBLES.length)];
               say(pick, 2000, false);
             }
           }
