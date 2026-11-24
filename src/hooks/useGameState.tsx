@@ -212,7 +212,7 @@ export function createInitialState(): GameState {
     currentLevel: 1,
     tutorialCompleted: false,
     completedTutorialChapters: [],
-    inventory: { basic: 3, elemental: 0, royal: 0 },
+    inventory: { basic: 8, elemental: 0, royal: 0 }, // 8 Glimberries = 80 XP, enough to take one slime from level 1 to 5 (72 XP) and unlock battles
     floorFood: [],
     farmPlots: createFarmPlots(),
     farm: createFarmState(),

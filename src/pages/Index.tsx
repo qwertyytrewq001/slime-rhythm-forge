@@ -1,5 +1,7 @@
 import type React from 'react';
 import { useStageSize, altarScale } from '@/utils/stage';
+import { battleUnlocked, bestSlimeLevel, BATTLE_UNLOCK_LEVEL } from '@/utils/battleGate';
+import { useToast } from '@/hooks/use-toast';
 import { useEffect, useRef, useState } from 'react';
 import { GameProvider, useGameState, getStage } from '@/hooks/useGameState';
 import { TopBar } from '@/components/game/TopBar';
@@ -42,6 +44,7 @@ import { triggerDialogue } from '@/utils/dialogueTriggers';
 function GameLayout() {
   const { state, dispatch } = useGameState();
   const stageSize = useStageSize();
+  const { toast } = useToast();
   const [currentView, setCurrentView] = useState<'breeding' | 'breedingDen' | 'sanctuaries' | 'battleMap' | 'habitats' | 'hatchery' | 'farm'>('breeding');
   const [selectedHabitatId, setSelectedHabitatId] = useState<string | null>(null);
   const [showAchievements, setShowAchievements] = useState(false);
@@ -367,7 +370,13 @@ function GameLayout() {
             currentView={currentView}
             onBackToAltar={() => setCurrentView('breeding')} 
             onOpenSanctuaries={() => setCurrentView('sanctuaries')}
-            onOpenBattle={() => setCurrentView('battleMap')}
+            onOpenBattle={() => {
+              if (!battleUnlocked(state.slimes, state.currentLevel)) {
+                toast({ title: 'Battles are locked for now', description: `Raise a slime to level ${BATTLE_UNLOCK_LEVEL} first: buy an egg in the Bazaar, hatch it, then feed it. Your best is level ${bestSlimeLevel(state.slimes)}.` });
+                return;
+              }
+              setCurrentView('battleMap');
+            }}
             onOpenBreedingDen={() => setCurrentView('breedingDen')}
             onOpenFarm={() => setCurrentView('farm')}
           />

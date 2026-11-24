@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useStageSize, altarPad } from '@/utils/stage';
+import { battleUnlocked, bestSlimeLevel, BATTLE_UNLOCK_LEVEL } from '@/utils/battleGate';
 import { useGameState } from '../../hooks/useGameState';
 import { isReady } from '../../utils/farmCore';
 import { totalGifts } from '../../utils/sanctuaryCore';
@@ -35,12 +36,12 @@ const ICON_BALANCE: Record<string, { ox: number; oy: number; aspect: number; s: 
 };
 
 /** A painted wooden sign with an icon medallion; the label sits in the empty wood. */
-export const NavPlate: React.FC<{ art: string; icon: string; color: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string }> = ({ art, icon, color, label, onClick, badge, badgeLabel }) => (
+export const NavPlate: React.FC<{ art: string; icon: string; color: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string; locked?: boolean; hint?: string }> = ({ art, icon, color, label, onClick, badge, badgeLabel, locked, hint }) => (
   <button
     onClick={onClick}
     aria-label={label}
     className="relative transition-transform duration-150 hover:scale-105 hover:brightness-110 active:scale-95 outline-none"
-    style={{ width: 'clamp(150px, 17cqw, 250px)', background: 'transparent', border: 'none', padding: 0 }}
+    style={{ width: 'clamp(150px, 17cqw, 250px)', background: 'transparent', border: 'none', padding: 0, filter: locked ? 'grayscale(0.85) brightness(0.8)' : undefined }}
   >
     <img src={`${ART}nav_${art}.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 5px rgba(0,0,0,0.45))' }} />
     {/* the plate image already has a clean cream medallion (measured centre and size below); only the icon goes on top */}
@@ -49,8 +50,11 @@ export const NavPlate: React.FC<{ art: string; icon: string; color: string; labe
       className="absolute flex items-center justify-center text-center text-game-ui"
       style={{ left: '38%', right: '3%', top: 0, bottom: 0, whiteSpace: 'nowrap', fontSize: 'clamp(11px, 1.15cqw, 17px)', color, letterSpacing: '0.06em', lineHeight: 1.05, textShadow: '0 2px 0 rgba(20,10,5,0.9), 0 0 5px rgba(0,0,0,0.6)' }}
     >
-      {label}
+      {locked ? '🔒 ' : ''}{label}
     </span>
+    {locked && hint ? (
+      <span className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full font-bold pointer-events-none" style={{ top: '92%', fontSize: 'clamp(10px, 1.05cqw, 14px)', padding: '1px 10px', background: 'rgba(30,14,40,0.9)', color: '#ffe9a8', border: '2px solid #f2b632', filter: 'none', fontFamily: "'Fredoka', sans-serif" }}>{hint}</span>
+    ) : null}
     {badge ? (
       <span
         aria-label={badgeLabel}
@@ -74,6 +78,8 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
   const readyCrops = state.farmPlots.filter(p => isReady(p, nowMs)).length;
 
   const home = currentView === 'breeding';
+  const canBattle = battleUnlocked(state.slimes, state.currentLevel);
+  const best = bestSlimeLevel(state.slimes);
   const stageH = useStageSize().h;
 
   return (
@@ -92,7 +98,7 @@ export function TopBar({ onBackToAltar, onOpenSanctuaries, onOpenBattle, onOpenB
         {home && (
           <>
             <NavPlate art="den" icon="ui/navicon_altar.png" color="#b2ebff" label="BREEDING" onClick={onOpenBreedingDen} />
-            <NavPlate art="battle" icon="ui/navicon_battle.png" color="#ffe066" label="BATTLE MAP" onClick={onOpenBattle} />
+            <NavPlate art="battle" icon="ui/navicon_battle.png" color="#ffe066" label="BATTLE MAP" onClick={onOpenBattle} locked={!canBattle} hint={`Raise a slime to Lv ${BATTLE_UNLOCK_LEVEL} (best: Lv ${best})`} />
           </>
         )}
       </div>
