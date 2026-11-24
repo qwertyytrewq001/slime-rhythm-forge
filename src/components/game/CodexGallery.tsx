@@ -70,308 +70,171 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
     }
   };
 
+  const INK = '#4a2f17';
+  const PARCH = 'linear-gradient(#f6e8c3, #ecd9a8)';
+  const FRED = "'Fredoka', 'Trebuchet MS', sans-serif";
+
   const renderFamilySidebarItem = (family: string) => {
     const stats = familyStats.get(family);
     if (!stats) return null;
-    
     const isSelected = selectedFamily === family;
     const isComplete = stats.completion === 100;
-    const hasAny = stats.discovered > 0;
-    
-    // Format family name for display
     const displayName = family.replace(/-/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
-    
     return (
-      <div
+      <button
         key={family}
-        onClick={() => {
-          setSelectedFamily(family);
-          setPage(0); // Reset page when changing family
+        onClick={() => { setSelectedFamily(family); setPage(0); }}
+        className="relative w-full text-left rounded-xl px-3 py-2 transition-transform hover:translate-x-0.5"
+        style={{
+          fontFamily: FRED,
+          background: isSelected ? 'linear-gradient(#ffe9a3, #f2b632)' : PARCH,
+          border: `3px solid ${INK}`,
+          color: INK,
+          boxShadow: isSelected ? '0 3px 0 #8a5a14, 0 0 14px rgba(242,182,50,0.55)' : '0 2px 0 rgba(0,0,0,0.35)',
+          marginLeft: isSelected ? 6 : 0,
         }}
-        className={`
-          relative p-4 cursor-pointer border-l-4 transition-all duration-300
-          ${isSelected 
-            ? 'bg-[#FF7EB6]/20 border-[#FF7EB6]' 
-            : 'bg-gray-800/30 border-gray-600/30 hover:bg-gray-800/50 hover:border-gray-500/50'
-          }
-        `}
       >
-        {/* Family name - vertical orientation */}
-        <div className="flex flex-col items-center justify-center h-full">
-          <h3 className={`text-sm font-bold text-center mb-3 leading-tight text-white`}>
-            {displayName}
-          </h3>
-          
-          {/* Trophy for completed families */}
-          {isComplete && (
-            <Trophy className="w-5 h-5 text-yellow-400 mb-2" />
-          )}
-          
-          {/* Progress indicator */}
-          <div className="w-full">
-            <div className="bg-gray-700/50 rounded-full h-2 mb-2">
-              <div 
-                className={`h-2 rounded-full transition-all duration-500 ${
-                  isComplete ? 'bg-yellow-400' : 
-                  hasAny ? 'bg-[#FF7EB6]' : 'bg-gray-600'
-                }`}
-                style={{ width: `${stats.completion}%` }}
-              />
-            </div>
-            
-            {/* Stats */}
-            <div className="text-center">
-              <span className={`text-xs font-bold ${
-                isComplete ? 'text-yellow-400' : 
-                hasAny ? 'text-[#FF7EB6]' : 'text-gray-500'
-              }`}>
-                {stats.discovered}/{stats.total}
-              </span>
-            </div>
-          </div>
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-bold text-[15px] leading-tight">{displayName}</span>
+          {isComplete && <Trophy className="w-4 h-4 shrink-0" style={{ color: '#b8860b' }} />}
         </div>
-      </div>
+        <div className="mt-1.5 flex items-center gap-2">
+          <div className="flex-1 h-2.5 rounded-full overflow-hidden" style={{ background: 'rgba(74,47,23,0.25)', border: `1.5px solid ${INK}` }}>
+            <div className="h-full rounded-full" style={{ width: `${stats.completion}%`, background: isComplete ? 'linear-gradient(#ffd54a,#e0a000)' : 'linear-gradient(#ff9ec8,#ff5aa5)' }} />
+          </div>
+          <span className="text-xs font-bold tabular-nums">{stats.discovered}/{stats.total}</span>
+        </div>
+      </button>
     );
   };
 
   const renderSlimeCard = (slime: CodexSlime) => {
     const isDiscovered = (slime as any).isDiscovered;
     const displaySlime = createCodexSlime(slime.id);
-
+    const tier = RARITY_TIER_COLORS[slime.rarityTier];
     return (
       <div
         key={slime.id}
         onClick={() => handleSlimeClick(slime)}
-        className={`
-          relative bg-gray-800/50 rounded-lg border-2 p-3
-          transition-all duration-300 hover:scale-105 cursor-pointer
-          ${isDiscovered 
-            ? 'border-[#FF7EB6]/40 hover:border-[#FF7EB6]/60' 
-            : 'border-gray-600/30 hover:border-gray-500/50'
-          }
-        `}
+        className={`relative rounded-2xl p-2.5 transition-transform ${isDiscovered ? 'cursor-pointer hover:scale-105 hover:-translate-y-0.5' : 'cursor-default'}`}
+        style={{
+          fontFamily: FRED,
+          background: isDiscovered ? PARCH : 'linear-gradient(#cdbf9d, #b7a781)',
+          border: `3px solid ${INK}`,
+          boxShadow: '0 3px 0 rgba(0,0,0,0.35)',
+        }}
       >
-        {/* Slime display */}
-        <div className="w-full h-32 flex items-center justify-center mb-3">
+        {isDiscovered && <div className="absolute left-3 right-3 top-0 h-1.5 rounded-b-full" style={{ background: tier }} />}
+        <div className="w-full h-32 flex items-center justify-center mb-2 rounded-xl" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%)' }}>
           <div
-            className="transition-all duration-500 ease-in-out"
+            className="transition-all duration-500"
             style={{
-              filter: isDiscovered 
-                ? 'grayscale(0%) opacity(100%)' 
-                : 'grayscale(100%) opacity(60%)',
-              transform: 'scale(1)'
+              // an undiscovered slime is a solid dark shape: you can see its outline, not its colours
+              filter: isDiscovered ? 'none' : 'brightness(0) opacity(0.62) drop-shadow(0 0 1px rgba(255,255,255,0.35))',
             }}
           >
-            <SlimeCanvas
-              slime={displaySlime}
-              size={120}
-              animated={false}
-              sizeMultiplier={2.2}
-            />
+            <SlimeCanvas slime={displaySlime} size={120} animated={false} sizeMultiplier={2.2} />
           </div>
         </div>
-
-        {/* Slime info */}
         <div className="text-center">
-          <p className={`text-sm font-bold leading-tight mb-2 ${
-            isDiscovered ? 'text-white' : 'text-gray-300'
-          }`}>
-            {slime.name}
+          <p className="text-sm font-bold leading-tight truncate" style={{ color: isDiscovered ? INK : '#6f6247' }}>
+            {isDiscovered ? slime.name : '???'}
           </p>
-          
           {isDiscovered ? (
-            <span 
-              className="text-sm font-bold"
-              style={{ color: RARITY_TIER_COLORS[slime.rarityTier] }}
-            >
-              {slime.rarityTier}
-            </span>
+            <span className="text-xs font-bold px-2 py-0.5 rounded-full text-white inline-block mt-1" style={{ background: tier, textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{slime.rarityTier}</span>
           ) : (
-            <span className="text-sm text-gray-400">
-              ???
-            </span>
+            <span className="text-xs font-semibold block mt-1" style={{ color: '#6f6247' }}>Not discovered yet</span>
           )}
         </div>
-
-        {/* Discovery indicator */}
-        {isDiscovered && (
-          <div className="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full" />
-        )}
       </div>
     );
   };
 
+  const pageBtn = 'w-9 h-9 flex items-center justify-center rounded-full border-[3px] disabled:opacity-40 disabled:cursor-not-allowed hover:scale-110 transition-transform';
+
   return (
-    <div className="relative flex h-full bg-[#1d1630] text-slate-900 border-l-4 border-[#FF7EB6]/20 custom-scrollbar">
-      {/* painted library behind the panels; the rose wash on top keeps the original look and readability */}
+    <div className="relative flex h-full text-slate-900 custom-scrollbar" style={{ background: '#1d1630' }}>
+      {/* painted library behind the panels, darkened so the parchment reads */}
       <img src={`${import.meta.env.BASE_URL}ui/codex_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
-      <div className="absolute inset-0 pointer-events-none" style={{ background: 'rgba(255,241,245,0.84)' }} />
-      {/* Left Sidebar - Family Navigation */}
-      <div className="w-64 bg-black/40 border-r border-[#FF7EB6]/10 flex flex-col">
-        {/* Sidebar Header */}
-        <div className="p-3 border-b border-[#4a2f17]/20">
-          <div className="relative mx-auto mb-1" style={{ width: '92%' }}>
-            <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.35))' }} />
-            <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 17, color: '#fff3d0', WebkitTextStroke: '3.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>Collections</div>
+      <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(rgba(24,12,40,0.62), rgba(24,12,40,0.78))' }} />
+
+      {/* Left: families */}
+      <div className="relative w-64 shrink-0 flex flex-col" style={{ background: 'linear-gradient(#3b2358, #2a1840)', borderRight: `4px solid ${INK}`, boxShadow: '4px 0 18px rgba(0,0,0,0.5)' }}>
+        <div className="p-3 text-center" style={{ borderBottom: '3px solid rgba(242,182,50,0.55)' }}>
+          <div className="relative mx-auto" style={{ width: '92%' }}>
+            <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.45))' }} />
+            <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: FRED, fontSize: 17, color: '#fff3d0', WebkitTextStroke: '3.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>Collections</div>
           </div>
-          <div className="text-xs font-bold text-center text-[#4a2f17] [font-family:Fredoka,sans-serif]">
-            {familyOptions.filter(f => familyStats.get(f)?.discovered! > 0).length} / {familyOptions.length} Discovered
+          <div className="text-xs font-bold mt-1" style={{ fontFamily: FRED, color: '#f2d98a' }}>
+            {familyOptions.filter(f => (familyStats.get(f)?.discovered ?? 0) > 0).length} / {familyOptions.length} started
           </div>
         </div>
-        
-        {/* Family List */}
-        <div className="flex-1 overflow-y-auto p-2 space-y-2">
-          {familyOptions.map(renderFamilySidebarItem)}
-        </div>
+        <div className="flex-1 overflow-y-auto p-2.5 space-y-2.5">{familyOptions.map(renderFamilySidebarItem)}</div>
       </div>
 
-      {/* Right Content - Selected Family Collection */}
-      <div className="flex-1 flex flex-col">
-        {/* Header */}
-        <div className="p-6 border-b-2 border-[#FF7EB6]/10 bg-white/40 backdrop-blur-md">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <div className="relative" style={{ width: 300, maxWidth: '60cqw' }}>
-                <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.35))' }} />
-                <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', sans-serif", fontSize: 26, color: '#fff3d0', WebkitTextStroke: '4.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.07em' }}>Slime Codex</div>
+      {/* Right: the chosen family */}
+      <div className="relative flex-1 flex flex-col min-w-0">
+        <div className="px-6 py-4" style={{ background: 'linear-gradient(#4b2c6b, #3a2152)', borderBottom: `4px solid ${INK}`, boxShadow: '0 4px 14px rgba(0,0,0,0.45)' }}>
+          <div className="flex items-center justify-between gap-3">
+            <div className="min-w-0">
+              <div className="relative" style={{ width: 260, maxWidth: '50cqw' }}>
+                <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.45))' }} />
+                <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: FRED, fontSize: 24, color: '#fff3d0', WebkitTextStroke: '4.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.07em' }}>Slime Codex</div>
               </div>
-              <div className="text-sm font-bold text-[#6b4a2c] mt-1 capitalize [font-family:Fredoka,sans-serif]">
-                {selectedFamily.replace(/-/g, ' ')}
+            </div>
+            <div className="flex-1 max-w-md min-w-[180px]" style={{ fontFamily: FRED }}>
+              <div className="flex items-baseline justify-between mb-1">
+                <span className="font-bold capitalize" style={{ color: '#fff3d0', fontSize: 17 }}>{selectedFamily.replace(/-/g, ' ')}</span>
+                <span className="font-bold tabular-nums" style={{ color: '#f2d98a', fontSize: 14 }}>{discoveryProgress.discovered} / {discoveryProgress.total} found</span>
+              </div>
+              <div className="h-4 rounded-full overflow-hidden" style={{ background: 'rgba(0,0,0,0.4)', border: '2px solid #f2b632' }}>
+                <div className="h-full rounded-full transition-all duration-500" style={{ width: `${discoveryProgress.percentage}%`, background: 'linear-gradient(#ffe27a, #f2a81d)' }} />
               </div>
             </div>
             {onClose && (
-              <button
-                onClick={onClose}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors border border-white/20"
-              >
-                <ChevronLeft className="w-4 h-4 text-[#FF7EB6]" />
+              <button onClick={onClose} aria-label="Close codex" className="shrink-0 hover:scale-110 transition-transform">
+                <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 44, height: 44, maxWidth: 'none', imageRendering: 'auto' }} />
               </button>
             )}
           </div>
-
-          {/* Overall Progress Bar */}
-          <div className="bg-black/30 rounded-full h-3 mb-2">
-            <div 
-              className="bg-gradient-to-r from-green-400 to-blue-400 h-3 rounded-full transition-all duration-500"
-              style={{ width: `${discoveryProgress.percentage}%` }}
-            />
-          </div>
-          <p className="text-sm font-bold text-[#FF7EB6] uppercase tracking-wide" style={{ fontFamily: "'Press Start 2P', cursive" }}>
-            {discoveryProgress.discovered} / {discoveryProgress.total} SLIMES ({discoveryProgress.percentage}%)
-          </p>
         </div>
 
-        {/* Family Slimes Grid */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-5">
           {familySlimes.length > 0 ? (
             <>
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-4">
-                {paginatedSlimes.map(renderSlimeCard)}
-              </div>
-
-              {/* Pagination */}
+              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-4">{paginatedSlimes.map(renderSlimeCard)}</div>
               {totalPages > 1 && (
-                <div className="flex items-center justify-center gap-2 mt-6">
-                  <button
-                    onClick={() => setPage(Math.max(0, currentPage - 1))}
-                    disabled={currentPage === 0}
-                    className="p-2 rounded bg-black/30 border border-white/20 hover:bg-black/40 disabled:opacity-50 disabled:cursor-not-allowed text-white"
-                  >
-                    <ChevronLeft className="w-4 h-4" />
-                  </button>
-                  
-                  <span className="px-4 py-2 bg-black/30 border border-white/20 rounded text-sm text-white">
-                    {currentPage + 1} / {totalPages}
-                  </span>
-                  
-                  <button
-                    onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))}
-                    disabled={currentPage === totalPages - 1}
-                    className="p-2 rounded bg-black/30 border border-white/20 hover:bg-black/40 disabled:opacity-50 disabled:cursor-not-allowed text-white"
-                  >
-                    <ChevronRight className="w-4 h-4" />
-                  </button>
+                <div className="flex items-center justify-center gap-3 mt-4" style={{ fontFamily: FRED }}>
+                  <button onClick={() => setPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0} className={pageBtn} style={{ background: PARCH, borderColor: INK, color: INK }}><ChevronLeft className="w-4 h-4" /></button>
+                  <span className="px-4 py-1 rounded-full font-bold text-sm" style={{ background: PARCH, border: `3px solid ${INK}`, color: INK }}>{currentPage + 1} / {totalPages}</span>
+                  <button onClick={() => setPage(Math.min(totalPages - 1, currentPage + 1))} disabled={currentPage === totalPages - 1} className={pageBtn} style={{ background: PARCH, borderColor: INK, color: INK }}><ChevronRight className="w-4 h-4" /></button>
                 </div>
               )}
             </>
           ) : (
-            <div className="flex items-center justify-center h-full">
-              <div className="text-center">
-                <div className="text-6xl mb-4">🔍</div>
-                <p className="text-gray-400 text-lg">No slimes found in this family</p>
-              </div>
+            <div className="flex items-center justify-center h-full text-center">
+              <div><div className="text-6xl mb-4">🔍</div><p className="text-lg font-semibold" style={{ color: '#f2d98a', fontFamily: FRED }}>No slimes found in this family</p></div>
             </div>
           )}
         </div>
       </div>
 
-      {/* Slime detail modal */}
+      {/* Slime detail */}
       {selectedSlime && (
-        <div 
-          className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-          onClick={() => setSelectedSlime(null)}
-        >
-          <div 
-            className="bg-obsidian-glass rounded-xl p-6 max-w-md w-full border-2 border-[#FF7EB6]/40"
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div className="flex items-center justify-between mb-4">
-              <h2 className="text-xl font-bold text-game-ui text-white">{selectedSlime.name}</h2>
-              <button
-                onClick={() => setSelectedSlime(null)}
-                className="p-2 rounded-lg bg-white/10 hover:bg-white/20 transition-colors border border-white/20 text-white"
-              >
-                ×
-              </button>
+        <div className="fixed inset-0 bg-black/75 flex items-center justify-center z-50 p-4" onClick={() => setSelectedSlime(null)}>
+          <div className="rounded-3xl p-5 max-w-md w-full" style={{ fontFamily: FRED, background: PARCH, border: `4px solid ${INK}`, color: INK, boxShadow: '0 20px 60px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
+            <div className="flex items-center justify-between mb-2">
+              <h2 className="text-2xl font-bold">{selectedSlime.name}</h2>
+              <button onClick={() => setSelectedSlime(null)} aria-label="Close" className="w-9 h-9 rounded-full font-bold text-xl border-[3px] hover:scale-110 transition-transform" style={{ background: '#fff7dc', borderColor: INK }}>×</button>
             </div>
-
-            <div className="flex justify-center mb-4">
-              <div
-                className="transition-all duration-500 ease-in-out"
-                style={{
-                  filter: 'grayscale(0%) opacity(100%)',
-                  transform: 'scale(1)'
-                }}
-              >
-                <SlimeCanvas
-                  slime={createCodexSlime(selectedSlime.id)}
-                  size={120}
-                  animated={true}
-                  sizeMultiplier={2}
-                />
-              </div>
+            <div className="flex justify-center mb-3 rounded-2xl" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.7), rgba(255,255,255,0) 70%)' }}>
+              <SlimeCanvas slime={createCodexSlime(selectedSlime.id)} size={150} animated sizeMultiplier={2} />
             </div>
-
-            <div className="space-y-3 text-sm">
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-300">Rarity:</span>
-                <span 
-                  className="font-bold text-lg"
-                  style={{ color: RARITY_TIER_COLORS[selectedSlime.rarityTier] }}
-                >
-                  {selectedSlime.rarityTier}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-300">Elements:</span>
-                <span className="font-bold text-white">
-                  {selectedSlime.elements.join(', ')}
-                </span>
-              </div>
-
-              <div className="flex justify-between items-center">
-                <span className="font-medium text-gray-300">Family:</span>
-                <span className="font-bold text-white capitalize">
-                  {selectedSlime.family}
-                </span>
-              </div>
-
-              <div className="mt-4 p-4 bg-black/30 rounded-lg border border-white/20">
-                <p className="text-gray-200 text-xs leading-relaxed">
-                  {selectedSlime.description}
-                </p>
-              </div>
+            <div className="space-y-2 text-sm font-semibold">
+              <div className="flex justify-between items-center"><span className="opacity-70">Rarity</span><span className="px-2.5 py-0.5 rounded-full text-white font-bold" style={{ background: RARITY_TIER_COLORS[selectedSlime.rarityTier], textShadow: '0 1px 2px rgba(0,0,0,0.5)' }}>{selectedSlime.rarityTier}</span></div>
+              <div className="flex justify-between items-center"><span className="opacity-70">Elements</span><span className="font-bold capitalize">{selectedSlime.elements.join(', ')}</span></div>
+              <div className="flex justify-between items-center"><span className="opacity-70">Family</span><span className="font-bold capitalize">{selectedSlime.family?.replace(/-/g, ' ')}</span></div>
+              <div className="mt-3 p-3 rounded-xl text-[13px] leading-relaxed" style={{ background: 'rgba(74,47,23,0.1)', border: '2px solid rgba(74,47,23,0.35)' }}>{selectedSlime.description}</div>
             </div>
           </div>
         </div>
