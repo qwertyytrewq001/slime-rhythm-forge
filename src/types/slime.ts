@@ -41,6 +41,7 @@ export interface Slime {
   isNew?: boolean;
   level: number;
   xp: number;
+  bond?: number; // friendship with the player (see utils/bond.ts)
 }
 
 /** A travelling merchant who sometimes visits the sanctuaries and asks for food from the farm. */
@@ -281,6 +282,7 @@ export type GameAction =
   | { type: 'START_HATCHING'; slime: Slime; duration: number }
   | { type: 'FINISH_HATCHING' }
   | { type: 'HATCH_WAIT' }
+  | { type: 'ADD_BOND'; slimeId: string; amount: number }
   | { type: 'ADD_GOO'; amount: number }
   | { type: 'SPEND_GOO'; amount: number }
   | { type: 'ACTIVATE_MUTATION_JUICE' }

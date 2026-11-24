@@ -318,6 +318,8 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
       return { ...state, activeHatching: { slime: action.slime, endTime: Date.now() + action.duration } };
     case 'FINISH_HATCHING':
       return { ...state, activeHatching: null };
+    case 'ADD_BOND':
+      return { ...state, slimes: state.slimes.map(s => s.id === action.slimeId ? { ...s, bond: Math.min(999, (s.bond ?? 0) + action.amount) } : s) };
     case 'HATCH_WAIT':
       return state.activeHatching ? { ...state, activeHatching: { ...state.activeHatching, waiting: true } } : state;
     case 'ADD_GOO':

@@ -10,6 +10,7 @@ import { SlimeGallery } from './SlimeGallery';
 import { FeedTray } from './FeedTray';
 import { foodSpriteUrl } from '@/data/foodSprites';
 import { audioEngine } from '@/utils/audioEngine';
+import { bondLevel, bondProgress, BOND_LEVELS } from '@/utils/bond';
 import { setSanctuaryOpen } from '@/utils/sanctuaryState';
 import { JOY_MAX } from '@/utils/sanctuaryCore';
 import { SanctuaryPanel } from './SanctuaryPanel';
@@ -199,6 +200,7 @@ interface SlimeApi {
   setHover: (v: boolean) => void;
   pos: () => { x: number; y: number };
   greet: () => void;
+  callTo: (x: number, y: number) => boolean;
 }
 
 interface PointerSample {
@@ -219,8 +221,10 @@ interface BouncingSlimeProps {
   histRef: React.MutableRefObject<PointerSample[]>;
   apiRef: React.MutableRefObject<Record<string, SlimeApi>>;
   eatNonce: number;
+  bond: number;
   onPoke: (id: string, quiet?: boolean) => void;
   onDecor?: (decorId: string) => void;
+  onBond?: (id: string, amount: number) => void;
 }
 
 const DECOR_ANIM: Record<string, string> = { ball: 'dc-ball', swing: 'dc-swing', lantern: 'dc-sway', hammock: 'dc-swing', flowers: 'dc-sway', mushroom: 'dc-squash', stump: 'dc-squash', fountain: 'dc-pulse' };
@@ -274,7 +278,7 @@ const clamp = (v: number, a: number, b: number) => Math.min(b, Math.max(a, v));
 type Mode = 'idle' | 'crouch' | 'air' | 'land' | 'glide' | 'sleep' | 'carried' | 'inspect';
 type Mood = 'calm' | 'lonely' | 'curious' | 'happy';
 
-function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmarks, attractRef, pointerRef, histRef, apiRef, eatNonce, onPoke, onDecor }: BouncingSlimeProps) {
+function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmarks, attractRef, pointerRef, histRef, apiRef, eatNonce, bond, onPoke, onDecor, onBond }: BouncingSlimeProps) {
   const groundRef = useRef<HTMLDivElement>(null);
   const bodyRef = useRef<HTMLDivElement>(null);
   const shadowRef = useRef<HTMLDivElement>(null);
@@ -285,12 +289,12 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
   bubbleRef.current = bubble;
   const hover = useRef(false);
   const pressed = useRef(false);
-  const cb = useRef({ onPoke, landmarks, onDecor });
-  cb.current = { onPoke, landmarks, onDecor };
+  const cb = useRef({ onPoke, landmarks, onDecor, onBond });
+  cb.current = { onPoke, landmarks, onDecor, onBond };
 
   // Latest props for the animation loop, which must not restart on every render
-  const live = useRef({ selected, targeted, dragging, wantsFood });
-  live.current = { selected, targeted, dragging, wantsFood };
+  const live = useRef({ selected, targeted, dragging, wantsFood, bond });
+  live.current = { selected, targeted, dragging, wantsFood, bond };
 
   const sim = useRef({
     x: rand(22, 78),
@@ -332,6 +336,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     nap: false,
     fed: performance.now() / 1000 - rand(30, 90), // when it last ate: hunger builds from here
     rush: false,
+    call: null as { x: number; y: number } | null, // a spot the player tapped for it to come to
   });
 
   // Show a reaction bubble. Soft ones (mood chatter) never interrupt a bubble that is already up.
@@ -436,6 +441,18 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         hover.current = v;
       },
       pos: () => ({ x: sim.current.x, y: sim.current.y }),
+      // the player tapped the ground: strangers are shy about it, friends come running
+      callTo: (px: number, py: number) => {
+        const s = sim.current;
+        if (s.mode === 'sleep' || s.mode === 'carried' || s.mode === 'air' || s.mode === 'crouch') return false;
+        const b = live.current.bond;
+        if (b < 40 && Math.random() < 0.4) { say(pickOf(['❓', 'txt:Hmm?']), 1500, false); return false; }
+        s.call = { x: clamp(px, BAND.minX, BAND.maxX), y: clamp(py, BAND.minY, BAND.maxY) };
+        s.visit = null; s.explore = null;
+        say(b >= 40 ? pickOf(['txt:Coming!', '👋', 'txt:On my way!']) : pickOf(['👋', 'txt:Okay?']), 1500);
+        if (s.mode === 'idle' || s.mode === 'land' || s.mode === 'inspect') { s.mode = 'idle'; s.t = 0; s.hasTarget = false; s.bounceQ = []; }
+        return true;
+      },
       // a friend arrived next to us: perk up and say hi
       greet: () => {
         const s = sim.current;
@@ -464,6 +481,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
 
     const idleTime = () => {
       const s = sim.current;
+      if (s.call) return 0.12;
       const mult = s.mood === 'lonely' ? 1.4 : s.mood === 'curious' ? 0.7 : 1;
       return rand(pers.idle[0], pers.idle[1]) * mult;
     };
@@ -539,6 +557,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         if (dec) {
           const play = DECOR_PLAY[dec];
           cb.current.onDecor?.(dec);
+          if (play) cb.current.onBond?.(slime.id, 2);
           say(dec === 'ball' && Math.random() < 0.5 ? '🎾' : `txt:${pickOf(play?.words ?? ['Ooh!'])}`, 2400, false);
           if (play && play.bounces.length) {
             // bouncy toys: actually play on it instead of just looking
@@ -574,6 +593,24 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         y: rect && rect.height > 0 ? ((pt.y - rect.top) / rect.height) * 100 : s.y,
       });
       s.explore = null;
+
+      if (s.call && !l.targeted) {
+        const c = s.call;
+        const dx = c.x - s.x;
+        const dy = c.y - s.y;
+        if (Math.abs(dx) < 3.4 && Math.abs(dy) < 3.4) {
+          // arrived: the more it likes you, the bigger the show
+          s.call = null;
+          const b = l.bond;
+          s.bounceQ = b >= 300 ? [470, 390, 310, 240] : b >= 120 ? [400, 300, 230] : [330, 250];
+          say(pickOf(b >= 300 ? ['🤩', 'txt:Ta-da!', '💖'] : b >= 120 ? ['😄', 'txt:Look at me!', 'txt:Hehe!'] : ['😊', 'txt:Here!']), 2000);
+          cb.current.onBond?.(slime.id, b >= 40 ? 2 : 1);
+          bounceNext();
+          return;
+        }
+        goTo(s.x + clamp(dx, -24, 24), s.y + clamp(dy, -8, 8), pers.float ? 'float' : 'hop', hopJump());
+        return;
+      }
 
       if (l.targeted) {
         goTo(s.x, s.y, 'hop', 210); // food right over me: bounce with excitement
@@ -1245,7 +1282,31 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     say(`${slime.name} moved in!`);
   };
 
+  // Friendship: gains are rate limited per slime so spamming one action does not farm it
+  const bondGate = useRef<Record<string, number>>({});
+  const addBond = (slimeId: string, amount: number, gapMs = 2500) => {
+    const now = Date.now();
+    if (now - (bondGate.current[slimeId] ?? 0) < gapMs) return;
+    bondGate.current[slimeId] = now;
+    const sl = stateRef.current.slimes.find(s => s.id === slimeId);
+    if (!sl) return;
+    const before = bondLevel(sl.bond ?? 0);
+    const after = bondLevel((sl.bond ?? 0) + amount);
+    dispatch({ type: 'ADD_BOND', slimeId, amount });
+    if (after > before) {
+      const c = centerOf(slimeId);
+      if (c) {
+        addFx({ kind: 'text', x: c.x - 90, y: c.y - 110, text: `${sl.name} is now your ${BOND_LEVELS[after].name}!`, color: '#ffe14d', big: true }, 2600);
+        addFx({ kind: 'burst', x: c.x, y: c.y - 30, emojis: ['💖', '✨', '⭐'], count: 10 }, 1600);
+        addFx({ kind: 'ring', x: c.x, y: c.y, color: '#ff7eb6' }, 1200);
+      }
+      audioEngine.playSfx('discovery');
+      apiRef.current[slimeId]?.greet();
+    }
+  };
+
   const handlePoke = (slimeId: string, quiet = false) => {
+    addBond(slimeId, 1);
     const c = centerOf(slimeId);
     if (c) addFx({ kind: 'burst', x: c.x, y: c.y - 24, emojis: ['💖'], count: quiet ? 2 : 3 }, 1100);
     if (!quiet) audioEngine.playSfx('squish');
@@ -1279,6 +1340,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
       dispatch({ type: 'FEED_SLIME_XP', slimeId, foodType: food });
       dispatch({ type: 'SANCT_JOY', habitatId, source: 'feed', now: Date.now(), rolls: Array.from({ length: 12 }, Math.random) });
       setEatNonce(n => ({ ...n, [slimeId]: (n[slimeId] || 0) + 1 }));
+      addBond(slimeId, 3, 0);
       const at = centerOf(slimeId) ?? c;
       addFx({ kind: 'burst', x: at.x, y: at.y - 20, emojis: ['💖', '✨'], count: 6 });
       addFx({ kind: 'text', x: at.x + 35, y: at.y - 45, text: `+${info.xpValue} XP`, color: '#7CFFB2' }, 1300);
@@ -1432,6 +1494,16 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
         // a little puff of the sanctuary's own sparkles where you tapped
         const pt = pointerRef.current;
         if (pt) {
+          // ...and the nearest slime that is free to move answers the call
+          const r = sceneRef.current?.getBoundingClientRect();
+          if (r && r.width > 0 && r.height > 0) {
+            const px = ((pt.x - r.left) / r.width) * 100;
+            const py = ((pt.y - r.top) / r.height) * 100;
+            const near = Object.entries(apiRef.current)
+              .map(([id, a]) => ({ id, a, d: Math.hypot(a.pos().x - px, (a.pos().y - py) * 1.6) }))
+              .sort((p, q) => p.d - q.d);
+            for (const n of near) { if (n.d < 3) break; if (n.a.callTo(px, py)) break; }
+          }
           addFx({ kind: 'burst', x: pt.x, y: pt.y, emojis: GROUND_SPARKLE[habitat?.element ?? 'light'] ?? ['✨'], count: 5 }, 1000);
           audioEngine.playSfx('squish');
         }
@@ -1569,6 +1641,8 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
               histRef={histRef}
               apiRef={apiRef}
               eatNonce={eatNonce[slime.id] || 0}
+              bond={slime.bond ?? 0}
+              onBond={addBond}
               onPoke={handlePoke}
             />
           ))}
@@ -1610,6 +1684,18 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           <div>
             <p className="text-xs text-white/60 font-bold tracking-wider uppercase">Inhabitants</p>
             <p className="text-lg font-black text-white">{assignedSlimes.length} <span className="text-white/60">/ {habitat.capacity}</span></p>
+          </div>
+          <div className="flex items-center gap-3 flex-wrap justify-center" aria-label="Friendship">
+            {assignedSlimes.map(sl => {
+              const lv = bondLevel(sl.bond ?? 0);
+              return (
+                <div key={sl.id} className="flex flex-col items-center" style={{ minWidth: 64 }} title={`${sl.name}: ${BOND_LEVELS[lv].name}`}>
+                  <span className="text-[10px] font-black text-white/80 leading-none truncate" style={{ maxWidth: 80 }}>{sl.name.replace(' Slime', '')}</span>
+                  <span className="text-[13px] leading-none mt-0.5" style={{ color: '#ff7eb6', letterSpacing: 1 }}>{'♥'.repeat(lv)}<span style={{ color: 'rgba(255,255,255,0.25)' }}>{'♥'.repeat(3 - lv)}</span></span>
+                  <span className="mt-0.5 rounded-full overflow-hidden" style={{ width: 52, height: 4, background: 'rgba(255,255,255,0.18)' }}><span className="block h-full" style={{ width: `${Math.round(bondProgress(sl.bond ?? 0) * 100)}%`, background: 'linear-gradient(90deg,#ff7eb6,#ffd27e)' }} /></span>
+                </div>
+              );
+            })}
           </div>
           <div className="text-right">
             <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">Available Goo</p>

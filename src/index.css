@@ -460,6 +460,7 @@ html, body { margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
 .h-screen { height: 100cqh; }
 .min-h-screen { min-height: 100cqh; }
 .w-screen { width: 100cqw; }
+.max-h-screen { max-height: 100cqh; }
 html { -webkit-text-size-adjust: 100%; -webkit-tap-highlight-color: transparent; }
 body { -webkit-touch-callout: none; user-select: none; -webkit-user-select: none; }
 input, textarea, [contenteditable] { user-select: text; -webkit-user-select: text; }
