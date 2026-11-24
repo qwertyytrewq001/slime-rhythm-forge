@@ -19,3 +19,18 @@ export const bondProgress = (bond = 0): number => {
   if (!next) return 1;
   return (bond - BOND_LEVELS[lv].at) / (next.at - BOND_LEVELS[lv].at);
 };
+
+/** Every slime has a nature, fixed by its id. It changes how it reacts when you pet it. */
+export type SlimeNature = 'shy' | 'playful' | 'greedy' | 'lazy';
+const NATURES: SlimeNature[] = ['shy', 'playful', 'greedy', 'lazy'];
+export const slimeNature = (id: string): SlimeNature => {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = (h * 31 + id.charCodeAt(i)) >>> 0;
+  return NATURES[h % NATURES.length];
+};
+export const NATURE_BLURB: Record<SlimeNature, string> = {
+  shy: 'Shy: hides at first, warms up once you are friends',
+  playful: 'Playful: bounces when you pet it',
+  greedy: 'Greedy: always thinking about snacks',
+  lazy: 'Lazy: would rather be napping',
+};

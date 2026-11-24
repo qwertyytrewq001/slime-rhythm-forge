@@ -10,7 +10,7 @@ import { SlimeGallery } from './SlimeGallery';
 import { FeedTray } from './FeedTray';
 import { foodSpriteUrl } from '@/data/foodSprites';
 import { audioEngine } from '@/utils/audioEngine';
-import { bondLevel, bondProgress, BOND_LEVELS } from '@/utils/bond';
+import { bondLevel, bondProgress, BOND_LEVELS, slimeNature, NATURE_BLURB } from '@/utils/bond';
 import { setSanctuaryOpen } from '@/utils/sanctuaryState';
 import { JOY_MAX } from '@/utils/sanctuaryCore';
 import { SanctuaryPanel } from './SanctuaryPanel';
@@ -201,6 +201,7 @@ interface SlimeApi {
   pos: () => { x: number; y: number };
   greet: () => void;
   callTo: (x: number, y: number) => boolean;
+  cheer: () => void;
 }
 
 interface PointerSample {
@@ -223,7 +224,7 @@ interface BouncingSlimeProps {
   eatNonce: number;
   bond: number;
   onPoke: (id: string, quiet?: boolean) => void;
-  onDecor?: (decorId: string) => void;
+  onDecor?: (decorId: string, bySlimeId?: string) => void;
   onBond?: (id: string, amount: number) => void;
 }
 
@@ -363,7 +364,17 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
     const s = sim.current;
     s.last = performance.now() / 1000;
     if (s.mode === 'sleep') setSleeping(false);
-    say(POKE_BUBBLES[Math.floor(Math.random() * POKE_BUBBLES.length)], 1400);
+    const nature = slimeNature(slime.id);
+    const friend = live.current.bond >= 40;
+    const hungry = live.current.wantsFood && performance.now() / 1000 - s.fed > 150;
+    say(
+      nature === 'shy' && !friend ? pickOf(['🥺', 'txt:Eep!', 'txt:...hi']) :
+      nature === 'greedy' && hungry ? pickOf(['food', 'txt:Snack?']) :
+      nature === 'lazy' ? pickOf(['txt:Five more minutes', '😊', 'txt:Mmh...']) :
+      nature === 'playful' ? pickOf(['😆', 'txt:Again!', '🤩']) :
+      POKE_BUBBLES[Math.floor(Math.random() * POKE_BUBBLES.length)],
+      1400,
+    );
     if (s.mode === 'idle' || s.mode === 'land' || s.mode === 'glide' || s.mode === 'sleep' || s.mode === 'inspect') {
       s.mode = 'air';
       s.vz = 430;
@@ -376,6 +387,8 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
       s.bounceQ = [];
       s.z = Math.max(s.z, 1);
       s.syv += 4;
+      if (nature === 'playful') s.bounceQ = [320, 250];
+      if (nature === 'shy' && !friend) s.syv -= 3; // flinches
     }
     cb.current.onPoke(slime.id);
   };
@@ -441,6 +454,15 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         hover.current = v;
       },
       pos: () => ({ x: sim.current.x, y: sim.current.y }),
+      // another slime is having fun nearby: sometimes join in
+      cheer: () => {
+        const s = sim.current;
+        if (s.mode !== 'idle' && s.mode !== 'land') return;
+        if (slimeNature(slime.id) === 'lazy' && Math.random() < 0.6) { say('txt:Yawn...', 1600, false); return; }
+        say(pickOf(['txt:Me too!', '🤩', 'txt:Wait for me!', '😄']), 1800, false);
+        s.mode = 'air'; s.vz = 330; s.jump = 330; s.vx = 0; s.vy = 0; s.hasTarget = false; s.z = Math.max(s.z, 1); s.syv += 3;
+        s.bounceQ = [260];
+      },
       // the player tapped the ground: strangers are shy about it, friends come running
       callTo: (px: number, py: number) => {
         const s = sim.current;
@@ -556,7 +578,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         const dec = s.inspecting.decor;
         if (dec) {
           const play = DECOR_PLAY[dec];
-          cb.current.onDecor?.(dec);
+          cb.current.onDecor?.(dec, slime.id);
           if (play) cb.current.onBond?.(slime.id, 2);
           say(dec === 'ball' && Math.random() < 0.5 ? '🎾' : `txt:${pickOf(play?.words ?? ['Ooh!'])}`, 2400, false);
           if (play && play.bounces.length) {
@@ -1353,7 +1375,12 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
 // Decorations react when a slime comes over to play with them (the ball rolls, the swing swings...)
   const [decorPlay, setDecorPlay] = useState<Record<string, number>>({});
   const [decorX, setDecorX] = useState<Record<string, number>>({});
-  const playDecor = useCallback((id: string) => {
+  const playDecor = useCallback((id: string, by?: string) => {
+    // chain reaction: the slimes closest to the one playing may cheer and join in
+    if (by) {
+      const me = apiRef.current[by]?.pos();
+      if (me) Object.entries(apiRef.current).forEach(([oid, a]) => { if (oid !== by && Math.hypot(a.pos().x - me.x, a.pos().y - me.y) < 38 && Math.random() < 0.5) a.cheer(); });
+    }
     setDecorPlay(p => (p[id] && Date.now() - p[id] < 2000 ? p : { ...p, [id]: Date.now() }));
     // the ball really gets kicked: it rolls away along the ground and the slimes chase it next time
     if (id === 'ball') setDecorX(d => { const cur = d.ball ?? 30; const dir = cur > 70 ? -1 : cur < 25 ? 1 : Math.random() < 0.5 ? -1 : 1; return { ...d, ball: Math.min(86, Math.max(14, cur + dir * (14 + Math.random() * 14))) }; });
@@ -1689,7 +1716,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
             {assignedSlimes.map(sl => {
               const lv = bondLevel(sl.bond ?? 0);
               return (
-                <div key={sl.id} className="flex flex-col items-center" style={{ minWidth: 64 }} title={`${sl.name}: ${BOND_LEVELS[lv].name}`}>
+                <div key={sl.id} className="flex flex-col items-center" style={{ minWidth: 64 }} title={`${sl.name}: ${BOND_LEVELS[lv].name}. ${NATURE_BLURB[slimeNature(sl.id)]}`}>
                   <span className="text-[10px] font-black text-white/80 leading-none truncate" style={{ maxWidth: 80 }}>{sl.name.replace(' Slime', '')}</span>
                   <span className="text-[13px] leading-none mt-0.5" style={{ color: '#ff7eb6', letterSpacing: 1 }}>{'♥'.repeat(lv)}<span style={{ color: 'rgba(255,255,255,0.25)' }}>{'♥'.repeat(3 - lv)}</span></span>
                   <span className="mt-0.5 rounded-full overflow-hidden" style={{ width: 52, height: 4, background: 'rgba(255,255,255,0.18)' }}><span className="block h-full" style={{ width: `${Math.round(bondProgress(sl.bond ?? 0) * 100)}%`, background: 'linear-gradient(90deg,#ff7eb6,#ffd27e)' }} /></span>

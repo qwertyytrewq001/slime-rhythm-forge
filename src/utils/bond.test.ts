@@ -16,3 +16,12 @@ describe('bond', () => {
     expect(bondProgress(500)).toBe(1);
   });
 });
+
+import { slimeNature } from './bond';
+describe('nature', () => {
+  it('is stable per slime and uses all four natures across many ids', () => {
+    expect(slimeNature('abc')).toBe(slimeNature('abc'));
+    const seen = new Set(Array.from({ length: 60 }, (_, i) => slimeNature(`slime-${i}`)));
+    expect(seen.size).toBe(4);
+  });
+});
