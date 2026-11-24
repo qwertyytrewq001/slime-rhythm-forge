@@ -345,7 +345,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
   useEffect(() => {
     if (!eatNonce) return;
     setEating(true);
-    say(`txt:${pickOf(['Nom nom!', 'Yum!', 'Tasty!'])}`, 1800);
+    say(pickOf(['😋', 'txt:Nom nom!', 'txt:Yum!', '😋', 'txt:Tasty!']), 1800);
     sim.current.last = performance.now() / 1000;
     sim.current.fed = performance.now() / 1000;
     const t = setTimeout(() => setEating(false), 600);
@@ -387,7 +387,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         s.explore = null;
         s.bounceQ = [];
         setSleeping(false);
-        say(`txt:${pickOf(['Whoa!', 'Eep!', 'Up we go!'])}`, 8000);
+        say(pickOf(['😮', 'txt:Whoa!', 'txt:Eep!', 'txt:Up we go!']), 8000);
       },
       drop: () => {
         const s = sim.current;
@@ -417,7 +417,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
           s.vx = clamp((vpx / rect.width) * 100 * 0.9, -110, 110);
           s.vy = clamp((vpy / rect.height) * 100 * 0.5, -35, 35);
           s.vz = clamp(220 - vpy * 0.5, 120, 760);
-          say(`txt:${pickOf(['Wheeee!', 'Flyyy!'])}`, 2200);
+          say(pickOf(['🤩', 'txt:Wheeee!', 'txt:Flyyy!']), 2200);
         } else {
           s.thrown = false;
           s.vz = 0;
@@ -440,7 +440,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
       greet: () => {
         const s = sim.current;
         if (s.mode === 'sleep' || s.mode === 'carried' || s.mode === 'air') return;
-        say(pickOf(['txt:Hi hi!', 'txt:Oh, hello!', 'txt:Yay, a friend!']), 2200, false);
+        say(pickOf(['txt:Hi hi!', '👋', 'txt:Oh, hello!', 'txt:Yay, a friend!']), 2200, false);
         if (s.mode === 'idle' || s.mode === 'land') {
           s.mode = 'air'; s.vz = 300; s.jump = 300; s.vx = 0; s.vy = 0; s.hasTarget = false; s.z = Math.max(s.z, 1); s.syv += 3;
         }
@@ -511,7 +511,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         const friend = apiRef.current[s.visit];
         s.visit = null;
         s.energy += 1;
-        say(pickOf(['txt:Hi!', 'txt:Hello!', 'txt:Hey you!']), 2200, false);
+        say(pickOf(['txt:Hi!', '👋', 'txt:Hello!', '👋', 'txt:Hey you!']), 2200, false);
         friend?.greet();
         s.mode = 'idle';
         s.t = rand(3, 5);
@@ -522,7 +522,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         s.energy = 0;
         s.explore = null;
         cb.current.onDecor?.('hammock');
-        say(`txt:${pickOf(DECOR_PLAY.hammock.words)}`, 2200, false);
+        say(Math.random() < 0.5 ? '🛏️' : `txt:${pickOf(DECOR_PLAY.hammock.words)}`, 2200, false);
         s.mode = 'sleep';
         s.t = rand(9, 14);
         setSleeping(true);
@@ -539,7 +539,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         if (dec) {
           const play = DECOR_PLAY[dec];
           cb.current.onDecor?.(dec);
-          say(`txt:${pickOf(play?.words ?? ['Ooh!'])}`, 2400, false);
+          say(dec === 'ball' && Math.random() < 0.5 ? '🎾' : `txt:${pickOf(play?.words ?? ['Ooh!'])}`, 2400, false);
           if (play && play.bounces.length) {
             // bouncy toys: actually play on it instead of just looking
             s.inspecting = null;
@@ -872,7 +872,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
             } else {
               if (s.thrown && s.throwPower > 0.5) {
                 s.dizzy = 1.4;
-                say('txt:Dizzy...', 2200);
+                say(pickOf(['😵', 'txt:Dizzy...']), 2200);
               }
               s.thrown = false;
               s.vx = 0;
@@ -1029,7 +1029,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
               {bubble.slice(4)}
             </div>
           ) :
-          bubble.startsWith('decor:') || bubble === 'food' ? (
+          bubble.startsWith('decor:') ? (
             <div className="absolute z-30 pointer-events-none top-[-6%] left-[60%] animate-in zoom-in-50 fade-in duration-300 flex items-center justify-center rounded-full" style={{ width: 52, height: 52, background: 'radial-gradient(circle at 35% 30%, #fffdf2, #f3e3b8)', border: '3px solid #4a2f17', boxShadow: '0 3px 0 rgba(0,0,0,0.35)' }}>
               {bubble === 'food'
                 ? <img src={foodSpriteUrl('basic')} alt="" draggable={false} style={{ width: 34, height: 34, objectFit: 'contain' }} />

@@ -83,6 +83,17 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
     setPossibleOutcomes(outcomes);
   }, [slot1Slime, slot2Slime]);
 
+  // The real odds for this exact pair (same numbers the egg roll uses, including Lucky Charm / Mutation Juice)
+  const oddsById = useMemo(() => {
+    const m = new Map<string, number>();
+    if (!slot1Slime || !slot2Slime) return m;
+    const res = calculateBreedingResult(slot1Slime.elements, slot2Slime.elements, slot1Slime.level || 1, slot2Slime.level || 1, slot1Slime.rarityTier, slot2Slime.rarityTier, { luck: state.luckyCharmActive ? 0.35 : 0, skipCommon: state.mutationJuiceActive });
+    if (!res) return m;
+    const total = Object.values(res.finalWeights).reduce((a, b) => a + b, 0) || 1;
+    for (const id of res.validOutcomes) m.set(id, (res.finalWeights[id] / total) * 100);
+    return m;
+  }, [slot1Slime, slot2Slime, state.luckyCharmActive, state.mutationJuiceActive]);
+
   const handleSlotClick = (slot: 1 | 2) => {
     if (state.activeBreeding) return;
     
@@ -401,7 +412,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
           {/* Possible Outcomes Grid */}
           {possibleOutcomes.length > 0 ? (
             <div className="grid grid-cols-3 md:grid-cols-4 gap-6">
-              {possibleOutcomes.map((slime) => (
+              {[...possibleOutcomes].sort((a, b) => (oddsById.get(b.id) ?? 0) - (oddsById.get(a.id) ?? 0)).map((slime) => (
                 <div
                   key={slime.id}
                   className="p-3 transition-all hover:scale-105 bg-white/55 rounded-2xl border-[3px] border-[#4a2f17]/40"
@@ -420,7 +431,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                   <div className="flex justify-center mt-2">
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-[#4a2f17]" style={{ fontFamily: "'Fredoka', sans-serif" }}>
                       <img src={`${import.meta.env.BASE_URL}altar/gem_${slime.rarityTier.toLowerCase()}.png`} alt="" draggable={false} style={{ width: 22, height: 22, objectFit: 'contain', imageRendering: 'auto' }} />
-                      {slime.rarityTier}
+                      {slime.rarityTier}{oddsById.has(slime.id) && <span className="ml-1 opacity-80">· {oddsById.get(slime.id)! < 1 ? '<1' : Math.round(oddsById.get(slime.id)!)}%</span>}
                     </span>
                   </div>
                 </div>
