@@ -9,8 +9,10 @@
  * can keep treating them as ordinary CSS pixels. On a big screen the scale is 1 and nothing is changed.
  */
 // Smaller than before so a phone held sideways shows the game bigger (it used to be drawn at 1000x600 and shrunk to about 65%)
-export const MIN_W = 700;
-export const MIN_H = 400;
+export const MIN_W = 640;
+export const MIN_H = 320;
+// On a phone the game is also zoomed IN: a phone pixel is physically smaller than a desktop one, so the same layout looked tiny.
+export const PHONE_ZOOM = 1.2;
 
 let scale = 1;
 let offX = 0; // where the game's top-left corner sits on the real screen (the safe-area insets)
@@ -56,13 +58,14 @@ function apply() {
   offY = Math.round(ins.t);
   root.style.left = `${offX}px`;
   root.style.top = `${offY}px`;
-  const s = Math.min(1, w / MIN_W, h / MIN_H);
+  const phone = Math.min(w, h) < 520 && Math.max(w, h) < 1100;
+  const s = Math.min(phone ? PHONE_ZOOM : 1, w / MIN_W, h / MIN_H);
   scale = s;
-  width = s < 1 ? Math.ceil(w / s) : w;
-  height = s < 1 ? Math.ceil(h / s) : h;
+  width = s !== 1 ? Math.ceil(w / s) : w;
+  height = s !== 1 ? Math.ceil(h / s) : h;
   root.style.width = `${width}px`;
   root.style.height = `${height}px`;
-  root.style.transform = s < 1 ? `scale(${s})` : 'none';
+  root.style.transform = s !== 1 ? `scale(${s})` : 'none';
   document.documentElement.style.setProperty('--stage-scale', String(s));
   // a phone held upright: the game wants a wide screen
   const portrait = h > w * 1.05 && Math.min(w, h) < 900;

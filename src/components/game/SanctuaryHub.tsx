@@ -61,6 +61,18 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
   }, []);
 
   const sh = (sw * 9) / 16;
+  // the stage may be a little taller than the screen (so the field is bigger on a phone): the HUD is kept inside the visible part
+  const [boxH, setBoxH] = useState(0);
+  useEffect(() => {
+    const el = stageRef.current?.parentElement;
+    if (!el) return;
+    const m = () => setBoxH(el.clientHeight);
+    m();
+    const ro = new ResizeObserver(m);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const crop = boxH ? Math.max(0, ((sw * 9) / 16 - boxH) / 2) : 0;
   const { habitats, slimes, pendingHabitatPlacement, visitor } = state;
   const open = slotsOpen(habitats);
   const pages = Math.max(1, Math.ceil(open / SLOTS));
@@ -111,7 +123,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
       <div className="absolute inset-0 bg-cover bg-center blur-2xl scale-110 opacity-60" style={{ backgroundImage: `url("${BASE}second_screen_background.png")` }} />
       {/* soft light for the time of day, over the WHOLE screen (not just the stage) and under the interface */}
       <div className="absolute inset-0 pointer-events-none" style={{ background: day.tint ?? 'transparent', opacity: day.tint ? 1 : 0, transition: 'opacity 1.5s ease', zIndex: 250 }} />
-      <div ref={stageRef} className="relative" style={{ width: 'min(100cqw, calc(100cqh * 16 / 9))', height: 'min(100cqh, calc(100cqw * 9 / 16))' }}>
+      <div ref={stageRef} className="relative" style={{ width: 'min(100cqw, calc(100cqh * 16 / 9 * 1.12))', aspectRatio: '16 / 9', flexShrink: 0 }}>
         {/* painted sky if it exists, otherwise the existing backdrop */}
         <ArtImg file="sanct_hub_background.jpg" className="absolute inset-0 w-full h-full" fallback={<div className="absolute inset-0 bg-cover bg-center" style={{ backgroundImage: `url("${BASE}second_screen_background.png")` }}><div className="absolute inset-0 bg-black/50" /></div>} />
         <MirrorBackdrop src={`${SANCT}sanct_hub_background.jpg`} />
@@ -157,16 +169,16 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
           onClick={() => { setMascotBloop(n => n + 1); addPop(sw * 0.075, sh * 0.9, ['Bloop!', 'Hi hi!', '♪', 'Boing!'][mascotBloop % 4]); audioEngine.playSfx('tap'); }}
           aria-label="Say hi to the blueberry slime"
           className="absolute sanct-hop"
-          style={{ left: sw * 0.012, bottom: sw * 0.01, width: sw * 0.075, zIndex: 120 }}
+          style={{ left: sw * 0.012, bottom: sw * 0.01 + crop, width: sw * 0.075, zIndex: 120 }}
         >
           <ArtImg file="mascot_blueberry.png" className="w-full" fallback={null} />
         </button>
 
         {/* the visitor */}
         {visitor && (
-          <button onClick={() => setVisitOpen(true)} aria-label="Talk to the visitor" className="absolute sanct-gift" style={{ right: sw * 0.004, bottom: sw * 0.004, width: sw * 0.1, zIndex: 310, transform: 'none' }}>
+          <button onClick={() => setVisitOpen(true)} aria-label="Talk to the visitor" className="absolute sanct-gift" style={{ right: sw * 0.004, bottom: sw * 0.004 + crop, width: sw * 0.1, zIndex: 310, transform: 'none' }}>
             <ArtImg file={visitor.done ? 'visitor_idle.png' : 'visitor_wave.png'} className="w-full" fallback={<span style={{ fontSize: sw * 0.05 }}>🦉</span>} />
-            {!visitor.done && <span className="absolute rounded-full font-bold text-white flex items-center justify-center sanct-ready" style={{ left: '4%', top: '2%', width: sw * 0.024, height: sw * 0.024, background: '#e8344c', border: '2px solid #fff', fontSize: sw * 0.0145 }}>!</span>}
+            {!visitor.done && <span className="absolute rounded-full font-bold text-white flex items-center justify-center sanct-ready" style={{ left: '4%', top: '2%', width: sw * 0.024, height: sw * 0.024, background: '#e8344c', border: '2px solid #fff', fontSize: Math.max(11, sw * 0.0145) }}>!</span>}
           </button>
         )}
 
@@ -182,24 +194,24 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
           <>
             <button onClick={() => setPage(Math.max(0, shownPage - 1))} disabled={shownPage === 0} aria-label="Previous page of islands" className="absolute rounded-full font-bold border-[3px] shadow-lg hover:scale-110 transition-transform disabled:opacity-30" style={{ left: sw * 0.008, top: '50%', width: sw * 0.034, height: sw * 0.034, background: PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.022, zIndex: 320, lineHeight: 1 }}>‹</button>
             <button onClick={() => setPage(Math.min(pages - 1, shownPage + 1))} disabled={shownPage >= pages - 1} aria-label="Next page of islands" className="absolute rounded-full font-bold border-[3px] shadow-lg hover:scale-110 transition-transform disabled:opacity-30" style={{ right: sw * 0.008, top: '50%', width: sw * 0.034, height: sw * 0.034, background: PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.022, zIndex: 320, lineHeight: 1 }}>›</button>
-            <div className="absolute left-1/2 -translate-x-1/2 rounded-full font-bold whitespace-nowrap" style={{ top: sw * 0.014, background: 'rgba(30,14,40,0.8)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: sw * 0.0115, padding: `${sw * 0.002}px ${sw * 0.01}px`, zIndex: 320 }}>Islands {shownPage + 1} / {pages}</div>
+            <div className="absolute left-1/2 -translate-x-1/2 rounded-full font-bold whitespace-nowrap" style={{ top: sw * 0.014, background: 'rgba(30,14,40,0.8)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: Math.max(11, sw * 0.0115), padding: `${sw * 0.002}px ${sw * 0.01}px`, zIndex: 320 }}>Islands {shownPage + 1} / {pages}</div>
           </>
         )}
 
         {/* HUD: clock and goo on the left, the title in the middle, Collect All and the close cross on the right, so the bar balances */}
-        <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
+        <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012 + crop, gap: sw * 0.008, zIndex: 300 }}>
           <ClockChip day={day} sw={sw} />
-          <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0135, padding: `${sw * 0.004}px ${sw * 0.012}px`, minWidth: sw * 0.09, textAlign: 'center' }}>
+          <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: Math.max(11, sw * 0.0135), padding: `${sw * 0.004}px ${sw * 0.012}px`, minWidth: sw * 0.09, textAlign: 'center' }}>
             {Math.floor(state.goo).toLocaleString()} <GooIcon />
           </div>
         </div>
-        <div className="absolute flex items-center justify-center pointer-events-none" style={{ left: '50%', top: sw * 0.014, transform: 'translateX(-50%)', zIndex: 300 }}>
+        <div className="absolute flex items-center justify-center pointer-events-none" style={{ left: '50%', top: sw * 0.014 + crop, transform: 'translateX(-50%)', zIndex: 300 }}>
           <div className="text-center">
             <div className="font-bold leading-none text-white" style={{ fontSize: sw * 0.026, WebkitTextStroke: `${sw * 0.003}px #2a1408`, paintOrder: 'stroke fill', letterSpacing: '0.02em' }}>Habitat Isles</div>
-            <div className="font-semibold text-white/90" style={{ fontSize: sw * 0.0105, textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>Happy slimes leave gifts. Tap an island to visit.</div>
+            <div className="font-semibold text-white/90" style={{ fontSize: Math.max(11, sw * 0.0105), textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>Happy slimes leave gifts. Tap an island to visit.</div>
           </div>
         </div>
-        <div className="absolute flex items-center" style={{ right: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
+        <div className="absolute flex items-center" style={{ right: sw * 0.014, top: sw * 0.012 + crop, gap: sw * 0.008, zIndex: 300 }}>
           <button
             onClick={collectEverything}
             disabled={!gifts}
@@ -211,9 +223,9 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
             {gifts > 0 && <span className="absolute inset-0 pointer-events-none sanct-shine" />}
             <span className="absolute flex items-center justify-center" style={{ left: '21%', right: '21%', top: 0, bottom: 0, gap: sw * 0.003 }}>
               <ArtImg file="icon_gift_bubble.png" style={{ width: sw * 0.022, flexShrink: 0, filter: gifts ? undefined : 'grayscale(1) opacity(0.6)' }} fallback={<span style={{ fontSize: sw * 0.02 }}>🎁</span>} />
-              <span className="font-bold whitespace-nowrap" style={{ fontSize: sw * 0.0108, color: gifts ? '#fff' : 'rgba(255,255,255,0.7)', WebkitTextStroke: `${sw * 0.0026}px ${gifts ? '#4a1d7a' : '#4a4650'}`, paintOrder: 'stroke fill', letterSpacing: '0.03em' }}>{gifts ? 'Collect All' : 'No gifts'}</span>
+              <span className="font-bold whitespace-nowrap" style={{ fontSize: Math.max(11, sw * 0.0108), color: gifts ? '#fff' : 'rgba(255,255,255,0.7)', WebkitTextStroke: `${sw * 0.0026}px ${gifts ? '#4a1d7a' : '#4a4650'}`, paintOrder: 'stroke fill', letterSpacing: '0.03em' }}>{gifts ? 'Collect All' : 'No gifts'}</span>
             </span>
-            {gifts > 0 && <span className="absolute rounded-full font-bold text-white flex items-center justify-center" style={{ right: '2%', top: '-4%', background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.021, height: sw * 0.021, fontSize: sw * 0.011, padding: '0 4px' }}>{gifts}</span>}
+            {gifts > 0 && <span className="absolute rounded-full font-bold text-white flex items-center justify-center" style={{ right: '2%', top: '-4%', background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.021, height: sw * 0.021, fontSize: Math.max(11, sw * 0.011), padding: '0 4px' }}>{gifts}</span>}
           </button>
           <button onClick={onClose} aria-label="Close" className="hover:scale-110 active:scale-90 transition-transform" style={{ background: 'transparent', border: 'none', padding: 0, width: sw * 0.044 }}>
             <img src={`${BASE}ui/baz_close.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.45))' }} />
@@ -222,9 +234,9 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
 
         {/* active perks */}
         {perkLines.length > 0 && (
-          <div className="absolute flex flex-wrap justify-center" style={{ left: '12%', right: '12%', bottom: sw * 0.012, gap: sw * 0.005, zIndex: 300 }}>
+          <div className="absolute flex flex-wrap justify-center" style={{ left: '12%', right: '12%', bottom: sw * 0.012 + crop, gap: sw * 0.005, zIndex: 300 }}>
             {perkLines.map(p => (
-              <span key={p.element} className="rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.82)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: sw * 0.0098, padding: `${sw * 0.0012}px ${sw * 0.007}px` }}>
+              <span key={p.element} className="rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.82)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: Math.max(11, sw * 0.0098), padding: `${sw * 0.0012}px ${sw * 0.007}px` }}>
                 <Emblem element={p.element} size={sw * 0.014} style={{ marginRight: 3 }} />{p.title}: {p.text.replace(/^(Farm|Gifts): /, '')}
               </span>
             ))}
@@ -234,11 +246,11 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
         {/* placement banner / first-time nudge */}
         {pendingHabitatPlacement ? (
           <Banner sw={sw}>Place your {ELEMENT_DISPLAY_NAMES[pendingHabitatPlacement.element]} Habitat: tap a glowing site.
-            <button onClick={() => dispatch({ type: 'CANCEL_HABITAT_PLACEMENT' })} className="ml-3 rounded-full border-2 font-bold" style={{ borderColor: INK, background: '#fff7dc', padding: `0 ${sw * 0.008}px`, fontSize: sw * 0.011 }}>Cancel</button>
+            <button onClick={() => dispatch({ type: 'CANCEL_HABITAT_PLACEMENT' })} className="ml-3 rounded-full border-2 font-bold" style={{ borderColor: INK, background: '#fff7dc', padding: `0 ${sw * 0.008}px`, fontSize: Math.max(11, sw * 0.011) }}>Cancel</button>
           </Banner>
         ) : habitats.length === 0 ? (
           <Banner sw={sw}><ArtImg file="mascot_cap.png" className="inline-block align-middle mr-2" style={{ width: sw * 0.045 }} fallback={null} />No habitats yet. Build one in the Bazaar and your slimes will have a home.
-            <button onClick={onOpenBazaar} className="ml-3 rounded-full border-2 font-bold" style={{ borderColor: INK, background: 'linear-gradient(#ffe98a,#f2b632)', padding: `0 ${sw * 0.008}px`, fontSize: sw * 0.011 }}>Open Bazaar</button>
+            <button onClick={onOpenBazaar} className="ml-3 rounded-full border-2 font-bold" style={{ borderColor: INK, background: 'linear-gradient(#ffe98a,#f2b632)', padding: `0 ${sw * 0.008}px`, fontSize: Math.max(11, sw * 0.011) }}>Open Bazaar</button>
           </Banner>
         ) : null}
 
@@ -250,13 +262,13 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
 }
 
 const Banner: React.FC<{ sw: number; children: React.ReactNode }> = ({ sw, children }) => (
-  <div className="absolute left-1/2 -translate-x-1/2 rounded-2xl shadow-xl font-bold text-center sanct-rise" style={{ bottom: sw * 0.07, background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.006}px ${sw * 0.014}px`, zIndex: 350, maxWidth: '70%' }}>{children}</div>
+  <div className="absolute left-1/2 -translate-x-1/2 rounded-2xl shadow-xl font-bold text-center sanct-rise" style={{ bottom: sw * 0.07, background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: Math.max(11, sw * 0.0125), padding: `${sw * 0.006}px ${sw * 0.014}px`, zIndex: 350, maxWidth: '70%' }}>{children}</div>
 );
 
 const LockedSite: React.FC<{ w: number; sw: number; label: string }> = ({ w, sw, label }) => (
   <div className="absolute inset-0 sanct-bob pointer-events-none" style={{ animationDelay: '-2s' }}>
     <ArtImg file="island_locked.png" className="absolute inset-0 w-full h-full" style={{ objectFit: 'contain', objectPosition: 'center bottom', opacity: 0.9 }} fallback={<div className="absolute" style={{ left: '8%', right: '8%', top: '18%', height: '50%', borderRadius: '50%', background: 'rgba(120,110,150,0.55)' }} />} />
-    <div className="absolute left-1/2 -translate-x-1/2 text-center whitespace-nowrap font-bold text-white" style={{ top: '84%', fontSize: sw * 0.0115, WebkitTextStroke: sw * 0.0025 + 'px #2a1238', paintOrder: 'stroke fill', textShadow: '0 2px 3px rgba(0,0,0,0.7)' }}>{label}</div>
+    <div className="absolute left-1/2 -translate-x-1/2 text-center whitespace-nowrap font-bold text-white" style={{ top: '84%', fontSize: Math.max(11, sw * 0.0115), WebkitTextStroke: sw * 0.0025 + 'px #2a1238', paintOrder: 'stroke fill', textShadow: '0 2px 3px rgba(0,0,0,0.7)' }}>{label}</div>
   </div>
 );
 
@@ -311,7 +323,7 @@ const IslandView: React.FC<{
 
       {/* nameplate, level and joy */}
       <div className="absolute left-1/2 -translate-x-1/2 text-center pointer-events-none" style={{ top: '84%', width: '92%' }}>
-        <div className="inline-flex items-center rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.85)', color: '#fff', border: `2px solid ${theme.accent}`, fontSize: sw * 0.0105, padding: `0 ${sw * 0.007}px`, gap: sw * 0.004 }}>
+        <div className="inline-flex items-center rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.85)', color: '#fff', border: `2px solid ${theme.accent}`, fontSize: Math.max(11, sw * 0.0105), padding: `0 ${sw * 0.007}px`, gap: sw * 0.004 }}>
           <Emblem element={habitat.element} size={sw * 0.02} />
           <span>{ELEMENT_DISPLAY_NAMES[habitat.element]}</span>
           <span style={{ color: '#ffe9a8' }}>Lv {level}</span>
@@ -332,7 +344,7 @@ const IslandView: React.FC<{
         </button>
       )}
 
-      <button onClick={e => { e.stopPropagation(); onManage(); }} className="absolute rounded-full font-bold border-2 hover:scale-110 transition-transform" style={{ right: '4%', top: '4%', background: PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.0095, padding: `0 ${sw * 0.006}px`, zIndex: 5 }} aria-label="Manage habitat">⚙ Manage</button>
+      <button onClick={e => { e.stopPropagation(); onManage(); }} className="absolute rounded-full font-bold border-2 hover:scale-110 transition-transform" style={{ right: '4%', top: '4%', background: PARCHMENT, borderColor: INK, color: INK, fontSize: Math.max(11, sw * 0.0095), padding: `0 ${sw * 0.006}px`, zIndex: 5 }} aria-label="Manage habitat">⚙ Manage</button>
     </div>
   );
 };

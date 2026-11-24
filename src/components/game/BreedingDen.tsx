@@ -1,3 +1,4 @@
+import { useStageSize } from '@/utils/stage';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
@@ -25,6 +26,7 @@ const oddsLabel = (pct: number) => (pct >= 40 ? "Likely" : pct >= 15 ? "Possible
 
 export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatchery }: BreedingDenProps) {
   const { state, dispatch } = useGameState();
+  const shortDen = useStageSize().h < 420; // a small phone zoomed in: lift the pedestals into view and slim the title
   const [possibleOutcomes, setPossibleOutcomes] = useState<CodexSlime[]>([]);
   const [showPossibleModal, setShowPossibleModal] = useState(false);
   const [hoverId, setHoverId] = useState<string | null>(null);
@@ -170,8 +172,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         }}
         onClick={() => handleSlotClick(1)}
       >
-        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot1Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25cqw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
-        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18cqw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot1Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: shortDen ? -4 : -58, width: 'min(25cqw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: shortDen ? 6 : -46, width: 'min(18cqw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
         {slot1Slime ? (
           <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 1 ? (reaction === 'shy' ? 'denShy 0.5s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot1Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
@@ -221,8 +223,8 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         }}
         onClick={() => handleSlotClick(2)}
       >
-        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot2Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -58, width: 'min(25cqw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
-        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: -46, width: 'min(18cqw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_${slot2Slime ? 'platform_glow' : 'platform'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: shortDen ? -4 : -58, width: 'min(25cqw, 340px)', transform: 'translateX(-50%)', imageRendering: 'auto' }} />
+        <img src={`${import.meta.env.BASE_URL}altar/denp_dome.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ left: '50%', bottom: shortDen ? 6 : -46, width: 'min(18cqw, 250px)', transform: 'translateX(-50%)', imageRendering: 'auto', opacity: 0.5, zIndex: 5 }} />
         {slot2Slime ? (
           <div className="relative flex items-center justify-center" style={{ animation: reaction && waitingSlot === 2 ? (reaction === 'shy' || reaction === 'smitten' ? 'denShy 0.5s ease-in-out infinite' : reaction === 'cool' ? 'denCool 1.4s ease-in-out infinite' : 'denWorry 0.6s ease-in-out infinite') : bothChosen && Date.now() - bondAt < 1800 ? 'denHop 0.6s ease-out 2' : undefined }}>
             <SlimeCanvas slime={slot2Slime} size={160} animated sizeMultiplier={1.8} animationStyle="playful" />
@@ -292,7 +294,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
       )}
 
       {/* Breeding title */}
-      <div className="absolute top-4 left-1/2 -translate-x-1/2 text-center" style={{ width: 'min(46cqw, 430px)' }}>
+      <div className="absolute top-4 left-1/2 -translate-x-1/2 text-center" style={{ width: shortDen ? 'min(30cqw, 240px)' : 'min(46cqw, 430px)' }}>
         <div className="relative">
           <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.45))' }} />
           <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", fontSize: 'clamp(18px, 2.4cqw, 32px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>Breeding Den</span>

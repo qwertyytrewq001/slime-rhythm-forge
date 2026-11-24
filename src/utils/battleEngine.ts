@@ -195,7 +195,7 @@ function pickEnemySpecies(level: number, boss: boolean): CodexSlime {
 
 // Generate a themed opponent team for a map level: real codex species that fit the
 // region's elements, scaled by the map level. Every 5th level is a boss fight.
-export function generateAIOpponents(level: number, _playerAverageLevel?: number): BattleSlime[] {
+export function generateAIOpponents(level: number, _playerAverageLevel?: number, avoidSpecies: string[] = []): BattleSlime[] {
   const count = getEnemyCount(level);
   const boss = isBossLevel(level);
   const baseLevel = getEnemyLevel(level);
@@ -203,7 +203,9 @@ export function generateAIOpponents(level: number, _playerAverageLevel?: number)
 
   for (let i = 0; i < count; i++) {
     const isBossSlot = boss && i === count - 1;
-    const species = pickEnemySpecies(level, isBossSlot);
+    let species = pickEnemySpecies(level, isBossSlot);
+    // the first fights should not be a mirror match against the slime you own (a new player owns one Leaf Slime)
+    for (let tries = 0; level <= 3 && avoidSpecies.includes(species.id) && tries < 12; tries++) species = pickEnemySpecies(level, isBossSlot);
     const slime = createCodexSlime(species.id);
     // Unique id so an enemy never collides with the player's copy of the same species
     // (battle animations and hit effects are keyed by id). codexId keeps the right sprite.

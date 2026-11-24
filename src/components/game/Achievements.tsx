@@ -1,3 +1,4 @@
+import { useStageSize } from '@/utils/stage';
 import { useGameState } from '@/hooks/useGameState';
 import { GooIcon } from './GooIcon';
 import { ACHIEVEMENT_CATEGORIES, ACHIEVEMENT_DEFS } from '@/data/achievements';
@@ -11,6 +12,7 @@ const INK = '#4a2f17';
 const medalFor = (reward: number) => (reward >= 500 ? 'gold' : reward >= 200 ? 'silver' : 'bronze');
 
 export function Achievements({ onClose }: { onClose: () => void }) {
+  const short = useStageSize().h < 560; // a phone held sideways: slimmer header and rows so more fits
   const { state, dispatch } = useGameState();
 
   const claimable = state.achievements.filter(a => a.unlocked && !a.claimed);
@@ -31,12 +33,12 @@ export function Achievements({ onClose }: { onClose: () => void }) {
       <img src={`${U}ach_bg.jpg`} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover pointer-events-none" style={{ imageRendering: 'auto' }} />
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 50%, rgba(30,16,10,0.05), rgba(30,16,10,0.5))' }} />
 
-      <div className="relative w-full max-w-3xl max-h-[90cqh] flex flex-col rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()} style={{ background: 'rgba(246,232,195,0.88)', border: '4px solid #4a2f17', boxShadow: '0 20px 60px rgba(0,0,0,0.55)' }}>
-        <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-4 p-3 sm:p-4" style={{ background: 'linear-gradient(#5a3a7a,#3f2757)', borderBottom: '4px solid #f2d68a', color: '#fff3d0' }}>
+      <div className="relative w-full max-w-3xl max-h-[96cqh] flex flex-col rounded-3xl overflow-hidden" onClick={e => e.stopPropagation()} style={{ background: 'rgba(246,232,195,0.88)', border: '4px solid #4a2f17', boxShadow: '0 20px 60px rgba(0,0,0,0.55)' }}>
+        <div className={`flex flex-wrap items-center justify-between gap-2 sm:gap-4 ${short ? 'px-3 py-1' : 'p-3 sm:p-4'}`} style={{ background: 'linear-gradient(#5a3a7a,#3f2757)', borderBottom: '4px solid #f2d68a', color: '#fff3d0' }}>
           <div className="flex items-center gap-3">
-            <img src={`${U}tool_achievements.png`} alt="" draggable={false} className="w-16 h-16" style={{ imageRendering: 'auto' }} />
+            <img src={`${U}tool_achievements.png`} alt="" draggable={false} className={short ? 'w-10 h-10' : 'w-16 h-16'} style={{ imageRendering: 'auto' }} />
             <div>
-              <div className="text-3xl font-bold leading-none" style={{ letterSpacing: '0.05em', WebkitTextStroke: '4px #2a1238', paintOrder: 'stroke fill' }}>Achievements</div>
+              <div className={`${short ? 'text-xl' : 'text-3xl'} font-bold leading-none`} style={{ letterSpacing: '0.05em', WebkitTextStroke: '4px #2a1238', paintOrder: 'stroke fill' }}>Achievements</div>
               <p className="text-sm font-semibold opacity-90 mt-1">
                 {unlockedCount} / {state.achievements.length} unlocked{claimable.length > 0 && ` · ${claimable.length} ready to claim`}
               </p>
@@ -50,13 +52,13 @@ export function Achievements({ onClose }: { onClose: () => void }) {
               </button>
             )}
             <button onClick={onClose} aria-label="Close" className="hover:scale-110 active:scale-95 transition-transform">
-              <img src={`${U}baz_close.png`} alt="" draggable={false} className="w-12 h-12" style={{ imageRendering: 'auto' }} />
+              <img src={`${U}baz_close.png`} alt="" draggable={false} className={short ? 'w-9 h-9' : 'w-12 h-12'} style={{ imageRendering: 'auto' }} />
             </button>
           </div>
         </div>
 
         <style>{`.ach-scroll{scrollbar-width:thin;scrollbar-color:#8a5a14 transparent}.ach-scroll::-webkit-scrollbar{width:10px}.ach-scroll::-webkit-scrollbar-track{background:rgba(74,47,23,0.12);border-radius:8px;margin:6px 0}.ach-scroll::-webkit-scrollbar-thumb{background:linear-gradient(90deg,#f2b632,#b8801a);border:2px solid #4a2f17;border-radius:8px}`}</style>
-        <div className="overflow-y-auto p-4 space-y-5 ach-scroll">
+        <div className={`overflow-y-auto ${short ? 'p-2 space-y-2' : 'p-4 space-y-5'} ach-scroll`}>
           {ACHIEVEMENT_CATEGORIES.map(category => {
             const defs = ACHIEVEMENT_DEFS.filter(d => d.category === category);
             const done = defs.filter(d => state.achievements.find(a => a.id === d.id)?.unlocked).length;
@@ -75,7 +77,7 @@ export function Achievements({ onClose }: { onClose: () => void }) {
                     const card = ach.claimed ? 'ach_row' : ach.unlocked ? 'ach_row_ready' : 'ach_row_locked';
                     return (
                       <div key={def.id} className="relative" style={{ minHeight: 82, borderStyle: 'solid', borderWidth: '15px 64px', borderImageSource: `url(${U}${card}.png)`, borderImageSlice: '45 192 fill', borderImageRepeat: 'stretch', boxSizing: 'border-box' }}>
-                        <div className="relative flex items-center gap-3" style={{ color: INK, margin: '-15px -64px', padding: '10px 70px 10px 78px', minHeight: 82 }}>
+                        <div className="relative flex items-center gap-3" style={{ color: INK, margin: '-15px -64px', padding: short ? '4px 70px 4px 78px' : '10px 70px 10px 78px', minHeight: short ? 56 : 82 }}>
                           <div className="absolute" style={{ left: 15, top: '50%', width: 47, height: 47, transform: 'translateY(-50%)' }}>
                             {ach.unlocked ? (
                               <img src={`${U}ach_medal_${medalFor(def.rewardAmount)}.png`} alt="" draggable={false} className="w-full h-full" style={{ imageRendering: 'auto' }} />

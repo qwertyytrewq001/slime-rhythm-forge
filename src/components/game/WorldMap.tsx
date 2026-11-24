@@ -163,7 +163,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
               style={{
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
-                width: `max(${isUnlocked ? 32 : 22}px, calc(var(--sw) * ${size}))`,
+                width: `max(${isUnlocked ? 46 : 32}px, calc(var(--sw) * ${size}))`,
                 aspectRatio: '1',
                 zIndex: isCurrent ? 15 : 10,
               }}

@@ -97,6 +97,18 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
   const perks = useMemo(() => perksFrom(state.habitats, state.slimes), [state.habitats, state.slimes]);
   const perkLines = useMemo(() => activePerks(state.habitats, state.slimes), [state.habitats, state.slimes]);
   const sh = (sw * 9) / 16; // stage height
+  // the stage may be a little taller than the screen (so the field is bigger on a phone): the HUD is kept inside the visible part
+  const [boxH, setBoxH] = useState(0);
+  useEffect(() => {
+    const el = stageRef.current?.parentElement;
+    if (!el) return;
+    const m = () => setBoxH(el.clientHeight);
+    m();
+    const ro = new ResizeObserver(m);
+    ro.observe(el);
+    return () => ro.disconnect();
+  }, []);
+  const crop = boxH ? Math.max(0, ((sw * 9) / 16 - boxH) / 2) : 0;
 
   const toSlice = (): FarmSlice => {
     const s = stateRef.current;
@@ -302,7 +314,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
       <div
         ref={stageRef}
         className="relative"
-        style={{ width: 'min(100cqw, calc(100cqh * 16 / 9))', height: 'min(100cqh, calc(100cqw * 9 / 16))' }}
+        style={{ width: 'min(100cqw, calc(100cqh * 16 / 9 * 1.12))', aspectRatio: '16 / 9', flexShrink: 0 }}
         onClick={onStageClick}
         onMouseMove={onStageMove}
       >
@@ -316,7 +328,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
             <span key={i} className="absolute rounded-full farm-spark" style={{ left: `${p.x}%`, top: `${p.y}%`, width: sw * 0.004, height: sw * 0.004, background: p.c, boxShadow: `0 0 ${sw * 0.008}px ${p.c}`, animationDelay: `${p.d}s`, animationDuration: `${p.t}s` }} />
           ))}
           <span className="absolute farm-butterfly" style={{ top: '40%', fontSize: sw * 0.022 }}>🦋</span>
-          <span className="absolute farm-butterfly" style={{ top: '58%', fontSize: sw * 0.018, animationDelay: '-9s', animationDuration: '26s' }}>🦋</span>
+          <span className="absolute farm-butterfly" style={{ top: '58%', fontSize: Math.max(11, sw * 0.018), animationDelay: '-9s', animationDuration: '26s' }}>🦋</span>
         </div>
 
         {/* the plots */}
@@ -409,21 +421,21 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
               onClick={e => e.stopPropagation()}
               style={{ left: `${Math.min(86, Math.max(14, c.x * 100))}%`, top: `${c.y * 100 - 17}%`, transform: 'translateX(-50%)', width: sw * 0.2, background: `linear-gradient(${PARCHMENT}, #ecd9a8)`, border: `3px solid ${INK}`, color: INK, padding: sw * 0.008, zIndex: 200 }}
             >
-              <div className="font-bold leading-tight" style={{ fontSize: sw * 0.0145 }}>{crop.name}</div>
-              <div className="font-semibold opacity-70" style={{ fontSize: sw * 0.0105 }}>Ready in {formatDuration((infoPlot.readyAt ?? now) - now)}</div>
+              <div className="font-bold leading-tight" style={{ fontSize: Math.max(11, sw * 0.0145) }}>{crop.name}</div>
+              <div className="font-semibold opacity-70" style={{ fontSize: Math.max(11, sw * 0.0105) }}>Ready in {formatDuration((infoPlot.readyAt ?? now) - now)}</div>
               <div className="flex gap-1.5" style={{ marginTop: sw * 0.006 }}>
                 <button
                   onClick={() => waterOne(infoPlot.id)}
                   disabled={!!infoPlot.watered}
                   className="flex-1 rounded-full font-bold border-2 hover:scale-105 transition-transform disabled:opacity-45 disabled:hover:scale-100"
-                  style={{ background: '#dff1ff', borderColor: INK, fontSize: sw * 0.011, padding: `${sw * 0.003}px 0` }}
+                  style={{ background: '#dff1ff', borderColor: INK, fontSize: Math.max(11, sw * 0.011), padding: `${sw * 0.003}px 0` }}
                 >
                   <Ico name="icon_water_can" w={sw * 0.016} style={{ marginRight: 3 }} />{infoPlot.watered ? 'Watered' : `Water -${Math.round(WATER_BONUS * 100)}%`}
                 </button>
                 <button
                   onClick={() => rushOne(infoPlot.id)}
                   className="flex-1 rounded-full font-bold border-2 hover:scale-105 transition-transform"
-                  style={{ background: goo >= cost ? 'linear-gradient(#ffe98a,#f2b632)' : '#e8dfc9', borderColor: INK, fontSize: sw * 0.011, padding: `${sw * 0.003}px 0`, opacity: goo >= cost ? 1 : 0.6 }}
+                  style={{ background: goo >= cost ? 'linear-gradient(#ffe98a,#f2b632)' : '#e8dfc9', borderColor: INK, fontSize: Math.max(11, sw * 0.011), padding: `${sw * 0.003}px 0`, opacity: goo >= cost ? 1 : 0.6 }}
                 >
                   <Ico name="icon_rush" w={sw * 0.016} style={{ marginRight: 3 }} />{cost.toLocaleString()} <Ico name="icon_drop" w={sw * 0.011} />
                 </button>
@@ -438,11 +450,11 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         </div>
 
         {/* HUD: Farm Level */}
-        <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
+        <div className="absolute flex items-center" style={{ left: sw * 0.014, top: sw * 0.012 + crop, gap: sw * 0.008, zIndex: 300 }}>
           <div className="relative flex items-center justify-center font-bold" style={{ width: sw * 0.066, height: sw * 0.066, color: '#fff', fontSize: sw * 0.026, filter: 'drop-shadow(0 4px 6px rgba(0,0,0,0.45))' }}>
             <Ico name="icon_level_badge" w={sw * 0.066} style={{ position: 'absolute', inset: 0 }} />
             <span className="relative" style={{ WebkitTextStroke: `${sw * 0.0025}px ${INK}`, paintOrder: 'stroke fill', marginTop: sw * 0.004 }}>{farm.level}</span>
-            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full font-bold whitespace-nowrap" style={{ background: INK, color: '#ffe9a8', fontSize: sw * 0.0085, padding: `0 ${sw * 0.005}px` }}>FARM LV</span>
+            <span className="absolute -bottom-1 left-1/2 -translate-x-1/2 rounded-full font-bold whitespace-nowrap" style={{ background: INK, color: '#ffe9a8', fontSize: Math.max(11, sw * 0.0085), padding: `0 ${sw * 0.005}px` }}>FARM LV</span>
           </div>
           <div style={{ width: sw * 0.27 }}>
             <div className="relative" style={{ aspectRatio: '569 / 82' }}>
@@ -451,14 +463,14 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
                 <div className="h-full rounded-full transition-[width] duration-500" style={{ width: `${farm.level >= MAX_FARM_LEVEL ? 100 : (xp.have / xp.need) * 100}%`, background: 'linear-gradient(#ffe98a,#f2b632)', boxShadow: 'inset 0 2px 0 rgba(255,255,255,0.5)' }} />
               </div>
             </div>
-            <div className="font-bold text-white leading-tight" style={{ fontSize: sw * 0.0105, textShadow: '0 1px 3px rgba(0,0,0,0.9)', marginTop: sw * 0.002 }}>
+            <div className="font-bold text-white leading-tight" style={{ fontSize: Math.max(11, sw * 0.0105), textShadow: '0 1px 3px rgba(0,0,0,0.9)', marginTop: sw * 0.002 }}>
               {farm.level >= MAX_FARM_LEVEL ? 'Max level' : `${xp.have} / ${xp.need} Farm XP`}
               {nextUnlocks.length > 0 && <span className="opacity-80"> · Next: {nextUnlocks[0]}</span>}
             </div>
             {perkLines.filter(p => p.text.startsWith('Farm')).length > 0 && (
               <div className="flex flex-wrap" style={{ gap: sw * 0.004, marginTop: sw * 0.004 }}>
                 {perkLines.filter(p => p.text.startsWith('Farm')).map(p => (
-                  <span key={p.element} title={`${p.title} (${p.element} habitat, level ${p.level})`} className="rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.78)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: sw * 0.0088, padding: `0 ${sw * 0.005}px` }}>
+                  <span key={p.element} title={`${p.title} (${p.element} habitat, level ${p.level})`} className="rounded-full font-bold whitespace-nowrap" style={{ background: 'rgba(30,14,40,0.78)', color: '#ffe9a8', border: '1px solid rgba(255,255,255,0.35)', fontSize: Math.max(11, sw * 0.0088), padding: `0 ${sw * 0.005}px` }}>
                     ✦ {p.text.replace('Farm: ', '')}
                   </span>
                 ))}
@@ -468,17 +480,17 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         </div>
 
         {/* HUD: goo, bag, close */}
-        <div className="absolute flex items-center" style={{ right: sw * 0.014, top: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
+        <div className="absolute flex items-center" style={{ right: sw * 0.014, top: sw * 0.012 + crop, gap: sw * 0.008, zIndex: 300 }}>
           <div ref={bagRef} className="flex items-center rounded-full shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, padding: `${sw * 0.003}px ${sw * 0.01}px`, gap: sw * 0.008 }}>
             <img src={`${BASE}food_bag.png`} alt="" draggable={false} style={{ width: sw * 0.026 }} />
             {CROP_ORDER.map(c => (
-              <span key={c} className="flex items-center font-bold" style={{ color: INK, fontSize: sw * 0.0125, gap: 2 }}>
+              <span key={c} className="flex items-center font-bold" style={{ color: INK, fontSize: Math.max(11, sw * 0.0125), gap: 2 }}>
                 <img src={foodSpriteUrl(c)} alt="" draggable={false} style={{ width: sw * 0.022 }} />
                 {inventory[c] || 0}
               </span>
             ))}
           </div>
-          <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.004}px ${sw * 0.01}px` }}>
+          <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: Math.max(11, sw * 0.0125), padding: `${sw * 0.004}px ${sw * 0.01}px` }}>
             <span className="inline-flex items-center" style={{ gap: sw * 0.003 }}>{Math.floor(goo).toLocaleString()} <Ico name="icon_drop" w={sw * 0.017} /></span>
           </div>
           <button onClick={onClose} aria-label="Close farm" className="hover:scale-110 transition-transform" style={{ width: sw * 0.036, height: sw * 0.036 }}>
@@ -487,7 +499,7 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
         </div>
 
         {/* action bar */}
-        <div className="absolute left-1/2 -translate-x-1/2 flex items-center" style={{ bottom: sw * 0.012, gap: sw * 0.008, zIndex: 300 }}>
+        <div className="absolute left-1/2 -translate-x-1/2 flex items-center" style={{ bottom: sw * 0.012 + crop, gap: sw * 0.008, zIndex: 300 }}>
           <ActionButton primary={readyPlots.length > 0} disabled={!readyPlots.length} onClick={harvestEverything} sw={sw} badge={readyPlots.length || undefined}>
             <Ico name="icon_basket" w={sw * 0.022} style={{ marginRight: 4 }} />Harvest All
           </ActionButton>
@@ -498,13 +510,13 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
             <Ico name="icon_water_can" w={sw * 0.022} style={{ marginRight: 4 }} />Water All
           </ActionButton>
           {farmPlots.some(p => p.unlocked && isGrowing(p, now)) && (
-            <AdBoostButton kind="farm" label="Grow twice as fast" style={{ fontSize: sw * 0.0125 }} onReward={() => dispatch({ type: 'AD_SPEED', target: 'farm' })} />
+            <AdBoostButton kind="farm" label="Grow twice as fast" style={{ fontSize: Math.max(11, sw * 0.0125) }} onReward={() => dispatch({ type: 'AD_SPEED', target: 'farm' })} />
           )}
           <button
             onClick={() => dispatch({ type: 'SET_AUTO_REPLANT', value: !farm.autoReplant })}
             title="After a harvest, plant the same crop again automatically"
             className="rounded-full font-bold border-[3px] shadow-lg hover:scale-105 transition-transform whitespace-nowrap"
-            style={{ background: farm.autoReplant ? 'linear-gradient(#9dffb0,#38c95a)' : PARCHMENT, borderColor: INK, color: INK, fontSize: sw * 0.0125, padding: `${sw * 0.005}px ${sw * 0.012}px` }}
+            style={{ background: farm.autoReplant ? 'linear-gradient(#9dffb0,#38c95a)' : PARCHMENT, borderColor: INK, color: INK, fontSize: Math.max(11, sw * 0.0125), padding: `${sw * 0.005}px ${sw * 0.012}px` }}
           >
             <Ico name="icon_autoreplant" w={sw * 0.02} style={{ marginRight: 4 }} />Auto-replant {farm.autoReplant ? 'ON' : 'OFF'}
           </button>
@@ -512,13 +524,13 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
 
         {/* level-up banner */}
         {banner && (
-          <div key={banner.id} className="absolute left-1/2 pointer-events-none farm-banner text-center" style={{ top: sw * 0.07, zIndex: 500 }}>
+          <div key={banner.id} className="absolute left-1/2 pointer-events-none farm-banner text-center" style={{ top: sw * 0.07 + crop, zIndex: 500 }}>
             <div className="relative mx-auto" style={{ width: sw * 0.34, aspectRatio: '358 / 116' }}>
               <img src={bt('ui_ribbon.png')} alt="" className="absolute inset-0 w-full h-full" draggable={false} style={{ filter: `drop-shadow(0 0 ${sw * 0.02}px ${GOLD})` }} />
               <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ color: INK, fontSize: sw * 0.03 }}>Farm Level {banner.level}!</div>
             </div>
             {banner.lines.length > 0 && (
-              <div className="mx-auto rounded-2xl font-bold" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, width: sw * 0.3, marginTop: sw * 0.004, padding: `${sw * 0.005}px ${sw * 0.01}px`, fontSize: sw * 0.0125 }}>
+              <div className="mx-auto rounded-2xl font-bold" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, width: sw * 0.3, marginTop: sw * 0.004, padding: `${sw * 0.005}px ${sw * 0.01}px`, fontSize: Math.max(11, sw * 0.0125) }}>
                 {banner.lines.map(l => <div key={l}>✨ {l}</div>)}
               </div>
             )}
@@ -559,7 +571,7 @@ const ActionButton: React.FC<{ children: React.ReactNode; onClick: () => void; d
   >
     {children}
     {badge ? (
-      <span className="absolute -top-2 -right-2 rounded-full font-bold text-white flex items-center justify-center" style={{ background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.02, height: sw * 0.02, fontSize: sw * 0.0105, padding: '0 4px' }}>{badge}</span>
+      <span className="absolute -top-2 -right-2 rounded-full font-bold text-white flex items-center justify-center" style={{ background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.02, height: sw * 0.02, fontSize: Math.max(11, sw * 0.0105), padding: '0 4px' }}>{badge}</span>
     ) : null}
   </button>
 );
@@ -575,9 +587,9 @@ const CropChooser: React.FC<{
         <div className="flex items-center justify-between" style={{ marginBottom: sw * 0.01 }}>
           <div>
             <div className="font-bold" style={{ fontSize: sw * 0.024 }}>{mode === 'all' ? `Plant on ${count} empty plot${count === 1 ? '' : 's'}` : 'Choose a crop'}</div>
-            <div className="font-semibold opacity-70" style={{ fontSize: sw * 0.0115 }}>Seeds are bought as you plant. Quick crops for now, long crops for later.</div>
+            <div className="font-semibold opacity-70" style={{ fontSize: Math.max(11, sw * 0.0115) }}>Seeds are bought as you plant. Quick crops for now, long crops for later.</div>
           </div>
-          <button onClick={onClose} className="rounded-full font-bold border-2 hover:scale-110 transition-transform" style={{ width: sw * 0.032, height: sw * 0.032, borderColor: INK, background: '#fff7dc', fontSize: sw * 0.018 }}>×</button>
+          <button onClick={onClose} className="rounded-full font-bold border-2 hover:scale-110 transition-transform" style={{ width: sw * 0.032, height: sw * 0.032, borderColor: INK, background: '#fff7dc', fontSize: Math.max(11, sw * 0.018) }}>×</button>
         </div>
         <div className="grid grid-cols-3" style={{ gap: sw * 0.01 }}>
           {CROP_ORDER.map(c => {
@@ -596,21 +608,21 @@ const CropChooser: React.FC<{
                 className={`relative text-center rounded-2xl border-[3px] transition-transform ${unlocked && afford ? 'hover:scale-[1.03] hover:-translate-y-1' : 'opacity-70 cursor-not-allowed'}`}
                 style={{ background: '#fff7dc', borderColor: INK, padding: `${sw * 0.01}px ${sw * 0.008}px` }}
               >
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full font-bold text-white" style={{ background: ROLE_COLOR[def.role], fontSize: sw * 0.0095, padding: `0 ${sw * 0.008}px`, border: '2px solid #fff' }}>{def.role}</span>
+                <span className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full font-bold text-white" style={{ background: ROLE_COLOR[def.role], fontSize: Math.max(11, sw * 0.0095), padding: `0 ${sw * 0.008}px`, border: '2px solid #fff' }}>{def.role}</span>
                 <Ico name={`seed_packet_${c}`} w={sw * 0.075} style={{ display: 'block', margin: '0 auto', filter: unlocked ? undefined : 'grayscale(1)' }} />
-                <div className="font-bold leading-tight" style={{ fontSize: sw * 0.0155 }}>{def.name}</div>
-                <div className="opacity-75 leading-tight" style={{ fontSize: sw * 0.0098, margin: `${sw * 0.003}px 0` }}>{def.blurb}</div>
-                <div className="grid grid-cols-2 gap-x-2 font-semibold" style={{ fontSize: sw * 0.0105 }}>
+                <div className="font-bold leading-tight" style={{ fontSize: Math.max(11, sw * 0.0155) }}>{def.name}</div>
+                <div className="opacity-75 leading-tight" style={{ fontSize: Math.max(11, sw * 0.0098), margin: `${sw * 0.003}px 0` }}>{def.blurb}</div>
+                <div className="grid grid-cols-2 gap-x-2 font-semibold" style={{ fontSize: Math.max(11, sw * 0.0105) }}>
                   <span>⏱ {formatDuration(grow)}</span>
                   <span>🧺 ×{yieldTxt}</span>
                   <span>⭐ {SLIME_FOODS[c].xpValue} XP each</span>
                   <span>🌾 +{def.farmXp} Farm XP</span>
                 </div>
-                <div className="font-bold" style={{ marginTop: sw * 0.005, fontSize: sw * 0.0125, color: afford ? INK : '#c0392b' }}>
+                <div className="font-bold" style={{ marginTop: sw * 0.005, fontSize: Math.max(11, sw * 0.0125), color: afford ? INK : '#c0392b' }}>
                   {!unlocked ? '' : cost === 0 ? 'Seeds ready' : <>{cost.toLocaleString()} <Ico name="icon_drop" w={sw * 0.0125} /></>}
                 </div>
                 {!unlocked && (
-                  <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center bg-black/75 text-white font-bold" style={{ fontSize: sw * 0.0145 }}>
+                  <div className="absolute inset-0 rounded-2xl flex flex-col items-center justify-center bg-black/75 text-white font-bold" style={{ fontSize: Math.max(11, sw * 0.0145) }}>
                     <Lock style={{ width: sw * 0.026, height: sw * 0.026 }} />
                     Farm Level {def.unlockLevel}
                   </div>
@@ -628,7 +640,7 @@ const FxView: React.FC<{ fx: Fx; sw: number }> = ({ fx, sw }) => {
   if (fx.kind === 'pop') {
     return (
       <div className="absolute text-center whitespace-nowrap farm-pop" style={{ left: fx.x, top: fx.y, transform: 'translate(-50%,-50%)' }}>
-        {fx.label && <div className="font-bold leading-none" style={{ fontSize: sw * 0.0125, color: '#ffe14d', textShadow: '0 2px 3px rgba(0,0,0,0.9)', letterSpacing: '0.08em' }}>{fx.label}</div>}
+        {fx.label && <div className="font-bold leading-none" style={{ fontSize: Math.max(11, sw * 0.0125), color: '#ffe14d', textShadow: '0 2px 3px rgba(0,0,0,0.9)', letterSpacing: '0.08em' }}>{fx.label}</div>}
         <div className="font-bold leading-none" style={{ fontSize: sw * 0.026 * fx.size, color: fx.color, WebkitTextStroke: `${Math.max(2, sw * 0.003)}px #2a1408`, paintOrder: 'stroke fill', textShadow: '0 3px 0 rgba(30,12,4,0.85)' }}>{fx.text}</div>
       </div>
     );

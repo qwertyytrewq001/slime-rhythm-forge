@@ -1,3 +1,4 @@
+import { useStageSize } from '@/utils/stage';
 import React, { useState, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
@@ -11,6 +12,7 @@ interface CodexGalleryProps {
 }
 
 export function CodexGallery({ onClose }: CodexGalleryProps) {
+  const short = useStageSize().h < 560; // a phone held sideways: slimmer header, smaller cards, more of them on screen
   const { codexManager } = useGameState();
   const [selectedFamily, setSelectedFamily] = useState<string>('elemental-foundations');
   const [page, setPage] = useState(0);
@@ -119,7 +121,7 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
       <div
         key={slime.id}
         onClick={() => handleSlimeClick(slime)}
-        className={`relative rounded-2xl p-2.5 transition-transform ${isDiscovered ? 'cursor-pointer hover:scale-105 hover:-translate-y-0.5' : 'cursor-default'}`}
+        className={`relative rounded-2xl ${short ? 'p-1.5' : 'p-2.5'} transition-transform ${isDiscovered ? 'cursor-pointer hover:scale-105 hover:-translate-y-0.5' : 'cursor-default'}`}
         style={{
           fontFamily: FRED,
           background: isDiscovered ? PARCH : 'linear-gradient(#cdbf9d, #b7a781)',
@@ -128,7 +130,7 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
         }}
       >
         {isDiscovered && <div className="absolute left-3 right-3 top-0 h-1.5 rounded-b-full" style={{ background: tier }} />}
-        <div className="w-full h-40 flex items-center justify-center mb-2 rounded-xl" style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%)' }}>
+        <div className={`w-full ${short ? 'h-24 mb-1' : 'h-40 mb-2'} flex items-center justify-center rounded-xl`} style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.55), rgba(255,255,255,0) 70%)' }}>
           <div
             className="transition-all duration-500"
             style={{
@@ -136,7 +138,7 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
               filter: isDiscovered ? 'none' : 'url(#codex-silhouette)',
             }}
           >
-            <SlimeCanvas slime={displaySlime} size={120} animated={false} sizeMultiplier={2.2} />
+            <SlimeCanvas slime={displaySlime} size={short ? 72 : 120} animated={false} sizeMultiplier={2.2} />
           </div>
         </div>
         <div className="text-center">
@@ -168,7 +170,7 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
       <div className="absolute inset-0 pointer-events-none" style={{ background: 'linear-gradient(rgba(24,12,40,0.62), rgba(24,12,40,0.78))' }} />
 
       {/* Left: families */}
-      <div className="relative w-64 shrink-0 flex flex-col" style={{ background: 'linear-gradient(#3b2358, #2a1840)', borderRight: `4px solid ${INK}`, boxShadow: '4px 0 18px rgba(0,0,0,0.5)' }}>
+      <div className={`relative ${short ? 'w-44' : 'w-64'} shrink-0 flex flex-col`} style={{ background: 'linear-gradient(#3b2358, #2a1840)', borderRight: `4px solid ${INK}`, boxShadow: '4px 0 18px rgba(0,0,0,0.5)' }}>
         <div className="p-3 text-center" style={{ borderBottom: '3px solid rgba(242,182,50,0.55)' }}>
           <div className="relative mx-auto" style={{ width: '92%' }}>
             <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.45))' }} />
@@ -183,12 +185,12 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
 
       {/* Right: the chosen family */}
       <div className="relative flex-1 flex flex-col min-w-0">
-        <div className="px-6 py-4" style={{ background: 'linear-gradient(#4b2c6b, #3a2152)', borderBottom: `4px solid ${INK}`, boxShadow: '0 4px 14px rgba(0,0,0,0.45)' }}>
+        <div className={short ? 'px-4 py-1' : 'px-6 py-4'} style={{ background: 'linear-gradient(#4b2c6b, #3a2152)', borderBottom: `4px solid ${INK}`, boxShadow: '0 4px 14px rgba(0,0,0,0.45)' }}>
           <div className="flex items-center justify-between gap-3">
             <div className="min-w-0">
-              <div className="relative" style={{ width: 260, maxWidth: '50cqw' }}>
+              <div className="relative" style={{ width: short ? 150 : 260, maxWidth: '50cqw' }}>
                 <img src={`${import.meta.env.BASE_URL}altar/ui_plate_title.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 5px rgba(0,0,0,0.45))' }} />
-                <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: FRED, fontSize: 24, color: '#fff3d0', WebkitTextStroke: '4.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.07em' }}>Slime Codex</div>
+                <div className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontFamily: FRED, fontSize: short ? 15 : 24, color: '#fff3d0', WebkitTextStroke: short ? '3px #3a2150' : '4.5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.07em' }}>Slime Codex</div>
               </div>
             </div>
             <div className="flex-1 max-w-md min-w-[180px]" style={{ fontFamily: FRED }}>
@@ -202,16 +204,16 @@ export function CodexGallery({ onClose }: CodexGalleryProps) {
             </div>
             {onClose && (
               <button onClick={onClose} aria-label="Close codex" className="shrink-0 hover:scale-110 transition-transform">
-                <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 44, height: 44, maxWidth: 'none', imageRendering: 'auto' }} />
+                <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: short ? 36 : 44, height: short ? 36 : 44, maxWidth: 'none', imageRendering: 'auto' }} />
               </button>
             )}
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-5">
+        <div className={`flex-1 overflow-y-auto ${short ? 'p-2' : 'p-5'}`}>
           {familySlimes.length > 0 ? (
             <>
-              <div className="grid grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-4">{paginatedSlimes.map(renderSlimeCard)}</div>
+              <div className={`grid ${short ? 'grid-cols-4 gap-2 pb-2' : 'grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4 pb-4'}`}>{paginatedSlimes.map(renderSlimeCard)}</div>
               {totalPages > 1 && (
                 <div className="flex items-center justify-center gap-3 mt-4" style={{ fontFamily: FRED }}>
                   <button onClick={() => setPage(Math.max(0, currentPage - 1))} disabled={currentPage === 0} className={pageBtn} style={{ background: PARCH, borderColor: INK, color: INK }}><ChevronLeft className="w-4 h-4" /></button>
