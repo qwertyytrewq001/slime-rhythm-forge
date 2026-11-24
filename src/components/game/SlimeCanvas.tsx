@@ -40,9 +40,6 @@ export function SlimeCanvas({
   const [floatOffset, setFloatOffset] = useState(0);
   const [breathScale, setBreathScale] = useState(1);
   const [idleRotation, setIdleRotation] = useState(0);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const frameRef = useRef(0);
-  const rafRef = useRef<number>();
 
   // Calculate stage-based size multiplier
   const stage = getStage(slime.level || 1);
@@ -221,8 +218,17 @@ export function SlimeCanvas({
     );
   }
 
-  // Fallback to canvas rendering
+  // Fallback to canvas rendering (its own component, so the hooks it needs are not skipped when a sprite shows instead)
+  return (
+    <ProceduralSlime slime={slime} size={size} animated={animated} isHurt={isHurt} renderEnhancement={renderEnhancement} isSilhouette={isSilhouette} finalSizeMultiplier={finalSizeMultiplier} className={className} onClick={onClick} draggable={draggable} onDragStart={onDragStart} />
+  );
+}
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function ProceduralSlime({ slime, size, animated, isHurt, renderEnhancement, isSilhouette, finalSizeMultiplier, className, onClick, draggable, onDragStart }: any) {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameRef = useRef(0);
+  const rafRef = useRef<number>();
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;

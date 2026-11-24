@@ -152,7 +152,7 @@ export function breedSlimes(parent1: Slime, parent2: Slime, mutationBoost = fals
 function biasTraitsForElement(traits: SlimeTraits, element: SlimeElement) {
   const colorMap: Partial<Record<SlimeElement, number[]>> = {
     fire: [3, 6, 11], water: [12, 17], plant: [0, 7], earth: [3],
-    ice: [1, 5, 13], cosmic: [4, 9, 19], arcane: [8, 16],
+    ice: [1, 5, 13],
     light: [15], shadow: [4], electric: [10],
   };
   const colors = colorMap[element];
@@ -161,7 +161,7 @@ function biasTraitsForElement(traits: SlimeTraits, element: SlimeElement) {
   }
 
   const auraMap: Partial<Record<SlimeElement, number>> = {
-    void: 4, ice: 3, fire: 2,
+    ice: 3, fire: 2,
   };
   if (auraMap[element] !== undefined) {
     traits.aura = Math.max(traits.aura, auraMap[element]!);

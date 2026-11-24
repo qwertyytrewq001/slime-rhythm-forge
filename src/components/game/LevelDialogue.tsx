@@ -60,17 +60,21 @@ const LEVEL_DIALOGUES = {
   }
 };
 
-export function LevelDialogue({ isOpen, onClose, level, onVossEncounter }: LevelDialogueProps) {
+// Levels without a script render nothing. The hooks live in the inner component so their order never changes.
+export function LevelDialogue(props: LevelDialogueProps) {
+  const has = !!LEVEL_DIALOGUES[props.level as keyof typeof LEVEL_DIALOGUES];
+  const { isOpen, onClose } = props;
+  useEffect(() => { if (!has && isOpen) onClose(); }, [has, isOpen, onClose]);
+  return has ? <LevelDialogueInner {...props} /> : null;
+}
+
+function LevelDialogueInner({ isOpen, onClose, level, onVossEncounter }: LevelDialogueProps) {
   const [currentDialogueIndex, setCurrentDialogueIndex] = useState(0);
   const [displayedText, setDisplayedText] = useState('');
   const [isTyping, setIsTyping] = useState(false);
 
   const dialogueData = LEVEL_DIALOGUES[level as keyof typeof LEVEL_DIALOGUES];
   
-  if (!dialogueData) {
-    onClose();
-    return null;
-  }
 
   const fullText = dialogueData.dialogue[currentDialogueIndex] || '';
 
