@@ -117,6 +117,11 @@ const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
     expression: 'dramatic',
+    text: "Hatch it, feed it until it grows up, and the Battle Map will open."
+  },
+  {
+    id: 'firstLaunch',
+    expression: 'dramatic',
     text: "I'll be watching."
   }
 ];
@@ -401,17 +406,18 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
   // Debug logging
   console.log('🔍 LoreTutorial state:', { isOpen, currentDialogueLength: currentDialogue.length, currentExpression, glimPosition });
 
-  // Fallback to trigger first launch if open but empty
+  // the intro counts as done once it has been read and closed, so it can never come back (this also unlocks Glim's one-time tips)
   useEffect(() => {
-    if (isOpen && currentDialogue.length === 0) {
-      console.log('🚀 LoreTutorial fallback: Setting firstLaunch dialogue');
-      setCurrentDialogue(FIRST_LAUNCH_DIALOGUE);
-      setCurrentDialogueIndex(0);
-      setDisplayedText('');
-      setCurrentExpression('exicted');
-      setGlimPosition('bottom-left');
-    }
-  }, [isOpen, currentDialogue.length]);
+    if (!isOpen && !state.tutorialCompleted && currentDialogue.length === 0 && hasSeenEvent('firstLaunch')) dispatch({ type: 'COMPLETE_TUTORIAL' });
+  }, [isOpen, state.tutorialCompleted, currentDialogue.length, dispatch]);
+
+  // closing or skipping throws the script away, so reopening the panel cannot show it again
+  const finish = () => {
+    onClose();
+    setCurrentDialogue([]);
+    setCurrentDialogueIndex(0);
+    setDisplayedText('');
+  };
 
   // Listen for dialogue triggers
   useDialogueTrigger(useCallback((triggerId: TriggerType, data) => {
@@ -592,7 +598,8 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       }
     }
 
-    if (triggerId === 'finalBattle') {
+    if (triggerId === 'finalBattle' && !hasSeenEvent('levelStory_50')) {
+      markEventSeen('levelStory_50');
       startDialogue(LEVEL_DIALOGUE[50]);
       setCurrentExpression('determined');
       setGlimPosition('bottom-left');
@@ -658,10 +665,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       // Reset text for the new card
       setDisplayedText('');
     } else {
-      // End of dialogue - dismiss
-      onClose();
-      // Reset for next time
-      setTimeout(() => setCurrentDialogueIndex(0), 500);
+      finish();
     }
   };
 
@@ -672,10 +676,7 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     }
   };
 
-  const handleSkip = () => {
-    onClose();
-    setTimeout(() => setCurrentDialogueIndex(0), 500);
-  };
+  const handleSkip = () => finish();
 
   if (!isOpen || !currentDialogue.length) return null;
 

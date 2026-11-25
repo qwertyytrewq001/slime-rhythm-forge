@@ -8,6 +8,7 @@ const BASE = import.meta.env.BASE_URL;
 type Mood = 'kind' | 'excited' | 'smug' | 'explain' | 'worried' | 'sad' | 'giggle' | 'sleepy' | 'wave';
 // trimmed to the character (public/altar/glim_<mood>.png) so he can be sized by height
 const FACE: Record<Mood, string> = Object.fromEntries(['kind', 'excited', 'smug', 'explain', 'worried', 'sad', 'giggle', 'sleepy', 'wave'].map(m => [m, `altar/glim_${m}.png`])) as Record<Mood, string>;
+let greeted = false;
 /** Glim dozes off when it is night where the player is. */
 const idleMood = (): Mood => (dayPhase(nowForDay()).night ? 'sleepy' : 'kind');
 
@@ -47,9 +48,10 @@ export function GlimCompanion() {
     return () => { clearInterval(b); timers.current.forEach(clearTimeout); };
   }, []);
 
-  // a wave hello when you arrive
+  // a wave hello when you arrive: once per visit to the game, not every time you come back to the home screen
   useEffect(() => {
-    const t = window.setTimeout(() => say('wave', 'Welcome back, guardian!', 3600), 1800);
+    if (greeted) return;
+    const t = window.setTimeout(() => { greeted = true; say('wave', 'Welcome back, guardian!', 3600); }, 1800);
     return () => clearTimeout(t);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

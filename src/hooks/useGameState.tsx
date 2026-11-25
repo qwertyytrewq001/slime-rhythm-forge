@@ -4,7 +4,7 @@ import { FarmSlice, createFarmPlots, createFarmState, migrateFarm, plant as farm
 import { SanctSlice, FEED_JOY, addJoy, collectAll, collectGift, normalizeHabitat, perksFrom, petHabitat, placeDecor, removeDecor, rollerFrom, tickHabitat, upgradeHabitat } from '@/utils/sanctuaryCore';
 import { visitorTick, deliver as visitorDeliver } from '@/utils/visitorCore';
 import { GOO_RATE } from '@/utils/gooEconomy';
-import { createStarterSlimes, breedSlimes } from '@/utils/slimeGenerator';
+import { breedSlimes } from '@/utils/slimeGenerator';
 import { saveGame, loadGame } from '@/utils/gameStorage';
 import { deriveElement, deriveSecondaryElement, getRarityTier, RARITY_TIER_STARS, getPlayerLevel, ALL_ELEMENTS } from '@/data/traitData';
 import { audioEngine } from '@/utils/audioEngine';
@@ -136,7 +136,8 @@ function findNextGridSlot(habitats: Habitat[]): { x: number; y: number } {
 
 export function createInitialState(): GameState {
   const saved = loadGame();
-  if (saved && saved.slimes && saved.slimes.length > 0) {
+  // a save with no slimes is still a real save: a new player spends their Goo on the first egg before anything has hatched
+  if (saved && Array.isArray(saved.slimes)) {
     // Older saves can contain several slimes sharing one id (two eggs of the same species).
     // Give every duplicate after the first its own id so lookups by id are unambiguous.
     const seenIds = new Set<string>();
@@ -186,7 +187,7 @@ export function createInitialState(): GameState {
     };
   }
   return {
-    slimes: createStarterSlimes(),
+    slimes: [], // no free slime: the first one is the egg you buy, hatch and feed to level 5 (which opens battles)
     goo: 500,
     selectedSlimeId: null,
     breedSlot1: null,

@@ -86,11 +86,8 @@ function GameLayout() {
     });
   }, []);
   
-  // Synchronously check if we should show the tutorial to prevent flickering
-  const [showTutorial, setShowTutorial] = useState(() => {
-    const hasLaunchedBefore = localStorage.getItem('glim_first_launch_completed');
-    return !hasLaunchedBefore;
-  });
+  // opened by the dialogue triggers; each script plays once ever
+  const [showTutorial, setShowTutorial] = useState(false);
 
   const [showLevelDialogue, setShowLevelDialogue] = useState(false);
   const [showTitle, setShowTitle] = useState(true);
@@ -114,16 +111,6 @@ function GameLayout() {
   const [bazaarModalOpen, setBazaarModalOpen] = useState(false);
 
   const [ageMessage, setAgeMessage] = useState<string | null>(null);
-
-  // Check for first launch and trigger tutorial
-  useEffect(() => {
-    const hasLaunchedBefore = localStorage.getItem('glim_first_launch_completed');
-    if (!hasLaunchedBefore) {
-      localStorage.setItem('glim_first_launch_completed', 'true');
-      console.log('🚀 Triggering first launch tutorial');
-      triggerDialogue('firstLaunch');
-    }
-  }, []);
 
   const openGalleryForSlot = (slot?: 1 | 2) => {
     if (slot) setGallerySlot(slot);
@@ -201,8 +188,13 @@ function GameLayout() {
     if (result.winner === 'player') {
       const dialogueLevels = [1, 5, 10, 14, 15, 16];
       if (dialogueLevels.includes(result.level)) {
-        setDialogueLevel(result.level);
-        setShowLevelDialogue(true);
+        // once only: replaying a level does not replay its story
+        const key = `glim_event_levelStory_${result.level}`;
+        if (localStorage.getItem(key) !== 'true') {
+          localStorage.setItem(key, 'true');
+          setDialogueLevel(result.level);
+          setShowLevelDialogue(true);
+        }
       } else {
         // Later story beats (Voss at 30/45, final battle at 50, ...) live in the
         // Glim tutorial and were never triggered for levels above 16.
@@ -232,15 +224,12 @@ function GameLayout() {
     };
   }, []);
 
-  // Show tutorial for first-time players
+  // Glim's intro, right after Play on a new game (the dialogue box itself ignores it if it was already read)
   useEffect(() => {
-    if (!state.tutorialCompleted && state.slimes.length > 0 && !showTitle) {
-      const timer = setTimeout(() => {
-        setShowTutorial(true);
-      }, 1000);
-      return () => clearTimeout(timer);
-    }
-  }, [state.tutorialCompleted, state.slimes.length, showTitle]);
+    if (showTitle || state.tutorialCompleted) return;
+    const timer = setTimeout(() => triggerDialogue('firstLaunch'), 600);
+    return () => clearTimeout(timer);
+  }, [state.tutorialCompleted, showTitle]);
 
   // every button, icon and tappable thing gets a click, unless it already plays a sound of its own a moment earlier
   useEffect(() => {

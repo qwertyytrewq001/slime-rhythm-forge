@@ -110,11 +110,6 @@ export function createRandomSlime(basicOnly = false): Slime {
   return createCodexSlime(randomSlime.id, undefined);
 }
 
-// Start with 1 Goo Slime (Common, nature element, basic stats)
-export function createStarterSlimes(): Slime[] {
-  return [createCodexSlime('leaf_slime', undefined)]; // Use nature primal as starter
-}
-
 // Create a slime with a specific element (for starter eggs in shop)
 export function createElementSlime(element: SlimeElement): Slime {
   // Starter eggs are fixed: the core slime that has exactly this one element (Electric gives Spark Slime, not a dual-element species)

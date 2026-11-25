@@ -3,6 +3,7 @@ import { describe, it, expect, vi } from 'vitest';
 import { GameProvider } from '@/hooks/useGameState';
 import { SlimeGallery } from '@/components/game/SlimeGallery';
 import { BreedingPod } from '@/components/game/BreedingPod';
+import { createCodexSlime } from '@/utils/slimeGenerator';
 
 describe('slot picker flow', () => {
   it('sends the player to the Breeding Den when a pedestal is clicked', () => {
@@ -22,6 +23,8 @@ describe('slot picker flow', () => {
   });
 
   it('lets the player pick a slime from the gallery', async () => {
+    // new games start with no slime, so give this save one
+    localStorage.setItem('rareslime-forge-save', JSON.stringify({ slimes: [createCodexSlime('leaf_slime', undefined)], goo: 100 }));
     const handleSelect = vi.fn();
     const { container } = render(
       <GameProvider>

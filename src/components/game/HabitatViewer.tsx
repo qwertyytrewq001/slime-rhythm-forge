@@ -1598,18 +1598,30 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
       className="sanctuary-root fixed inset-0 z-[10000] flex flex-col bg-black/80 select-none"
       style={{ pointerEvents: 'auto', WebkitUserSelect: 'none', userSelect: 'none', WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none' }}
     >
-      <div className="sticky top-0 z-40 flex-shrink-0 pt-3 pb-4 px-6 backdrop-blur-md" style={{ background: "linear-gradient(rgba(46,26,70,0.97), rgba(46,26,70,0.84))", borderBottom: "3px solid #f2b632" }}>
-        <button onClick={onClose} className="absolute top-4 left-4 p-2 hover:bg-white/10 rounded-lg transition-all">
-          <ChevronLeft className="w-6 h-6 text-[#f6e8c3]" />
-        </button>
-        <h2 className="text-center text-2xl font-black uppercase tracking-widest" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.08em' }}>
-          {ELEMENT_DISPLAY_NAMES[habitat.element]} Habitat
-        </h2>
-        <p className="text-center text-xs text-white/60 mt-2 font-bold tracking-wider">{theme.desc}</p>
-        <div className="absolute top-4 right-4 flex items-center gap-3">
+      {/* everything about this habitat lives in this one bar, so the island gets the rest of the screen */}
+      <div className="sticky top-0 z-40 flex-shrink-0 px-3 py-1.5 backdrop-blur-md" style={{ background: "linear-gradient(rgba(46,26,70,0.97), rgba(46,26,70,0.84))", borderBottom: "3px solid #f2b632" }}>
+        <div className="flex items-center gap-3">
+          <button onClick={onClose} aria-label="Back" className="p-1 hover:bg-white/10 rounded-lg transition-all flex-shrink-0">
+            <ChevronLeft className="w-6 h-6 text-[#f6e8c3]" />
+          </button>
+          <div className="min-w-0 flex-1">
+            <div role="heading" aria-level={2} className="text-xl font-black uppercase leading-tight truncate" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif", color: '#fff3d0', WebkitTextStroke: '4px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.06em' }}>
+              {ELEMENT_DISPLAY_NAMES[habitat.element]} Habitat
+            </div>
+            <p className="text-[11px] leading-tight text-white/60 font-bold truncate">{theme.desc}</p>
+          </div>
+          <div className="flex-shrink-0 text-center leading-tight" title="Inhabitants">
+            <p className="text-[9px] text-white/60 font-black uppercase tracking-wider">Slimes</p>
+            <p className="text-base font-black text-white">{assignedSlimes.length}<span className="text-white/60">/{habitat.capacity}</span></p>
+          </div>
+          <div className="flex-shrink-0 text-center leading-tight" title="Available Goo">
+            <p className="text-[9px] text-white/60 font-black uppercase tracking-wider">Goo</p>
+            <p className="text-base font-black text-[#f2d98a] whitespace-nowrap">{Math.floor(state.goo).toLocaleString()} <GooIcon /></p>
+          </div>
+          <div className="flex-shrink-0 flex items-center gap-2">
           <div title="Joy: fill it for a gift. Petting and feeding help." className="flex items-center gap-2">
             <Heart size={26} />
-            <div className="rounded-full overflow-hidden" style={{ width: 120, height: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.4)' }}>
+            <div className="rounded-full overflow-hidden" style={{ width: 80, height: 12, background: 'rgba(255,255,255,0.18)', border: '1px solid rgba(255,255,255,0.4)' }}>
               <div className="h-full" style={{ width: `${((habitat.joy ?? 0) / JOY_MAX) * 100}%`, background: 'linear-gradient(90deg,#ffe27a,#f2a81d)', transition: 'width 0.6s' }} />
             </div>
           </div>
@@ -1629,7 +1641,22 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
             </button>
           )}
           <button onClick={() => setManageOpen(true)} className="rounded-full px-3 py-1 text-sm font-black text-[#4a2f17] border-2 border-[#4a2f17] hover:scale-105 transition-transform" style={{ background: "linear-gradient(#f6e8c3,#ecd9a8)", boxShadow: "0 2px 0 rgba(0,0,0,0.4)" }} aria-label="Manage habitat">⚙ Manage</button>
+          </div>
         </div>
+        {assignedSlimes.length > 0 && (
+          <div className="flex items-center gap-2 overflow-x-auto pt-1 pl-11" aria-label="Friendship">
+            {assignedSlimes.map(sl => {
+              const lv = bondLevel(sl.bond ?? 0);
+              return (
+                <div key={sl.id} className="flex-shrink-0 flex items-center gap-1.5 rounded-full px-2 py-0.5" style={{ background: 'rgba(255,255,255,0.1)' }} title={`${sl.name}: ${BOND_LEVELS[lv].name}${lv ? ` (+${lv * 10}% Joy)` : ''}. ${NATURE_BLURB[slimeNature(sl.id)]}`}>
+                  <span className="text-[11px] font-black text-white/85 leading-none truncate" style={{ maxWidth: 90 }}>{sl.name.replace(' Slime', '')}</span>
+                  <span className="text-[12px] leading-none" style={{ color: '#ff7eb6' }}>{'♥'.repeat(lv)}<span style={{ color: 'rgba(255,255,255,0.25)' }}>{'♥'.repeat(3 - lv)}</span></span>
+                  <span className="rounded-full overflow-hidden" style={{ width: 34, height: 4, background: 'rgba(255,255,255,0.18)' }}><span className="block h-full" style={{ width: `${Math.round(bondProgress(sl.bond ?? 0) * 100)}%`, background: 'linear-gradient(90deg,#ff7eb6,#ffd27e)' }} /></span>
+                </div>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <div className="flex-1 relative overflow-hidden">
@@ -1710,31 +1737,6 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
             }}
           />
         )}
-      </div>
-
-      <div className="sticky bottom-0 z-40 flex-shrink-0 px-6 py-3 backdrop-blur-md" style={{ background: "linear-gradient(rgba(46,26,70,0.84), rgba(46,26,70,0.97))", borderTop: "3px solid #f2b632" }}>
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs text-white/60 font-bold tracking-wider uppercase">Inhabitants</p>
-            <p className="text-lg font-black text-white">{assignedSlimes.length} <span className="text-white/60">/ {habitat.capacity}</span></p>
-          </div>
-          <div className="flex items-center gap-3 flex-wrap justify-center" aria-label="Friendship">
-            {assignedSlimes.map(sl => {
-              const lv = bondLevel(sl.bond ?? 0);
-              return (
-                <div key={sl.id} className="flex flex-col items-center" style={{ minWidth: 64 }} title={`${sl.name}: ${BOND_LEVELS[lv].name}${lv ? ` (+${lv * 10}% Joy)` : ''}. ${NATURE_BLURB[slimeNature(sl.id)]}`}>
-                  <span className="text-[10px] font-black text-white/80 leading-none truncate" style={{ maxWidth: 80 }}>{sl.name.replace(' Slime', '')}</span>
-                  <span className="text-[13px] leading-none mt-0.5" style={{ color: '#ff7eb6', letterSpacing: 1 }}>{'♥'.repeat(lv)}<span style={{ color: 'rgba(255,255,255,0.25)' }}>{'♥'.repeat(3 - lv)}</span></span>
-                  <span className="mt-0.5 rounded-full overflow-hidden" style={{ width: 52, height: 4, background: 'rgba(255,255,255,0.18)' }}><span className="block h-full" style={{ width: `${Math.round(bondProgress(sl.bond ?? 0) * 100)}%`, background: 'linear-gradient(90deg,#ff7eb6,#ffd27e)' }} /></span>
-                </div>
-              );
-            })}
-          </div>
-          <div className="text-right">
-            <p className="text-[10px] text-white/40 font-black uppercase tracking-widest">Available Goo</p>
-            <p className="text-lg font-black text-[#f2d98a]">{state.goo.toFixed(1)} <GooIcon /></p>
-          </div>
-        </div>
       </div>
 
       <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
