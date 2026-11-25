@@ -1,3 +1,4 @@
+import { NewPlayerGuide } from '@/components/game/NewPlayerGuide';
 import type React from 'react';
 import { useStageSize, altarScale } from '@/utils/stage';
 import { battleUnlocked, bestSlimeLevel, BATTLE_UNLOCK_LEVEL } from '@/utils/battleGate';
@@ -350,6 +351,8 @@ function GameLayout() {
         </div>
       )}
 
+      <NewPlayerGuide paused={showTitle} />
+
       {/* 2. MAIN GAME INTERFACE */}
       <div className={`relative z-10 flex flex-col h-full ${currentView === 'battleMap' || currentView === 'breedingDen' || currentView === 'hatchery' || currentView === 'farm' || currentView === 'sanctuaries' ? 'hidden' : ''}`}>
         
@@ -406,7 +409,7 @@ function GameLayout() {
                   </button>
                 </div>
               </SheetTrigger>
-              <SheetContent side="left" style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }} className="p-0 border-r-4 border-[#c8922a] flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto">
+              <SheetContent onOpenAutoFocus={e => e.preventDefault()} side="left" style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }} className="p-0 border-r-4 border-[#c8922a] flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto">
                 <div className="flex-1 overflow-hidden">
                   <SlimeGallery onSelect={handleGallerySelect} />
                 </div>
@@ -415,7 +418,7 @@ function GameLayout() {
           )}
 
           <Sheet open={breedingGalleryOpen} onOpenChange={setBreedingGalleryOpen}>
-            <SheetContent side="left" style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }} className="p-0 border-r-4 border-[#c8922a] flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto">
+            <SheetContent onOpenAutoFocus={e => e.preventDefault()} side="left" style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }} className="p-0 border-r-4 border-[#c8922a] flex flex-col w-[350px] sm:w-[450px] shadow-2xl pointer-events-auto">
               <div className="flex-1 overflow-hidden">
                 <SlimeGallery adultsOnly autoPlace={false} onSelect={handleGallerySelect} />
               </div>
@@ -425,6 +428,7 @@ function GameLayout() {
           <div className="relative group">
             <button 
               onClick={() => setBazaarModalOpen(true)}
+              data-guide="bazaar"
               className={toolbarArt}
             >
               {toolIcon('bazaar')}
@@ -438,7 +442,7 @@ function GameLayout() {
             </button>
 
           <div className="relative group">
-            <button onClick={() => setShowAchievements(true)} className={toolbarArt}>
+            <button onClick={() => setShowAchievements(true)} data-guide="achievements" data-claimable={claimableAchievements > 0} className={toolbarArt}>
               {toolIcon('achievements')}
               <span className={toolbarLabel}>Achievements</span>
               {claimableAchievements > 0 && (

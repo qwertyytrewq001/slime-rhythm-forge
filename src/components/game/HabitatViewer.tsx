@@ -1,3 +1,4 @@
+import { useStageSize } from '@/utils/stage';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GooIcon } from './GooIcon';
 import { useGameState, xpToNextLevel, getStage } from '@/hooks/useGameState';
@@ -1235,6 +1236,7 @@ function FxLayer({ items }: { items: Fx[] }) {
 export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerProps) {
   const { state, dispatch } = useGameState();
   const [galleryOpen, setGalleryOpen] = useState(false);
+  const short = useStageSize().h < 520;
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [targetId, setTargetId] = useState<string | null>(null);
   const [dragging, setDragging] = useState(false);
@@ -1597,12 +1599,13 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
   return (
     <div
       className="sanctuary-root fixed inset-0 z-[10000] flex flex-col bg-black/80 select-none"
+      data-viewer={habitat.id}
       style={{ pointerEvents: 'auto', WebkitUserSelect: 'none', userSelect: 'none', WebkitTapHighlightColor: 'transparent', WebkitTouchCallout: 'none' }}
     >
       {/* everything about this habitat lives in this one bar, so the island gets the rest of the screen */}
       <div className="sticky top-0 z-40 flex-shrink-0 px-3 py-1.5 backdrop-blur-md" style={{ background: "linear-gradient(rgba(46,26,70,0.97), rgba(46,26,70,0.84))", borderBottom: "3px solid #f2b632" }}>
         <div className="flex items-center gap-3">
-          <button onClick={onClose} aria-label="Back" className="p-1 hover:bg-white/10 rounded-lg transition-all flex-shrink-0">
+          <button onClick={onClose} aria-label="Back" data-guide="viewer-back" className="p-1 hover:bg-white/10 rounded-lg transition-all flex-shrink-0">
             <ChevronLeft className="w-6 h-6 text-[#f6e8c3]" />
           </button>
           <div className="min-w-0 flex-1">
@@ -1709,6 +1712,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
                 onClick={() => setGalleryOpen(true)}
                 className="w-16 h-16 rounded-full bg-black/60 border-4 border-dashed border-white/40 hover:border-[#f2b632] hover:scale-110 transition-all flex items-center justify-center group"
                 aria-label="Add a slime"
+                data-guide="add-slime"
               >
                 <Plus className="w-8 h-8 text-white/40 group-hover:text-[#f2b632]" />
               </button>
@@ -1741,13 +1745,13 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
       </div>
 
       <Sheet open={galleryOpen} onOpenChange={setGalleryOpen}>
-        <SheetContent side="bottom" className="h-[80cqh] p-0 border-t-4 border-[#c8922a] shadow-2xl" style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }}>
-          <SheetHeader className="p-4 border-b border-[#c8922a]/40">
+        <SheetContent onOpenAutoFocus={e => e.preventDefault()} side="bottom" className={`${short ? 'h-[100cqh]' : 'h-[80cqh]'} flex flex-col gap-0 p-0 border-t-4 border-[#c8922a] shadow-2xl`} style={{ background: 'radial-gradient(ellipse at 50% 0%, #3a2766 0%, #261849 55%, #1a1033 100%)' }}>
+          <SheetHeader className={`${short ? 'p-1.5' : 'p-4'} border-b border-[#c8922a]/40`}>
             <SheetTitle className="text-center text-lg font-bold tracking-widest" style={{ fontFamily: "'Fredoka', sans-serif", color: '#ffe9a8', textShadow: '0 2px 0 rgba(20,8,40,0.8)' }}>
               Select {ELEMENT_DISPLAY_NAMES[habitat.element]} Slime
             </SheetTitle>
           </SheetHeader>
-          <div className="h-full overflow-hidden">
+          <div className="flex-1 min-h-0 overflow-hidden">
              <SlimeGallery autoPlace={false} onSelect={handleSlimeSelect} filterElement={habitat.element} />
           </div>
         </SheetContent>

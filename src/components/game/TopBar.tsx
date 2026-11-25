@@ -39,6 +39,7 @@ const ICON_BALANCE: Record<string, { ox: number; oy: number; aspect: number; s: 
 export const NavPlate: React.FC<{ art: string; icon: string; color: string; label: string; onClick?: () => void; badge?: number; badgeLabel?: string; locked?: boolean; hint?: string }> = ({ art, icon, color, label, onClick, badge, badgeLabel, locked, hint }) => (
   <button
     onClick={onClick}
+    data-guide={`nav-${art === 'sanctuaries' ? 'habitats' : art}`}
     aria-label={label}
     className="relative transition-transform duration-150 hover:scale-105 hover:brightness-110 active:scale-95 outline-none"
     style={{ width: 'clamp(150px, 17cqw, 250px)', background: 'transparent', border: 'none', padding: 0, filter: locked ? 'grayscale(0.85) brightness(0.8)' : undefined }}

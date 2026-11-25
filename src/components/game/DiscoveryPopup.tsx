@@ -105,13 +105,13 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
   );
 
   const actions = compatibleHabitats.length > 0 ? (
-    <button onClick={() => handleAssignToHabitat(compatibleHabitats[0].id)} className="relative block hover:scale-105 active:scale-95 transition-transform" style={{ width: small ? 200 : 'min(100%, 280px)', background: 'transparent', border: 'none', padding: 0 }}>
+    <button onClick={() => handleAssignToHabitat(compatibleHabitats[0].id)} data-guide="discovery-ok" className="relative block hover:scale-105 active:scale-95 transition-transform" style={{ width: small ? 200 : 'min(100%, 280px)', background: 'transparent', border: 'none', padding: 0 }}>
       <img src={`${BASE}altar/ui_btn_begin.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 0 10px rgba(190,120,255,0.7))' }} />
       <span className="absolute flex items-center justify-center font-bold whitespace-nowrap" style={{ left: '20%', right: '20%', top: 0, bottom: 0, fontSize: 'clamp(13px, 1.5cqw, 16px)', color: '#fff', WebkitTextStroke: '3px #4a1d7a', paintOrder: 'stroke fill', letterSpacing: '0.02em', fontFamily: FRED }}>Move to habitat</span>
     </button>
   ) : (
     <div className={small ? "flex flex-col items-center gap-1 text-center" : "flex items-center gap-3 flex-wrap"}>
-      <button onClick={onClose} className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: small ? 130 : 170, background: 'transparent', border: 'none', padding: 0 }}>
+      <button onClick={onClose} data-guide="discovery-ok" className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: small ? 130 : 170, background: 'transparent', border: 'none', padding: 0 }}>
         <img src={`${BASE}ui/dlg_choice_glow.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
         <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 16, fontFamily: FRED, color: INK }}>Got it</span>
       </button>

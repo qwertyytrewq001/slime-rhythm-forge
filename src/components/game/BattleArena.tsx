@@ -1,3 +1,4 @@
+import { useStageSize } from '@/utils/stage';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { RESULT_LINES } from '@/data/battleStory';
 import { canOfferRewarded, rewardedBreak } from '@/utils/portal';
@@ -40,6 +41,9 @@ const TINT: Record<SlimeElement, string> = {
 // Where the three slimes of each side stand on the platform, as % of the stage (feet position)
 const PLAYER_SPOTS = [{ x: 41, y: 55 }, { x: 31, y: 66 }, { x: 41, y: 77 }];
 const ENEMY_SPOTS = PLAYER_SPOTS.map(p => ({ x: 100 - p.x, y: p.y }));
+// A phone held sideways: the arena fills the whole screen, and the teams stand further apart so nothing overlaps
+const PHONE_PLAYER_SPOTS = [{ x: 40, y: 52 }, { x: 25, y: 65 }, { x: 10, y: 78 }]; // a diagonal line: no plate covers another slime
+const PHONE_ENEMY_SPOTS = PHONE_PLAYER_SPOTS.map(p => ({ x: 100 - p.x, y: p.y }));
 
 const arenaIndex = (level: number) => Math.min(5, Math.floor((level - 1) / 10) + 1);
 
@@ -121,6 +125,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
     try { return localStorage.getItem('battle_timing') !== 'off'; } catch { return true; }
   });
   const [sw, setSw] = useState(1000);
+  const phone = useStageSize().h < 520;
+  // Text and buttons are sized from this. On a phone it is bigger than the screen needs by proportion, so they stay readable.
+  const hud = phone ? 950 : sw;
   const [hint, setHint] = useState<string | null>(null);
 
   const stageRef = useRef<HTMLDivElement>(null);
@@ -614,10 +621,12 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
   const targetMode = cmd?.mode === 'target' ? cmd : null;
   const selectedActor = cmd ? unitById(battle, cmd.actorId) : null;
 
-  const unitPx = Math.max(84, Math.min(190, sw * 0.098));
+  const stageH = useStageSize().h;
+  const unitPx = phone ? Math.min(96, stageH * 0.29) : Math.max(84, Math.min(190, sw * 0.098));
+  const plateText = phone ? 1.25 : 1;
 
   const renderUnit = (u: Unit, idx: number) => {
-    const spots = u.team === 'player' ? PLAYER_SPOTS : ENEMY_SPOTS;
+    const spots = u.team === 'player' ? (phone ? PHONE_PLAYER_SPOTS : PLAYER_SPOTS) : (phone ? PHONE_ENEMY_SPOTS : ENEMY_SPOTS);
     const teamIdx = units.filter(x => x.team === u.team).findIndex(x => x.id === u.id);
     const spot = spots[teamIdx] ?? spots[0];
     const v = view[u.id];
@@ -657,8 +666,11 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
               className={`absolute inset-0 flex items-end justify-center ${v.mood === 'cheer' ? 'bt-cheer' : v.mood === 'tired' || v.mood === 'sad' ? 'bt-tired' : 'bt-bob'} ${foeTarget ? 'cursor-pointer' : ''}`}
               style={{ animationDelay: `${idx * -0.4}s`, opacity: v.alive ? 1 : undefined, filter: v.mood === 'tired' || v.mood === 'sad' ? 'saturate(0.75)' : undefined }}
               onClick={() => foeTarget && pickTarget(u.id)}
+              data-guide={foeTarget ? 'enemy-target' : undefined}
             >
-              <SlimeCanvas slime={u.slime} size={unitPx * 1.3} sizeMultiplier={spriteMult(u.slime) * 2.5} animated={v.alive} isHurt={v.hit} />
+              <div className="shrink-0 pointer-events-none" style={{ marginBottom: -unitPx * 0.52 }}>
+                <SlimeCanvas slime={u.slime} size={unitPx * 1.8} sizeMultiplier={spriteMult(u.slime) * 2.5} animated={v.alive} isHurt={v.hit} />
+              </div>
             </div>
           </div>
         </div>
@@ -684,7 +696,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
 
         {/* plate */}
         {v.alive && (
-          <div className="absolute left-1/2 pointer-events-none" style={{ bottom: '82%', width: unitPx * 1.0, transform: 'translateX(-50%)' }}>
+          <div className="absolute left-1/2 pointer-events-none" style={{ bottom: '82%', width: unitPx * (phone ? 1.15 : 1), transform: 'translateX(-50%)' }}>
             {isActor && <div className="bt-marker text-center leading-none" style={{ fontSize: unitPx * 0.2, color: GOLD, textShadow: '0 2px 0 rgba(0,0,0,0.6)', marginBottom: -unitPx * 0.03 }}>▼</div>}
             {chip && (
               <div className="text-center mb-0.5">
@@ -693,8 +705,8 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
             )}
             <div className="flex items-center justify-center gap-1" style={{ fontFamily: "'Fredoka', sans-serif", marginBottom: unitPx * 0.01 }}>
               <span className="inline-block rounded-full shrink-0" style={{ width: unitPx * 0.055, height: unitPx * 0.055, background: u.team === 'player' ? '#4aa8ff' : '#ff5a4a', boxShadow: '0 0 4px rgba(0,0,0,0.6)' }} />
-              <span className="font-bold text-white truncate" style={{ fontSize: Math.max(9, unitPx * 0.095), textShadow: '0 1px 3px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.95)', maxWidth: unitPx * 0.62 }}>{u.name}</span>
-              <span className="font-bold shrink-0" style={{ fontSize: Math.max(8, unitPx * 0.08), color: '#ffe08a', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>Lv{u.level}</span>
+              <span className="font-bold text-white truncate" style={{ fontSize: Math.max(9, unitPx * 0.095) * plateText, textShadow: '0 1px 3px rgba(0,0,0,0.95), 0 0 2px rgba(0,0,0,0.95)', maxWidth: unitPx * (phone ? 0.82 : 0.62) }}>{u.name}</span>
+              <span className="font-bold shrink-0" style={{ fontSize: Math.max(8, unitPx * 0.08) * plateText, color: '#ffe08a', textShadow: '0 1px 3px rgba(0,0,0,0.95)' }}>Lv{u.level}</span>
             </div>
             {/* hp: frame first, fill on top of its dark groove */}
             <div className="relative" style={{ width: '100%', aspectRatio: '569 / 82' }}>
@@ -705,7 +717,7 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
               </div>
             </div>
             {u.team === 'player' && (
-              <div className="text-center font-bold text-white leading-none" style={{ fontSize: Math.max(8, unitPx * 0.075), textShadow: '0 1px 2px #000', fontFamily: "'Fredoka', sans-serif", marginTop: unitPx * 0.01 }}>
+              <div className="text-center font-bold text-white leading-none" style={{ fontSize: Math.max(8, unitPx * 0.075) * plateText, textShadow: '0 1px 2px #000', fontFamily: "'Fredoka', sans-serif", marginTop: unitPx * 0.01 }}>
                 {Math.ceil(v.hp)}<span className="opacity-60">/{v.maxHp}</span>
               </div>
             )}
@@ -741,14 +753,13 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
         ref={stageRef}
         className="relative"
         style={{
-          ['--sw' as string]: 'min(100cqw, calc(100cqh * 16 / 9))',
-          width: 'min(100cqw, calc(100cqh * 16 / 9))',
-          height: 'min(100cqh, calc(100cqw * 9 / 16))',
+          width: phone ? '100%' : 'min(100cqw, calc(100cqh * 16 / 9))',
+          height: phone ? '100%' : 'min(100cqh, calc(100cqw * 9 / 16))',
           touchAction: 'manipulation',
         }}
       >
         {/* arena */}
-        <img src={bt(`arena_${arenaIndex(level)}.jpg`)} alt="" draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
+        <img src={bt(`arena_${arenaIndex(level)}.jpg`)} alt="" draggable={false} className="absolute inset-0 w-full h-full object-cover" style={{ imageRendering: 'auto' }} />
         <div className="absolute inset-0 pointer-events-none" style={{ background: 'radial-gradient(ellipse at 50% 60%, transparent 50%, rgba(0,0,0,0.45) 100%)' }} />
         {dim && <div className="absolute inset-0 pointer-events-none transition-opacity" style={{ background: 'radial-gradient(circle at 50% 55%, rgba(0,0,0,0.25), rgba(0,0,0,0.72))' }} />}
 
@@ -757,22 +768,22 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
 
         {/* effects */}
         <div className="absolute inset-0 pointer-events-none overflow-hidden" style={{ zIndex: 800 }}>
-          {fx.map(f => <FxView key={f.id} fx={f} sw={sw} />)}
+          {fx.map(f => <FxView key={f.id} fx={f} sw={phone ? 800 : sw} />)}
           {flash > 0 && <div key={flash} className="absolute inset-0 bt-flash" style={{ background: 'white' }} />}
         </div>
 
         {/* turn order */}
-        <TurnBar order={order} battle={battle} view={view} unitPx={sw} />
+        <TurnBar order={order} battle={battle} view={view} unitPx={phone ? 640 : sw} phone={phone} />
 
         {/* skill callout */}
         {callout && (
-          <div key={callout.id} className="absolute left-1/2 pointer-events-none bt-callout" style={{ top: sw * 0.085, zIndex: 850 }}>
-            <div className="relative flex items-center justify-center" style={{ width: sw * (callout.kind === 'ultimate' ? 0.36 : 0.28), aspectRatio: '358 / 116' }}>
-              <img src={bt('ui_ribbon.png')} alt="" className="absolute inset-0 w-full h-full" draggable={false} style={{ imageRendering: 'auto', filter: callout.kind === 'ultimate' ? `drop-shadow(0 0 ${sw * 0.02}px ${TINT[callout.element]})` : undefined }} />
+          <div key={callout.id} className="absolute left-1/2 pointer-events-none bt-callout" style={{ top: phone ? 44 : sw * 0.085, zIndex: 850 }}>
+            <div className="relative flex items-center justify-center" style={{ width: hud * (callout.kind === 'ultimate' ? 0.36 : 0.28), aspectRatio: '358 / 116' }}>
+              <img src={bt('ui_ribbon.png')} alt="" className="absolute inset-0 w-full h-full" draggable={false} style={{ imageRendering: 'auto', filter: callout.kind === 'ultimate' ? `drop-shadow(0 0 ${hud * 0.02}px ${TINT[callout.element]})` : undefined }} />
               <img src={bt(`badge_${callout.element}.png`)} alt="" className="absolute" style={{ left: '8%', width: '17%' }} draggable={false} />
               <div className="relative text-center" style={{ color: INK, marginLeft: '12%' }}>
-                <div className="font-bold leading-none" style={{ fontSize: sw * (callout.kind === 'ultimate' ? 0.026 : 0.021) }}>{callout.text}</div>
-                <div className="font-semibold opacity-70 leading-none" style={{ fontSize: sw * 0.0105, marginTop: sw * 0.003 }}>{callout.who}{callout.kind === 'ultimate' ? ' · ULTIMATE' : ''}</div>
+                <div className="font-bold leading-none" style={{ fontSize: hud * (callout.kind === 'ultimate' ? 0.026 : 0.021) }}>{callout.text}</div>
+                <div className="font-semibold opacity-70 leading-none" style={{ fontSize: hud * 0.0105, marginTop: hud * 0.003 }}>{callout.who}{callout.kind === 'ultimate' ? ' · ULTIMATE' : ''}</div>
               </div>
             </div>
           </div>
@@ -782,8 +793,8 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
         {bossBanner && (
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none bt-boss" style={{ zIndex: 900, background: 'linear-gradient(transparent, rgba(60,0,0,0.55), transparent)' }}>
             <div className="text-center">
-              <div className="font-bold text-white" style={{ fontSize: sw * 0.07, letterSpacing: '0.12em', textShadow: `0 4px 0 #7a0f0f, 0 0 ${sw * 0.03}px #ff3b30`, WebkitTextStroke: `${sw * 0.002}px #3a0505` }}>BOSS BATTLE</div>
-              <div className="font-semibold" style={{ fontSize: sw * 0.026, color: '#ffd9a0', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
+              <div className="font-bold text-white" style={{ fontSize: hud * 0.07, letterSpacing: '0.12em', textShadow: `0 4px 0 #7a0f0f, 0 0 ${hud * 0.03}px #ff3b30`, WebkitTextStroke: `${hud * 0.002}px #3a0505` }}>BOSS BATTLE</div>
+              <div className="font-semibold" style={{ fontSize: hud * 0.026, color: '#ffd9a0', textShadow: '0 2px 4px rgba(0,0,0,0.8)' }}>
                 {battle.units.filter(u => u.team === 'enemy').slice(-1)[0]?.name} blocks the way!
               </div>
             </div>
@@ -791,9 +802,9 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
         )}
 
         {/* top-right controls */}
-        <div className="absolute flex items-center gap-2" style={{ top: sw * 0.012, right: sw * 0.012, zIndex: 860 }}>
-          <Pill label={`⏩ x${speed}`} on={speed === 2} onClick={() => setSpeed(s => (s === 1 ? 2 : 1))} sw={sw} />
-          <Pill label="🤖 Auto" on={auto} onClick={() => setAuto(a => !a)} sw={sw} />
+        <div className="absolute flex items-center gap-2" style={{ top: phone ? 4 : sw * 0.012, right: phone ? 4 : sw * 0.012, zIndex: 860 }}>
+          <Pill label={`⏩ x${speed}`} on={speed === 2} onClick={() => setSpeed(s => (s === 1 ? 2 : 1))} sw={hud} />
+          <Pill label="🤖 Auto" on={auto} onClick={() => setAuto(a => !a)} sw={hud} />
           <Pill
             label="🎯 Timing"
             on={timingOn}
@@ -803,42 +814,42 @@ export const BattleArena: React.FC<BattleArenaProps> = ({ level, playerTeam, opp
                 return !t;
               });
             }}
-            sw={sw}
+            sw={hud}
           />
-          <button onClick={() => setConfirmQuit(true)} aria-label="Leave battle" className="hover:scale-110 transition-transform" style={{ width: sw * 0.034, height: sw * 0.034 }}>
+          <button onClick={() => setConfirmQuit(true)} aria-label="Leave battle" className="hover:scale-110 transition-transform" style={{ width: hud * 0.034, height: hud * 0.034 }}>
             <img src={bt('ui_btn_close.png')} alt="" className="w-full h-full" draggable={false} style={{ imageRendering: 'auto' }} />
           </button>
         </div>
 
         {/* command bar */}
         {cmd?.mode === 'choose' && selectedActor && !auto && (
-          <CommandBar actor={selectedActor} sw={sw} onChoose={chooseKind} />
+          <CommandBar actor={selectedActor} sw={hud} phone={phone} onChoose={chooseKind} />
         )}
         {cmd?.mode === 'target' && (
-          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-3 rounded-full shadow-lg" style={{ bottom: sw * 0.03, zIndex: 850, background: PARCHMENT, border: `3px solid ${INK}`, color: INK, padding: `${sw * 0.007}px ${sw * 0.018}px`, fontSize: sw * 0.0135 }}>
-            <span className="font-bold">Choose a target</span>
-            <button onClick={() => setCmd({ actorId: cmd.actorId, mode: 'choose' })} className="font-semibold underline opacity-70 hover:opacity-100">Back (Esc)</button>
+          <div className="absolute left-1/2 -translate-x-1/2 pointer-events-auto flex items-center gap-3 rounded-full shadow-lg" style={{ bottom: hud * 0.012, zIndex: 850, background: PARCHMENT, border: `3px solid ${INK}`, color: INK, padding: `${hud * 0.007}px ${hud * 0.018}px`, fontSize: hud * 0.0135, whiteSpace: 'nowrap' }}>
+            <span className="font-bold">{phone ? 'Tap an enemy' : 'Choose a target'}</span>
+            <button onClick={() => setCmd({ actorId: cmd.actorId, mode: 'choose' })} className="font-semibold underline opacity-70 hover:opacity-100">{phone ? 'Back' : 'Back (Esc)'}</button>
           </div>
         )}
 
         {/* timing ring */}
-        {cmd?.mode === 'timing' && <TimingRing x={cmd.x} y={cmd.y} sw={sw} onDone={finishTiming} />}
+        {cmd?.mode === 'timing' && <TimingRing x={cmd.x} y={cmd.y} sw={hud} onDone={finishTiming} />}
 
         {/* first-time hint */}
-        {hint && <div className="absolute left-1/2 -translate-x-1/2 text-white font-bold" style={{ top: sw * 0.16 }}>{hint}</div>}
+        {hint && <div className="absolute left-1/2 -translate-x-1/2 text-white font-bold" style={{ top: phone ? 48 : sw * 0.16 }}>{hint}</div>}
 
         {/* result */}
-        {result && <ResultScreen result={result} sw={sw} team={units.filter(u => u.team === 'player')} view={view} onContinue={cont} />}
+        {result && <ResultScreen result={result} sw={phone ? Math.min(860, stageH * 2.65) : sw} phone={phone} team={units.filter(u => u.team === 'player')} view={view} onContinue={cont} />}
 
         {/* leave? */}
         {confirmQuit && !result && (
           <div className="absolute inset-0 flex items-center justify-center bg-black/60" style={{ zIndex: 950 }}>
-            <div className="rounded-2xl p-6 text-center shadow-2xl" style={{ background: PARCHMENT, border: `4px solid ${INK}`, color: INK, width: sw * 0.34 }}>
-              <p className="font-bold" style={{ fontSize: sw * 0.024 }}>Leave the battle?</p>
-              <p className="font-semibold opacity-70" style={{ fontSize: sw * 0.0135, marginTop: 4 }}>You won't get any rewards.</p>
-              <div className="flex gap-3 justify-center" style={{ marginTop: sw * 0.018 }}>
-                <button onClick={() => setConfirmQuit(false)} className="rounded-full font-bold border-[3px] px-5 py-2 hover:scale-105 transition-transform" style={{ background: '#fff7dc', borderColor: INK, fontSize: sw * 0.0145 }}>Keep fighting</button>
-                <button onClick={leave} className="rounded-full font-bold text-white border-[3px] px-5 py-2 hover:scale-105 transition-transform" style={{ background: '#c0392b', borderColor: '#5b1a12', fontSize: sw * 0.0145 }}>Leave</button>
+            <div className="rounded-2xl p-6 text-center shadow-2xl" style={{ background: PARCHMENT, border: `4px solid ${INK}`, color: INK, width: hud * 0.34 }}>
+              <p className="font-bold" style={{ fontSize: hud * 0.024 }}>Leave the battle?</p>
+              <p className="font-semibold opacity-70" style={{ fontSize: hud * 0.0135, marginTop: 4 }}>You won't get any rewards.</p>
+              <div className="flex gap-3 justify-center" style={{ marginTop: hud * 0.018 }}>
+                <button onClick={() => setConfirmQuit(false)} className="rounded-full font-bold border-[3px] px-5 py-2 hover:scale-105 transition-transform" style={{ background: '#fff7dc', borderColor: INK, fontSize: hud * 0.0145 }}>Keep fighting</button>
+                <button onClick={leave} className="rounded-full font-bold text-white border-[3px] px-5 py-2 hover:scale-105 transition-transform" style={{ background: '#c0392b', borderColor: '#5b1a12', fontSize: hud * 0.0145 }}>Leave</button>
               </div>
             </div>
           </div>
@@ -875,17 +886,17 @@ function commandList(actor: Unit): Array<{ kind: ActionKind; element: SlimeEleme
   return list;
 }
 
-const CommandBar: React.FC<{ actor: Unit; sw: number; onChoose: (k: ActionKind, el: SlimeElement) => void }> = ({ actor, sw, onChoose }) => {
+const CommandBar: React.FC<{ actor: Unit; sw: number; phone: boolean; onChoose: (k: ActionKind, el: SlimeElement) => void }> = ({ actor, sw, phone, onChoose }) => {
   const list = commandList(actor);
   return (
-    <div className="absolute left-1/2 -translate-x-1/2 flex items-end gap-3 bt-rise" style={{ bottom: sw * 0.018, zIndex: 850 }}>
-      <div className="relative shrink-0" style={{ width: sw * 0.085 }}>
+    <div className="absolute left-1/2 -translate-x-1/2 flex items-end gap-3 bt-rise" style={{ bottom: phone ? 4 : sw * 0.018, zIndex: 850 }}>
+      <div className={phone ? 'hidden' : 'relative shrink-0'} style={{ width: sw * 0.085 }}>
         <img src={bt('ui_ring_portrait.png')} alt="" draggable={false} className="w-full" style={{ imageRendering: 'auto' }} />
         <div className="absolute inset-[13%] overflow-hidden rounded-full flex items-end justify-center" style={{ background: 'radial-gradient(circle at 50% 40%, #e3f1ff, #6fb2ff)' }}>
           <SlimeCanvas slime={actor.slime} size={Math.round(sw * 0.07)} sizeMultiplier={spriteMult(actor.slime) * 2.5} animated={false} />
         </div>
       </div>
-      <div className="flex items-stretch gap-2">
+      <div className={`flex items-stretch ${phone ? 'gap-1' : 'gap-2'}`}>
         {list.map((c, i) => {
           const can = canAfford(actor, c.kind);
           const primary = c.kind === 'attack';
@@ -893,18 +904,19 @@ const CommandBar: React.FC<{ actor: Unit; sw: number; onChoose: (k: ActionKind, 
           return (
             <button
               key={`${c.kind}-${c.element}`}
+              data-guide={primary ? 'move-attack' : undefined}
               onClick={() => can && onChoose(c.kind, c.element)}
               disabled={!can}
               title={`${c.desc}${can ? '' : ' (not enough energy)'}`}
               className={`relative flex items-center gap-2 text-left transition-transform ${can ? 'hover:scale-105 hover:-translate-y-1 active:scale-95' : 'opacity-55 grayscale-[0.4] cursor-not-allowed'} ${ult && can ? 'bt-ready-btn' : ''}`}
-              style={{ width: sw * (primary ? 0.15 : 0.165), aspectRatio: '393 / 126', backgroundImage: `url("${bt(primary || ult ? 'ui_btn_primary.png' : 'ui_btn_secondary.png')}")`, backgroundSize: '100% 100%', padding: `0 ${sw * 0.014}px 0 ${sw * 0.016}px`, color: primary || ult ? '#fff' : INK, filter: ult && can ? `drop-shadow(0 0 ${sw * 0.012}px ${GOLD})` : undefined }}
+              style={{ width: phone ? 168 : sw * (primary ? 0.15 : 0.165), height: phone ? 54 : undefined, aspectRatio: phone ? undefined : '393 / 126', backgroundImage: `url("${bt(primary || ult ? 'ui_btn_primary.png' : 'ui_btn_secondary.png')}")`, backgroundSize: '100% 100%', padding: `0 ${sw * 0.014}px 0 ${sw * 0.016}px`, color: primary || ult ? '#fff' : INK, filter: ult && can ? `drop-shadow(0 0 ${sw * 0.012}px ${GOLD})` : undefined }}
             >
               <img src={bt(`badge_${c.element}.png`)} alt="" draggable={false} style={{ width: sw * 0.034, imageRendering: 'auto' }} />
               <span className="min-w-0">
-                <span className="block font-bold leading-tight truncate" style={{ fontSize: sw * 0.0135, textShadow: primary || ult ? '0 1px 2px rgba(80,0,40,0.7)' : undefined }}>{c.label}</span>
+                <span className={`block font-bold leading-tight ${phone ? 'line-clamp-2' : 'truncate'}`} style={{ fontSize: sw * 0.0135, textShadow: primary || ult ? '0 1px 2px rgba(80,0,40,0.7)' : undefined }}>{c.label}</span>
                 <span className="block font-semibold leading-tight opacity-80" style={{ fontSize: sw * 0.0095 }}>{c.sub}</span>
               </span>
-              <span className="absolute -top-2 -left-1 rounded-full bg-black/70 text-white font-bold px-1.5" style={{ fontSize: sw * 0.0085 }}>{i + 1}</span>
+              <span className={phone ? 'hidden' : 'absolute -top-2 -left-1 rounded-full bg-black/70 text-white font-bold px-1.5'} style={{ fontSize: sw * 0.0085 }}>{i + 1}</span>
             </button>
           );
         })}
@@ -913,11 +925,11 @@ const CommandBar: React.FC<{ actor: Unit; sw: number; onChoose: (k: ActionKind, 
   );
 };
 
-const TurnBar: React.FC<{ order: string[]; battle: Battle; view: Record<string, View>; unitPx: number }> = ({ order, battle, view, unitPx: sw }) => {
+const TurnBar: React.FC<{ order: string[]; battle: Battle; view: Record<string, View>; unitPx: number; phone: boolean }> = ({ order, battle, view, unitPx: sw, phone }) => {
   if (!order.length) return null;
   return (
-    <div className="absolute left-1/2 -translate-x-1/2 flex items-center pointer-events-none" style={{ top: sw * 0.008, gap: sw * 0.004, zIndex: 840 }}>
-      {order.slice(0, 7).map((id, i) => {
+    <div className={`absolute flex items-center pointer-events-none ${phone ? '' : 'left-1/2 -translate-x-1/2'}`} style={{ left: phone ? 6 : undefined, top: phone ? 4 : sw * 0.008, gap: sw * 0.004, zIndex: 840 }}>
+      {order.slice(0, phone ? 5 : 7).map((id, i) => {
         const u = unitById(battle, id);
         if (!u) return null;
         const first = i === 0;
@@ -926,8 +938,8 @@ const TurnBar: React.FC<{ order: string[]; battle: Battle; view: Record<string, 
         return (
           <div key={`${i}-${id}`} className={`relative ${first ? 'bt-turn-first' : ''}`} style={{ width: size, height: size, opacity: dead ? 0.35 : 1 - i * 0.07 }}>
             <img src={bt('ui_ring_portrait.png')} alt="" className="absolute inset-0 w-full h-full" draggable={false} style={{ imageRendering: 'auto', filter: first ? `drop-shadow(0 0 ${sw * 0.008}px ${GOLD})` : undefined }} />
-            <div className="absolute inset-[13%] rounded-full overflow-hidden flex items-end justify-center" style={{ background: u.team === 'player' ? 'radial-gradient(circle at 50% 40%, #e3f1ff, #6fb2ff)' : 'radial-gradient(circle at 50% 40%, #ffe0db, #ff7a6a)' }}>
-              <SlimeCanvas slime={u.slime} size={Math.round(size * 0.95)} sizeMultiplier={spriteMult(u.slime) * 2.5} animated={false} />
+            <div className="absolute inset-[13%] rounded-full overflow-hidden flex items-center justify-center" style={{ background: u.team === 'player' ? 'radial-gradient(circle at 50% 40%, #e3f1ff, #6fb2ff)' : 'radial-gradient(circle at 50% 40%, #ffe0db, #ff7a6a)' }}>
+              <div className="shrink-0"><SlimeCanvas slime={u.slime} size={Math.round(size * 1.8)} sizeMultiplier={spriteMult(u.slime) * 2.5} animated={false} /></div>
             </div>
           </div>
         );
@@ -1025,7 +1037,7 @@ const Orb: React.FC<{ fx: Extract<Fx, { kind: 'orb' }>; sw: number }> = ({ fx, s
   return <div ref={ref} className="absolute rounded-full" style={{ left: fx.x, top: fx.y, width: s, height: s, transform: 'translate(-50%,-50%)', background: `radial-gradient(circle, #fff, ${fx.color} 55%, transparent 75%)`, boxShadow: `0 0 ${s}px ${fx.color}` }} />;
 };
 
-const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record<SlimeFoodType, number>; perfects: number }; sw: number; team: Unit[]; view: Record<string, View>; onContinue: () => void }> = ({ result, sw, team, view, onContinue }) => {
+const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record<SlimeFoodType, number>; perfects: number }; sw: number; phone: boolean; team: Unit[]; view: Record<string, View>; onContinue: () => void }> = ({ result, sw, phone, team, view, onContinue }) => {
   const [goo, setGoo] = useState(0);
   const { dispatch: gameDispatch } = useGameState();
   const [bonusDone, setBonusDone] = useState(false);
@@ -1056,10 +1068,10 @@ const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record
   }, [result]);
 
   return (
-    <div className="absolute inset-0 flex flex-col items-center justify-center bt-result" style={{ zIndex: 960, background: 'rgba(8,4,2,0.72)' }}>
-      <div className="relative bt-banner" style={{ width: sw * 0.36, aspectRatio: result.won ? '643 / 590' : '647 / 557' }}>
+    <div className={`absolute inset-0 flex items-center justify-center bt-result ${phone ? 'flex-row gap-3 px-3' : 'flex-col'}`} style={{ zIndex: 960, background: 'rgba(8,4,2,0.72)' }}>
+      <div className="relative bt-banner shrink-0" style={{ width: sw * 0.36, aspectRatio: result.won ? '643 / 590' : '647 / 557' }}>
         <img src={bt(result.won ? 'banner_victory.png' : 'banner_defeat.png')} alt="" className="absolute inset-0 w-full h-full" draggable={false} style={{ imageRendering: 'auto' }} />
-        <div className="absolute left-0 right-0 text-center font-bold" style={{ top: '19%', fontSize: sw * 0.036, color: result.won ? '#6b4210' : '#e5e9ef', textShadow: result.won ? '0 2px 0 rgba(255,245,200,0.8)' : '0 3px 0 rgba(0,0,0,0.6)', letterSpacing: '0.06em' }}>
+        <div className="absolute left-0 right-0 text-center font-bold" style={{ top: phone ? '15%' : '19%', fontSize: sw * 0.036, color: result.won ? '#6b4210' : '#e5e9ef', textShadow: result.won ? '0 2px 0 rgba(255,245,200,0.8)' : '0 3px 0 rgba(0,0,0,0.6)', letterSpacing: '0.06em' }}>
           {result.won ? 'VICTORY!' : 'DEFEAT'}
         </div>
         {/* rewards on a plate inside the ribbon loop (the loop itself is see-through) */}
@@ -1082,10 +1094,11 @@ const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record
           {result.perfects > 0 && <div className="font-bold leading-none" style={{ fontSize: sw * 0.0125, color: result.won ? '#a8650a' : '#ffe14d' }}>🎯 {result.perfects} perfect timing{result.perfects > 1 ? 's' : ''}</div>}
         </div>
       </div>
+      <div className={phone ? 'flex flex-col items-center min-w-0' : 'contents'}>
       <div className="flex items-end justify-center" style={{ gap: sw * 0.01, marginTop: sw * 0.008 }}>
         {team.map(u => (
           <div key={u.id} className="relative flex flex-col items-center" style={{ opacity: view[u.id]?.alive ? 1 : 0.4, filter: view[u.id]?.alive ? undefined : 'grayscale(1)' }}>
-            <div className={view[u.id]?.alive && result.won ? 'bt-cheer' : ''}><SlimeCanvas slime={u.slime} size={Math.round(sw * 0.085)} sizeMultiplier={spriteMult(u.slime) * 2.5} animated={view[u.id]?.alive} /></div>
+            <div className={`flex items-center justify-center ${view[u.id]?.alive && result.won ? 'bt-cheer' : ''}`} style={{ width: sw * 0.11, height: sw * 0.095 }}><div className="shrink-0"><SlimeCanvas slime={u.slime} size={Math.round(sw * 0.17)} sizeMultiplier={spriteMult(u.slime) * 2.5} animated={view[u.id]?.alive} /></div></div>
           </div>
         ))}
       </div>
@@ -1102,11 +1115,13 @@ const ResultScreen: React.FC<{ result: { won: boolean; goo: number; food: Record
       )}
       <button
         onClick={onContinue}
+        data-guide="battle-continue"
         className="rounded-full font-bold text-white uppercase border-[3px] hover:scale-105 active:translate-y-1 transition-transform"
         style={{ marginTop: sw * 0.012, fontSize: sw * 0.02, padding: `${sw * 0.008}px ${sw * 0.04}px`, background: 'linear-gradient(#ff7eb6,#ff1493)', borderColor: '#fff3c0', boxShadow: '0 6px 0 #8a0f55, 0 10px 24px rgba(0,0,0,0.5)', textShadow: '0 2px 3px rgba(80,0,40,0.6)' }}
       >
         Continue
       </button>
+      </div>
     </div>
   );
 };

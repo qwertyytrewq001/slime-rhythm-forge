@@ -5,6 +5,7 @@ import { triggerDialogue } from '@/utils/dialogueTriggers';
 import { getEnemyCount, getEnemyLevel, isBossLevel, MAP_SCREENS } from '@/utils/battleEngine';
 import { getSpriteIdForSlime } from '@/utils/spriteLoader';
 import { MirrorBackdrop } from './MirrorBackdrop';
+import { useStageSize } from '@/utils/stage';
 
 interface WorldMapProps {
   onSelectLevel: (level: number) => void;
@@ -83,6 +84,14 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
   const clearedHere = Math.max(0, Math.min(levelsPerScreen, unlockedLevel - firstLevel));
   const screenDone = unlockedLevel >= firstLevel + levelsPerScreen;
 
+  // A phone held sideways: the picture fills the screen (a little is cut off the top or bottom, chosen so every
+  // level stays visible), and the title and buttons stick to the screen edges
+  const { w: stageW, h: stageH } = useStageSize();
+  const phone = stageH < 520;
+  const worldH = Math.max(stageH, (stageW * 9) / 16);
+  const ys = nodes.map(n => (n.y / 100) * worldH);
+  const worldTop = Math.min(0, Math.max(stageH - worldH, (stageH - Math.min(...ys) - Math.max(...ys)) / 2));
+
   const canGoNext = screen < lastScreen;
   const nextLocked = screen + 1 > furthestScreen;
   const prevName = screen > 0 ? MAP_SCREENS[screen - 1].name : '';
@@ -110,11 +119,12 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
         key={`stage-${screen}`}
         className="relative animate-fade-in"
         style={{
-          ['--sw' as string]: 'min(100cqw, calc(100cqh * 16 / 9))',
-          width: 'min(100cqw, calc(100cqh * 16 / 9))',
-          height: 'min(100cqh, calc(100cqw * 9 / 16))',
+          ['--sw' as string]: phone ? '100cqw' : 'min(100cqw, calc(100cqh * 16 / 9))',
+          width: phone ? '100%' : 'min(100cqw, calc(100cqh * 16 / 9))',
+          height: phone ? '100%' : 'min(100cqh, calc(100cqw * 9 / 16))',
         }}
       >
+        <div className="absolute left-0 right-0" style={phone ? { top: worldTop, height: worldH } : { top: 0, bottom: 0 }}>
         <img src={MAP_IMAGES[screen]} alt={info.name} draggable={false} className="absolute inset-0 w-full h-full" style={{ imageRendering: 'auto' }} />
         <MirrorBackdrop src={MAP_IMAGES[screen]} />
         <div className="absolute pointer-events-none" style={{ left: '-100%', right: '-100%', top: '-100%', bottom: '-100%', background: 'radial-gradient(ellipse at center, transparent 70%, rgba(0,0,0,0.4) 100%)' }} />
@@ -152,6 +162,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
             <button
               key={levelNum}
               disabled={!isUnlocked}
+              data-guide={isCurrent ? 'map-level' : undefined}
               onClick={() => {
                 if (!isUnlocked) return;
                 if (!state.completedTutorialChapters.includes('battle')) triggerDialogue('battle-start');
@@ -163,7 +174,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
               style={{
                 left: `${pos.x}%`,
                 top: `${pos.y}%`,
-                width: `max(${isUnlocked ? 46 : 32}px, calc(var(--sw) * ${size}))`,
+                width: `max(${phone ? (isUnlocked ? 38 : 26) : isUnlocked ? 46 : 32}px, calc(var(--sw) * ${size}))`,
                 aspectRatio: '1',
                 zIndex: isCurrent ? 15 : 10,
               }}
@@ -238,8 +249,10 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
           );
         })}
 
+        </div>
+
         {/* Region banner */}
-        <div className="absolute top-[2.5%] left-1/2 -translate-x-1/2 pointer-events-none flex flex-col items-center">
+        <div className={`absolute top-[2.5%] pointer-events-none flex flex-col items-center ${phone ? 'left-2' : 'left-1/2 -translate-x-1/2'}`}>
           <div
             className="relative px-[max(20px,calc(var(--sw)*0.03))] py-[max(6px,calc(var(--sw)*0.006))] rounded-lg text-center shadow-[0_6px_16px_rgba(0,0,0,0.55)]"
             style={{ background: `linear-gradient(${PARCHMENT}, #e8d5a3)`, border: `3px solid ${INK}`, color: INK }}
@@ -286,7 +299,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
         )}
 
         {/* Region pager */}
-        <div className="absolute bottom-[2.5%] left-1/2 -translate-x-1/2 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/55 backdrop-blur-sm">
+        <div className={`absolute bottom-[2.5%] ${phone ? 'right-2' : 'left-1/2 -translate-x-1/2'} flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/55 backdrop-blur-sm`}>
           {MAP_SCREENS.map((s, i) => {
             const reachable = i <= furthestScreen;
             return (
@@ -306,6 +319,7 @@ export const WorldMap: React.FC<WorldMapProps> = ({ onSelectLevel, onClose }) =>
         <button
           onClick={onClose}
           aria-label="Close map"
+          data-guide="map-close"
           className="absolute top-[2.5%] right-[1.5%] w-[max(38px,calc(var(--sw)*0.032))] h-[max(38px,calc(var(--sw)*0.032))] flex items-center justify-center rounded-full border-[3px] shadow-[0_4px_14px_rgba(0,0,0,0.55)] hover:scale-110 transition-transform"
           style={{ background: PARCHMENT, borderColor: INK, color: INK }}
         >

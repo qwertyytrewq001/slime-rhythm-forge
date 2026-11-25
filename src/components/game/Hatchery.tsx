@@ -38,12 +38,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
   const activeHatching = state.activeHatching;
   const isFinished = activeHatching && now >= activeHatching.endTime;
 
-  console.log('🔍 Hatchery: activeHatching =', activeHatching);
-  console.log('🔍 Hatchery: isFinished =', isFinished);
-  console.log('🔍 Hatchery: now =', now);
   if (activeHatching) {
-    console.log('🔍 Hatchery: activeHatching.endTime =', activeHatching.endTime);
-    console.log('🔍 Hatchery: time remaining =', activeHatching.endTime - now);
   }
 
   useEffect(() => {
@@ -108,15 +103,16 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
   const isRecentlyTapped = Date.now() - lastTapTime < 100;
 
   return (
-    <div ref={containerRef} className="fixed top-[78%] left-[68%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 group/hatchery">
+    <div ref={containerRef} className="fixed top-[78%] -translate-x-1/2 -translate-y-1/2 pointer-events-none z-20 group/hatchery" style={{ left: 'min(68%, calc(100% - 288px))' }}>
       {discoveredSlime && <DiscoveryPopup slime={discoveredSlime} reason="Hatched from an Ancient Egg" onClose={finalizeHatch} />}
       {showHatcheryScreen && (
         <HatcheryScreen onClose={() => setShowHatcheryScreen(false)} />
       )}
 
-      <div className="relative w-56 h-56 cursor-pointer group pointer-events-auto" onClick={handleTap}>
+      {/* only the jar and the egg take taps, so the box never covers the buttons beside it */}
+      <div className="relative w-56 h-56 cursor-pointer group" onClick={handleTap}>
         <style>{`@keyframes hatchGlow { 0%,100% { opacity: 0.5 } 50% { opacity: 1 } }`}</style>
-        <img src={`${import.meta.env.BASE_URL}altar/${activeHatching ? 'home_hatch_glow' : 'home_hatch'}.png`} alt="" draggable={false} className="absolute pointer-events-none" style={{ right: '-168px', top: '-6px', width: 170, imageRendering: 'auto', zIndex: 5 }} />
+        <img src={`${import.meta.env.BASE_URL}altar/${activeHatching ? 'home_hatch_glow' : 'home_hatch'}.png`} alt="" draggable={false} className="absolute pointer-events-auto" style={{ right: '-168px', top: '-6px', width: 170, imageRendering: 'auto', zIndex: 5 }} />
         <div className="absolute inset-0 pointer-events-none overflow-visible">
           {[...Array(20)].map((_, i) => <FairySparkle key={i} index={i} />)}
         </div>
@@ -124,7 +120,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
           <div className="flex flex-col items-center gap-2 translate-y-6"><div className="w-1 h-1" /></div>
         ) : (
           <div className="relative flex flex-col">
-            <div className="absolute z-10" style={{ right: '-126px', top: '46px' }}>
+            <div className="absolute z-10 pointer-events-auto" data-guide="egg" style={{ right: '-126px', top: '46px' }}>
               <HatchingEgg slime={activeHatching.slime} crackProgress={crackProgress} shaking={isRecentlyTapped || isHatching} />
               {isFinished && !isHatching && (
                 <div className="absolute pointer-events-none rounded-full" style={{ left: '50%', top: '50%', width: 110, height: 110, transform: 'translate(-50%,-50%)', background: 'radial-gradient(circle, rgba(255,240,170,0.75), rgba(255,240,170,0) 68%)', animation: 'hatchGlow 1.8s ease-in-out infinite' }} />
@@ -139,7 +135,7 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
                     </div>
                     {!isHatching && crackProgress === 0 && (
                       <div className="flex items-center gap-1 mt-1 text-[10px] text-white/60 uppercase font-bold animate-pulse">
-                        <MousePointer2 className="w-3 h-3" /> Click to Crack
+                        <MousePointer2 className="w-3 h-3" /> Tap to crack
                       </div>
                     )}
                   </div>

@@ -507,17 +507,17 @@ export function FarmScreen({ onClose }: FarmScreenProps) {
           <div className="rounded-full font-bold shadow-lg" style={{ background: PARCHMENT, border: `3px solid ${INK}`, color: INK, fontSize: Math.max(11, hud.w * 0.0125), padding: `${hud.w * 0.004}px ${hud.w * 0.01}px` }}>
             <span className="inline-flex items-center" style={{ gap: hud.w * 0.003 }}>{Math.floor(goo).toLocaleString()} <Ico name="icon_drop" w={hud.w * 0.017} /></span>
           </div>
-          <button onClick={onClose} aria-label="Close farm" className="hover:scale-110 transition-transform" style={{ width: hud.w * 0.036, height: hud.w * 0.036 }}>
+          <button onClick={onClose} aria-label="Close farm" data-guide="farm-close" className="hover:scale-110 transition-transform" style={{ width: hud.w * 0.036, height: hud.w * 0.036 }}>
             <img src={bt('ui_btn_close.png')} alt="" className="w-full h-full" draggable={false} />
           </button>
         </div>
 
         {/* action bar */}
         <div className="absolute left-1/2 -translate-x-1/2 flex items-center w-max" style={{ bottom: hud.w * 0.012, gap: hud.w * 0.008, zIndex: 300 }}>
-          <ActionButton primary={readyPlots.length > 0} disabled={!readyPlots.length} onClick={harvestEverything} sw={hud.w} badge={readyPlots.length || undefined}>
+          <ActionButton guide="farm-harvest" primary={readyPlots.length > 0} disabled={!readyPlots.length} onClick={harvestEverything} sw={hud.w} badge={readyPlots.length || undefined}>
             <Ico name="icon_basket" w={hud.w * 0.022} style={{ marginRight: 4 }} />Harvest All
           </ActionButton>
-          <ActionButton disabled={!emptyPlots.length} onClick={() => setPicker({ mode: 'all' })} sw={hud.w} badge={emptyPlots.length || undefined}>
+          <ActionButton guide="farm-plant" disabled={!emptyPlots.length} onClick={() => setPicker({ mode: 'all' })} sw={hud.w} badge={emptyPlots.length || undefined}>
             <Ico name="icon_seed_pouch" w={hud.w * 0.022} style={{ marginRight: 4 }} />Plant All
           </ActionButton>
           <ActionButton disabled={!growingUnwatered.length} onClick={waterEverything} sw={hud.w} badge={growingUnwatered.length || undefined}>
@@ -577,10 +577,11 @@ const SPARKS = Array.from({ length: 16 }, (_, i) => ({
   x: 8 + ((i * 53) % 84), y: 36 + ((i * 37) % 56), d: -((i * 1.7) % 9), t: 7 + (i % 5) * 1.6, c: i % 3 === 0 ? '#fff3b0' : i % 3 === 1 ? '#ffd6f0' : '#c9f5ff',
 }));
 
-const ActionButton: React.FC<{ children: React.ReactNode; onClick: () => void; disabled?: boolean; primary?: boolean; sw: number; badge?: number }> = ({ children, onClick, disabled, primary, sw, badge }) => (
+const ActionButton: React.FC<{ children: React.ReactNode; onClick: () => void; disabled?: boolean; primary?: boolean; sw: number; badge?: number; guide?: string }> = ({ guide, children, onClick, disabled, primary, sw, badge }) => (
   <button
     onClick={onClick}
     disabled={disabled}
+    data-guide={guide}
     className={`relative rounded-full font-bold border-[3px] shadow-lg transition-transform whitespace-nowrap ${disabled ? 'opacity-55 cursor-not-allowed' : 'hover:scale-105 active:scale-95'} ${primary && !disabled ? 'farm-ready-btn' : ''}`}
     style={{ background: primary && !disabled ? 'linear-gradient(#ff7eb6,#ff1493)' : PARCHMENT, borderColor: primary && !disabled ? '#fff3c0' : INK, color: primary && !disabled ? '#fff' : INK, fontSize: Math.max(13, sw * 0.0125), padding: `${sw * 0.005}px ${sw * 0.014}px`, textShadow: primary && !disabled ? '0 1px 2px rgba(80,0,40,0.6)' : undefined }}
   >
@@ -620,6 +621,7 @@ const CropChooser: React.FC<{
                 key={c}
                 disabled={!unlocked || !afford}
                 onClick={() => onPick(c)}
+                data-guide="farm-crop"
                 className={`relative text-center rounded-2xl border-[3px] transition-transform ${unlocked && afford ? 'hover:scale-[1.03] hover:-translate-y-1' : 'opacity-70 cursor-not-allowed'}`}
                 style={{ background: '#fff7dc', borderColor: INK, padding: `${sw * 0.01}px ${sw * 0.008}px` }}
               >

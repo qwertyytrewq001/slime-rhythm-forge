@@ -46,7 +46,7 @@ export function Achievements({ onClose }: { onClose: () => void }) {
           </div>
           <div className="flex items-center gap-3">
             {claimable.length > 0 && (
-              <button onClick={claimAll} className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: 190 }}>
+              <button onClick={claimAll} data-guide="claim" className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: 190 }}>
                 <img src={`${U}ach_claim.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
                 <span className="absolute inset-0 flex items-center justify-center font-bold text-white whitespace-nowrap" style={{ fontSize: 15, WebkitTextStroke: '3px #1f4a1a', paintOrder: 'stroke fill' }}>Claim all · {claimableGoo}</span>
               </button>

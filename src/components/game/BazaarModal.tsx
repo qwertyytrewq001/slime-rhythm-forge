@@ -287,7 +287,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                   <img src={`${import.meta.env.BASE_URL}ui/dlg_choice.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
                   <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 15 }}>Keep shopping</span>
                 </button>
-                <button onClick={() => { setBoughtEgg(null); onClose(); }} className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: 150, background: 'transparent', border: 'none', padding: 0 }}>
+                <button onClick={() => { setBoughtEgg(null); onClose(); }} data-guide="see-jar" className="relative hover:scale-105 active:scale-95 transition-transform" style={{ width: 150, background: 'transparent', border: 'none', padding: 0 }}>
                   <img src={`${import.meta.env.BASE_URL}ui/dlg_choice_glow.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
                   <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 15 }}>See the jar</span>
                 </button>
@@ -320,6 +320,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
               </div>
               <button
                 onClick={onClose}
+                data-guide="baz-close"
                 className="hover:scale-110 active:scale-95 transition-transform"
               >
                 <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" className="w-12 h-12" style={{ imageRendering: 'auto' }} />
@@ -339,6 +340,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                   onClick={handlePrevPage}
                   disabled={currentPage === 0}
                   aria-label="Previous page"
+                  data-guide="baz-prev" data-tab={selectedCategory}
                   className="shrink-0 transition-transform hover:scale-110 active:scale-95 disabled:opacity-25 disabled:hover:scale-100"
                   style={{ width: 64, background: 'transparent', border: 'none', padding: 0 }}
                 >
@@ -354,6 +356,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                         <div
                           key={elem}
                           onClick={() => handleBuyEgg(elem)}
+                          data-guide="baz-egg" data-element={elem}
                           className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-80 baz-card px-5 pt-6 pb-4 ${
                             lockedEl ? 'opacity-60 grayscale' : state.goo >= eggCost(elem) 
                               ? 'hover:scale-105' 
@@ -420,6 +423,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                         <div
                           key={elem}
                           onClick={() => (lockedEl ? toast({ title: 'Not unlocked yet', description: `This habitat opens at Level ${elementUnlockLevel(elem)}. Breed and collect slimes to raise your level.`, variant: 'destructive' }) : state.goo >= cost && handleBuyHabitat(elem, cost))}
+                          data-guide="baz-habitat" data-element={elem}
                           className={`group relative flex flex-col items-center cursor-pointer transition-all duration-300 w-52 h-[21rem] baz-card px-5 pt-6 pb-4 ${
                             lockedEl ? 'opacity-60 grayscale' : state.goo >= cost 
                               ? 'hover:scale-105' 
@@ -528,6 +532,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
                   onClick={handleNextPage}
                   disabled={currentPage >= getTotalPages() - 1}
                   aria-label="Next page"
+                  data-guide="baz-next" data-tab={selectedCategory}
                   className="shrink-0 transition-transform hover:scale-110 active:scale-95 disabled:opacity-25 disabled:hover:scale-100"
                   style={{ width: 64, background: 'transparent', border: 'none', padding: 0 }}
                 >
@@ -560,6 +565,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
               <button
                 key={key}
                 onClick={() => setSelectedCategory(key)}
+                data-guide={`baz-tab-${key}`}
                 aria-label={label}
                 className="relative transition-transform hover:scale-105 active:scale-95"
                 style={{ width: short ? 'clamp(90px, 14cqw, 130px)' : 'clamp(120px, 20cqw, 190px)', background: 'transparent', border: 'none', padding: 0, transform: selectedCategory === key ? 'scale(1.08)' : undefined }}

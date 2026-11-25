@@ -208,6 +208,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
                 <button
                   onPointerDown={e => startDrag(e, food)}
                   aria-label={`${info.name}, ${owned} in bag`}
+                  data-guide={owned > 0 ? 'food' : undefined}
                   className={`absolute rounded-full flex items-center justify-center transition-transform
                     ${affordable ? 'hover:scale-110 cursor-grab active:cursor-grabbing' : 'cursor-not-allowed'}`}
                   style={{ ...slotStyle(i), touchAction: 'none', animation: shaking === food ? 'feedShake .4s' : undefined }}
@@ -245,6 +246,7 @@ export function FeedTray({ slimeAt, selectedSlimeId, onDragHover, onDragActive, 
           <button
             onClick={() => { audioEngine.playSfx('tap'); setOpen(true); }}
             aria-label={`Open food bag, ${total} items`}
+            data-guide="food-bag"
             className={`absolute bottom-2 left-3 z-[200] w-[60px] h-[60px] rounded-full flex items-center justify-center bg-black/45 backdrop-blur-md border-2 border-white/30 shadow-[0_6px_18px_rgba(0,0,0,0.5)] hover:scale-110 transition-all duration-300 ${
               open ? 'opacity-0 scale-50 pointer-events-none' : 'opacity-100 scale-100'
             }`}

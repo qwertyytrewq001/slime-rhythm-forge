@@ -123,6 +123,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
         {/* Close Button */}
         <button 
           onClick={onClose}
+          data-guide="hatch-close"
           className="absolute top-4 right-4 hover:scale-110 transition-transform z-50"
         >
           <img src={`${import.meta.env.BASE_URL}ui/baz_close.png`} alt="Close" draggable={false} style={{ width: 52, height: 52, maxWidth: 'none', imageRendering: 'auto' }} />
@@ -133,6 +134,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
           <div 
             className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex flex-col items-center cursor-pointer group"
             onClick={handleEggTap}
+            data-guide={activeHatching.waiting ? undefined : 'egg-big'}
           >
             {/* Fairy sparkles around the nest */}
             <div className="absolute inset-0 pointer-events-none overflow-visible">
@@ -162,7 +164,7 @@ export function HatcheryScreen({ onClose }: HatcheryScreenProps) {
                   </div>
                   {!isHatching && crackProgress === 0 && (
                     <div className="flex items-center gap-1 mt-1 text-[10px] text-white/60 uppercase font-bold animate-pulse">
-                      <MousePointer2 className="w-3 h-3" /> Click to Crack
+                      <MousePointer2 className="w-3 h-3" /> Tap to crack
                     </div>
                   )}
                 </div>

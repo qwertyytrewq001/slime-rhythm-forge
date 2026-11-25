@@ -227,7 +227,7 @@ export function SanctuaryHub({ onClose, onOpenHabitat, onOpenBazaar }: Sanctuary
             </span>
             {gifts > 0 && <span className="absolute rounded-full font-bold text-white flex items-center justify-center" style={{ right: '2%', top: '-4%', background: '#e8344c', border: '2px solid #fff', minWidth: sw * 0.021, height: sw * 0.021, fontSize: Math.max(11, sw * 0.011), padding: '0 4px' }}>{gifts}</span>}
           </button>
-          <button onClick={onClose} aria-label="Close" className="hover:scale-110 active:scale-90 transition-transform" style={{ background: 'transparent', border: 'none', padding: 0, width: sw * 0.044 }}>
+          <button onClick={onClose} aria-label="Close" data-guide="isles-close" className="hover:scale-110 active:scale-90 transition-transform" style={{ background: 'transparent', border: 'none', padding: 0, width: sw * 0.044 }}>
             <img src={`${BASE}ui/baz_close.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.45))' }} />
           </button>
         </div>
@@ -273,7 +273,7 @@ const LockedSite: React.FC<{ w: number; sw: number; label: string }> = ({ w, sw,
 );
 
 const EmptySite: React.FC<{ w: number; active: boolean; pending: boolean; onClick: () => void }> = ({ w, active, pending, onClick }) => (
-  <button onClick={onClick} disabled={!active} className="absolute inset-0 sanct-bob" style={{ animationDelay: '-1s', opacity: active ? 1 : 0.55, cursor: active ? 'pointer' : 'default' }} aria-label={pending ? 'Place habitat here' : 'Empty habitat site'}>
+  <button onClick={onClick} disabled={!active} data-guide={pending ? 'place-site' : undefined} className="absolute inset-0 sanct-bob" style={{ animationDelay: '-1s', opacity: active ? 1 : 0.55, cursor: active ? 'pointer' : 'default' }} aria-label={pending ? 'Place habitat here' : 'Empty habitat site'}>
     <ArtImg
       file="island_empty.png"
       className="absolute inset-0 w-full h-full"
@@ -299,7 +299,7 @@ const IslandView: React.FC<{
   const joy = (habitat.joy ?? 0) / JOY_MAX;
   return (
     <div className="absolute inset-0 sanct-bob" style={{ animationDelay: `${-index * 0.9}s` }}>
-      <div className="absolute inset-0 cursor-pointer" onClick={onOpen} role="button" aria-label={`${ELEMENT_DISPLAY_NAMES[habitat.element]} habitat`}>
+      <div className="absolute inset-0 cursor-pointer" onClick={onOpen} role="button" data-guide="isle" data-habitat={habitat.id} aria-label={`${ELEMENT_DISPLAY_NAMES[habitat.element]} habitat`}>
         <ArtImg
           file={`island_${habitat.element}.png`}
           className="absolute inset-0 w-full h-full"
