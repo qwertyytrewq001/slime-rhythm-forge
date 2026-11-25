@@ -37,6 +37,8 @@ export interface Slime {
   rarityStars: number;
   rarityTier: RarityTier;
   createdAt: number;
+  /** The player's own name for this slime. `name` stays the species name, which art and stats are keyed on. */
+  nickname?: string;
   parentIds?: [string, string];
   isNew?: boolean;
   level: number;
@@ -275,6 +277,7 @@ export interface FarmState {
 export type GameAction =
   | { type: 'ADD_SLIME'; slime: Slime }
   | { type: 'SELECT_SLIME'; id: string | null }
+  | { type: 'RENAME_SLIME'; id: string; nickname: string }
   | { type: 'SET_BREED_SLOT'; slot: 1 | 2; id: string | null }
   | { type: 'CLEAR_BREED_SLOTS' }
   | { type: 'START_BREEDING'; ritual: { parent1Id: string; parent2Id: string; endTime: number; resultSlime: Slime } }

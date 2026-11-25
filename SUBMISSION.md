@@ -34,7 +34,9 @@ My estimate: a decent chance of passing review and reaching Basic Launch, a smal
 3. **Money.** If a player comes to your game directly you keep 100%. If they come through Poki.com or Poki marketing, revenue is split 50/50 (their stated default; terms are set in your agreement).
 4. **The catch: exclusivity.** Poki prefers web-exclusive deals, 5 years by default. You could not publish on other web portals. Steam and app stores are allowed. A non-exclusive deal is a one-time flat fee with no revenue share. **Do not sign anything with Poki until you have decided this**, because it blocks CrazyGames.
 
-Suggested order: CrazyGames first (no exclusivity), measure for a month, then decide on Poki with real numbers.
+**Portrait on phones (checked 24 Nov 2026).** Poki's requirements page still says a game may cover the screen in portrait, landscape or both, but Poki's own blog (5 June 2026, https://poki.com/blog/building-web-browser-games-2026) says every game needs to work in portrait and that QA tests it. This game only shows a "turn your phone sideways" screen in portrait, so expect Poki to reject it until there is a real portrait layout.
+
+Suggested order: CrazyGames first (no exclusivity; it allows landscape-only mobile games if you set the orientation when you submit), measure for a month, then decide on Poki with real numbers.
 
 ## 3. Money, with the assumptions shown
 
@@ -86,11 +88,11 @@ I use 1 to 8 USD per 1,000 plays as the range you take home, which is cautious.
 
 **Short description (one line):** Breed rare slimes, build cosy habitats and battle through 50 levels.
 
-**Long description:** Collect over 85 painted slimes in RareSlime Forge. Pair two slimes at the altar and discover which hybrid hatches. Every pair has surprises, and the rarest slimes need real luck and well-raised parents. Give each slime a home, watch them play, become friends and collect their gifts. Grow crops on your farm to feed them, then take your team into rhythm-timed battles across the Verdant Lowlands, the Frostpeak Skyway and the Forgotten Castle, following Glim's story.
+**Long description:** Collect over 85 painted slimes in RareSlime Forge. Pair two slimes at the altar and discover which hybrid hatches. Every pair has surprises, and the rarest slimes need real luck and well-raised parents. Give each slime a home, watch them play, become friends and collect their gifts. Grow crops on your farm to feed them, then take your team into turn-based battles with a tap-timing bonus across the Verdant Lowlands, the Frostpeak Skyway and the Forgotten Castle, following Glim's story.
 
 **Controls:** Mouse or touch. Tap and drag to pet, carry and throw slimes. Tap the ground to call a slime. Drag food onto a slime to feed it.
 
-**Tags:** slime, breeding, collecting, pets, idle, cozy, rhythm, strategy, farm, cute
+**Tags:** slime, breeding, collecting, pets, idle, cozy, turn-based, strategy, farm, cute
 
 **Age:** suitable for 12 and up (cartoon fighting, no blood).
 

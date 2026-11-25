@@ -28,7 +28,7 @@ const TIPS: Record<TipKey, { face: string; title: string; lines: string[] }> = {
     face: 'smug',
     title: 'The Breeding Den',
     lines: [
-      'Pick two Adults (level 10 or more). Hover a second slime and watch the first one react. Some are shy. Some are very cool.',
+      'Pick two Adults (level 10 or more). Choose a second slime and watch the first one react. Some are shy. Some are very cool.',
       'The question-mark egg shows which slimes this pair could make. Then begin the ritual and wait for the egg.',
     ],
   },
@@ -67,7 +67,7 @@ export function FirstVisitTip({ when, ready = true }: { when: TipKey | null; rea
   const skip = () => { mark(tip); setTip(null); };
 
   return (
-    <div className="fixed inset-0 z-[9500] flex items-end justify-center pointer-events-none" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
+    <div data-dialogue className="fixed inset-0 z-[9500] flex items-end justify-center pointer-events-none" style={{ fontFamily: "'Fredoka', 'Trebuchet MS', sans-serif" }}>
       <style>{`@keyframes tipUp { from { opacity: 0; transform: translateY(24px) } to { opacity: 1; transform: none } }`}</style>
       <div className="relative pointer-events-auto flex items-end" style={{ width: 'min(94cqw, 760px)', marginBottom: 84, animation: 'tipUp 0.3s ease-out' }}>
         <img src={`${A}glim_${data.face}.png`} alt="" draggable={false} style={{ height: 'clamp(120px, 20cqh, 190px)', width: 'auto', marginRight: -26, zIndex: 2, imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.4))' }} />

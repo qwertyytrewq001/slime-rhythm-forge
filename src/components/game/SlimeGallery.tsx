@@ -1,3 +1,5 @@
+import { displayName } from '@/utils/nickname';
+import { RenameButton } from './RenameButton';
 import { useState, useMemo, useEffect } from 'react';
 import { useGameState, getStage } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
@@ -39,7 +41,7 @@ export function SlimeGallery({ onSelect, filterElement, adultsOnly, autoPlace = 
 
     if (search) {
       const q = search.toLowerCase();
-      list = list.filter(s => s.name.toLowerCase().includes(q));
+      list = list.filter(s => `${s.name} ${s.nickname ?? ''}`.toLowerCase().includes(q));
     }
     switch (sort) {
       case 'rarity': list = [...list].sort((a, b) => b.rarityScore - a.rarityScore); break;
@@ -139,13 +141,14 @@ export function SlimeGallery({ onSelect, filterElement, adultsOnly, autoPlace = 
               onMouseLeave={() => window.dispatchEvent(new CustomEvent('breedHover', { detail: { id: null } }))}
             >
               <div>
+                <RenameButton slimeId={slime.id} size={small ? 22 : 30} className={`!absolute z-20 ${small ? 'top-1 right-1' : 'top-4 right-5'}`} />
                 <div className="absolute inset-0 rounded-full blur-xl opacity-0 group-hover:opacity-20 transition-opacity" 
                      style={{ backgroundColor: RARITY_TIER_COLORS[slime.rarityTier] }} />
                 <div className="flex items-center justify-center" style={small ? { height: 58 } : undefined}><div className="shrink-0"><SlimeCanvas slime={slime} size={small ? 56 : 100} animated sizeMultiplier={1.8} animationStyle="calm" /></div></div>
                 <span className={`absolute z-10 flex items-center justify-center font-black text-white rounded-full ${small ? 'top-1 left-1' : 'top-4 left-5'}`} style={{ minWidth: small ? 22 : 34, height: small ? 22 : 34, padding: '0 6px', fontSize: small ? 11 : 13, background: 'radial-gradient(circle at 35% 30%, #ffe98a, #e09a1a)', border: '3px solid #4a2f17', boxShadow: '0 2px 4px rgba(0,0,0,0.35)', WebkitTextStroke: '2px #4a2f17', paintOrder: 'stroke fill' }} title={`Level ${slime.level}`}>{slime.level}</span>
               </div>
               <div className={`w-full text-center ${small ? 'mt-0.5' : 'mt-4'}`}>
-                <p className={`${small ? 'text-[11px]' : 'text-base'} font-bold text-[#4a2f17] uppercase leading-none mb-1 break-words px-1 [font-family:Fredoka,sans-serif]`}>{slime.name}</p>
+                <p className={`${small ? 'text-[11px]' : 'text-base'} font-bold text-[#4a2f17] uppercase leading-none mb-1 break-words px-1 [font-family:Fredoka,sans-serif]`}>{displayName(slime)}</p>
                 <div className="flex items-center justify-center gap-2">
                   <img src={`${import.meta.env.BASE_URL}altar/gem_${slime.rarityTier.toLowerCase()}.png`} alt="" draggable={false} style={{ width: small ? 12 : 20, imageRendering: 'auto', filter: 'drop-shadow(0 1px 1px rgba(0,0,0,0.4))' }} onError={e => { (e.currentTarget as HTMLImageElement).style.display = 'none'; }} />
                   <p className="text-[10px] font-bold tracking-wider uppercase [font-family:Fredoka,sans-serif]" style={{ color: CARD_TIER_COLORS[slime.rarityTier] ?? '#6b4a2c' }}>

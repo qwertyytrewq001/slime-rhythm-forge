@@ -47,6 +47,9 @@ function safeInsets() {
   return { t: n(cs.paddingTop), r: n(cs.paddingRight), b: n(cs.paddingBottom), l: n(cs.paddingLeft) };
 }
 
+let lastW = 0;
+let lastH = 0;
+
 function apply() {
   const root = document.getElementById('root');
   if (!root) return;
@@ -54,6 +57,11 @@ function apply() {
   const ins = safeInsets();
   const w = Math.round(vv?.width ?? rw()) - Math.round(ins.l + ins.r);
   const h = Math.round(vv?.height ?? rh()) - Math.round(ins.t + ins.b);
+  const el = document.activeElement as HTMLInputElement | null;
+  const typing = el?.tagName === 'INPUT' && (el.type === 'text' || el.type === 'search');
+  if (typing && w === lastW && h < lastH) return;
+  lastW = w;
+  lastH = h;
   offX = Math.round(ins.l);
   offY = Math.round(ins.t);
   root.style.left = `${offX}px`;
@@ -115,6 +123,7 @@ export function initStage() {
   window.addEventListener('resize', apply);
   window.addEventListener('orientationchange', () => setTimeout(apply, 120));
   window.visualViewport?.addEventListener('resize', apply);
+  document.addEventListener('focusout', () => setTimeout(apply, 250)); // catch up once the keyboard closes
 }
 
 /** React hook: the size of the virtual screen, kept current when the window or phone is turned or resized. */

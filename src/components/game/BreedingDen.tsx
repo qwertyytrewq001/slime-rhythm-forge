@@ -1,3 +1,4 @@
+import { displayName } from '@/utils/nickname';
 import { useStageSize } from '@/utils/stage';
 import React, { useState, useEffect, useMemo } from 'react';
 import { useGameState } from '@/hooks/useGameState';
@@ -437,7 +438,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
                     />
                   </div>
                   <p className="text-gray-800 text-sm font-bold text-center leading-tight">
-                    {slime.name}
+                    {displayName(slime)}
                   </p>
                   <div className="flex justify-center mt-2">
                     <span className="inline-flex items-center gap-1 text-xs font-bold text-[#4a2f17]" style={{ fontFamily: "'Fredoka', sans-serif" }}>

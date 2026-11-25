@@ -1,3 +1,4 @@
+import { displayName } from '@/utils/nickname';
 import { useStageSize } from '@/utils/stage';
 import { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
@@ -111,7 +112,7 @@ export function EvolutionPopup() {
               <Trophy className="w-4 h-4 text-[#FFD700] fill-current" />
             </div>
             <h3 className="text-xl font-black text-slate-800 uppercase tracking-tight">
-              {slime?.name}
+              {slime && displayName(slime)}
             </h3>
             <div className="flex items-center gap-2 mt-2">
               <span className="text-sm font-bold text-slate-400">Stage {localEvolution?.stage}</span>

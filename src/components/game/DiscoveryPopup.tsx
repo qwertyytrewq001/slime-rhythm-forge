@@ -1,3 +1,5 @@
+import { displayName } from '@/utils/nickname';
+import { RenameButton } from './RenameButton';
 import { useEffect, useMemo, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { stageSize, onStageChange } from '@/utils/stage';
@@ -123,7 +125,13 @@ export function DiscoveryPopup({ slime, onClose }: DiscoveryPopupProps) {
     <div className="flex flex-col" style={{ gap: small ? 4 : 8, textAlign: wide ? 'left' : 'center' }}>
       <div>
         <div className="font-bold uppercase" style={{ color: '#b8660e', fontSize: 13, letterSpacing: '0.18em', fontFamily: FRED }}>Species unlocked</div>
-        <div className="font-bold" style={{ fontSize: small ? 22 : 'clamp(28px, 4cqw, 38px)', lineHeight: 1.1, fontFamily: FRED, color: INK }}>{slime.name}</div>
+        <div className="font-bold" style={{ fontSize: small ? 22 : 'clamp(28px, 4cqw, 38px)', lineHeight: 1.1, fontFamily: FRED, color: INK }}>{displayName(state.slimes.find(s => s.id === slime.id) ?? slime)}</div>
+        {state.slimes.some(s => s.id === slime.id) && (
+          <div className="flex items-center gap-1.5" style={{ justifyContent: wide ? 'flex-start' : 'center', marginTop: 2 }}>
+            <RenameButton slimeId={slime.id} size={small ? 22 : 28} label="Name your slime" />
+            {state.slimes.find(s => s.id === slime.id)?.nickname && <span className="font-semibold" style={{ fontSize: 12, opacity: 0.7, fontFamily: FRED }}>{slime.name}</span>}
+          </div>
+        )}
       </div>
 
       <div className="flex flex-wrap items-center gap-2" style={{ justifyContent: wide ? 'flex-start' : 'center' }}>

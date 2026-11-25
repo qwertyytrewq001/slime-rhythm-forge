@@ -1,3 +1,4 @@
+import { displayName } from './nickname';
 import { BattleSlime, SlimeElement } from '../types/slime';
 import { Effectiveness, effectivenessFromMultiplier, getTypeMultiplier } from './battleEngine';
 
@@ -132,7 +133,7 @@ const toUnit = (s: BattleSlime, team: Team): Unit => ({
   id: s.id,
   team,
   slime: s,
-  name: s.name,
+  name: displayName(s),
   level: s.level,
   elements: s.elements.length ? s.elements : [s.element],
   hp: s.battleStats.hp,

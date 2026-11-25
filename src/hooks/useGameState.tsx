@@ -1,3 +1,4 @@
+import { cleanNickname, displayName } from '@/utils/nickname';
 import React, { createContext, useContext, useReducer, useEffect, useRef, useMemo } from 'react';
 import { GameState, GameAction, Achievement, SlimeElement, Habitat, SlimeEvolutionStage, Slime, SLIME_FOODS, SlimeFoodType, BreedResult, FarmPlot, FarmState } from '@/types/slime';
 import { FarmSlice, createFarmPlots, createFarmState, migrateFarm, plant as farmPlant, plantAll as farmPlantAll, harvest as farmHarvest, harvestAll as farmHarvestAll, water as farmWater, waterAll as farmWaterAll, rush as farmRush, unlockPlot as farmUnlock } from '@/utils/farmCore';
@@ -58,7 +59,7 @@ export function addXp(slime: Slime, amount: number): {
   return {
     slime: { ...slime, level, xp },
     leveledUp: level > oldLevel
-      ? { slimeId: slime.id, slimeName: slime.name, oldLevel, newLevel: level, timestamp: now }
+      ? { slimeId: slime.id, slimeName: displayName(slime), oldLevel, newLevel: level, timestamp: now }
       : null,
     evolved: newStage !== oldStage ? { slimeId: slime.id, stage: newStage, timestamp: now } : null,
   };
@@ -302,6 +303,10 @@ export function gameReducer(state: GameState, action: GameAction): GameState {
         return { ...state, slimes: [...state.slimes, slime], habitats };
       }
       return { ...state, slimes: [...state.slimes, slime] };
+    }
+    case 'RENAME_SLIME': {
+      const nickname = cleanNickname(action.nickname) || undefined;
+      return { ...state, slimes: state.slimes.map(s => (s.id === action.id ? { ...s, nickname } : s)) };
     }
     case 'SELECT_SLIME':
       return { ...state, selectedSlimeId: action.id };

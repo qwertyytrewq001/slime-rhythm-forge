@@ -1,3 +1,5 @@
+import { displayName } from '@/utils/nickname';
+import { RenameButton } from './RenameButton';
 import { useStageSize } from '@/utils/stage';
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { GooIcon } from './GooIcon';
@@ -1111,7 +1113,7 @@ function BouncingSlime({ slime, selected, targeted, dragging, wantsFood, landmar
         {(selected || targeted) && (
           <div className="absolute -top-9 left-1/2 -translate-x-1/2 z-30 pointer-events-none flex flex-col items-center gap-1">
             <div className="flex items-center gap-2 rounded-full border border-white/25 bg-black/65 backdrop-blur-md px-3 py-1 whitespace-nowrap">
-              <span className="text-[10px] font-black uppercase tracking-wider text-white">{slime.name}</span>
+              <span className="text-[10px] font-black uppercase tracking-wider text-white">{displayName(slime)}</span>
               <span className="text-[10px] font-black text-amber-300">Lv {slime.level}</span>
             </div>
             <div className="w-24 h-2 rounded-full bg-black/60 border border-white/25 overflow-hidden">
@@ -1300,11 +1302,11 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     const slime = state.slimes.find(s => s.id === slimeId);
     const say = (text: string) => addFx({ kind: 'text', x: window.innerWidth / 2 - 90, y: 150, text, color: '#ffe14d' }, 2200);
     if (!slime) return;
-    if (!slime.elements.includes(habitat.element)) { say(`${slime.name} doesn't match this habitat`); return; }
+    if (!slime.elements.includes(habitat.element)) { say(`${displayName(slime)} doesn't match this habitat`); return; }
     if (habitat.assignedSlimeIds.length >= habitat.capacity && !habitat.assignedSlimeIds.includes(slimeId)) { say('This habitat is full'); setGalleryOpen(false); return; }
     dispatch({ type: 'ASSIGN_SLIME_TO_HABITAT', habitatId, slimeId });
     setGalleryOpen(false);
-    say(`${slime.name} moved in!`);
+    say(`${displayName(slime)} moved in!`);
   };
 
   // Friendship: gains are rate limited per slime so spamming one action does not farm it
@@ -1321,7 +1323,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
     if (after > before) {
       const c = centerOf(slimeId);
       if (c) {
-        addFx({ kind: 'text', x: c.x - 90, y: c.y - 110, text: `${sl.name} is now your ${BOND_LEVELS[after].name}!`, color: '#ffe14d', big: true }, 2600);
+        addFx({ kind: 'text', x: c.x - 90, y: c.y - 110, text: `${displayName(sl)} is now your ${BOND_LEVELS[after].name}!`, color: '#ffe14d', big: true }, 2600);
         addFx({ kind: 'burst', x: c.x, y: c.y - 30, emojis: ['💖', '✨', '⭐'], count: 10 }, 1600);
         addFx({ kind: 'ring', x: c.x, y: c.y, color: '#ff7eb6' }, 1200);
       }
@@ -1652,8 +1654,9 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
             {assignedSlimes.map(sl => {
               const lv = bondLevel(sl.bond ?? 0);
               return (
-                <div key={sl.id} className="flex-shrink-0 flex items-center gap-1.5 rounded-full px-2 py-0.5" style={{ background: 'rgba(255,255,255,0.1)' }} title={`${sl.name}: ${BOND_LEVELS[lv].name}${lv ? ` (+${lv * 10}% Joy)` : ''}. ${NATURE_BLURB[slimeNature(sl.id)]}`}>
-                  <span className="text-[11px] font-black text-white/85 leading-none truncate" style={{ maxWidth: 90 }}>{sl.name.replace(' Slime', '')}</span>
+                <div key={sl.id} className="flex-shrink-0 flex items-center gap-1.5 rounded-full px-2 py-0.5" style={{ background: 'rgba(255,255,255,0.1)' }} title={`${displayName(sl)}: ${BOND_LEVELS[lv].name}${lv ? ` (+${lv * 10}% Joy)` : ''}. ${NATURE_BLURB[slimeNature(sl.id)]}`}>
+                  <span className="text-[11px] font-black text-white/85 leading-none truncate" style={{ maxWidth: 90 }}>{sl.nickname ?? sl.name.replace(' Slime', '')}</span>
+                  <RenameButton slimeId={sl.id} size={20} />
                   <span className="text-[12px] leading-none" style={{ color: '#ff7eb6' }}>{'♥'.repeat(lv)}<span style={{ color: 'rgba(255,255,255,0.25)' }}>{'♥'.repeat(3 - lv)}</span></span>
                   <span className="rounded-full overflow-hidden" style={{ width: 34, height: 4, background: 'rgba(255,255,255,0.18)' }}><span className="block h-full" style={{ width: `${Math.round(bondProgress(sl.bond ?? 0) * 100)}%`, background: 'linear-gradient(90deg,#ff7eb6,#ffd27e)' }} /></span>
                 </div>

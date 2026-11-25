@@ -22,7 +22,7 @@ All the portal code is in `src/utils/portal.ts` (tested in `portal.test.ts`).
 | Initial download 50 MB or less (20 MB or less for mobile) | CrazyGames | Done. Whole game is 49 MB, about 10 MB once music and sounds load after Play |
 | Total 250 MB or less, 1500 files or less | CrazyGames | Done (49 MB, about 510 files) |
 | Aim for roughly 8 to 10 MB loaded | Poki | Close, about 10 MB. Loading music per screen would lower it |
-| Works on phones and tablets | Poki (required), CrazyGames | Done in landscape. The game is drawn on a virtual screen that scales to any size, with a "turn your phone sideways" screen in portrait (see `src/utils/stage.ts`). Not tested on a real phone |
+| Works on phones and tablets | Poki (required), CrazyGames | Landscape only. Fine for CrazyGames (set the orientation when submitting). **Risk for Poki:** its 2026 blog says portrait must work. The game is drawn on a virtual screen that scales to any size, with a "turn your phone sideways" screen in portrait (see `src/utils/stage.ts`). Not tested on a real phone |
 | Their SDK: start, gameplay start/stop, ads | both | Done |
 | Mute the sound and block input during ads | both | Done |
 | Game still works if the SDK or ads fail or an ad blocker is on | both | Done (tested) |

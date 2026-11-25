@@ -1,3 +1,4 @@
+import { displayName } from '@/utils/nickname';
 import React, { useEffect, useMemo, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { Slime, BattleSlime, SlimeElement } from '@/types/slime';
@@ -132,11 +133,11 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
               {playerTeam.map((slime, idx) => {
                 const m = slime ? verdict(matchupVs(slime, opponentTeam)) : null;
                 return slime && m ? (
-                  <button key={idx} onClick={() => removeAt(idx)} aria-label={`Remove ${slime.name}`} className="relative min-w-0 rounded-xl px-1 flex flex-col items-center justify-end text-center shadow-lg" style={{ ...panel, height: slotH }}>
+                  <button key={idx} onClick={() => removeAt(idx)} aria-label={`Remove ${displayName(slime)}`} className="relative min-w-0 rounded-xl px-1 flex flex-col items-center justify-end text-center shadow-lg" style={{ ...panel, height: slotH }}>
                     <span className="absolute -top-1 -right-1 w-5 h-5 rounded-full bg-red-600 text-white flex items-center justify-center border-2 border-white"><X className="w-3 h-3" strokeWidth={3} /></span>
                     <span className="absolute top-0.5 left-0.5 px-1 rounded text-[9px] font-bold text-white" style={{ background: m.color }}>{m.arrow} {m.label}</span>
                     {sprite(slime, 66)}
-                    <span className="block w-full text-[10px] font-bold leading-tight line-clamp-2">{slime.name}</span>
+                    <span className="block w-full text-[10px] font-bold leading-tight line-clamp-2">{displayName(slime)}</span>
                     <span className="block text-[9px] font-semibold opacity-70 leading-tight pb-0.5">Lv {slime.level} {slime.elements.map(e => ELEMENT_ICONS[e]).join('')}</span>
                   </button>
                 ) : (
@@ -175,7 +176,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
                   <button key={slime.id} onClick={() => addSlime(slime)} disabled={full} className={`relative shrink-0 w-[70px] rounded-lg px-1 flex flex-col items-center justify-end border-2 ${full ? 'opacity-50' : 'active:scale-95'}`} style={{ background: '#fff7dc', borderColor: INK }}>
                     <span className="absolute top-0.5 left-0.5 px-1 rounded text-[9px] font-bold text-white" style={{ background: v.color }}>{v.arrow} {v.label}</span>
                     {sprite(slime, 52)}
-                    <span className="block text-[10px] font-bold leading-tight truncate w-full text-center">{slime.name}</span>
+                    <span className="block text-[10px] font-bold leading-tight truncate w-full text-center">{displayName(slime)}</span>
                     <span className="block text-[9px] font-semibold opacity-70 leading-tight">Lv {slime.level}</span>
                   </button>
                 );
@@ -237,14 +238,14 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
                 const stats = slime ? deriveBattleStats(slime) : null;
                 return slime && stats && m ? (
                   <div key={idx} className="relative rounded-2xl p-2 flex flex-col items-center text-center shadow-lg animate-in zoom-in-95 duration-200" style={panel}>
-                    <button onClick={() => removeAt(idx)} aria-label={`Remove ${slime.name}`} className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center border-2 border-white shadow hover:scale-110 transition-transform">
+                    <button onClick={() => removeAt(idx)} aria-label={`Remove ${displayName(slime)}`} className="absolute -top-2 -right-2 w-7 h-7 rounded-full bg-red-600 text-white flex items-center justify-center border-2 border-white shadow hover:scale-110 transition-transform">
                       <X className="w-4 h-4" strokeWidth={3} />
                     </button>
                     <span className="absolute top-1 left-1 px-1.5 rounded text-[10px] font-bold text-white" style={{ background: m.color }}>{m.arrow} {m.label}</span>
                     <div className={`${compact ? '' : 'w-full aspect-square mt-3'} flex items-center justify-center rounded-full`} style={{ background: 'radial-gradient(circle, rgba(255,255,255,0.7), rgba(255,255,255,0) 70%)' }}>
                       <SlimeCanvas slime={slime} size={big} animated />
                     </div>
-                    <p className="font-bold text-sm leading-tight truncate w-full">{slime.name}</p>
+                    <p className="font-bold text-sm leading-tight truncate w-full">{displayName(slime)}</p>
                     <p className="text-[11px] font-semibold opacity-70">Lv {slime.level} · {slime.elements.map(e => ELEMENT_ICONS[e]).join(' ')}</p>
                     <div className="flex gap-2 mt-1 text-[11px] font-bold">
                       <span>❤️ {stats.maxHp}</span>
@@ -322,7 +323,7 @@ export const BattlePreview: React.FC<BattlePreviewProps> = ({ level, onStartBatt
                 >
                   <span className="absolute top-0.5 left-0.5 px-1 rounded text-[9px] font-bold text-white" style={{ background: v.color }}>{v.arrow} {v.label}</span>
                   <div className="mt-2"><SlimeCanvas slime={slime} size={compact ? 44 : 64} animated /></div>
-                  <p className="text-[11px] font-bold truncate w-full text-center">{slime.name}</p>
+                  <p className="text-[11px] font-bold truncate w-full text-center">{displayName(slime)}</p>
                   <p className="text-[10px] font-semibold opacity-70">Lv {slime.level} · {slime.elements.map(e => ELEMENT_ICONS[e]).join('')}{getStage(slime.level || 1) === 'baby' ? ' · Baby' : ''}</p>
                   <p className="text-[10px] font-bold">💪 {power}</p>
                 </button>
