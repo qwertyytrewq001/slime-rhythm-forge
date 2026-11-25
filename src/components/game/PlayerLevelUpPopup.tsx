@@ -1,3 +1,4 @@
+import { useStageSize } from '@/utils/stage';
 import { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { audioEngine } from '@/utils/audioEngine';
@@ -15,6 +16,9 @@ const LevelBadge = ({ n, big }: { n: number; big?: boolean }) => (
 
 export function PlayerLevelUpPopup() {
   const { state, dispatch } = useGameState();
+  const stageH = useStageSize().h;
+  const small = stageH < 520;
+  const zoom = small ? Math.min(0.75, (stageH - 12) / 480) : 1; // the whole card fits a phone screen
   const [isVisible, setIsVisible] = useState(false);
   const [localLevelUp, setLocalLevelUp] = useState<typeof state.lastPlayerLevelUp>(null);
 
@@ -46,15 +50,15 @@ export function PlayerLevelUpPopup() {
       <style>{`@keyframes lvlBanner { 0% { opacity: 0; transform: translateY(-30px) scale(0.7) } 60% { transform: translateY(4px) scale(1.04) } 100% { opacity: 1; transform: none } } @keyframes lvlPop { 0% { transform: scale(0.4) } 60% { transform: scale(1.18) } 100% { transform: scale(1) } }`}</style>
       <div className="absolute inset-0 bg-[#1d1235]/70 backdrop-blur-sm" onClick={handleClose} />
 
-      <div className={`relative w-full mx-4 transition-all duration-700 transform ${isVisible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-12'}`} style={{ maxWidth: 520, maxHeight: '94cqh' }}>
+      <div className={`relative w-full mx-4 transition-all duration-700 transform ${isVisible ? 'scale-100 translate-y-0' : 'scale-90 translate-y-12'}`} style={{ maxWidth: 520, zoom }}>
         {/* ribbon straddling the top of the card */}
-        <div className="relative mx-auto pointer-events-none" style={{ width: 'min(92%, 470px)', marginBottom: -34, zIndex: 3, animation: 'lvlBanner 0.6s ease-out both' }}>
+        <div className="relative mx-auto pointer-events-none" style={{ width: small ? 270 : 'min(92%, 470px)', marginBottom: small ? -22 : -34, zIndex: 3, animation: 'lvlBanner 0.6s ease-out both' }}>
           <img src={`${A}love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.35))' }} />
-          <span className="absolute flex items-center justify-center font-bold text-center px-10" style={{ left: 0, right: 0, top: 0, bottom: '30%', fontSize: 'clamp(18px, 4cqw, 27px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em', lineHeight: 1.05 }}>Resonance Increased!</span>
+          <span className="absolute flex items-center justify-center font-bold text-center px-10" style={{ left: 0, right: 0, top: 0, bottom: '30%', fontSize: small ? 17 : 'clamp(18px, 4cqw, 27px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em', lineHeight: 1.05 }}>Resonance Increased!</span>
         </div>
 
-        <div className="relative rounded-[28px] overflow-hidden text-center" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: `5px solid ${INK}`, boxShadow: '0 22px 50px rgba(0,0,0,0.5)', color: INK, padding: '52px 28px 24px' }}>
-          <div className="font-semibold opacity-75" style={{ fontSize: 15, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 10 }}>Your spirit has deepened</div>
+        <div className="relative rounded-[28px] overflow-hidden text-center" style={{ background: 'linear-gradient(#f6e8c3,#ecd9a8)', border: `5px solid ${INK}`, boxShadow: '0 22px 50px rgba(0,0,0,0.5)', color: INK, padding: small ? '30px 24px 14px' : '52px 28px 24px' }}>
+          {!small && <div className="font-semibold opacity-75" style={{ fontSize: 15, letterSpacing: '0.14em', textTransform: 'uppercase', marginBottom: 10 }}>Your spirit has deepened</div>}
 
           <div className="flex items-center justify-center gap-5 mb-4">
             <div className="flex flex-col items-center"><span className="text-xs font-bold opacity-60 mb-1 tracking-widest">OLD</span><LevelBadge n={level - 1} /></div>

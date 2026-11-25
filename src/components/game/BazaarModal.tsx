@@ -270,7 +270,7 @@ export function BazaarModal({ onClose }: BazaarModalProps) {
       {boughtEgg && (
         <div className="absolute inset-0 z-[300] flex items-center justify-center bg-black/65" onClick={() => setBoughtEgg(null)} style={{ fontFamily: "'Fredoka', sans-serif" }}>
           <style>{`@keyframes eggPopIn { 0% { opacity: 0; transform: scale(0.6) translateY(30px) } 65% { transform: scale(1.05) } 100% { opacity: 1; transform: none } } @keyframes eggBounce { 0%,100% { transform: translateY(0) rotate(-3deg) } 50% { transform: translateY(-12px) rotate(3deg) } } @keyframes eggSpin { to { transform: translate(-50%,-50%) rotate(360deg) } }`}</style>
-          <div className="relative text-center" onClick={e => e.stopPropagation()} style={{ width: 'min(92cqw, 440px)', animation: 'eggPopIn 0.45s ease-out both' }}>
+          <div className="relative text-center" onClick={e => e.stopPropagation()} style={{ width: 'min(92cqw, 440px)', zoom: short ? 0.54 : 1, animation: 'eggPopIn 0.45s ease-out both' }}>
             <div className="relative mx-auto pointer-events-none" style={{ width: '88%', marginBottom: -26, zIndex: 3 }}>
               <img src={`${import.meta.env.BASE_URL}altar/love_banner.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 6px 8px rgba(0,0,0,0.4))' }} />
               <span className="absolute flex items-center justify-center font-bold" style={{ left: 0, right: 0, top: 0, bottom: '30%', fontSize: 'clamp(20px, 4.4cqw, 28px)', color: '#fff3d0', WebkitTextStroke: '5px #3a2150', paintOrder: 'stroke fill', letterSpacing: '0.05em' }}>You got an egg!</span>

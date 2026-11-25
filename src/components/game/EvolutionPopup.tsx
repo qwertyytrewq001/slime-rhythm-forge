@@ -1,3 +1,4 @@
+import { useStageSize } from '@/utils/stage';
 import { useEffect, useState } from 'react';
 import { useGameState } from '@/hooks/useGameState';
 import { SlimeCanvas } from './SlimeCanvas';
@@ -8,6 +9,7 @@ import { FairySparkle } from './FairySparkle';
 
 export function EvolutionPopup() {
   const { state, dispatch } = useGameState();
+  const small = useStageSize().h < 520;
   const [isVisible, setIsVisible] = useState(false);
   const [localEvolution, setLocalEvolution] = useState<typeof state.lastEvolution>(null);
 
@@ -54,11 +56,11 @@ export function EvolutionPopup() {
 
   return (
     <div 
-      className={`fixed top-56 left-1/2 -translate-x-1/2 z-[10100] transition-all duration-500 pointer-events-none ${
+      className={`fixed ${small ? 'top-1' : 'top-56'} left-1/2 -translate-x-1/2 z-[10100] transition-all duration-500 pointer-events-none ${
         isVisible ? 'opacity-100 translate-y-0 scale-100' : 'opacity-0 -translate-y-12 scale-90'
       }`}
     >
-      <div className="relative pointer-events-auto cursor-pointer" onClick={handleClose}>
+      <div className="relative pointer-events-auto cursor-pointer" onClick={handleClose} style={small ? { zoom: 0.6 } : undefined}>
         {/* Background Glow */}
         <div className={`absolute inset-0 bg-gradient-to-r ${currentColor}/40 blur-2xl animate-pulse rounded-full`} />
         
