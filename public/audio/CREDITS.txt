@@ -11,7 +11,7 @@ Pixabay Content License (commercial use, no credit needed; https://pixabay.com/s
   farm.mp3 = zephiramusic-lofi-pop-611108 (farm)
   battle_map.mp3 = atlasaudio-fantasy-636094 (battle map)
   sanctuary_day.mp3 = andriih-magic-fantasy-fairy-tale-music-601667 (Habitat Isles)
-OpenGameArt, NOT cleared for release (conditions attached, the game shows no credit):
+OpenGameArt, used under CC-BY-SA 3.0, credited in the game (title screen > Credits, src/components/game/Credits.tsx):
   battle.ogg = "acción.ogg" from "Battle midi" by djsaryon. CC-BY-SA 3.0 / GPL 3.0 / GPL 2.0 (battles)
     https://opengameart.org/content/battle-midi
   medieval.ogg = "Medieval" by Miguel Herrero, submitted by remaxim. CC-BY-SA 3.0 (Bazaar)

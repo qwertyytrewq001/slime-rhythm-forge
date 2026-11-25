@@ -32,7 +32,7 @@ All the portal code is in `src/utils/portal.ts` (tested in `portal.test.ts`).
 | No splash screens, no outgoing links | Poki | None in the game |
 | Player lands in gameplay | CrazyGames full launch | Not done: there is a title screen with a Play button (browsers need a click before any sound can play) |
 | Game name, thumbnails, description, screenshots | both | NOT done |
-| Music licences confirmed | both | NOT done (`public/audio/CREDITS.txt`) |
+| Music licences | both | Sources traced and credited in the game (title screen > Credits). Open question: share-alike terms of the two CC-BY-SA tracks (`public/audio/CREDITS.txt`) |
 | AI-art disclosure rules | both | NOT checked, read each portal's current rule before submitting |
 
 ## Not built yet (see SUBMISSION.md for the full plan; the rewarded "double Goo" button on the battle result is done)

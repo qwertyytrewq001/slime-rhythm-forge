@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { audioEngine } from '@/utils/audioEngine';
+import { Credits } from './Credits';
 
 interface TitleScreenProps {
   onPlay: () => void;
@@ -18,6 +19,8 @@ export function TitleScreen({ onPlay, muted, onToggleMute }: TitleScreenProps) {
   const [logoFailed, setLogoFailed] = useState(false);
   const [playFailed, setPlayFailed] = useState(false);
 
+  const [credits, setCredits] = useState(false);
+
   const start = () => {
     if (leaving) return;
     audioEngine.resume();
@@ -26,11 +29,11 @@ export function TitleScreen({ onPlay, muted, onToggleMute }: TitleScreenProps) {
   };
 
   useEffect(() => {
-    const onKey = (e: KeyboardEvent) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start(); } };
+    const onKey = (e: KeyboardEvent) => { if (credits) { if (e.key === 'Escape') setCredits(false); return; } if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); start(); } };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [leaving]);
+  }, [leaving, credits]);
 
   return (
     <div
@@ -69,6 +72,9 @@ export function TitleScreen({ onPlay, muted, onToggleMute }: TitleScreenProps) {
       <button onClick={onToggleMute} aria-label={muted ? 'Turn sound on' : 'Turn sound off'} className="absolute outline-none hover:scale-110 transition-transform" style={{ left: 22, bottom: 22, width: 56, background: 'transparent', border: 'none', padding: 0 }}>
         <img src={`${ART}title_btn_sound_${muted ? 'off' : 'on'}.png`} alt="" draggable={false} className="w-full" style={{ imageRendering: 'auto', filter: 'drop-shadow(0 3px 4px rgba(0,0,0,0.5))' }} />
       </button>
+
+      <button type="button" onClick={() => setCredits(true)} className="absolute font-semibold text-white/55 hover:text-white" style={{ right: 12, bottom: 8, padding: '6px 8px', fontSize: 11, background: 'transparent', border: 'none', textShadow: '0 1px 3px rgba(0,0,0,0.9)' }}>Credits</button>
+      {credits && <Credits onClose={() => setCredits(false)} />}
     </div>
   );
 }

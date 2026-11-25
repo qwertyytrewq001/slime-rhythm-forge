@@ -76,7 +76,7 @@ I use 1 to 8 USD per 1,000 plays as the range you take home, which is cautious.
 - Build is not checking for a newer version on the portal builds.
 
 ### You must do
-1. **Confirm the music licences.** `public/audio/CREDITS.txt` lists tracks marked "licence to confirm" (the Pixabay and other music). Open each download page, confirm commercial use in a game is allowed, or replace the track. This can get a game removed.
+1. **Music.** Pixabay tracks need no credit. The battle and Bazaar tracks are CC-BY-SA 3.0: credited on the title screen, but how far share-alike reaches in a game is unsettled. Open both OpenGameArt pages to confirm the licence, and replace the tracks if anyone objects (see `public/audio/CREDITS.txt`).
 2. **Covers and screenshots.** I saved three low-resolution drafts in `store/` (800x450). Take real ones at 1920x1080 from a normal browser. Check the current cover sizes on the CrazyGames "game covers" page and Poki's thumbnail guide (static and animated thumbnails). The thumbnail is now scored directly (click-through), so spend time on it.
 3. **Developer accounts and the submit button.** Only you can create these and accept terms. Also set up payouts (Tipalti for CrazyGames) after the first payment is due.
 4. **AI art.** Read each portal's current rule on AI-generated art and disclose if asked. CrazyGames rejects unoriginal content; be ready to explain how the art was made.
