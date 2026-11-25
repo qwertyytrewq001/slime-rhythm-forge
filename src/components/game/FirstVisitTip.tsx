@@ -51,12 +51,12 @@ export function FirstVisitTip({ when, ready = true }: { when: TipKey | null; rea
   const [step, setStep] = useState(0);
 
   useEffect(() => {
-    if (!when || !ready || seen(when)) return;
+    if (tip || !when || !ready || seen(when)) return;
     const t = setTimeout(() => { setTip(when); setStep(0); }, 900);
     return () => clearTimeout(t);
-  }, [when, ready]);
+  }, [when, ready, tip]);
 
-  if (!tip) return null;
+  if (!tip || !ready) return null;
   const data = TIPS[tip];
   const last = step >= data.lines.length - 1;
   const next = () => {

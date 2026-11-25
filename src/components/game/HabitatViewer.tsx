@@ -1438,6 +1438,7 @@ export function HabitatViewer({ habitatId, onClose, onOpenFarm }: HabitatViewerP
           setPellets(l => l.filter(x => x.id !== p.id));
           if ((live.inventory[p.food] || 0) < 1) continue;
           dispatch({ type: 'FEED_SLIME_XP', slimeId: best.slime.id, foodType: p.food });
+          setTimeout(() => triggerDialogue('firstFeed'), 2400);
           dispatch({ type: 'SANCT_JOY', habitatId, source: 'feed', now: Date.now(), rolls: Array.from({ length: 12 }, Math.random) });
           setEatNonce(n => ({ ...n, [best!.slime.id]: (n[best!.slime.id] || 0) + 1 }));
           audioEngine.playSfx('collect');

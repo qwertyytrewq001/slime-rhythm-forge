@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { X } from 'lucide-react';
 import { PaintedDialogue } from './PaintedDialogue';
 import { VossPortrait } from './VossPortrait';
@@ -17,7 +17,7 @@ const LEVEL_DIALOGUES = {
   1: {
     expression: 'exicted' as const,
     dialogue: [
-      "Victory! First battle as a Forger in four centuries and you DELIVERED. The woods are literally trembling. Well — that might be the Electric slime. Hard to tell."
+      "Victory! First battle as a Forger in four centuries and you DELIVERED. The woods are literally trembling. Or your slime sneezed. Hard to tell."
     ]
   },
   5: {
@@ -85,15 +85,17 @@ function LevelDialogueInner({ isOpen, onClose, level, onVossEncounter }: LevelDi
   const line = (dialogueData.dialogue as Line[])[currentDialogueIndex];
   const fullText = lineText(line);
 
-  // Typewriter effect with error handling
+  const typeRef = useRef<number>();
+
+  // Typewriter effect
   useEffect(() => {
-    if (!isOpen || isTyping || !fullText) return;
+    if (!isOpen || !fullText) return;
 
     setIsTyping(true);
     setDisplayedText('');
     
     let charIndex = 0;
-    const typeInterval = setInterval(() => {
+    const typeInterval = window.setInterval(() => {
       if (charIndex < fullText.length) {
         setDisplayedText(fullText.slice(0, charIndex + 1));
         charIndex++;
@@ -103,12 +105,15 @@ function LevelDialogueInner({ isOpen, onClose, level, onVossEncounter }: LevelDi
       }
     }, 25);
 
+    typeRef.current = typeInterval;
+
     return () => clearInterval(typeInterval);
-  }, [fullText, isOpen]);
+  }, [fullText, currentDialogueIndex, isOpen]);
 
   const handleNext = () => {
     if (isTyping) {
       // Skip typing effect
+      clearInterval(typeRef.current);
       setIsTyping(false);
       setDisplayedText(fullText);
       return;

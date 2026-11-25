@@ -81,11 +81,6 @@ export function Hatchery({ onNavigateToHatchery }: HatcheryProps) {
       triggerDialogue('hatch-egg');
     }
     
-    // Trigger breeding tutorial when second slime hatches
-    if (state.slimes.length >= 2 && !state.completedTutorialChapters.includes('breeding')) {
-      triggerDialogue('hatch-egg');
-    }
-
     // Add slime to state immediately so it can be assigned to habitat in popup
     const newSlime = activeHatching.slime;
     dispatch({ type: 'ADD_SLIME', slime: newSlime });

@@ -194,9 +194,7 @@ export function BreedingPod(props: BreedingPodProps) {
       }
     });
 
-    if (!state.tutorialCompleted) {
-      triggerDialogue('breeding-complete');
-    }
+    triggerDialogue('breeding-complete'); // plays the first time only
 
     if (state.mutationJuiceActive) dispatch({ type: 'DEACTIVATE_MUTATION_JUICE' });
     if (state.luckyCharmActive) dispatch({ type: 'DEACTIVATE_LUCKY_CHARM' });

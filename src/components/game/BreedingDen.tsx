@@ -11,6 +11,7 @@ import { ALL_CODEX_SLIMES, SLIME_CODEX_MAP } from '@/data/slimeCodex';
 import { X, Heart, Sparkles, Plus, ChevronLeft, HelpCircle } from 'lucide-react';
 import { toast } from '@/hooks/use-toast';
 import { AdBoostButton } from './AdBoostButton';
+import { triggerDialogue } from '@/utils/dialogueTriggers';
 import { calculateBreedingResult, getPossibleOutcomes } from '@/utils/breedingCalculator';
 import { breedSlimes, createCodexSlime } from '@/utils/slimeGenerator';
 import { breedMs, hatchMs } from '@/utils/gooEconomy';
@@ -135,6 +136,7 @@ export function BreedingDen({ onRequestGallery, onBackToAltar, onNavigateToHatch
         resultSlime,
       };
       dispatch({ type: 'START_BREEDING', ritual });
+      triggerDialogue('breeding-complete'); // plays the first time only
     }
   };
 

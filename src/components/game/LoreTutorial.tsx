@@ -117,7 +117,7 @@ const FIRST_LAUNCH_DIALOGUE = [
   {
     id: 'firstLaunch',
     expression: 'dramatic',
-    text: "Hatch it, feed it until it grows up, and the Battle Map will open."
+    text: "Hatch it, give it a Habitat, and feed it to level 5. Then the Battle Map opens."
   },
   {
     id: 'firstLaunch',
@@ -140,7 +140,7 @@ const FIRST_BAZAAR_DIALOGUE = [
   {
     id: 'firstBazaarOpen',
     expression: 'nudging',
-    text: "Go on. Pick one. I personally recommend Electric — reliable, powerful, only occasionally causes explosions."
+    text: "Go on. Pick one. I personally recommend Fire — cheap, cheerful, only occasionally sets things alight."
   }
 ];
 
@@ -148,7 +148,7 @@ const FIRST_EGG_DIALOGUE = [
   {
     id: 'firstEggBought',
     expression: 'proud',
-    text: "Good. Now head to the hatchery and get that egg warm."
+    text: "Good. It's warming in the glass jar by the Altar. Tap the jar when it's ready."
   }
 ];
 
@@ -176,7 +176,7 @@ const FIRST_HATCH_DIALOGUE = [
   {
     id: 'firstHatch',
     expression: 'emotional',
-    text: "Now — it needs a home. Build it a Habitat."
+    text: "Now it needs a home. Bazaar, Habitats tab: build the one that matches its element."
   }
 ];
 
@@ -199,7 +199,7 @@ const FIRST_HABITAT_DIALOGUE = [
   {
     id: 'firstHabitatBuilt',
     expression: 'warm',
-    text: "Place your slime inside. Then feed it. It needs to grow."
+    text: "Pick a spot for it. Then visit it, tap the food bag, and feed your slime. It needs to grow."
   }
 ];
 
@@ -222,7 +222,7 @@ const FIRST_FEED_DIALOGUE = [
   {
     id: 'firstFeed',
     expression: 'excited',
-    text: "Now — it's time to breed."
+    text: "Level 5 opens the Battle Map. At level 10 it's an Adult, and Adults can breed."
   }
 ];
 
@@ -230,7 +230,7 @@ const FIRST_ALTAR_DIALOGUE = [
   {
     id: 'firstAltarVisit',
     expression: 'smug',
-    text: "This is the heart of the Forge. I was born here, actually."
+    text: "Two slimes! Now you should hear about the Altar. I was born there, actually."
   },
   {
     id: 'firstAltarVisit',
@@ -255,7 +255,7 @@ const FIRST_ALTAR_DIALOGUE = [
   {
     id: 'firstAltarVisit',
     expression: 'gesturing',
-    text: "Select two slimes as parents. Place them on the platform."
+    text: "When two of yours are Adults, choose them as parents at the Altar."
   },
   {
     id: 'firstAltarVisit',
@@ -413,11 +413,17 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
 
   // closing or skipping throws the script away, so reopening the panel cannot show it again
   const finish = () => {
-    onClose();
-    setCurrentDialogue([]);
+    const next = queueRef.current.shift();
     setCurrentDialogueIndex(0);
     setDisplayedText('');
+    if (next) { setCurrentDialogue(next); return; }
+    busyRef.current = false;
+    setCurrentDialogue([]);
+    onClose();
   };
+
+  const queueRef = useRef<any[][]>([]);
+  const busyRef = useRef(false);
 
   // Listen for dialogue triggers
   useDialogueTrigger(useCallback((triggerId: TriggerType, data) => {
@@ -431,9 +437,14 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     
     // Only open the panel when a trigger actually starts a NEW dialogue. Re-opening
     // it for every trigger replayed stale text whenever an already-seen event fired.
+    // A script that arrives while another is being read waits its turn (it used to replace it, and the first was lost)
     const startDialogue = (lines: any[]) => {
+      if (busyRef.current) { queueRef.current.push(lines); return; }
+      busyRef.current = true;
       setCurrentDialogue(lines);
-      if (!isOpen && onOpen) onOpen();
+      setCurrentDialogueIndex(0);
+      setDisplayedText('');
+      onOpen?.();
     };
 
     // Handle breeding-intro trigger (what actually fires when egg is bought)
@@ -442,10 +453,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       markEventSeen('firstEggBought');
       markEventSeen('breedingIntroShown'); // Prevent repeated triggers
       startDialogue(FIRST_EGG_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('proud');
-      setGlimPosition('bottom-left');
     }
 
     // Handle second slime hatch (trigger breeding tutorial)
@@ -453,18 +460,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       console.log('🚀 Executing second hatch trigger for breeding tutorial');
       markEventSeen('secondHatch');
       startDialogue(FIRST_ALTAR_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('reverent');
-      setGlimPosition('bottom-left');
-      
-      // Auto-open gallery when dialogue says "Select two slimes as parents"
-      setTimeout(() => {
-        const galleryButton = document.querySelector('[data-testid="gallery-button"]') as HTMLButtonElement;
-        if (galleryButton) {
-          galleryButton.click();
-        }
-      }, 3000); // 3 seconds after dialogue starts
     }
 
 
@@ -473,10 +468,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       console.log('🚀 Executing battle-start trigger for firstBattleMapOpen');
       markEventSeen('firstBattleMapOpen');
       startDialogue(FIRST_BATTLE_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('surveying');
-      setGlimPosition('bottom-left');
     }
 
     // Handle shop-purchase trigger (first time only)
@@ -484,10 +475,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       console.log('🚀 Executing shop-purchase trigger for firstBazaarOpen');
       markEventSeen('firstBazaarOpen');
       startDialogue(FIRST_BAZAAR_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('excited');
-      setGlimPosition('bottom-left');
     }
 
     // Handle habitat-purchase trigger
@@ -498,10 +485,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         console.log('🚀 Executing habitat-purchase trigger for firstHabitatBuilt');
         markEventSeen('firstHabitatBuilt');
         startDialogue(FIRST_HABITAT_DIALOGUE);
-        setCurrentDialogueIndex(0); // Reset to start
-        setDisplayedText(''); // Clear displayed text
-        setCurrentExpression('warm');
-        setGlimPosition('bottom-left');
       } else {
         console.log('❌ firstHabitatBuilt already seen, skipping habitat dialogue');
       }
@@ -512,10 +495,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       console.log('🚀 Executing hatch-egg trigger for firstHatch');
       markEventSeen('firstHatch');
       startDialogue(FIRST_HATCH_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('frozen');
-      setGlimPosition('bottom-left');
     }
 
     // Handle breeding-complete trigger
@@ -523,10 +502,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       console.log('🚀 Executing breeding-complete trigger for firstBreedComplete');
       markEventSeen('firstBreedComplete');
       startDialogue(FIRST_BREED_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('delighted');
-      setGlimPosition('bottom-left');
     }
 
     // Handle first-time events
@@ -534,10 +509,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       console.log('🚀 Executing firstLaunch trigger');
       markEventSeen('firstLaunch');
       startDialogue(FIRST_LAUNCH_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('shocked');
-      setGlimPosition('bottom-left'); // Changed from 'center' to 'bottom-left'
     }
 
     if (triggerId === 'firstHatch' && !hasSeenEvent('firstHatch')) {
@@ -548,10 +519,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'firstFeed' && !hasSeenEvent('firstFeed')) {
       markEventSeen('firstFeed');
       startDialogue(FIRST_FEED_DIALOGUE);
-      setCurrentDialogueIndex(0); // Reset to start
-      setDisplayedText(''); // Clear displayed text
-      setCurrentExpression('watching');
-      setGlimPosition('bottom-left');
     }
 
     if (triggerId === 'firstAltarVisit' && !hasSeenEvent('firstAltarVisit')) {
@@ -577,10 +544,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
       if (levelDialogue && !hasSeenEvent(`levelStory_${battleLevel}`)) {
         markEventSeen(`levelStory_${battleLevel}`);
         startDialogue(levelDialogue);
-        setCurrentDialogueIndex(0);
-        setDisplayedText('');
-        setCurrentExpression(levelDialogue[0].expression);
-        setGlimPosition('bottom-left');
       }
     }
 
@@ -601,8 +564,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
     if (triggerId === 'finalBattle' && !hasSeenEvent('levelStory_50')) {
       markEventSeen('levelStory_50');
       startDialogue(LEVEL_DIALOGUE[50]);
-      setCurrentExpression('determined');
-      setGlimPosition('bottom-left');
     }
   }, [isOpen, onOpen]));
 
@@ -701,16 +662,6 @@ export function LoreTutorial({ isOpen, onClose, onOpen, startChapter = 'firstLau
         onSkip={handleSkip}
         index={currentDialogueIndex}
         total={currentDialogue.length}
-        extra={currentDialogue === FIRST_ALTAR_DIALOGUE && displayedText?.includes('Select two slimes as parents') ? (
-          <button
-            onClick={() => window.dispatchEvent(new CustomEvent('openBreedingGallery', { detail: { slot: 1 } }))}
-            className="mt-2 relative hover:scale-105 active:scale-95 transition-transform"
-            style={{ width: 150, background: 'transparent', border: 'none', padding: 0 }}
-          >
-            <img src={`${import.meta.env.BASE_URL}ui/dlg_choice_glow.png`} alt="" draggable={false} className="w-full block" style={{ imageRendering: 'auto' }} />
-            <span className="absolute inset-0 flex items-center justify-center font-bold" style={{ fontSize: 15, color: '#4a2f17' }}>Select Parents</span>
-          </button>
-        ) : null}
       />
     </div>
   );

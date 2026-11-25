@@ -457,8 +457,8 @@ function GameLayout() {
 
       {/* one-time Glim tips for the newer systems, shown once the intro tutorial is done */}
       <FirstVisitTip
-        ready={state.tutorialCompleted && !showTitle && welcomeDone}
-        when={state.visitor && !state.visitor.done ? 'visitor' : currentView === 'farm' ? 'farm' : currentView === 'sanctuaries' ? 'sanctuaries' : currentView === 'breedingDen' ? 'den' : null}
+        ready={state.tutorialCompleted && !showTitle && welcomeDone && !showTutorial && !showLevelDialogue}
+        when={currentView === 'farm' ? 'farm' : currentView === 'sanctuaries' ? 'sanctuaries' : currentView === 'breedingDen' ? 'den' : state.visitor && !state.visitor.done ? 'visitor' : null}
       />
 
       {/* A short recap for players coming back after a while */}
