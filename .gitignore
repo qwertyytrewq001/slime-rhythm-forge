@@ -28,3 +28,6 @@ dist-ssr
 # portal builds (made on demand, not part of the GitHub Pages site)
 dist-poki
 dist-crazygames
+
+# upload package, rebuilt on demand
+submission/
